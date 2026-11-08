@@ -1,0 +1,13 @@
+node_modules/
+dist/
+declarations/
+*.tsbuildinfo
+.DS_Store
+.idea/
+coverage/
+.eslintcache
+testem.log
+docs/site/demo/
+docs/site/guide/
+docs/site/404.html
+parity/.upstream/

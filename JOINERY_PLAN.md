@@ -1,11 +1,30 @@
 # Joinery: shadcn/ui for Ember, as a Formwright sibling
 
-Status: Phase 0 (2026-11-08). The plan was agreed through a 40-question intake. The repo and the
-`@ember-joinery` npm org exist; nothing is built yet.
+Status: building (2026-11-08). The plan was agreed through a 40-question intake. It is being built
+unattended by subagents onto one stacked PR; see "Autonomous execution".
+
+Deviations from the intake, and why:
+
+- **One stacked PR, built unattended** (replaces decisions 8 and 38). Joe asked for subagents to
+  work through everything without feedback, as one big stacked PR. Each unit lands as its own
+  commits on `build/joinery-1.0`. Nothing merges to `main` and nothing publishes until Joe has
+  reviewed the whole PR.
+- **The upstream source, corrected.** ui.shadcn.com no longer renders the `new-york-v4` registry.
+  Its component pages render `apps/v4/registry/bases/radix/ui`, styled by one of eight style
+  sheets (`apps/v4/registry/styles/style-*.css`, Nova by default), with examples from
+  `apps/v4/examples/radix/`. Joinery ports that, so the scope is the 500 examples the docs pages
+  reference, not new-york-v4's 244. Charts still come from `registry/new-york-v4/charts` (the
+  charts gallery), and blocks from `registry/bases/radix/blocks`.
+- **All eight shadcn styles.** Upstream's components now carry semantic classes (`cn-button`,
+  `cn-button-variant-outline`) that each style sheet defines with `@apply`. Joinery ports the
+  sheets mechanically (`cn-` becomes `jn-`), so it ships Nova as the default and the other seven
+  (Luma, Lyra, Maia, Mira, Rhea, Sera, Vega) as alternatives, and the guide's theme switcher
+  offers all of them.
 
 **What we're copying:** [ui.shadcn.com](https://ui.shadcn.com/): every component, every example
 on its component pages, a subset of its blocks, and its theming. The source of truth is the code
-that builds that site, `shadcn-ui/ui` `apps/v4/` (the Radix "new-york-v4" registry), pinned at
+that builds that site, `shadcn-ui/ui` `apps/v4/` (components in `registry/bases/radix`, styles in
+`registry/styles`, examples in `examples/radix`), pinned at
 `8ab2771` (2026-11-08). Joinery also covers every feature of
 [ember-primitives](https://github.com/universal-ember/ember-primitives) 0.64.2 (`9584c78`).
 Both are MIT.
@@ -17,48 +36,48 @@ OIDC releases.
 
 ## Decisions (from intake)
 
-| #   | Area            | Decision                                                                                                                                                                 |
-| --- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1   | Name            | **Joinery**. Repo `joegaudet/ember-joinery`, npm `@ember-joinery/*`                                                                                                      |
-| 2   | Distribution    | npm v2 addons only; no copy-in CLI                                                                                                                                       |
-| 3   | Packages        | Core plus opt-in add-ons, one add-on per heavy dependency                                                                                                                |
-| 4   | Positioning     | Its own brand. "Design and API ported from shadcn/ui (MIT)" in the README, the site footer and `NOTICE`                                                                  |
-| 5   | Primitives      | Our own headless `@ember-joinery/primitives`, covering all of ember-primitives plus the Radix parts shadcn needs. No ember-primitives dependency                         |
-| 6   | Repo            | `joegaudet/ember-joinery`, public, created with `gh` from Joe's machine                                                                                                  |
-| 7   | Plan            | This file, committed as `JOINERY_PLAN.md` in the repo's first PR                                                                                                         |
-| 8   | Process         | Review this plan, then one PR per phase, each passing the full gate; Joe merges                                                                                          |
-| 9   | Ember           | 7.3 (latest) and 6.12 (previous LTS), both in CI                                                                                                                         |
-| 10  | Consumers       | Vite/Embroider and classic ember-cli apps, each with an example app in CI                                                                                                |
-| 11  | Composition     | Yielded parts: `<Dialog as \|d\|><d.Trigger>…</d.Trigger><d.Content>…`                                                                                                   |
-| 12  | State           | Controlled or uncontrolled, as in Radix: `@open`/`@defaultOpen`/`@onOpenChange`, `@value`/`@defaultValue`/`@onValueChange`                                               |
-| 13  | Styling         | Written with Tailwind v4 using shadcn's exact class strings, shipped as compiled CSS on semantic classes in `@layer joinery`. Tailwind is optional for apps              |
-| 14  | Tokens          | shadcn's names in OKLCH (`--background`, `--primary`, `--ring`, `--radius`, `--chart-1..5`, `--sidebar-*`…), so any shadcn theme pastes in unchanged                     |
-| 15  | Variants        | Typed `@variant` and `@size` args, rendered as `data-variant` and `data-size`                                                                                            |
-| 16  | Dark mode       | A `.dark` class, plus a color-scheme utility (follows the OS, saves the choice, syncs tabs)                                                                              |
-| 17  | Floating parts  | The Popover API for layering. CSS anchor positioning where the browser has it, `@floating-ui/dom` otherwise. Supported: the last 2 versions of evergreen browsers        |
-| 18  | `asChild`       | An `@as` tag, plus a yielded modifier for each part that needs one, e.g. `<LinkTo {{d.trigger}}>`                                                                        |
-| 19  | Accessibility   | WCAG 2.2 AA: an axe audit in every test, plus APG keyboard and focus tests for each component                                                                            |
-| 20  | i18n            | RTL: logical properties, a Direction provider, arrow keys flip. Every built-in string is an arg with an English default                                                  |
-| 21  | Scope           | All ~67 shadcn components, the chat set included, plus every ember-primitives component                                                                                  |
-| 22  | Utilities       | ember-primitives' non-visual utilities go in `@ember-joinery/primitives`, one subpath export per feature                                                                 |
-| 23  | Heavy deps      | We write Command, Drawer, Toast, Resizable, OTP and Calendar ourselves. Add-ons wrap embla-carousel, `@tanstack/table-core`, shiki and d3                                |
-| 24  | Charts          | Declarative Glimmer SVG on `d3-scale` and `d3-shape`, with an API shaped like recharts                                                                                   |
-| 25  | Formwright      | `@ember-joinery/formwright`: Joinery controls as Formwright controls, a Field-anatomy layout, and harnesses                                                              |
-| 26  | Icons           | Lucide (the framework-agnostic `lucide` package), imported per icon. Apps get `<Icon>`, and every icon slot can be replaced                                              |
-| 27  | Blocks          | Login, signup, dashboard with sidebar, and settings, as tested guide examples and in the demo (not exported)                                                             |
-| 28  | Dates           | `Date` in and out (`{ from, to }` for ranges), formatted with `Intl`; no date library                                                                                    |
-| 29  | Harness pkg     | `@ember-joinery/test-support`; each add-on exports its own harnesses from a `/test-support` subpath                                                                      |
-| 30  | Harness lookup  | `data-test-jn-*` attributes find and scope; state is read through ARIA                                                                                                   |
-| 31  | Harness compose | Formwright-style decorators (`@child`, `@form`) plus `find()` for one-off lookups. Portalled content is followed through its owner id                                    |
-| 32  | Runners         | `@ember/test-helpers` (QUnit or Vitest)                                                                                                                                  |
-| 33  | Site CSS        | Hand-written HTML styled with Joinery's own compiled CSS (no Pico)                                                                                                       |
-| 34  | Guide           | One page per component, laid out like ui.shadcn.com's                                                                                                                    |
-| 35  | Guide extras    | Theme switcher, RTL and width toggles, a theme builder page, generated API reference                                                                                     |
-| 36  | Brand           | The sibling layout and type of Formwright and real-enums, with its own accent and logo (a dovetail mark)                                                                 |
-| 37  | Release         | Formwright's machinery: Changesets with all packages versioned together, a version PR from the GitHub App, a release on a pushed tag (OIDC), and `bootstrap-publish.yml` |
-| 38  | Versions        | Each finished phase publishes a 0.x minor; 1.0 at parity                                                                                                                 |
-| 39  | Siblings        | PRs to ember-formwright and real-enums adding Joinery to their sibling lists, and a pointer in Formwright's guide                                                        |
-| 40  | Fidelity        | CI compares screenshots with shadcn's own examples, in light and dark. An upstream watch lists what changed upstream since the last sync                                 |
+| #   | Area            | Decision                                                                                                                                                                                  |
+| --- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Name            | **Joinery**. Repo `joegaudet/ember-joinery`, npm `@ember-joinery/*`                                                                                                                       |
+| 2   | Distribution    | npm v2 addons only; no copy-in CLI                                                                                                                                                        |
+| 3   | Packages        | Core plus opt-in add-ons, one add-on per heavy dependency                                                                                                                                 |
+| 4   | Positioning     | Its own brand. "Design and API ported from shadcn/ui (MIT)" in the README, the site footer and `NOTICE`                                                                                   |
+| 5   | Primitives      | Our own headless `@ember-joinery/primitives`, covering all of ember-primitives plus the Radix parts shadcn needs. No ember-primitives dependency                                          |
+| 6   | Repo            | `joegaudet/ember-joinery`, public, created with `gh` from Joe's machine                                                                                                                   |
+| 7   | Plan            | This file, committed as `JOINERY_PLAN.md` in the repo's first PR                                                                                                                          |
+| 8   | Process         | One stacked PR on `build/joinery-1.0`, built unattended by subagents (see the deviations above); Joe reviews and merges it at the end                                                     |
+| 9   | Ember           | 7.3 (latest) and 6.12 (previous LTS), both in CI                                                                                                                                          |
+| 10  | Consumers       | Vite/Embroider and classic ember-cli apps, each with an example app in CI                                                                                                                 |
+| 11  | Composition     | Yielded parts: `<Dialog as \|d\|><d.Trigger>…</d.Trigger><d.Content>…`                                                                                                                    |
+| 12  | State           | Controlled or uncontrolled, as in Radix: `@open`/`@defaultOpen`/`@onOpenChange`, `@value`/`@defaultValue`/`@onValueChange`                                                                |
+| 13  | Styling         | shadcn's style sheets ported with `cn-*` renamed `jn-*`, compiled with Tailwind v4, and shipped as plain CSS on those semantic classes in `@layer joinery`. Tailwind is optional for apps |
+| 14  | Tokens          | shadcn's names in OKLCH (`--background`, `--primary`, `--ring`, `--radius`, `--chart-1..5`, `--sidebar-*`…), so any shadcn theme pastes in unchanged                                      |
+| 15  | Variants        | Typed `@variant` and `@size` args, rendered as `data-variant` and `data-size`                                                                                                             |
+| 16  | Dark mode       | A `.dark` class, plus a color-scheme utility (follows the OS, saves the choice, syncs tabs)                                                                                               |
+| 17  | Floating parts  | The Popover API for layering. CSS anchor positioning where the browser has it, `@floating-ui/dom` otherwise. Supported: the last 2 versions of evergreen browsers                         |
+| 18  | `asChild`       | An `@as` tag, plus a yielded modifier for each part that needs one, e.g. `<LinkTo {{d.trigger}}>`                                                                                         |
+| 19  | Accessibility   | WCAG 2.2 AA: an axe audit in every test, plus APG keyboard and focus tests for each component                                                                                             |
+| 20  | i18n            | RTL: logical properties, a Direction provider, arrow keys flip. Every built-in string is an arg with an English default                                                                   |
+| 21  | Scope           | All ~67 shadcn components, the chat set included, plus every ember-primitives component                                                                                                   |
+| 22  | Utilities       | ember-primitives' non-visual utilities go in `@ember-joinery/primitives`, one subpath export per feature                                                                                  |
+| 23  | Heavy deps      | We write Command, Drawer, Toast, Resizable, OTP and Calendar ourselves. Add-ons wrap embla-carousel, `@tanstack/table-core`, shiki and d3                                                 |
+| 24  | Charts          | Declarative Glimmer SVG on `d3-scale` and `d3-shape`, with an API shaped like recharts                                                                                                    |
+| 25  | Formwright      | `@ember-joinery/formwright`: Joinery controls as Formwright controls, a Field-anatomy layout, and harnesses                                                                               |
+| 26  | Icons           | Lucide (the framework-agnostic `lucide` package), imported per icon. Apps get `<Icon>`, and every icon slot can be replaced                                                               |
+| 27  | Blocks          | Login, signup, dashboard with sidebar, and settings, as tested guide examples and in the demo (not exported)                                                                              |
+| 28  | Dates           | `Date` in and out (`{ from, to }` for ranges), formatted with `Intl`; no date library                                                                                                     |
+| 29  | Harness pkg     | `@ember-joinery/test-support`; each add-on exports its own harnesses from a `/test-support` subpath                                                                                       |
+| 30  | Harness lookup  | `data-test-jn-*` attributes find and scope; state is read through ARIA                                                                                                                    |
+| 31  | Harness compose | Formwright-style decorators (`@child`, `@form`) plus `find()` for one-off lookups. Portalled content is followed through its owner id                                                     |
+| 32  | Runners         | `@ember/test-helpers` (QUnit or Vitest)                                                                                                                                                   |
+| 33  | Site CSS        | Hand-written HTML styled with Joinery's own compiled CSS (no Pico)                                                                                                                        |
+| 34  | Guide           | One page per component, laid out like ui.shadcn.com's                                                                                                                                     |
+| 35  | Guide extras    | Theme switcher, RTL and width toggles, a theme builder page, generated API reference                                                                                                      |
+| 36  | Brand           | The sibling layout and type of Formwright and real-enums, with its own accent and logo (a dovetail mark)                                                                                  |
+| 37  | Release         | Formwright's machinery: Changesets with all packages versioned together, a version PR from the GitHub App, a release on a pushed tag (OIDC), and `bootstrap-publish.yml`                  |
+| 38  | Versions        | Nothing publishes during the build. After Joe merges, the changesets that have built up become 1.0.0, released through the bootstrap workflow for each new package                        |
+| 39  | Siblings        | PRs to ember-formwright and real-enums adding Joinery to their sibling lists, and a pointer in Formwright's guide                                                                         |
+| 40  | Fidelity        | CI compares screenshots with shadcn's own examples, in light and dark. An upstream watch lists what changed upstream since the last sync                                                  |
 
 **Defaults I chose without asking; please check them:** the MIT licence plus a `NOTICE` file; the core
 package is named `@ember-joinery/ember` (like `@ember-formwright/ember`); the test prefix is `jn`; Node
@@ -154,13 +173,19 @@ render in production, as Formwright's `data-test-fw-*` do.
 
 ### Styling pipeline
 
-- `packages/ember/src/styles/<component>.css` holds `@apply` rules seeded with shadcn's class
-  strings. `scripts/extract-classes.mjs` pulls the strings out of the upstream `cn(...)` and
-  `cva(...)` calls, both for the first port and to diff when upstream changes.
-- The build compiles that with Tailwind v4 into `dist/joinery.css` (components, in
-  `@layer joinery`), `dist/tokens.css` (the default neutral theme, light and `.dark`),
-  `dist/themes/*.css` (shadcn's base colours: neutral, stone, zinc, gray, slate) and
-  `dist/tailwind.css` (`@theme inline` mapping the tokens to utilities, for Tailwind apps).
+- `packages/ember/src/styles/<style>.css` holds shadcn's eight style sheets, ported by
+  `scripts/port-styles.mjs`. The script renames `cn-` to `jn-` and otherwise keeps upstream's
+  `@apply` rules verbatim, so upstream changes diff cleanly. Components render the same semantic
+  classes upstream's do (`jn-button jn-button-variant-outline jn-button-size-sm`), plus the data
+  attributes.
+- Upstream also puts some utility classes inline in each component (`inline-flex`, `shrink-0`…).
+  `scripts/extract-classes.mjs` pulls them out of the upstream `cn(...)` and `cva(...)` calls
+  into each component's base rule.
+- The build compiles all of that with Tailwind v4 into `dist/joinery.css` (the Nova style, in
+  `@layer joinery`), `dist/styles/<style>.css` (the other seven), `dist/tokens.css` (the default
+  neutral theme, light and `.dark`), `dist/themes/*.css` (shadcn's base colours: neutral, stone,
+  zinc, gray, slate) and `dist/tailwind.css` (`@theme inline` mapping the tokens to utilities,
+  for Tailwind apps).
 - Apps without Tailwind import `tokens.css` and `joinery.css`. Tailwind apps also import
   `tailwind.css` and can override any part with `class`.
 
@@ -253,9 +278,9 @@ That is 67 docs pages: Toast and Sonner are two pages for one component.
 ### Size
 
 8 packages; ~67 shadcn components, ~15 components only ember-primitives has, ~20 utilities;
-~95 harness classes. Upstream has 244 example files, 71 chart examples and 27 blocks (we
-port 4). Every ported example becomes a guide example with its own harness test and axe audit,
-so about 320 example tests, plus the integration suite.
+~95 harness classes. The docs pages reference 500 examples, the charts gallery has 71, and we
+port 4 of the 27 blocks. Every ported example becomes a guide example with its own harness test
+and axe audit, so about 575 example tests, plus the integration suite.
 
 ## Definition of done for every component
 
@@ -298,20 +323,24 @@ ember-primitives. `pages.yml` builds the demo and guide, then deploys `docs/site
 ## Parity and upstream watch
 
 - **Reference app** (`parity/`, private): a React 19 + Tailwind 4 Vite app that renders shadcn's
-  `new-york-v4` `ui/` and `examples/` from the commit pinned in `upstream.json`. `parity.mjs
+  `registry/bases/radix/ui` and `examples/radix/`, each example in the style its docs page uses
+  (charts from `registry/new-york-v4/charts`), from the commit pinned in `upstream.json`. `parity.mjs
 fetch` downloads them into a gitignored `parity/.upstream/`.
 - **Joinery side:** docs-app has a `/parity/<id>` route that renders one example with no frame.
 - **Comparison** (`scripts/parity.mjs`, the `parity.yml` workflow): pinned Playwright Chromium,
   fixed viewport, fonts loaded, animations off. Both sides are screenshotted in light and dark and
   diffed with pixelmatch. The check fails over a threshold (1% of pixels by default; an override
   for an example needs a written reason in `parity/map.json`), and a side-by-side report is
-  uploaded. An upstream example missing from the map also fails, which keeps coverage complete.
+  uploaded. With `--require-complete`, an upstream example missing from the map also fails, which
+  keeps coverage complete. CI turns that flag on for the final unit; until then, the check covers
+  the examples that are mapped.
 - **Upstream watch** (`scripts/upstream.mjs`, a weekly `upstream.yml`): lists upstream changes
-  since the pinned shas in shadcn's `registry/new-york-v4/{ui,examples,charts,blocks}` and
+  since the pinned shas in shadcn's `registry/bases/radix/{ui,blocks}`, `registry/styles`,
+  `examples/radix`, `registry/new-york-v4/charts`, its docs pages, and
   `ember-primitives/src`, mapped to Joinery components, plus new upstream components, and updates
   one tracking issue. A sync PR ports the changes and bumps `upstream.json`.
 
-## Phases (one PR each; the gate passes on every one; each publishes a 0.x minor)
+## Phases (the order of the work; each phase is a group of units in the stacked PR)
 
 ### Phase 0: Bootstrap
 
@@ -344,12 +373,11 @@ click, nested layers); focus scope and trap; roving focus; typeahead; presence (
 animations driven by `data-state`); the `@as` + yielded-modifier pattern; VisuallyHidden;
 Key/KeyCombo; color-scheme. Each one gets integration tests, and a harness where it is visible.
 
-### Phase 3: Theme and display components (first publish: 0.1.0)
+### Phase 3: Theme and display components
 
 `tokens.css`, the base-colour themes, `tailwind.css`, and `<Icon>`. The 19 display components
 listed above. The guide's theme switcher, RTL toggle and width presets go in here, because
-every later page uses them. The first publish of each new package goes out through
-`bootstrap-publish.yml`; after that, OIDC trusted publishing takes over.
+every later page uses them. Nothing publishes during the build (see "Autonomous execution").
 
 ### Phase 4: Inputs
 
@@ -409,8 +437,56 @@ pages.
 
 ### Phase 14: 1.0
 
-A parity audit: every upstream example is mapped and passing. A last upstream sync. PRs to
-ember-formwright and real-enums for the cross-links. 1.0.0 published with release notes.
+A parity audit: every upstream example is mapped and passing with `--require-complete`. A last
+upstream sync. The full gate, including the 6.12 run. PRs to ember-formwright and real-enums for
+the cross-links (opened, not merged). Then the stacked PR is marked ready for review. Joe merges
+it and releases 1.0.0.
+
+## Autonomous execution
+
+Joe asked for the whole plan to be built by subagents without feedback, as one big stacked PR.
+
+- **One branch, one PR.** `build/joinery-1.0` starts from Phase 0 and backs a single draft PR
+  into `main`. Each unit lands on it as its own commits, in dependency order, so the PR reads as
+  a stack: review it commit by commit or unit by unit. Nothing merges to `main`, nothing
+  publishes, and no tag is pushed until Joe has reviewed it.
+- **Units.** The phases are split into about 48 units: one or a few related components, or one
+  piece of tooling. The orchestrating workflow's unit list is the authoritative split, and each
+  unit names its dependencies.
+- **Per unit:**
+  1. An implement agent works in its own worktree (`/home/user/jn-wt/<unit>`, branch
+     `unit/<unit>`, cut from the integration branch).
+  2. An independent review agent checks the result against the definition of done and the
+     upstream examples. Up to two rounds of fixes follow.
+  3. An integrate agent rebases the unit onto the integration branch, runs the gate,
+     fast-forwards and pushes.
+
+  Units integrate one at a time; implementation runs in parallel wherever the dependencies
+  allow.
+
+- **CI stays green.** Before integrating, the integrate agent checks GitHub CI on the branch tip
+  and fixes any failure first. CI covers the 6.12 run, the anchor-fallback run and parity, which
+  the local gate skips to save time.
+- **Shared files don't collide.** Registries that every component touches are either one file per
+  component or generated:
+  - the package barrels (`src/index.ts`) and the test-support index are generated from the files
+    present;
+  - the guide's component `meta.json` is generated, in alphabetical order;
+  - each component has its own `parity/map/<component>.json`;
+  - the acceptance test's `PAGES` is built from the templates directory.
+
+  Phase 1 sets all of these up.
+
+- **No silent gaps.** A unit that can't meet an item of the definition of done lists it, with the
+  reason, under "Known gaps" in the PR body. A unit that can't be built at all is reported as
+  blocked, and the units that depend on it are skipped and reported. Everything else carries on.
+- **Progress** is a checklist in the PR body, ticked as each unit integrates.
+- **What stays with Joe:**
+  - reviewing and merging the PR;
+  - publishing: the npm-bootstrap environment's `NPM_TOKEN`, approving the bootstrap run,
+    setting up trusted publishers, and pushing the tag;
+  - required status checks on `main`;
+  - merging the sibling PRs on ember-formwright and real-enums.
 
 ## The gate (CONTRIBUTING.md)
 
@@ -431,18 +507,19 @@ workspace.
 
 ## Risks and open items
 
-- **The `@ember-joinery` npm org.** The names `ember-joinery` and `@ember-joinery/ember` were
-  unclaimed on 2026-11-08, but I couldn't check the org itself. This blocks Phase 0.
+- **An unattended build at this scale.** About 150–200 agent runs over several days. On a 4-CPU
+  machine, two agents run at a time. The workflow journal lets a restarted session resume where
+  it stopped.
 - **ui.shadcn.com does not resolve from Claude's cloud sessions.** Everything here comes from
   its GitHub source, and parity runs in GitHub Actions, which needs no access to the site. If you
   want sessions to read the live site, add `ui.shadcn.com` to the environment's allowed hosts.
-- **Size.** Roughly 320 example tests and ~95 harnesses. Upstream's examples serve as the spec;
-  big phases split into a/b PRs rather than growing past review size.
+- **Size.** About 575 example tests and ~95 harnesses. Upstream's examples serve as the spec, and
+  big components split into several units.
 - **Pixel noise.** Fonts, anti-aliasing, animations, and whitespace differences between React
   and Glimmer DOM can trip the comparison. One pinned browser and font set, a threshold, and
   written reasons for each override.
 - **Upstream moves fast.** The chat set arrived in 2026, and shadcn now also ships Base UI and
-  React Aria variants. Joinery tracks Radix `new-york-v4` only.
+  React Aria variants. Joinery tracks the Radix base and its eight styles only.
 - **Hardest behaviours.** Each gets a spike at the start of its phase: Drawer gestures, Navigation
   Menu motion, the menus' pointer grace areas, Message Scroller anchoring, chart tooltips and
   animation.
@@ -456,5 +533,6 @@ workspace.
 
 ## Next steps
 
-1. Review this plan in Phase 0's PR. Any decision can still change there.
-2. Phase 1 (monorepo, tooling, CI) starts once that PR is merged.
+1. The workflow builds every unit onto `build/joinery-1.0`, ticking the PR's checklist as it goes.
+2. When the last unit lands, the PR is marked ready for review. Joe reviews it, merges it, and
+   releases 1.0.0.

@@ -8,9 +8,15 @@ plan.
 ## Port from upstream, not from memory
 
 Joinery copies https://ui.shadcn.com/. Port from the upstream source at the commits pinned in
-`upstream.json` (until that file exists, the plan's header has the pins): shadcn-ui/ui
-`apps/v4/registry/new-york-v4/` and universal-ember/ember-primitives `ember-primitives/src`.
-Before writing a component, read its `.tsx`, its docs page and every upstream example for it.
+`upstream.json` (until that file exists, the plan's header has the pins).
+
+- In shadcn-ui/ui `apps/v4/`: `registry/bases/radix/ui`, `registry/styles/style-*.css`,
+  `examples/radix` and `content/docs/components/radix`, plus `registry/new-york-v4/charts` for
+  charts.
+- In universal-ember/ember-primitives: `ember-primitives/src`.
+
+Before writing a component, read its `.tsx`, its style rules, its docs page, and every example
+that page references.
 
 ## A component ships whole
 

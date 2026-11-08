@@ -42,14 +42,20 @@ fallback is tested too.
 Joinery copies [ui.shadcn.com](https://ui.shadcn.com/). Port from the upstream source at the
 commits pinned in `upstream.json`, never from memory:
 
-1. Read the component's source, `apps/v4/registry/new-york-v4/ui/<name>.tsx` in shadcn-ui/ui,
-   its docs page, `apps/v4/content/docs/components/radix/<name>.mdx`, and every example for it
-   in `apps/v4/registry/new-york-v4/examples/`. If ember-primitives has the component, read it in
-   `ember-primitives/src/components/` too.
+1. Read, in shadcn-ui/ui:
+   - the component's source, `apps/v4/registry/bases/radix/ui/<name>.tsx`;
+   - its rules in each style sheet, `apps/v4/registry/styles/style-*.css` (Nova is the default);
+   - its docs page, `apps/v4/content/docs/components/radix/<name>.mdx`;
+   - every example that page references (`<ComponentPreview name="…">`), in
+     `apps/v4/examples/radix/`.
+
+   If ember-primitives has the component, read it in `ember-primitives/src/components/` too.
+
 2. Put the behaviour in `@ember-joinery/primitives`, the styled component in
    `@ember-joinery/ember`, and the harness in `@ember-joinery/test-support`.
-3. Seed its CSS with `scripts/extract-classes.mjs` (†), which pulls shadcn's class strings out
-   of the upstream `cn(...)` and `cva(...)` calls.
+3. Its styles come from the ported style sheets (`scripts/port-styles.mjs` †, which renames
+   `cn-` to `jn-`). `scripts/extract-classes.mjs` (†) moves the utility classes upstream writes
+   inline into the component's base rule.
 
 A component is done when it has everything listed under "Definition of done for every
 component" in the plan: its primitive, the styled component, its harness, tests written with the

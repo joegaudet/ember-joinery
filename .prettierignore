@@ -4,6 +4,8 @@ pnpm-lock.yaml
 .changeset/*.md
 coverage/
 .claude/
+# The plan's Glimmer snippet is laid out by hand.
+JOINERY_PLAN.md
 docs/site/demo/
 docs/site/guide/
 docs/site/404.html

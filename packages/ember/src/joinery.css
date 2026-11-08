@@ -1,0 +1,10 @@
+/*
+ * @ember-joinery/ember's component CSS, compiled by Tailwind v4 into dist/joinery.css.
+ *
+ * `@reference` makes Tailwind's theme and utilities available to `@apply` without emitting
+ * any of them. The ported style sheets (src/styles/<style>.css) and each component's rules are
+ * imported here, inside `@layer joinery`; see "Styling pipeline" in JOINERY_PLAN.md.
+ */
+@reference 'tailwindcss';
+
+@layer joinery;

@@ -105,7 +105,7 @@ ember-joinery/
   docs/site/       hand-written marketing page (index.html, site.css, logo.svg, favicon.svg, social-card.png)
   docs/social-card.html
   scripts/         publish.mjs, publish-plan.mjs (from Formwright), upstream.mjs, parity.mjs,
-                   extract-classes.mjs, site-screenshots.mjs, *.test.mjs
+                   extract-classes.mjs, site-screenshots.mjs, gen-barrels.mjs, *.test.mjs
   upstream.json    the shadcn-ui/ui and ember-primitives commits last synced
   CLAUDE.md  CONTRIBUTING.md  README.md  LICENSE.md  NOTICE  JOINERY_PLAN.md
   .changeset/  .github/workflows/{ci,parity,upstream,pages,release,bootstrap-publish}.yml
@@ -470,7 +470,7 @@ Joe asked for the whole plan to be built by subagents without feedback, as one b
 - **Shared files don't collide.** Registries that every component touches are either one file per
   component or generated:
   - the package barrels (`src/index.ts`) and the test-support index are generated from the files
-    present;
+    present, by `scripts/gen-barrels.mjs` on every build (they are gitignored);
   - the guide's component `meta.json` is generated, in alphabetical order;
   - each component has its own `parity/map/<component>.json`;
   - the acceptance test's `PAGES` is built from the templates directory.

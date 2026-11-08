@@ -1,41 +1,72 @@
 # Contributing
 
-> **Phase 0.** This guide describes how the repo works once Phase 1 adds the tooling (see
-> [JOINERY_PLAN.md](JOINERY_PLAN.md)). Commands marked † don't exist yet.
+> **Building.** Joinery lands in stages (see [JOINERY_PLAN.md](JOINERY_PLAN.md)). Anything
+> marked † isn't there yet; a gate command marked † runs and passes, with nothing to check.
 
 ## Setup
 
 ```bash
-pnpm install   # †
-pnpm build     # † the test app, guide and examples import the packages' built output
-pnpm start     # † the demo (test-app); Vite prints its URL
+pnpm install
+pnpm build     # the test app, guide and examples import the packages' built output
+pnpm start     # the demo (test-app); Vite prints its URL
 ```
 
 pnpm runs scripts on Node 24 (`useNodeVersion` in `pnpm-workspace.yaml`).
+
+The tests run in Chrome. Outside CI, testem uses the Playwright Chromium at
+`/opt/pw-browsers/chromium` when there is one (cloud dev containers often have it), and
+`CHROME_BIN` points it at any other Chrome or Chromium.
 
 ## The gate
 
 CI runs exactly these; run them before opening a PR.
 
 ```bash
-pnpm format:check                  # †
-pnpm build                         # †
-pnpm lint                          # †
-pnpm typecheck                     # †
-node --test scripts/*.test.mjs     # †
-pnpm test                          # † test-app, Ember 7.3
+pnpm format:check
+pnpm build
+pnpm lint
+pnpm typecheck
+node --test scripts/*.test.mjs
+pnpm test                          # test-app, Ember 7.3
 pnpm --filter docs-app test        # † every guide example and page
 pnpm test:examples                 # † vite-basic, classic, tailwind, formwright
 pnpm parity                        # † screenshot comparison with shadcn/ui
 ```
 
 CI also runs the suite on the previous LTS (6.12) by overriding `ember-source` for the whole
-workspace. To do that locally, add `ember-source: ~6.12.0` under `overrides:` in
-`pnpm-workspace.yaml`, then run `pnpm install --no-frozen-lockfile && pnpm build && pnpm test`,
-and revert both files afterwards. Overriding only the test app loads two copies of Ember.
+workspace. To do that locally, add `ember-source: ~6.12.0` directly under the top-level
+`overrides:` key in `pnpm-workspace.yaml` (where CI's `sed` puts it), then run
+`pnpm install --no-frozen-lockfile && pnpm build && pnpm test`, and revert both files afterwards.
+Overriding only the test app loads two copies of Ember.
 
 CI also runs the suite once more with CSS anchor positioning turned off, so the Floating UI
-fallback is tested too.
+fallback is tested too. Locally that's `pnpm test:anchor-fallback`: it builds the test app with
+`JOINERY_ANCHOR_FALLBACK=1`, which puts `globalThis.JOINERY_ANCHOR_FALLBACK = true` on the page
+before any module runs. `@ember-joinery/primitives` reads that global each time it positions a
+part (not once at import), and uses Floating UI whenever it is `true`.
+
+## Generated files
+
+Files that every unit of work would otherwise touch are generated, so parallel changes never
+collide. Don't edit them by hand.
+
+- **Package barrels.** Each package's `src/index.ts` is written by `scripts/gen-barrels.mjs`
+  from the modules present, every time the package builds or typechecks (`pnpm barrels` runs it
+  alone). The barrels are gitignored. A package lists its barrel folders under
+  `"joinery": { "barrels": [...] }` in its `package.json`; an add-on's `src/test-support` gets
+  its own. A barrel re-exports every module's named exports, and a default export under the
+  PascalCase of its file name (`button-group.gts` becomes `ButtonGroup`). A folder with its own
+  `index.ts` counts as one module. Names starting with `_`, and `-private` folders, stay out.
+  Two modules exporting the same name fail the build.
+
+## Packages and their build
+
+The packages are v2 addons: `primitives` and `ember` build with `@embroider/addon-dev` and
+rollup, `test-support` with `tsc`. Each one's `dist/` (and `declarations/`) is what the test app,
+the guide and the examples import, so rebuild after changing a package. `@ember-joinery/ember`
+also builds its CSS: `packages/ember/build-css.mjs` lists the CSS files it ships, and after
+every rollup build the Tailwind v4 CLI compiles each into `dist/` (`dist/joinery.css` and the
+rest).
 
 ## Porting a component
 

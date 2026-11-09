@@ -1,0 +1,33 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/native-select.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="native-select-wrapper" in NativeSelect; keep on the element: group/native-select */
+:where(.jn-native-select-wrapper) {
+  @apply relative w-fit has-[select:disabled]:opacity-50;
+}
+
+/* data-slot="native-select" in NativeSelect */
+:where(.jn-native-select) {
+  @apply outline-none disabled:pointer-events-none disabled:cursor-not-allowed;
+}
+
+/* data-slot="native-select-icon" in NativeSelect */
+:where(.jn-native-select-icon) {
+  @apply pointer-events-none absolute select-none;
+}
+
+/* data-slot="native-select-option" in NativeSelectOption */
+:where(.jn-native-select-option) {
+  @apply bg-[Canvas] text-[CanvasText];
+}
+
+/* data-slot="native-select-optgroup" in NativeSelectOptGroup */
+:where(.jn-native-select-optgroup) {
+  @apply bg-[Canvas] text-[CanvasText];
+}

@@ -83,8 +83,8 @@ Add the `disabled` attribute to the `NativeSelect` component to disable the sele
 
 ## Invalid
 
-Use `aria-invalid="true"` to show validation errors, and the `data-invalid` attribute on the
-`Field` component for styling (Field comes with the inputs). In a template a bare
+Use `aria-invalid="true"` to show validation errors, and `@invalid={{true}}` on the
+[Field](/components/field.md) component (upstream's `data-invalid`) for styling. In a template a bare
 `aria-invalid` is empty, which ARIA reads as false, so give it the value.
 
 <Example @name="native-select-invalid" @title="Invalid" />
@@ -199,7 +199,7 @@ It's the browser's own `<select>`, so the browser's keys work, as its menu does:
 
 ## Accessibility
 
-- Name it with a `<label for>` (or a Field, once it lands), `aria-label` or `aria-labelledby`.
+- Name it with a `<label for>` (or a [Field](/components/field.md)'s `FieldLabel`), `aria-label` or `aria-labelledby`.
   Upstream's examples leave theirs unnamed; Joinery's give each an `aria-label`, so the audit
   every example runs passes.
 - The chevron is hidden from assistive technology, and a click on it reaches the select.

@@ -91,7 +91,7 @@ label is clicked.
 - A `<label>` tied to its control by `for` (or wrapping it) names the control, and makes the
   label a larger target for the pointer.
 - One label names one control. For a group of controls, use a `<fieldset>` and `<legend>`, or
-  Field's `FieldSet` when it lands.
+  [Field](/components/field.md)'s `FieldSet`.
 - The label dims with a disabled control; the control's own `disabled` is what assistive
   technology reads.
 

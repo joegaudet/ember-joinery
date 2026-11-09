@@ -1,5 +1,5 @@
 {
-  "$comment": "Waiting for components that haven't landed: pagination-icons-only (Field and Select). The unit that lands the later of them ports the example onto the Pagination page and maps it here.",
+  "$comment": "Waiting for components that haven't landed: pagination-icons-only (Select; Field has landed). The unit that lands Select ports the example onto the Pagination page and maps it here.",
   "examples": {
     "pagination-demo": "pagination-demo",
     "pagination-simple": "pagination-simple",

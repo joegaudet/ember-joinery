@@ -204,7 +204,7 @@ input leaves the tab order.
 
 ## Accessibility
 
-- Name it with a `<label for>` (or a Field, once it lands), `aria-label` or `aria-labelledby`.
+- Name it with a `<label for>` (or a [Field](/components/field.md)'s `FieldLabel`), `aria-label` or `aria-labelledby`.
   A placeholder alone is a weak name: it disappears as soon as someone types.
 - Mark an error with `aria-invalid="true"`, and point `aria-describedby` at the message;
   `InputHarness` reads both.

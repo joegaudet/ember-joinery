@@ -5,6 +5,7 @@ import { on } from '@ember/modifier'
 import { modifier } from 'ember-modifier'
 import { ArrowUp } from 'lucide'
 import { Button, Icon } from '@ember-joinery/ember'
+import { CodeBlock, highlightedCode } from '@ember-joinery/code-block'
 import { anchorTo } from '@ember-joinery/primitives/anchor'
 import { dismissable } from '@ember-joinery/primitives/dismiss'
 import { topLayer } from '@ember-joinery/primitives/layer'
@@ -81,6 +82,8 @@ class Tip extends Component {
   </template>
 }
 
+const install = 'pnpm add @ember-joinery/code-block'
+
 <template>
   <main>
     <h1>Joinery in a classic app</h1>
@@ -95,5 +98,14 @@ class Tip extends Component {
       <Button @name="save" @variant="outline">Save</Button>
       <Button @name="up" @size="icon" aria-label="Back to top"><Icon @icon={{ArrowUp}} /></Button>
     </p>
+    <CodeBlock @name="install" as |b|>
+      <b.Header>
+        <b.Title>Terminal</b.Title>
+        <b.Actions><b.CopyButton @value={{install}} /></b.Actions>
+      </b.Header>
+      <b.Content>
+        {{#each (highlightedCode install "bash") as |line|}}<b.Line @code={{line}} />{{/each}}
+      </b.Content>
+    </CodeBlock>
   </main>
 </template>

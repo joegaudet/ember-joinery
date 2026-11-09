@@ -13,6 +13,7 @@ import {
   placementOf,
   pressEscape,
 } from '@ember-joinery/test-support'
+import { CodeBlockHarness, setupClipboard } from '@ember-joinery/code-block/test-support'
 
 /** The app's disclosure, built on the primitives. */
 class DisclosureHarness extends Harness {
@@ -138,5 +139,20 @@ module('Acceptance | smoke', function (hooks) {
     assert.true(up.find(IconHarness).isDecorative, 'its lucide icon')
     assert.strictEqual(up.find(IconHarness).element.namespaceURI, 'http://www.w3.org/2000/svg')
     await a11yAudit()
+  })
+
+  module('an add-on', function (hooks) {
+    const clipboard = setupClipboard(hooks)
+
+    test('a Code Block from @ember-joinery/code-block, with Shiki loaded on demand', async function (assert) {
+      await visit('/')
+      const block = new CodeBlockHarness('install')
+      assert.strictEqual(block.code, 'pnpm add @ember-joinery/code-block')
+      assert.true(block.isHighlighted, 'ember-auto-import split out Shiki and the bash grammar')
+      assert.strictEqual(getComputedStyle(block.element).borderTopLeftRadius, '10px')
+      await block.copy()
+      assert.strictEqual(clipboard.text, 'pnpm add @ember-joinery/code-block')
+      await a11yAudit()
+    })
   })
 })

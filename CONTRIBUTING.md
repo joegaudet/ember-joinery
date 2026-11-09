@@ -552,5 +552,6 @@ and below `utilities`, so a class on a component overrides them. Its tests check
 
 Each app imports `tokens.css` and `joinery.css`, and the Tailwind one `tailwind.css` too, and
 renders a Button with a lucide icon, which its smoke test drives with `ButtonHarness`: that is
-what proves a classic app consumes `.gts` v2 addon components. The Vite app also renders a Code
-Block, highlighted, which proves an add-on and the Shiki it loads on demand build in an app.
+what proves a classic app consumes `.gts` v2 addon components. The Vite and classic apps also
+render a Code Block, highlighted, which proves an add-on and the Shiki it loads on demand build
+in both.

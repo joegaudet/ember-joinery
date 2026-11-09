@@ -1,0 +1,8 @@
+{
+  "$comment": "Waiting for components that haven't landed: table-actions (Dropdown Menu). The unit that lands it ports the example onto the Table page and maps it here.",
+  "examples": {
+    "table-demo": "table-demo",
+    "table-footer": "table-footer",
+    "table-rtl": "table-rtl"
+  }
+}

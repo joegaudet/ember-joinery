@@ -233,8 +233,6 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   classes and ending in an axe audit. The guide shows it in the example's Test tab, so write it
   the way you'd want a reader to write theirs. `docs-app/tests/unit/examples-test.ts` fails
   when an example has no test, a test has no example, or a test never calls `a11yAudit()`.
-  (The Introduction's test still uses raw selectors; it moves to a harness once the guide can
-  import the harness base.)
 - The guide's own CSS (`docs-app/app/styles/app.css`) sits in `@layer guide`, below
   `@layer joinery`, so Joinery's rules win wherever a component renders. The example's preview
   and the parity route are a `guide-stage`, and the guide's rules stop there: its prose and

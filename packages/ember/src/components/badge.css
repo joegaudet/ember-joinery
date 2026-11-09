@@ -1,0 +1,18 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/badge.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* in badgeVariants; keep on the element: group/badge */
+:where(.jn-badge) {
+  @apply inline-flex w-fit shrink-0 items-center justify-center overflow-hidden whitespace-nowrap focus-visible:border-ring focus-visible:ring-[3px] aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none;
+}
+
+/* in badgeVariants: upstream's later .jn-badge-variant-destructive overrides this in every style */
+:where(.jn-badge:not(.jn-badge-variant-destructive)) {
+  @apply focus-visible:ring-ring/50;
+}

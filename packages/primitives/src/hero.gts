@@ -5,15 +5,14 @@ import { adoptLayoutStyles } from './-private/layout-styles.ts'
 /**
  * ember-primitives' hero rules: the whole viewport, with the dynamic viewport units so it fits
  * a phone's browser as its toolbars come and go. `position: relative`, so what's inside can be
- * placed along its edges. Any CSS of the app's wins.
+ * placed along its edges. The app's CSS wins, where the `joinery` layer comes before its own
+ * (see `-private/layout-styles.ts`).
  */
 const STYLES = `@layer joinery {
   :where([data-jn-hero]) { width: 100dvw; height: 100dvh; position: relative; }
 }`
 
-const styled = modifier((element: HTMLElement) => {
-  adoptLayoutStyles(element, 'hero', STYLES)
-})
+const styled = modifier((element: HTMLElement) => adoptLayoutStyles(element, 'hero', STYLES))
 
 export interface HeroSignature {
   Args: {
@@ -39,9 +38,11 @@ export interface HeroSignature {
  *     <a href="/guide">Get started</a>
  *   </Hero>
  *
- * Its rules are in `@layer joinery` at no specificity, so a class of the app's resizes it. It
- * adds no landmark: put `<main>` or `<header>` inside or around it as the page needs. It wraps
- * content, so it is a wrapper for the harnesses (`data-test-jn-wrapper`).
+ * Its rules are in `@layer joinery` at no specificity, so a class of the app's resizes it: an
+ * unlayered one always, and a layered one (a Tailwind utility) where the app names `joinery`
+ * before its own layers, as joinery.css and the guide's Tailwind setup do. It adds no landmark:
+ * put `<main>` or `<header>` inside or around it as the page needs. It wraps content, so it is a
+ * wrapper for the harnesses (`data-test-jn-wrapper`).
  */
 export const Hero: TOC<HeroSignature> = <template>
   <div

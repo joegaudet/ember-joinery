@@ -9,7 +9,10 @@ import { scrollEnd } from './-private/scroll-end.ts'
 
 const waiter = buildWaiter('@ember-joinery/primitives:scroller')
 
-/** ember-primitives' documented default: the element scrolls. Any CSS of the app's wins. */
+/**
+ * ember-primitives' documented default: the element scrolls. The app's CSS wins, where the
+ * `joinery` layer comes before its own (see `-private/layout-styles.ts`).
+ */
 const STYLES = `@layer joinery {
   :where([data-jn-scroller]) { overflow: auto; }
 }`
@@ -80,8 +83,9 @@ export class Scroller extends Component<ScrollerSignature> {
 
   setup = modifier((element: HTMLDivElement) => {
     this.#element = element
-    adoptLayoutStyles(element, 'scroller', STYLES)
+    const stopStyling = adoptLayoutStyles(element, 'scroller', STYLES)
     return () => {
+      stopStyling()
       if (this.#element === element) this.#element = undefined
     }
   })

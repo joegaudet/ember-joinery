@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { render } from '@ember/test-helpers'
+import { getRootElement, render } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { Hero } from '@ember-joinery/primitives/hero'
 import { Harness, HeroHarness } from '@ember-joinery/test-support'
@@ -63,6 +63,62 @@ module('Integration | primitives | hero', function (hooks) {
     assert.strictEqual(hero.element.offsetWidth, 300)
     assert.strictEqual(hero.element.offsetHeight, 120)
     assert.false(hero.fillsViewport)
+    await a11yAudit()
+  })
+
+  test('a layered class of yours wins too, once your CSS names the joinery layer first', async function (assert) {
+    // A page of its own, without joinery.css: an app on the primitives alone, with Tailwind's
+    // layers, named as the guide's Primitives page says.
+    const frame = document.createElement('iframe')
+    frame.title = 'App'
+    frame.style.cssText = 'width: 400px; height: 600px; border: 0'
+    getRootElement().append(frame)
+    const page = frame.contentDocument!
+    const style = page.createElement('style')
+    style.textContent = `
+      @layer theme, base, joinery, components, utilities;
+      @layer utilities { .h-80 { height: 20rem; } }
+    `
+    page.head.append(style)
+    const body = page.body
+    try {
+      await render(
+        <template>
+          {{#in-element body}}
+            <Hero @name="sized" class="h-80">Sized</Hero>
+            <Hero @name="unsized">Unsized</Hero>
+          {{/in-element}}
+        </template>,
+      )
+      // Harnesses look in the test's own document, so read the frame's directly.
+      const [sized, unsized] = [...body.querySelectorAll<HTMLElement>('[data-jn-hero]')]
+      assert.strictEqual(unsized!.offsetHeight, 600, 'the rules are the frame’s')
+      assert.strictEqual(sized!.offsetHeight, 320, 'the utility wins')
+    } finally {
+      frame.remove()
+    }
+    await a11yAudit()
+  })
+
+  test('rendered into an element not in a document yet, it gets its rules once that is', async function (assert) {
+    // A shadow root of its own, so no earlier test has brought the rules in.
+    const host = document.createElement('div')
+    const shadow = host.attachShadow({ mode: 'open' })
+    const detached = document.createElement('div')
+    await render(
+      <template>
+        {{host}}
+        {{#in-element detached}}<Hero>Content</Hero>{{/in-element}}
+      </template>,
+    )
+    // Harnesses look in the document, which the element isn't in.
+    const hero = detached.querySelector('[data-jn-hero]')!
+    assert.strictEqual(shadow.adoptedStyleSheets.length, 0)
+
+    shadow.append(detached)
+    await new Promise(requestAnimationFrame)
+    assert.strictEqual(shadow.adoptedStyleSheets.length, 1, 'adopted where it landed')
+    assert.strictEqual(getComputedStyle(hero).position, 'relative')
     await a11yAudit()
   })
 

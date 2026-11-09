@@ -16,7 +16,8 @@ const DEFAULT_OFFSET = 0
 /**
  * ember-primitives' zoetrope rules, with logical sides so they serve right-to-left text too:
  * a header and the controls on one line, and under them the track, which scrolls sideways,
- * snaps to each item's start and hides its scrollbar. Any CSS of the app's wins.
+ * snaps to each item's start and hides its scrollbar. The app's CSS wins, where the `joinery`
+ * layer comes before its own (see `-private/layout-styles.ts`).
  */
 const STYLES = `@layer joinery {
   :where([data-jn-zoetrope]) { display: flex; flex-wrap: wrap; position: relative; width: 100%; }
@@ -211,9 +212,9 @@ export class Zoetrope extends Component<ZoetropeSignature> {
   }
 
   setStyles = modifier((element: HTMLElement, [gap, offset]: [number, number]) => {
-    adoptLayoutStyles(element, 'zoetrope', STYLES)
     element.style.setProperty('--zoetrope-gap', `${gap}px`)
     element.style.setProperty('--zoetrope-offset', `${offset}px`)
+    return adoptLayoutStyles(element, 'zoetrope', STYLES)
   })
 
   setupScroller = modifier((element: HTMLElement) => {

@@ -4,8 +4,8 @@ import { adoptLayoutStyles } from './-private/layout-styles.ts'
 
 /**
  * ember-primitives' sticky-footer rules: the wrapper scrolls, and inside it a grid at least as
- * tall as the wrapper gives the content the space the footer doesn't take. Any CSS of the
- * app's wins.
+ * tall as the wrapper gives the content the space the footer doesn't take. The app's CSS wins,
+ * where the `joinery` layer comes before its own (see `-private/layout-styles.ts`).
  */
 const STYLES = `@layer joinery {
   :where([data-jn-sticky-footer]) { height: 100%; overflow: auto; }
@@ -16,9 +16,9 @@ const STYLES = `@layer joinery {
   }
 }`
 
-const styled = modifier((element: HTMLElement) => {
-  adoptLayoutStyles(element, 'sticky-footer', STYLES)
-})
+const styled = modifier((element: HTMLElement) =>
+  adoptLayoutStyles(element, 'sticky-footer', STYLES),
+)
 
 export interface StickyFooterSignature {
   Args: {

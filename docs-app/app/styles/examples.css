@@ -34,6 +34,19 @@
 @custom-variant style-sera (&:where([data-style='sera'] *));
 @custom-variant style-rhea (&:where([data-style='rhea'] *));
 
+/*
+ * ui.shadcn.com's variant for each style (`style-lyra:mb-2`), from apps/v4/app/globals.css,
+ * where the preview carries `.style-<name>`. The guide's preview carries `data-style`.
+ */
+@custom-variant style-vega (&:where([data-style='vega'] *));
+@custom-variant style-nova (&:where([data-style='nova'] *));
+@custom-variant style-lyra (&:where([data-style='lyra'] *));
+@custom-variant style-maia (&:where([data-style='maia'] *));
+@custom-variant style-mira (&:where([data-style='mira'] *));
+@custom-variant style-luma (&:where([data-style='luma'] *));
+@custom-variant style-sera (&:where([data-style='sera'] *));
+@custom-variant style-rhea (&:where([data-style='rhea'] *));
+
 @source '../examples';
 
 /*

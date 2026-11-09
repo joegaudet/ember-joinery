@@ -1,6 +1,7 @@
 {
-  "$comment": "Waiting for components that haven't landed: scroll-area-demo and scroll-area-rtl (Separator). The Scroll Area page shows Joinery's own scroll-area-list until Separator lands; it has no upstream counterpart, so it isn't mapped. The unit that lands Separator ports both onto the Scroll Area page and maps them here.",
   "examples": {
-    "scroll-area-horizontal-demo": "scroll-area-horizontal-demo"
+    "scroll-area-demo": "scroll-area-demo",
+    "scroll-area-horizontal-demo": "scroll-area-horizontal-demo",
+    "scroll-area-rtl": "scroll-area-rtl"
   }
 }

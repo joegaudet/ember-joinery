@@ -2,11 +2,7 @@
 
 Augments native scroll functionality for custom, cross-browser styling.
 
-Upstream's first example (`scroll-area-demo`) puts a Separator between its tags, and Separator
-hasn't landed in Joinery yet; it comes with Separator. Until then, Joinery's own example is
-that list without the separators:
-
-<Example @name="scroll-area-list" @title="Scroll Area" />
+<Example @name="scroll-area-demo" @title="Scroll Area" />
 
 ## Installation
 
@@ -53,11 +49,12 @@ Use `ScrollBar` with `@orientation="horizontal"` for horizontal scrolling.
 
 ## RTL
 
-Joinery's styles use logical properties, so an area lays itself out right to left inside any
-element with `dir="rtl"` (see [Direction](/components/direction.md)): the scrollbar moves to the
-left, with its border on its inline start, and a horizontal one starts on the right. Upstream's
-right-to-left example (`scroll-area-rtl`) is the tags list in Arabic, with its Separators, so it
-comes with Separator.
+To enable RTL support, see the [Direction](/components/direction.md) guide. Joinery's styles use
+logical properties, so an area lays itself out right to left inside any element with
+`dir="rtl"`, or with `@dir="rtl"`: the scrollbar moves to the left, with its border on its
+inline start, and a horizontal one starts on the right.
+
+<Example @name="scroll-area-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 

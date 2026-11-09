@@ -36,15 +36,26 @@ const UPSTREAM_CONTRAST = {
 }
 
 /**
- * Upstream's examples name their landmarks as upstream's components do: every Breadcrumb is a
- * nav called `breadcrumb`, every Pagination one called `pagination`. A page that shows several
- * has several of the same, which axe's `landmark-unique` rule flags, though each example is
- * fine on its own (its test audits it alone). So the page's audit runs that rule over the
- * guide's own landmarks, leaving the examples' previews out, and every other rule over all of it
- * (but for upstream's contrast shortfalls, above, and the page's own exceptions).
+ * The axe rules that judge a page as a whole, which a page of examples can fail though each
+ * example is fine on its own (its test audits it alone):
+ *
+ * - `landmark-unique`: upstream's examples name their landmarks as upstream's components do, so
+ *   every Breadcrumb is a nav called `breadcrumb`, every Pagination one called `pagination`, and
+ *   a page that shows several has several of the same.
+ * - `heading-order` wants each heading at most one level below the one before it, but an
+ *   example's headings are a component's, as an app would use it: an accordion's items are
+ *   `<h3>`s, as upstream's, and the first example sits right under the page's `<h1>`, as on
+ *   ui.shadcn.com.
+ *
+ * So the page's audit runs these rules over the guide's own content, leaving the examples'
+ * previews out, and every other rule over all of it (but for upstream's contrast shortfalls,
+ * above). A page's own exceptions apply to both.
  */
-const ALL_BUT_LANDMARK_UNIQUE = { rules: { 'landmark-unique': { enabled: false } } }
-const GUIDE_LANDMARKS = {
+const PAGE_RULES = ['heading-order', 'landmark-unique']
+const ALL_BUT_PAGE_RULES = Object.fromEntries(
+  PAGE_RULES.map(rule => [rule, { enabled: false as const }]),
+)
+const GUIDE_CONTENT = {
   include: [['#ember-testing-container']],
   exclude: [['.example-preview']],
 }
@@ -90,10 +101,9 @@ module('Acceptance | guide pages', function (hooks) {
         await waitUntil(() => !example.querySelector('.example-loading'), { timeout: 15000 })
         assert.dom(example.querySelector('.example-preview')).exists(`example ${name} rendered`)
       }
-      await a11yAudit(UPSTREAM_CONTRAST, {
-        rules: { ...AUDIT_EXCEPTIONS[page]?.rules, ...ALL_BUT_LANDMARK_UNIQUE.rules },
-      })
-      await a11yAudit(GUIDE_LANDMARKS, { runOnly: ['landmark-unique'] })
+      const exceptions = AUDIT_EXCEPTIONS[page]?.rules ?? {}
+      await a11yAudit(UPSTREAM_CONTRAST, { rules: { ...exceptions, ...ALL_BUT_PAGE_RULES } })
+      await a11yAudit(GUIDE_CONTENT, { runOnly: PAGE_RULES.filter(rule => !exceptions[rule]) })
     })
   }
 

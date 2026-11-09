@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import {
@@ -163,6 +163,22 @@ test('portStyles writes every sheet, and --check finds stale ones', () => {
       () => portStyles({ root, check: true, log: () => {} }),
       /stale ported styles[\s\S]*nova\.css/,
     )
+
+    // A sheet upstream drops: --check reports the ported copy, and a port removes it. A file
+    // the script didn't port stays.
+    portStyles({ root, log: () => {} })
+    rmSync(join(root, `.upstream/shadcn-ui/${PATHS.styles}/style-lyra.css`))
+    write(`${OUTPUT_DIR}/extra.css`, '/* not ported */\n')
+    assert.throws(
+      () => portStyles({ root, check: true, log: () => {} }),
+      /stale ported styles[^\n]*\n {2}packages\/ember\/src\/styles\/lyra\.css \(upstream has no style-lyra\.css any more\)$/,
+    )
+    const logs = []
+    assert.deepEqual(portStyles({ root, log: line => logs.push(line) }), ['nova'])
+    assert.equal(existsSync(join(root, OUTPUT_DIR, 'lyra.css')), false)
+    assert.equal(existsSync(join(root, OUTPUT_DIR, 'extra.css')), true)
+    assert.match(logs[0], /^removed packages\/ember\/src\/styles\/lyra\.css/)
+    assert.deepEqual(portStyles({ root, check: true, log: () => {} }), ['nova'])
   } finally {
     rmSync(root, { recursive: true, force: true })
   }

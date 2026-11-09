@@ -3,8 +3,10 @@
 // upstream.json) into packages/ember/src/styles/<style>.css. See "Styling pipeline" in
 // JOINERY_PLAN.md.
 //
-//   node scripts/port-styles.mjs           writes the ported sheets (run `upstream.mjs fetch` first)
-//   node scripts/port-styles.mjs --check   fails if a ported sheet differs from what it would write
+//   node scripts/port-styles.mjs           writes the ported sheets (run `upstream.mjs fetch` first),
+//                                          and removes any it ported from a sheet upstream has dropped
+//   node scripts/port-styles.mjs --check   fails if a ported sheet differs from what it would write,
+//                                          or is left from a sheet upstream has dropped
 //
 // The port is mechanical, so an upstream change diffs cleanly into Joinery's copy:
 //
@@ -18,7 +20,7 @@
 // It relies on upstream's sheets being flat rules inside the wrapper. Anything else (no wrapper,
 // a rule outside it, a nested rule or an at-rule) fails the port instead of slipping through.
 
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PATHS, checkoutDir, readPins, repoRoot } from './upstream.mjs'
@@ -137,6 +139,11 @@ export function header(style, commit) {
   ].join('\n')
 }
 
+/** Whether a file is a sheet this script ported: it starts with `header()`'s first lines. */
+export function isPorted(css) {
+  return /^\/\*\n \* The [A-Z][a-z]+ style, ported from shadcn-ui\/ui@[0-9a-f]+\n/.test(css)
+}
+
 /** One upstream sheet, ported. */
 export function portStyle(css, { style, commit }) {
   const ported = whereSelectors(renameClasses(unwrapStyleScope(css, style)))
@@ -155,7 +162,11 @@ export function upstreamSheets(checkout) {
     .map(name => ({ style: basename(name, '.css').slice('style-'.length), path: join(dir, name) }))
 }
 
-/** Writes (or, with `check`, compares) every ported sheet. Returns the styles it covered. */
+/**
+ * Writes (or, with `check`, compares) every ported sheet, and removes (or, with `check`, reports)
+ * the ones left from a sheet upstream no longer has. Other files in the folder are left alone.
+ * Returns the styles it covered.
+ */
 export function portStyles({ root = repoRoot, check = false, log = console.log } = {}) {
   const pins = readPins(root)
   const commit = pins['shadcn-ui'].commit
@@ -163,7 +174,22 @@ export function portStyles({ root = repoRoot, check = false, log = console.log }
   const outDir = join(root, OUTPUT_DIR)
   const stale = []
   const styles = []
-  for (const { style, path } of upstreamSheets(checkout)) {
+  const sheets = upstreamSheets(checkout)
+  const current = new Set(sheets.map(({ style }) => `${style}.css`))
+  const dropped = existsSync(outDir)
+    ? readdirSync(outDir)
+        .filter(name => name.endsWith('.css') && !current.has(name))
+        .filter(name => isPorted(readFileSync(join(outDir, name), 'utf8')))
+        .sort()
+    : []
+  for (const name of dropped) {
+    if (check) stale.push(`${OUTPUT_DIR}/${name} (upstream has no style-${name} any more)`)
+    else {
+      rmSync(join(outDir, name))
+      log(`removed ${OUTPUT_DIR}/${name}: upstream has no style-${name} any more`)
+    }
+  }
+  for (const { style, path } of sheets) {
     const ported = portStyle(readFileSync(path, 'utf8'), { style, commit })
     const target = join(outDir, `${style}.css`)
     styles.push(style)

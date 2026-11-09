@@ -54,12 +54,16 @@
 // Strings that only apply under a condition (`isActive && "…"`, `a ? "…" : "…"`) are reported
 // with their condition and left as comments in the CSS: the component decides how to express
 // them (usually a data attribute).
+//
+// The rules' physical sides are made logical, as port-styles.mjs does to the sheets (see
+// rtl.mjs), so they hold right to left too; the checks above run on upstream's own classes.
 
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { twMerge } from 'cn'
 import ts from 'typescript'
+import { logicalClasses } from './rtl.mjs'
 import { PATHS, checkoutDir, repoRoot } from './upstream.mjs'
 
 const MARKER = /^(group|peer)(\/[\w-]+)?$/
@@ -593,7 +597,8 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
     " * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's",
     " * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead",
     ' * of all of them), so each wins over those rules. Where a later string of the same cva (a',
-    ' * variant, a size) overrides one, its rule skips that class with :not().',
+    ' * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are',
+    ' * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.',
     ...(sheets === null
       ? [' * The style sheets were missing, so later classes were not checked.']
       : []),
@@ -636,7 +641,8 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
     }
     const kept = entry.utilities.filter(utility => !moved.has(utility))
     lines.push(`/* ${describe(entry)}${notes.length ? `; ${notes.join('; ')}` : ''} */`)
-    if (kept.length) lines.push(`:where(${subject}) {`, `  @apply ${kept.join(' ')};`, '}')
+    if (kept.length)
+      lines.push(`:where(${subject}) {`, `  @apply ${logicalClasses(kept.join(' '))};`, '}')
     lines.push(...warnings)
     for (const { utility, by, styles } of overridden.filter(o => !o.every)) {
       lines.push(
@@ -654,7 +660,7 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
         '',
         `/* ${describe(entry)}: upstream's later ${classes.map(c => `.${c}`).join(', ')} ${plural(classes.length, 'overrides', 'override')} ${plural(utilities.length, 'this', 'these')} in every style */`,
         `:where(${subject}${classes.map(c => `:not(.${c})`).join('')}) {`,
-        `  @apply ${utilities.join(' ')};`,
+        `  @apply ${logicalClasses(utilities.join(' '))};`,
         '}',
       )
     }

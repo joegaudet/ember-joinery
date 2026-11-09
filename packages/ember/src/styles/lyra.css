@@ -10,7 +10,7 @@
 }
 
 :where(.jn-accordion-trigger) {
-  @apply focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-none py-2.5 text-left text-xs font-medium hover:underline focus-visible:ring-1 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4;
+  @apply focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-none py-2.5 text-start text-xs font-medium hover:underline focus-visible:ring-1 **:data-[slot=accordion-trigger-icon]:ms-auto **:data-[slot=accordion-trigger-icon]:size-4;
 }
 
 :where(.jn-accordion-content) {
@@ -23,7 +23,7 @@
 
 /* MARK: Alert */
 :where(.jn-alert) {
-  @apply grid gap-0.5 rounded-none border px-2.5 py-2 text-left text-xs has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2 *:[svg]:row-span-2 *:[svg]:translate-y-0 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4;
+  @apply grid gap-0.5 rounded-none border px-2.5 py-2 text-start text-xs has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pe-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2 *:[svg]:row-span-2 *:[svg]:translate-y-0 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-alert-variant-default) {
@@ -43,7 +43,7 @@
 }
 
 :where(.jn-alert-action) {
-  @apply absolute top-[calc(--spacing(1.25))] right-[calc(--spacing(1.25))];
+  @apply absolute top-[calc(--spacing(1.25))] end-[calc(--spacing(1.25))];
 }
 
 /* MARK: Alert Dialog */
@@ -56,7 +56,7 @@
 }
 
 :where(.jn-alert-dialog-header) {
-  @apply grid grid-rows-[auto_1fr] place-items-center gap-1.5 text-center has-data-[slot=alert-dialog-media]:grid-rows-[auto_auto_1fr] has-data-[slot=alert-dialog-media]:gap-x-4 sm:group-data-[size=default]/alert-dialog-content:place-items-start sm:group-data-[size=default]/alert-dialog-content:text-left sm:group-data-[size=default]/alert-dialog-content:has-data-[slot=alert-dialog-media]:grid-rows-[auto_1fr];
+  @apply grid grid-rows-[auto_1fr] place-items-center gap-1.5 text-center has-data-[slot=alert-dialog-media]:grid-rows-[auto_auto_1fr] has-data-[slot=alert-dialog-media]:gap-x-4 sm:group-data-[size=default]/alert-dialog-content:place-items-start sm:group-data-[size=default]/alert-dialog-content:text-start sm:group-data-[size=default]/alert-dialog-content:has-data-[slot=alert-dialog-media]:grid-rows-[auto_1fr];
 }
 
 :where(.jn-alert-dialog-media) {
@@ -94,7 +94,7 @@
 
 /* MARK: Badge */
 :where(.jn-badge) {
-  @apply h-5 gap-1 rounded-none border border-transparent px-2 py-0.5 text-xs font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3!;
+  @apply h-5 gap-1 rounded-none border border-transparent px-2 py-0.5 text-xs font-medium transition-all has-data-[icon=inline-end]:pe-1.5 has-data-[icon=inline-start]:ps-1.5 [&>svg]:size-3!;
 }
 
 :where(.jn-badge-variant-default) {
@@ -176,19 +176,19 @@
 }
 
 :where(.jn-button-size-xs) {
-  @apply h-6 gap-1 rounded-none px-2 text-xs has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3;
+  @apply h-6 gap-1 rounded-none px-2 text-xs has-data-[icon=inline-end]:pe-1.5 has-data-[icon=inline-start]:ps-1.5 [&_svg:not([class*='size-'])]:size-3;
 }
 
 :where(.jn-button-size-sm) {
-  @apply h-7 gap-1 rounded-none px-2.5 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5;
+  @apply h-7 gap-1 rounded-none px-2.5 has-data-[icon=inline-end]:pe-1.5 has-data-[icon=inline-start]:ps-1.5 [&_svg:not([class*='size-'])]:size-3.5;
 }
 
 :where(.jn-button-size-default) {
-  @apply h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2;
+  @apply h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pe-2 has-data-[icon=inline-start]:ps-2;
 }
 
 :where(.jn-button-size-lg) {
-  @apply h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2;
+  @apply h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pe-2 has-data-[icon=inline-start]:ps-2;
 }
 
 :where(.jn-button-size-icon-xs) {
@@ -230,7 +230,7 @@
 }
 
 :where(.jn-calendar-caption-label) {
-  @apply h-6 rounded-none pr-1 pl-1.5;
+  @apply h-6 rounded-none pe-1 ps-1.5;
 }
 
 /* MARK: Card */
@@ -282,7 +282,7 @@
 }
 
 :where(.jn-combobox-content-logical) {
-  @apply data-[side=inline-start]:slide-in-from-right-2 data-[side=inline-end]:slide-in-from-left-2;
+  @apply data-[side=inline-start]:slide-in-from-end-2 data-[side=inline-end]:slide-in-from-start-2;
 }
 
 :where(.jn-combobox-label) {
@@ -290,7 +290,7 @@
 }
 
 :where(.jn-combobox-item) {
-  @apply data-highlighted:bg-accent data-highlighted:text-accent-foreground not-data-[variant=destructive]:data-highlighted:**:text-accent-foreground gap-2 rounded-none py-2 pr-8 pl-2 text-xs [&_svg:not([class*='size-'])]:size-4;
+  @apply data-highlighted:bg-accent data-highlighted:text-accent-foreground not-data-[variant=destructive]:data-highlighted:**:text-accent-foreground gap-2 rounded-none py-2 pe-8 ps-2 text-xs [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-combobox-item-aria) {
@@ -298,7 +298,7 @@
 }
 
 :where(.jn-combobox-item-indicator) {
-  @apply pointer-events-none absolute right-2 flex size-4 items-center justify-center;
+  @apply pointer-events-none absolute end-2 flex size-4 items-center justify-center;
 }
 
 :where(.jn-combobox-empty) {
@@ -330,11 +330,11 @@
 }
 
 :where(.jn-combobox-chip) {
-  @apply bg-muted text-foreground flex h-[calc(--spacing(5.25))] w-fit items-center justify-center gap-1 rounded-none px-1.5 text-xs font-medium whitespace-nowrap has-data-[slot=combobox-chip-remove]:pr-0;
+  @apply bg-muted text-foreground flex h-[calc(--spacing(5.25))] w-fit items-center justify-center gap-1 rounded-none px-1.5 text-xs font-medium whitespace-nowrap has-data-[slot=combobox-chip-remove]:pe-0;
 }
 
 :where(.jn-combobox-chip-remove) {
-  @apply -ml-1 opacity-50 hover:opacity-100;
+  @apply -ms-1 opacity-50 hover:opacity-100;
 }
 
 /* MARK: Command */
@@ -351,7 +351,7 @@
 }
 
 :where(.jn-command-input-group) {
-  @apply bg-input/30 border-input/30 h-8 border-none shadow-none! *:data-[slot=input-group-addon]:pl-2!;
+  @apply bg-input/30 border-input/30 h-8 border-none shadow-none! *:data-[slot=input-group-addon]:ps-2!;
 }
 
 :where(.jn-command-input-icon) {
@@ -387,7 +387,7 @@
 }
 
 :where(.jn-command-shortcut) {
-  @apply text-muted-foreground group-data-selected/command-item:text-foreground ml-auto text-xs tracking-widest;
+  @apply text-muted-foreground group-data-selected/command-item:text-foreground ms-auto text-xs tracking-widest;
 }
 
 :where(.jn-command-shortcut-aria) {
@@ -400,27 +400,27 @@
 }
 
 :where(.jn-context-menu-content-logical) {
-  @apply data-[side=inline-start]:slide-in-from-right-2 data-[side=inline-end]:slide-in-from-left-2;
+  @apply data-[side=inline-start]:slide-in-from-end-2 data-[side=inline-end]:slide-in-from-start-2;
 }
 
 :where(.jn-context-menu-item) {
-  @apply focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive focus:*:[svg]:text-accent-foreground gap-2 rounded-none px-2 py-2 text-xs data-inset:pl-7 [&_svg:not([class*='size-'])]:size-4;
+  @apply focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive focus:*:[svg]:text-accent-foreground gap-2 rounded-none px-2 py-2 text-xs data-inset:ps-7 [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-context-menu-checkbox-item) {
-  @apply focus:bg-accent focus:text-accent-foreground gap-2 rounded-none py-2 pr-8 pl-2 text-xs data-inset:pl-7 [&_svg:not([class*='size-'])]:size-4;
+  @apply focus:bg-accent focus:text-accent-foreground gap-2 rounded-none py-2 pe-8 ps-2 text-xs data-inset:ps-7 [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-context-menu-radio-item) {
-  @apply focus:bg-accent focus:text-accent-foreground gap-2 rounded-none py-2 pr-8 pl-2 text-xs data-inset:pl-7 [&_svg:not([class*='size-'])]:size-4;
+  @apply focus:bg-accent focus:text-accent-foreground gap-2 rounded-none py-2 pe-8 ps-2 text-xs data-inset:ps-7 [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-context-menu-item-indicator) {
-  @apply absolute right-2;
+  @apply absolute end-2;
 }
 
 :where(.jn-context-menu-label) {
-  @apply text-muted-foreground px-2 py-2 text-xs data-inset:pl-7;
+  @apply text-muted-foreground px-2 py-2 text-xs data-inset:ps-7;
 }
 
 :where(.jn-context-menu-separator) {
@@ -428,11 +428,11 @@
 }
 
 :where(.jn-context-menu-shortcut) {
-  @apply text-muted-foreground group-focus/context-menu-item:text-accent-foreground ml-auto text-xs tracking-widest;
+  @apply text-muted-foreground group-focus/context-menu-item:text-accent-foreground ms-auto text-xs tracking-widest;
 }
 
 :where(.jn-context-menu-sub-trigger) {
-  @apply focus:bg-accent focus:text-accent-foreground data-open:bg-accent data-open:text-accent-foreground gap-2 rounded-none px-2 py-2 text-xs data-inset:pl-7 [&_svg:not([class*='size-'])]:size-4;
+  @apply focus:bg-accent focus:text-accent-foreground data-open:bg-accent data-open:text-accent-foreground gap-2 rounded-none px-2 py-2 text-xs data-inset:ps-7 [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-context-menu-sub-content) {
@@ -453,11 +453,11 @@
 }
 
 :where(.jn-dialog-close) {
-  @apply absolute top-2 right-2;
+  @apply absolute top-2 end-2;
 }
 
 :where(.jn-dialog-header) {
-  @apply gap-1 text-left;
+  @apply gap-1 text-start;
 }
 
 :where(.jn-dialog-title) {
@@ -474,11 +474,11 @@
 }
 
 :where(.jn-drawer-content) {
-  @apply bg-popover text-popover-foreground flex h-auto flex-col text-xs/relaxed data-[vaul-drawer-direction=bottom]:rounded-none data-[vaul-drawer-direction=bottom]:border-t data-[vaul-drawer-direction=left]:rounded-none data-[vaul-drawer-direction=left]:border-r data-[vaul-drawer-direction=right]:rounded-none data-[vaul-drawer-direction=right]:border-l data-[vaul-drawer-direction=top]:rounded-none data-[vaul-drawer-direction=top]:border-b;
+  @apply bg-popover text-popover-foreground flex h-auto flex-col text-xs/relaxed data-[vaul-drawer-direction=bottom]:rounded-none data-[vaul-drawer-direction=bottom]:border-t data-[vaul-drawer-direction=left]:rounded-none data-[vaul-drawer-direction=left]:border-e data-[vaul-drawer-direction=right]:rounded-none data-[vaul-drawer-direction=right]:border-s data-[vaul-drawer-direction=top]:rounded-none data-[vaul-drawer-direction=top]:border-b;
 }
 
 :where(.jn-drawer-popup) {
-  @apply bg-popover text-popover-foreground text-xs/relaxed data-[swipe-direction=down]:rounded-none data-[swipe-direction=down]:border-t data-[swipe-direction=left]:rounded-none data-[swipe-direction=left]:border-r data-[swipe-direction=right]:rounded-none data-[swipe-direction=right]:border-l data-[swipe-direction=up]:rounded-none data-[swipe-direction=up]:border-b;
+  @apply bg-popover text-popover-foreground text-xs/relaxed data-[swipe-direction=down]:rounded-none data-[swipe-direction=down]:border-t data-[swipe-direction=left]:rounded-none data-[swipe-direction=left]:border-e data-[swipe-direction=right]:rounded-none data-[swipe-direction=right]:border-s data-[swipe-direction=up]:rounded-none data-[swipe-direction=up]:border-b;
 }
 
 :where(.jn-drawer-handle) {
@@ -490,11 +490,11 @@
 }
 
 :where(.jn-drawer-header) {
-  @apply gap-0.5 p-4 md:gap-0.5 md:text-left;
+  @apply gap-0.5 p-4 md:gap-0.5 md:text-start;
 }
 
 :where(.jn-drawer-header-base) {
-  @apply gap-0.5 p-4 pb-0 md:gap-0.5 md:text-left;
+  @apply gap-0.5 p-4 pb-0 md:gap-0.5 md:text-start;
 }
 
 :where(.jn-drawer-title) {
@@ -519,27 +519,27 @@
 }
 
 :where(.jn-dropdown-menu-content-logical) {
-  @apply data-[side=inline-start]:slide-in-from-right-2 data-[side=inline-end]:slide-in-from-left-2;
+  @apply data-[side=inline-start]:slide-in-from-end-2 data-[side=inline-end]:slide-in-from-start-2;
 }
 
 :where(.jn-dropdown-menu-item) {
-  @apply focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive not-data-[variant=destructive]:focus:**:text-accent-foreground gap-2 rounded-none px-2 py-2 text-xs data-inset:pl-7 [&_svg:not([class*='size-'])]:size-4;
+  @apply focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive not-data-[variant=destructive]:focus:**:text-accent-foreground gap-2 rounded-none px-2 py-2 text-xs data-inset:ps-7 [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-dropdown-menu-checkbox-item) {
-  @apply focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground gap-2 rounded-none py-2 pr-8 pl-2 text-xs data-inset:pl-7 [&_svg:not([class*='size-'])]:size-4;
+  @apply focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground gap-2 rounded-none py-2 pe-8 ps-2 text-xs data-inset:ps-7 [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-dropdown-menu-radio-item) {
-  @apply focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground gap-2 rounded-none py-2 pr-8 pl-2 text-xs data-inset:pl-7 [&_svg:not([class*='size-'])]:size-4;
+  @apply focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground gap-2 rounded-none py-2 pe-8 ps-2 text-xs data-inset:ps-7 [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-dropdown-menu-item-indicator) {
-  @apply absolute right-2 flex items-center justify-center;
+  @apply absolute end-2 flex items-center justify-center;
 }
 
 :where(.jn-dropdown-menu-label) {
-  @apply text-muted-foreground px-2 py-2 text-xs data-inset:pl-7;
+  @apply text-muted-foreground px-2 py-2 text-xs data-inset:ps-7;
 }
 
 :where(.jn-dropdown-menu-separator) {
@@ -547,11 +547,11 @@
 }
 
 :where(.jn-dropdown-menu-shortcut) {
-  @apply text-muted-foreground group-focus/dropdown-menu-item:text-accent-foreground ml-auto text-xs tracking-widest;
+  @apply text-muted-foreground group-focus/dropdown-menu-item:text-accent-foreground ms-auto text-xs tracking-widest;
 }
 
 :where(.jn-dropdown-menu-sub-trigger) {
-  @apply focus:bg-accent focus:text-accent-foreground data-open:bg-accent data-open:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground gap-2 rounded-none px-2 py-2 text-xs data-inset:pl-7 [&_svg:not([class*='size-'])]:size-4;
+  @apply focus:bg-accent focus:text-accent-foreground data-open:bg-accent data-open:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground gap-2 rounded-none px-2 py-2 text-xs data-inset:ps-7 [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-dropdown-menu-sub-content) {
@@ -629,7 +629,7 @@
 }
 
 :where(.jn-field-description) {
-  @apply text-muted-foreground text-left text-xs/relaxed [[data-variant=legend]+&]:-mt-1.5;
+  @apply text-muted-foreground text-start text-xs/relaxed [[data-variant=legend]+&]:-mt-1.5;
 }
 
 :where(.jn-field-separator) {
@@ -650,7 +650,7 @@
 }
 
 :where(.jn-hover-card-content-logical) {
-  @apply data-[side=inline-start]:slide-in-from-right-2 data-[side=inline-end]:slide-in-from-left-2;
+  @apply data-[side=inline-start]:slide-in-from-end-2 data-[side=inline-end]:slide-in-from-start-2;
 }
 
 /* MARK: Input */
@@ -668,7 +668,7 @@
 }
 
 :where(.jn-input-otp-slot) {
-  @apply dark:bg-input/30 border-input data-[active=true]:border-ring data-[active=true]:ring-ring/50 data-[active=true]:aria-invalid:ring-destructive/20 dark:data-[active=true]:aria-invalid:ring-destructive/40 aria-invalid:border-destructive data-[active=true]:aria-invalid:border-destructive size-8 border-y border-r text-xs transition-all outline-none first:rounded-none first:border-l last:rounded-none data-[active=true]:ring-1;
+  @apply dark:bg-input/30 border-input data-[active=true]:border-ring data-[active=true]:ring-ring/50 data-[active=true]:aria-invalid:ring-destructive/20 dark:data-[active=true]:aria-invalid:ring-destructive/40 aria-invalid:border-destructive data-[active=true]:aria-invalid:border-destructive size-8 border-y border-e text-xs transition-all outline-none first:rounded-none first:border-s last:rounded-none data-[active=true]:ring-1;
 }
 
 :where(.jn-input-otp-caret-line) {
@@ -733,7 +733,7 @@
 }
 
 :where(.jn-item-description) {
-  @apply text-muted-foreground text-left text-xs/relaxed group-data-[size=xs]/item:text-xs/relaxed;
+  @apply text-muted-foreground text-start text-xs/relaxed group-data-[size=xs]/item:text-xs/relaxed;
 }
 
 :where(.jn-item-actions) {
@@ -788,31 +788,31 @@
 }
 
 :where(.jn-menubar-content-logical) {
-  @apply data-[side=inline-start]:slide-in-from-right-2 data-[side=inline-end]:slide-in-from-left-2;
+  @apply data-[side=inline-start]:slide-in-from-end-2 data-[side=inline-end]:slide-in-from-start-2;
 }
 
 :where(.jn-menubar-item) {
-  @apply focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! not-data-[variant=destructive]:focus:**:text-accent-foreground gap-2 rounded-none px-2 py-2 text-xs data-disabled:opacity-50 data-inset:pl-8 [&_svg:not([class*='size-'])]:size-4;
+  @apply focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:text-destructive! not-data-[variant=destructive]:focus:**:text-accent-foreground gap-2 rounded-none px-2 py-2 text-xs data-disabled:opacity-50 data-inset:ps-8 [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-menubar-checkbox-item) {
-  @apply focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground gap-2 rounded-none py-2 pr-28 pl-8 text-xs data-inset:pl-8;
+  @apply focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground gap-2 rounded-none py-2 pe-28 ps-8 text-xs data-inset:ps-8;
 }
 
 :where(.jn-menubar-checkbox-item-indicator) {
-  @apply left-1.5 size-4 [&_svg:not([class*='size-'])]:size-4;
+  @apply start-1.5 size-4 [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-menubar-radio-item) {
-  @apply focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground gap-2 rounded-none py-2 pr-2 pl-8 text-xs data-disabled:opacity-50 data-inset:pl-8 [&_svg:not([class*='size-'])]:size-4;
+  @apply focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground gap-2 rounded-none py-2 pe-2 ps-8 text-xs data-disabled:opacity-50 data-inset:ps-8 [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-menubar-radio-item-indicator) {
-  @apply left-1.5 size-4 [&_svg:not([class*='size-'])]:size-4;
+  @apply start-1.5 size-4 [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-menubar-label) {
-  @apply px-2 py-2 text-xs data-inset:pl-8;
+  @apply px-2 py-2 text-xs data-inset:ps-8;
 }
 
 :where(.jn-menubar-separator) {
@@ -824,7 +824,7 @@
 }
 
 :where(.jn-menubar-sub-trigger) {
-  @apply focus:bg-accent focus:text-accent-foreground data-open:bg-accent data-open:text-accent-foreground gap-2 rounded-none px-2 py-2 text-xs data-inset:pl-8 [&_svg:not([class*='size-'])]:size-4;
+  @apply focus:bg-accent focus:text-accent-foreground data-open:bg-accent data-open:text-accent-foreground gap-2 rounded-none px-2 py-2 text-xs data-inset:ps-8 [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-menubar-sub-content) {
@@ -849,7 +849,7 @@
 }
 
 :where(.jn-navigation-menu-trigger-icon) {
-  @apply relative top-px ml-1 size-3 transition duration-300 group-data-open/navigation-menu-trigger:rotate-180 group-data-popup-open/navigation-menu-trigger:rotate-180;
+  @apply relative top-px ms-1 size-3 transition duration-300 group-data-open/navigation-menu-trigger:rotate-180 group-data-popup-open/navigation-menu-trigger:rotate-180;
 }
 
 :where(.jn-navigation-menu-content) {
@@ -869,7 +869,7 @@
 }
 
 :where(.jn-navigation-menu-positioner) {
-  @apply transition-[top,left,right,bottom] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] data-[side=bottom]:before:top-[-10px] data-[side=bottom]:before:right-0 data-[side=bottom]:before:left-0;
+  @apply transition-[top,left,right,bottom] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] data-[side=bottom]:before:top-[-10px] data-[side=bottom]:before:end-0 data-[side=bottom]:before:start-0;
 }
 
 :where(.jn-navigation-menu-popup) {
@@ -878,11 +878,11 @@
 
 /* MARK: Native Select */
 :where(.jn-native-select) {
-  @apply border-input placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 h-8 w-full min-w-0 appearance-none rounded-none border bg-transparent py-1 pr-8 pl-2.5 text-xs transition-colors select-none focus-visible:ring-1 aria-invalid:ring-1 data-[size=sm]:h-7 data-[size=sm]:rounded-none data-[size=sm]:py-0.5;
+  @apply border-input placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 h-8 w-full min-w-0 appearance-none rounded-none border bg-transparent py-1 pe-8 ps-2.5 text-xs transition-colors select-none focus-visible:ring-1 aria-invalid:ring-1 data-[size=sm]:h-7 data-[size=sm]:rounded-none data-[size=sm]:py-0.5;
 }
 
 :where(.jn-native-select-icon) {
-  @apply text-muted-foreground top-1/2 right-2.5 size-4 -translate-y-1/2;
+  @apply text-muted-foreground top-1/2 end-2.5 size-4 -translate-y-1/2;
 }
 
 /* MARK: Pagination */
@@ -895,11 +895,11 @@
 }
 
 :where(.jn-pagination-previous) {
-  @apply pl-1.5!;
+  @apply ps-1.5!;
 }
 
 :where(.jn-pagination-next) {
-  @apply pr-1.5!;
+  @apply pe-1.5!;
 }
 
 /* MARK: Popover */
@@ -908,7 +908,7 @@
 }
 
 :where(.jn-popover-content-logical) {
-  @apply data-[side=inline-start]:slide-in-from-right-2 data-[side=inline-end]:slide-in-from-left-2;
+  @apply data-[side=inline-start]:slide-in-from-end-2 data-[side=inline-end]:slide-in-from-start-2;
 }
 
 :where(.jn-popover-header) {
@@ -941,7 +941,7 @@
 }
 
 :where(.jn-progress-value) {
-  @apply text-muted-foreground ml-auto text-xs tabular-nums;
+  @apply text-muted-foreground ms-auto text-xs tabular-nums;
 }
 
 /* MARK: Radio Group */
@@ -962,7 +962,7 @@
 }
 
 :where(.jn-radio-group-indicator-icon) {
-  @apply bg-primary-foreground absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full;
+  @apply bg-primary-foreground absolute top-1/2 start-1/2 size-2 -translate-x-1/2 rtl:translate-x-1/2 -translate-y-1/2 rounded-full;
 }
 
 /* MARK: Resizable */
@@ -972,7 +972,7 @@
 
 /* MARK: Scroll Area */
 :where(.jn-scroll-area-scrollbar) {
-  @apply data-horizontal:h-2.5 data-horizontal:flex-col data-horizontal:border-t data-horizontal:border-t-transparent data-vertical:h-full data-vertical:w-2.5 data-vertical:border-l data-vertical:border-l-transparent;
+  @apply data-horizontal:h-2.5 data-horizontal:flex-col data-horizontal:border-t data-horizontal:border-t-transparent data-vertical:h-full data-vertical:w-2.5 data-vertical:border-s data-vertical:border-s-transparent;
 }
 
 :where(.jn-scroll-area-thumb) {
@@ -981,11 +981,11 @@
 
 /* MARK: Select */
 :where(.jn-select-trigger) {
-  @apply border-input data-placeholder:text-muted-foreground dark:bg-input/30 dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 gap-1.5 rounded-none border bg-transparent py-2 pr-2 pl-2.5 text-xs transition-colors select-none focus-visible:ring-1 aria-invalid:ring-1 data-[size=default]:h-8 data-[size=sm]:h-7 data-[size=sm]:rounded-none *:data-[slot=select-value]:flex *:data-[slot=select-value]:gap-1.5 [&_svg:not([class*='size-'])]:size-4;
+  @apply border-input data-placeholder:text-muted-foreground dark:bg-input/30 dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 gap-1.5 rounded-none border bg-transparent py-2 pe-2 ps-2.5 text-xs transition-colors select-none focus-visible:ring-1 aria-invalid:ring-1 data-[size=default]:h-8 data-[size=sm]:h-7 data-[size=sm]:rounded-none *:data-[slot=select-value]:flex *:data-[slot=select-value]:gap-1.5 [&_svg:not([class*='size-'])]:size-4;
 }
 
 :where(.jn-select-value) {
-  @apply flex flex-1 text-left;
+  @apply flex flex-1 text-start;
 }
 
 :where(.jn-select-value-aria) {
@@ -1001,7 +1001,7 @@
 }
 
 :where(.jn-select-content-logical) {
-  @apply data-[side=inline-start]:slide-in-from-right-2 data-[side=inline-end]:slide-in-from-left-2;
+  @apply data-[side=inline-start]:slide-in-from-end-2 data-[side=inline-end]:slide-in-from-start-2;
 }
 
 :where(.jn-select-label) {
@@ -1009,7 +1009,7 @@
 }
 
 :where(.jn-select-item) {
-  @apply focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground gap-2 rounded-none py-2 pr-8 pl-2 text-xs [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2;
+  @apply focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground gap-2 rounded-none py-2 pe-8 ps-2 text-xs [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2;
 }
 
 :where(.jn-select-item-aria) {
@@ -1017,7 +1017,7 @@
 }
 
 :where(.jn-select-item-indicator) {
-  @apply pointer-events-none absolute right-2 flex size-4 items-center justify-center;
+  @apply pointer-events-none absolute end-2 flex size-4 items-center justify-center;
 }
 
 :where(.jn-select-group) {
@@ -1063,11 +1063,11 @@
 }
 
 :where(.jn-sheet-content) {
-  @apply bg-popover text-popover-foreground fixed z-50 flex flex-col bg-clip-padding text-xs/relaxed shadow-lg transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:w-3/4 data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:w-3/4 data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b data-[side=left]:sm:max-w-sm data-[side=right]:sm:max-w-sm;
+  @apply bg-popover text-popover-foreground fixed z-50 flex flex-col bg-clip-padding text-xs/relaxed shadow-lg transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:w-3/4 data-[side=left]:border-e data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:w-3/4 data-[side=right]:border-s data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b data-[side=left]:sm:max-w-sm data-[side=right]:sm:max-w-sm;
 }
 
 :where(.jn-sheet-close) {
-  @apply absolute top-3 right-3;
+  @apply absolute top-3 end-3;
 }
 
 :where(.jn-sheet-header) {
@@ -1100,7 +1100,7 @@
 }
 
 :where(.jn-sidebar-inset) {
-  @apply bg-background md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-none md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2;
+  @apply bg-background md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ms-0 md:peer-data-[variant=inset]:rounded-none md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ms-2;
 }
 
 :where(.jn-sidebar-input) {
@@ -1140,11 +1140,11 @@
 }
 
 :where(.jn-sidebar-group-action) {
-  @apply text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground absolute top-3.5 right-3 w-5 rounded-none p-0 focus-visible:ring-2 [&>svg]:size-4;
+  @apply text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground absolute top-3.5 end-3 w-5 rounded-none p-0 focus-visible:ring-2 [&>svg]:size-4;
 }
 
 :where(.jn-sidebar-menu-button) {
-  @apply ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground gap-2 rounded-none p-2 text-left text-xs transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 data-active:font-medium;
+  @apply ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground gap-2 rounded-none p-2 text-start text-xs transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pe-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 data-active:font-medium;
 }
 
 :where(.jn-sidebar-menu-button-aria) {
@@ -1172,11 +1172,11 @@
 }
 
 :where(.jn-sidebar-menu-action) {
-  @apply text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground peer-hover/menu-button:text-sidebar-accent-foreground absolute top-1.5 right-1 aspect-square w-5 rounded-none p-0 peer-data-[size=default]/menu-button:top-1.5 peer-data-[size=lg]/menu-button:top-2.5 peer-data-[size=sm]/menu-button:top-1 focus-visible:ring-2 [&>svg]:size-4;
+  @apply text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground peer-hover/menu-button:text-sidebar-accent-foreground absolute top-1.5 end-1 aspect-square w-5 rounded-none p-0 peer-data-[size=default]/menu-button:top-1.5 peer-data-[size=lg]/menu-button:top-2.5 peer-data-[size=sm]/menu-button:top-1 focus-visible:ring-2 [&>svg]:size-4;
 }
 
 :where(.jn-sidebar-menu-badge) {
-  @apply text-sidebar-foreground peer-hover/menu-button:text-sidebar-accent-foreground peer-data-active/menu-button:text-sidebar-accent-foreground pointer-events-none absolute right-1 flex h-5 min-w-5 rounded-none px-1 text-xs font-medium peer-data-[size=default]/menu-button:top-1.5 peer-data-[size=lg]/menu-button:top-2.5 peer-data-[size=sm]/menu-button:top-1;
+  @apply text-sidebar-foreground peer-hover/menu-button:text-sidebar-accent-foreground peer-data-active/menu-button:text-sidebar-accent-foreground pointer-events-none absolute end-1 flex h-5 min-w-5 rounded-none px-1 text-xs font-medium peer-data-[size=default]/menu-button:top-1.5 peer-data-[size=lg]/menu-button:top-2.5 peer-data-[size=sm]/menu-button:top-1;
 }
 
 :where(.jn-sidebar-menu-skeleton) {
@@ -1192,7 +1192,7 @@
 }
 
 :where(.jn-sidebar-menu-sub) {
-  @apply border-sidebar-border mx-3.5 translate-x-px gap-1 border-l px-2.5 py-0.5 group-data-[collapsible=icon]:hidden;
+  @apply border-sidebar-border mx-3.5 translate-x-px rtl:-translate-x-px gap-1 border-s px-2.5 py-0.5 group-data-[collapsible=icon]:hidden;
 }
 
 :where(.jn-sidebar-menu-sub-button) {
@@ -1236,11 +1236,11 @@
 }
 
 :where(.jn-switch-thumb) {
-  @apply bg-background dark:data-unchecked:bg-foreground dark:data-checked:bg-primary-foreground rounded-full group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=default]/switch:data-unchecked:translate-x-0 group-data-[size=sm]/switch:data-unchecked:translate-x-0;
+  @apply bg-background dark:data-unchecked:bg-foreground dark:data-checked:bg-primary-foreground rounded-full group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)] rtl:group-data-[size=default]/switch:data-checked:-translate-x-[calc(100%-2px)] group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)] rtl:group-data-[size=sm]/switch:data-checked:-translate-x-[calc(100%-2px)] group-data-[size=default]/switch:data-unchecked:translate-x-0 rtl:group-data-[size=default]/switch:data-unchecked:-translate-x-0 group-data-[size=sm]/switch:data-unchecked:translate-x-0 rtl:group-data-[size=sm]/switch:data-unchecked:-translate-x-0;
 }
 
 :where(.jn-switch-thumb-aria) {
-  @apply dark:not-data-selected:bg-foreground dark:data-selected:bg-primary-foreground group-data-[size=default]/switch:data-selected:translate-x-[calc(100%-2px)] group-data-[size=sm]/switch:data-selected:translate-x-[calc(100%-2px)] group-data-[size=default]/switch:not-data-selected:translate-x-0 group-data-[size=sm]/switch:not-data-selected:translate-x-0;
+  @apply dark:not-data-selected:bg-foreground dark:data-selected:bg-primary-foreground group-data-[size=default]/switch:data-selected:translate-x-[calc(100%-2px)] rtl:group-data-[size=default]/switch:data-selected:-translate-x-[calc(100%-2px)] group-data-[size=sm]/switch:data-selected:translate-x-[calc(100%-2px)] rtl:group-data-[size=sm]/switch:data-selected:-translate-x-[calc(100%-2px)] group-data-[size=default]/switch:not-data-selected:translate-x-0 rtl:group-data-[size=default]/switch:not-data-selected:-translate-x-0 group-data-[size=sm]/switch:not-data-selected:translate-x-0 rtl:group-data-[size=sm]/switch:not-data-selected:-translate-x-0;
 }
 
 /* MARK: Table */
@@ -1273,19 +1273,19 @@
 }
 
 :where(.jn-table-head) {
-  @apply text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0;
+  @apply text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pe-0;
 }
 
 :where(.jn-table-head-aria) {
-  @apply [&:has([data-slot=checkbox])]:pr-0;
+  @apply [&:has([data-slot=checkbox])]:pe-0;
 }
 
 :where(.jn-table-cell) {
-  @apply p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0;
+  @apply p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0;
 }
 
 :where(.jn-table-cell-aria) {
-  @apply [&:has([data-slot=checkbox])]:pr-0;
+  @apply [&:has([data-slot=checkbox])]:pe-0;
 }
 
 :where(.jn-table-caption) {
@@ -1302,7 +1302,7 @@
 }
 
 :where(.jn-tabs-trigger) {
-  @apply gap-1.5 rounded-none border border-transparent px-1.5 py-0.5 text-xs font-medium group-data-vertical/tabs:py-[calc(--spacing(1.25))] [&_svg:not([class*='size-'])]:size-4 has-data-[icon=inline-end]:pr-1 has-data-[icon=inline-start]:pl-1;
+  @apply gap-1.5 rounded-none border border-transparent px-1.5 py-0.5 text-xs font-medium group-data-vertical/tabs:py-[calc(--spacing(1.25))] [&_svg:not([class*='size-'])]:size-4 has-data-[icon=inline-end]:pe-1 has-data-[icon=inline-start]:ps-1;
 }
 
 :where(.jn-tabs-content) {
@@ -1332,15 +1332,15 @@
 }
 
 :where(.jn-toggle-size-default) {
-  @apply h-8 min-w-8 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2;
+  @apply h-8 min-w-8 px-2.5 has-data-[icon=inline-end]:pe-2 has-data-[icon=inline-start]:ps-2;
 }
 
 :where(.jn-toggle-size-sm) {
-  @apply h-7 min-w-7 rounded-none px-2.5 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5;
+  @apply h-7 min-w-7 rounded-none px-2.5 has-data-[icon=inline-end]:pe-1.5 has-data-[icon=inline-start]:ps-1.5;
 }
 
 :where(.jn-toggle-size-lg) {
-  @apply h-9 min-w-9 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2;
+  @apply h-9 min-w-9 px-2.5 has-data-[icon=inline-end]:pe-2 has-data-[icon=inline-start]:ps-2;
 }
 
 /* MARK: Toggle Group */
@@ -1349,16 +1349,16 @@
 }
 
 :where(.jn-toggle-group-item) {
-  @apply group-data-[spacing=0]/toggle-group:rounded-none group-data-[spacing=0]/toggle-group:px-2 group-data-[spacing=0]/toggle-group:has-data-[icon=inline-end]:pr-1.5 group-data-[spacing=0]/toggle-group:has-data-[icon=inline-start]:pl-1.5 group-data-horizontal/toggle-group:data-[spacing=0]:first:rounded-none group-data-vertical/toggle-group:data-[spacing=0]:first:rounded-none group-data-horizontal/toggle-group:data-[spacing=0]:last:rounded-none group-data-vertical/toggle-group:data-[spacing=0]:last:rounded-none;
+  @apply group-data-[spacing=0]/toggle-group:rounded-none group-data-[spacing=0]/toggle-group:px-2 group-data-[spacing=0]/toggle-group:has-data-[icon=inline-end]:pe-1.5 group-data-[spacing=0]/toggle-group:has-data-[icon=inline-start]:ps-1.5 group-data-horizontal/toggle-group:data-[spacing=0]:first:rounded-none group-data-vertical/toggle-group:data-[spacing=0]:first:rounded-none group-data-horizontal/toggle-group:data-[spacing=0]:last:rounded-none group-data-vertical/toggle-group:data-[spacing=0]:last:rounded-none;
 }
 
 /* MARK: Tooltip */
 :where(.jn-tooltip-content) {
-  @apply data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 inline-flex items-center gap-1.5 rounded-none px-3 py-1.5 text-xs has-data-[slot=kbd]:pr-1.5 **:data-[slot=kbd]:relative **:data-[slot=kbd]:isolate **:data-[slot=kbd]:z-50 **:data-[slot=kbd]:rounded-none;
+  @apply data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 inline-flex items-center gap-1.5 rounded-none px-3 py-1.5 text-xs has-data-[slot=kbd]:pe-1.5 **:data-[slot=kbd]:relative **:data-[slot=kbd]:isolate **:data-[slot=kbd]:z-50 **:data-[slot=kbd]:rounded-none;
 }
 
 :where(.jn-tooltip-content-logical) {
-  @apply data-[side=inline-start]:slide-in-from-right-2 data-[side=inline-end]:slide-in-from-left-2;
+  @apply data-[side=inline-start]:slide-in-from-end-2 data-[side=inline-end]:slide-in-from-start-2;
 }
 
 :where(.jn-tooltip-arrow) {
@@ -1366,12 +1366,12 @@
 }
 
 :where(.jn-tooltip-arrow-logical) {
-  @apply data-[side=inline-end]:top-1/2! data-[side=inline-end]:-left-1 data-[side=inline-end]:-translate-y-1/2 data-[side=inline-start]:top-1/2! data-[side=inline-start]:-right-1 data-[side=inline-start]:-translate-y-1/2;
+  @apply data-[side=inline-end]:top-1/2! data-[side=inline-end]:-start-1 data-[side=inline-end]:-translate-y-1/2 data-[side=inline-start]:top-1/2! data-[side=inline-start]:-end-1 data-[side=inline-start]:-translate-y-1/2;
 }
 
 /* MARK: Input Group */
 :where(.jn-input-group) {
-  @apply border-input dark:bg-input/30 has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[[data-slot][aria-invalid=true]]:border-destructive dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 has-disabled:bg-input/50 dark:has-disabled:bg-input/80 h-8 rounded-none border transition-colors in-data-[slot=combobox-content]:focus-within:border-inherit in-data-[slot=combobox-content]:focus-within:ring-0 has-disabled:opacity-50 has-[[data-slot=input-group-control]:focus-visible]:ring-1 has-[[data-slot][aria-invalid=true]]:ring-1 has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-1.5 has-[>[data-align=inline-start]]:[&>input]:pl-1.5;
+  @apply border-input dark:bg-input/30 has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[[data-slot][aria-invalid=true]]:border-destructive dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 has-disabled:bg-input/50 dark:has-disabled:bg-input/80 h-8 rounded-none border transition-colors in-data-[slot=combobox-content]:focus-within:border-inherit in-data-[slot=combobox-content]:focus-within:ring-0 has-disabled:opacity-50 has-[[data-slot=input-group-control]:focus-visible]:ring-1 has-[[data-slot][aria-invalid=true]]:ring-1 has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pe-1.5 has-[>[data-align=inline-start]]:[&>input]:ps-1.5;
 }
 
 :where(.jn-input-group-addon) {
@@ -1379,11 +1379,11 @@
 }
 
 :where(.jn-input-group-addon-align-inline-start) {
-  @apply pl-2 has-[>button]:ml-[-0.3rem] has-[>kbd]:ml-[-0.15rem];
+  @apply ps-2 has-[>button]:ms-[-0.3rem] has-[>kbd]:ms-[-0.15rem];
 }
 
 :where(.jn-input-group-addon-align-inline-end) {
-  @apply pr-2 has-[>button]:mr-[-0.3rem] has-[>kbd]:mr-[-0.15rem];
+  @apply pe-2 has-[>button]:me-[-0.3rem] has-[>kbd]:me-[-0.15rem];
 }
 
 :where(.jn-input-group-addon-align-block-start) {
@@ -1485,11 +1485,11 @@
 }
 
 :where(.jn-bubble-reactions-align-start) {
-  @apply left-3;
+  @apply start-3;
 }
 
 :where(.jn-bubble-reactions-align-end) {
-  @apply right-3;
+  @apply end-3;
 }
 
 :where(.jn-bubble-group) {
@@ -1542,7 +1542,7 @@
 }
 
 :where(.jn-attachment-actions) {
-  @apply group-data-[orientation=vertical]/attachment:absolute group-data-[orientation=vertical]/attachment:top-3 group-data-[orientation=vertical]/attachment:right-3 relative z-20 group-data-[orientation=vertical]/attachment:gap-1;
+  @apply group-data-[orientation=vertical]/attachment:absolute group-data-[orientation=vertical]/attachment:top-3 group-data-[orientation=vertical]/attachment:end-3 relative z-20 group-data-[orientation=vertical]/attachment:gap-1;
 }
 
 :where(.jn-attachment-group) {
@@ -1555,11 +1555,11 @@
 
 /* MARK: Marker */
 :where(.jn-marker) {
-  @apply gap-2 text-xs text-muted-foreground [a]:hover:text-foreground [a]:underline-offset-3 [a]:underline [&_svg:not([class*='size-'])]:size-3.5 min-h-4 text-left;
+  @apply gap-2 text-xs text-muted-foreground [a]:hover:text-foreground [a]:underline-offset-3 [a]:underline [&_svg:not([class*='size-'])]:size-3.5 min-h-4 text-start;
 }
 
 :where(.jn-marker-variant-separator) {
-  @apply before:h-px before:min-w-0 before:flex-1 before:bg-border after:h-px after:min-w-0 after:flex-1 after:bg-border before:mr-1 after:ml-1;
+  @apply before:h-px before:min-w-0 before:flex-1 before:bg-border after:h-px after:min-w-0 after:flex-1 after:bg-border before:me-1 after:ms-1;
 }
 
 :where(.jn-marker-variant-border) {
@@ -1657,7 +1657,7 @@
 }
 
 :where(.jn-trace-icon) {
-  @apply size-3.5 [&_svg:not([class*='size-'])]:size-3.5 [[data-slot=trace-title]~&]:-ml-1;
+  @apply size-3.5 [&_svg:not([class*='size-'])]:size-3.5 [[data-slot=trace-title]~&]:-ms-1;
 }
 
 :where(.jn-trace-collapsible-content) {
@@ -1665,7 +1665,7 @@
 }
 
 :where(.jn-trace-collapsible-content-inner) {
-  @apply mt-2 mb-1 ml-[calc(--spacing(1.75)-1px)] border-l pr-1 pl-3.75 leading-relaxed;
+  @apply mt-2 mb-1 ms-[calc(--spacing(1.75)-1px)] border-s pe-1 ps-3.75 leading-relaxed;
 }
 
 /* MARK: Code Block */
@@ -1792,7 +1792,7 @@
 }
 
 :where(.jn-tooltip-content-aria) {
-  @apply data-entering:animate-in data-entering:fade-in-0 data-entering:zoom-in-95 data-exiting:animate-out data-exiting:fade-out-0 data-exiting:zoom-out-95 data-[placement=bottom]:slide-in-from-top-2 data-[placement=left]:slide-in-from-right-2 data-[placement=right]:slide-in-from-left-2 data-[placement=top]:slide-in-from-bottom-2 inline-flex items-center gap-1.5 rounded-none px-3 py-1.5 text-xs has-data-[slot=kbd]:pr-1.5 **:data-[slot=kbd]:relative **:data-[slot=kbd]:isolate **:data-[slot=kbd]:z-50 **:data-[slot=kbd]:rounded-none;
+  @apply data-entering:animate-in data-entering:fade-in-0 data-entering:zoom-in-95 data-exiting:animate-out data-exiting:fade-out-0 data-exiting:zoom-out-95 data-[placement=bottom]:slide-in-from-top-2 data-[placement=left]:slide-in-from-right-2 data-[placement=right]:slide-in-from-left-2 data-[placement=top]:slide-in-from-bottom-2 inline-flex items-center gap-1.5 rounded-none px-3 py-1.5 text-xs has-data-[slot=kbd]:pe-1.5 **:data-[slot=kbd]:relative **:data-[slot=kbd]:isolate **:data-[slot=kbd]:z-50 **:data-[slot=kbd]:rounded-none;
 }
 
 :where(.jn-context-menu-sub-content-aria) {

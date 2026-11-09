@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path'
 import {
   OUTPUT_DIR,
   checkPorted,
+  logicalApply,
   portStyle,
   portStyles,
   renameClasses,
@@ -131,6 +132,20 @@ test('portStyle ports a sheet with a header naming its source', () => {
     /:where\(\.jn-card-content:has\(> \[data-slot=questionnaire-choices\]\)\) \{/,
   )
   assert.doesNotMatch(ported, /\bcn-|style-nova \{/)
+})
+
+test('logicalApply makes each @apply list work in both directions', () => {
+  assert.equal(
+    logicalApply(
+      ':where(.jn-x) {\n  @apply pl-2 has-data-[icon=inline-end]:pr-1.5 text-left;\n}\n',
+    ),
+    ':where(.jn-x) {\n  @apply ps-2 has-data-[icon=inline-end]:pe-1.5 text-start;\n}\n',
+  )
+  const ported = portStyle(
+    '.style-nova {\n  .cn-alert-action {\n    @apply absolute top-2 right-2;\n  }\n}\n',
+    { style: 'nova', commit: '8ab27715521cbd4f87ae6886cd989cbb678f6de7' },
+  )
+  assert.match(ported, /@apply absolute top-2 end-2;/)
 })
 
 test('portStyles writes every sheet, and --check finds stale ones', () => {

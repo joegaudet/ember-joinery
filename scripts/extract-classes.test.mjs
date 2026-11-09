@@ -194,6 +194,14 @@ const SHEETS = {
 `),
 }
 
+test('renderCss makes physical sides logical, for both directions', () => {
+  const css = renderCss(
+    extractClasses('const x = cva("cn-x pl-2 text-left translate-x-1/2", { variants: {} })\n'),
+    { name: 'x' },
+  )
+  assert.match(css, /@apply ps-2 text-start translate-x-1\/2 rtl:-translate-x-1\/2;/)
+})
+
 test('sheetRules maps each plain rule to its utilities, renamed jn-', () => {
   assert.deepEqual(
     [...SHEETS.nova.keys()],

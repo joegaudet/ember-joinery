@@ -15,7 +15,12 @@
 //   since an app loads one style: the wrapper goes and its rules move out one level;
 // - each rule's selector goes inside `:where()`, so the rules add no specificity and app CSS can
 //   override any part;
-// - the `@apply` lists and comments are kept verbatim.
+// - each `@apply` list's physical sides become logical (`pl-2` → `ps-2`), with an `rtl:` twin
+//   where there is no logical form, as upstream's registry build does for its right-to-left
+//   copies (see rtl.mjs), so one sheet serves both directions;
+// - otherwise the `@apply` lists and comments are kept verbatim.
+//
+// It also writes the base colours (themes.mjs): packages/ember/src/themes/<name>.css.
 //
 // It relies on upstream's sheets being flat rules inside the wrapper. Anything else (no wrapper,
 // a rule outside it, a nested rule or an at-rule) fails the port instead of slipping through.
@@ -23,6 +28,8 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { logicalClasses } from './rtl.mjs'
+import { portThemes } from './themes.mjs'
 import { PATHS, checkoutDir, readPins, repoRoot } from './upstream.mjs'
 
 export const OUTPUT_DIR = 'packages/ember/src/styles'
@@ -144,9 +151,17 @@ export function isPorted(css) {
   return /^\/\*\n \* The [A-Z][a-z]+ style, ported from shadcn-ui\/ui@[0-9a-f]+\n/.test(css)
 }
 
+/** Every `@apply` list, with its physical sides made logical (see rtl.mjs). */
+export function logicalApply(css) {
+  return css.replace(
+    /(@apply\s+)([^;]+);/g,
+    (_match, apply, classes) => `${apply}${logicalClasses(classes)};`,
+  )
+}
+
 /** One upstream sheet, ported. */
 export function portStyle(css, { style, commit }) {
-  const ported = whereSelectors(renameClasses(unwrapStyleScope(css, style)))
+  const ported = logicalApply(whereSelectors(renameClasses(unwrapStyleScope(css, style))))
   return header(style, commit) + checkPorted(ported, style)
 }
 
@@ -214,7 +229,9 @@ export function portStyles({ root = repoRoot, check = false, log = console.log }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    portStyles({ check: process.argv.includes('--check') })
+    const check = process.argv.includes('--check')
+    portStyles({ check })
+    portThemes({ check })
   } catch (error) {
     console.error(error.message)
     process.exitCode = 1

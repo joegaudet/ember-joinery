@@ -13,6 +13,10 @@ examples/*/dist/
 docs-app/app/templates/*/meta.json
 parity/.generated/
 parity-report/
-# Generated from upstream: upstream.mjs writes the inventory, port-styles.mjs the style sheets.
+# Generated from upstream: upstream.mjs writes the inventory, port-styles.mjs the style sheets
+# and the base colours.
 upstream/inventory.json
 packages/ember/src/styles/
+packages/ember/src/themes/
+# Copied unchanged from the shadcn package (see its header).
+packages/ember/src/css/shadcn.css

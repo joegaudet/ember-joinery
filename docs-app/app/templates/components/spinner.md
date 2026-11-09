@@ -66,7 +66,9 @@ A spinner in an input group's addon. Upstream's example comes with Input Group.
 
 ## Empty
 
-A spinner as an empty state's media. Upstream's example comes with Empty.
+A spinner as an [empty state](/components/empty.md)'s media, on its icon tile.
+
+<Example @name="spinner-empty" @title="Empty" />
 
 ## RTL
 

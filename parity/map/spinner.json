@@ -1,8 +1,9 @@
 {
-  "$comment": "Waiting for components that haven't landed: spinner-demo and spinner-rtl (Item), spinner-badge (Badge), spinner-input-group (Input Group), spinner-empty (Empty). The unit that lands each one ports its examples onto the Spinner page and maps them here.",
+  "$comment": "Waiting for components that haven't landed: spinner-demo and spinner-rtl (Item), spinner-badge (Badge), spinner-input-group (Input Group). The unit that lands each one ports its examples onto the Spinner page and maps them here.",
   "examples": {
     "spinner-custom": "spinner-custom",
     "spinner-size": "spinner-size",
-    "spinner-button": "spinner-button"
+    "spinner-button": "spinner-button",
+    "spinner-empty": "spinner-empty"
   }
 }

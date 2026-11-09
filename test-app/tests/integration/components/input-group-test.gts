@@ -376,6 +376,50 @@ module('Integration | components | input-group', function (hooks) {
     await a11yAudit()
   })
 
+  test('@as renders each part as another tag', async function (assert) {
+    await render(
+      <template>
+        <InputGroup @as="section" @name="tags" as |g|>
+          <g.Input aria-label="Website" />
+          <g.Addon @as="span" @align="inline-start">
+            <g.Text @as="strong">https://</g.Text>
+          </g.Addon>
+          <g.Addon @align="inline-end">
+            <g.Button @as="a" @name="docs" href="#docs">Docs</g.Button>
+            <g.Button @name="copy">Copy</g.Button>
+          </g.Addon>
+        </InputGroup>
+      </template>,
+    )
+    const group = new InputGroupHarness('tags')
+    assert
+      .dom(group.element)
+      .hasTagName('section')
+      .hasClass('jn-input-group')
+      .hasAttribute('role', 'group')
+    const [start] = group.addons
+    assert
+      .dom(start)
+      .hasTagName('span')
+      .hasClass('jn-input-group-addon')
+      .hasAttribute('data-align', 'inline-start')
+    assert.dom(start!.querySelector('[data-test-jn-part="text"]')).hasTagName('strong')
+    const docs = new ButtonHarness('docs')
+    assert
+      .dom(docs.element)
+      .hasTagName('a')
+      .hasClass('jn-input-group-button')
+      .hasAttribute('href', '#docs')
+      .doesNotHaveAttribute('type', 'a link has no type')
+    assert
+      .dom(new ButtonHarness('copy').element)
+      .hasTagName('button')
+      .hasAttribute('type', 'button')
+    await click(start!)
+    assert.dom(group.control).isFocused('an addon of another tag still focuses the input')
+    await a11yAudit()
+  })
+
   test('RTL: inline-start is on the right, and the padding follows', async function (assert) {
     await render(
       <template>

@@ -2,6 +2,7 @@ import Component from '@glimmer/component'
 import type { TOC } from '@ember/component/template-only'
 import { on } from '@ember/modifier'
 import type { ComponentLike } from '@glint/template'
+import { As, type TagName } from '@ember-joinery/primitives/as'
 import type { NativeValueArgs } from '@ember-joinery/primitives/native-value'
 import { part, type PartModifier } from '@ember-joinery/primitives/part'
 import Button, { buttonAttributes, buttonClasses, type ButtonVariant } from './button.gts'
@@ -52,14 +53,18 @@ function focusControl(event: MouseEvent): void {
 }
 
 export interface InputGroupAddonSignature {
-  Args: InputGroupAddonOptions
+  Args: InputGroupAddonOptions & {
+    /** The tag to render instead of `div`. For a component of your own, use `g.addon`. */
+    as?: TagName
+  }
   /** Icons, text, buttons or a `Kbd`. */
   Blocks: { default: [] }
-  Element: HTMLDivElement
+  Element: HTMLElement
 }
 
 const InputGroupAddon: TOC<InputGroupAddonSignature> = <template>
-  <div
+  <As
+    @as={{@as}}
     class={{inputGroupAddonClasses align=@align}}
     role="group"
     data-slot="input-group-addon"
@@ -67,7 +72,7 @@ const InputGroupAddon: TOC<InputGroupAddonSignature> = <template>
     data-test-jn-part="addon"
     {{on "click" focusControl}}
     ...attributes
-  >{{yield}}</div>
+  >{{yield}}</As>
 </template>
 
 const addonModifier = part<HTMLElement, InputGroupAddonOptions>(options => ({
@@ -109,10 +114,19 @@ export function inputGroupButtonAttributes({
 }
 
 export interface InputGroupButtonSignature {
-  Args: InputGroupButtonOptions
+  Args: InputGroupButtonOptions & {
+    /**
+     * The tag to render instead of `button`, such as `a` for a link (`<g.Button @as="a">`).
+     * For a component of your own, such as `LinkTo`, use `g.button`.
+     */
+    as?: TagName
+  }
   /** Its label, or an icon (name an icon-only button with `aria-label`). */
   Blocks: { default: [] }
-  /** A `<button>`, as Joinery's Button (its `type` is `button`, unless you give another). */
+  /**
+   * A `<button>`, as Joinery's Button (its `type` is `button`, unless you give another), or
+   * with `@as="a"`, a link.
+   */
   Element: HTMLButtonElement | HTMLAnchorElement
 }
 
@@ -121,11 +135,18 @@ class InputGroupButton extends Component<InputGroupButtonSignature> {
     return this.args.size ?? 'xs'
   }
 
+  /** `button`, as upstream's, on a `<button>`; another tag has no `type`. */
+  get type(): 'button' | undefined {
+    const tag = this.args.as
+    return !tag || tag === 'button' ? 'button' : undefined
+  }
+
   <template>
     <Button
+      @as={{@as}}
       @variant={{if @variant @variant "ghost"}}
       @name={{@name}}
-      type="button"
+      type={{this.type}}
       class="jn-input-group-button jn-input-group-button-size-{{this.size}}"
       data-size={{this.size}}
       ...attributes
@@ -141,14 +162,24 @@ const buttonModifier = part<HTMLElement, InputGroupButtonOptions>(options => ({
 // ----- Text ----------------------------------------------------------------------------------
 
 export interface InputGroupTextSignature {
+  Args: {
+    /** The tag to render instead of `span`. */
+    as?: TagName
+  }
   /** Text, and any icons beside it. */
   Blocks: { default: [] }
-  Element: HTMLSpanElement
+  Element: HTMLElement
 }
 
 /** Text beside the control: a prefix (`https://`), a unit (`USD`) or a count. */
 const InputGroupText: TOC<InputGroupTextSignature> = <template>
-  <span class="jn-input-group-text" data-test-jn-part="text" ...attributes>{{yield}}</span>
+  <As
+    @as={{@as}}
+    @tag="span"
+    class="jn-input-group-text"
+    data-test-jn-part="text"
+    ...attributes
+  >{{yield}}</As>
 </template>
 
 const textModifier = part<HTMLElement>(() => ({
@@ -262,6 +293,8 @@ const PARTS: InputGroupParts = {
 
 export interface InputGroupSignature {
   Args: {
+    /** The tag to render instead of `div`. */
+    as?: TagName
     /** The group's name, for `InputGroupHarness` (`data-test-jn-name`). */
     name?: string
   }
@@ -269,7 +302,7 @@ export interface InputGroupSignature {
     /** The control first, then its addons, whatever their side (`@align` places them). */
     default: [InputGroupParts]
   }
-  Element: HTMLDivElement
+  Element: HTMLElement
 }
 
 /**
@@ -287,14 +320,15 @@ export interface InputGroupSignature {
  * `@align`. A press on an addon (not on a button in it) focuses the input.
  */
 const InputGroup: TOC<InputGroupSignature> = <template>
-  <div
+  <As
+    @as={{@as}}
     class="group/input-group jn-input-group"
     role="group"
     data-slot="input-group"
     data-test-jn="input-group"
     data-test-jn-name={{@name}}
     ...attributes
-  >{{yield PARTS}}</div>
+  >{{yield PARTS}}</As>
 </template>
 
 export default InputGroup

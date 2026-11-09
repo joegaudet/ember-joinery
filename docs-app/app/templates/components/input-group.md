@@ -149,6 +149,7 @@ attributes on its `role="group"` `<div>`.
 
 | Argument | Type     | Default | What it does                                            |
 | -------- | -------- | ------- | ------------------------------------------------------- |
+| `@as`    | `string` | `div`   | The tag to render instead                               |
 | `@name`  | `string` |         | Its name, for `InputGroupHarness` (`data-test-jn-name`) |
 
 ```gts
@@ -169,6 +170,7 @@ argument to position the addon.
 | Argument | Type                                                             | Default          |
 | -------- | ---------------------------------------------------------------- | ---------------- |
 | `@align` | `"inline-start" \| "inline-end" \| "block-start" \| "block-end"` | `"inline-start"` |
+| `@as`    | `string`                                                         | `"div"`          |
 
 ```gts
 <g.Addon @align="inline-end">
@@ -193,11 +195,12 @@ An addon can have several `g.Button`s and icons.
 Displays buttons within input groups: Joinery's [Button](/components/button.md) at its default
 size, with the group's own size classes and `type="button"` (give another `type` to submit).
 
-| Argument   | Type                                                                          | Default   |
-| ---------- | ----------------------------------------------------------------------------- | --------- |
-| `@size`    | `"xs" \| "icon-xs" \| "sm" \| "icon-sm"`                                      | `"xs"`    |
-| `@variant` | `"default" \| "destructive" \| "outline" \| "secondary" \| "ghost" \| "link"` | `"ghost"` |
-| `@name`    | `string`                                                                      |           |
+| Argument   | Type                                                                          | Default    |
+| ---------- | ----------------------------------------------------------------------------- | ---------- |
+| `@size`    | `"xs" \| "icon-xs" \| "sm" \| "icon-sm"`                                      | `"xs"`     |
+| `@variant` | `"default" \| "destructive" \| "outline" \| "secondary" \| "ghost" \| "link"` | `"ghost"`  |
+| `@name`    | `string`                                                                      |            |
+| `@as`      | `string`, such as `"a"` for a link (which then has no `type`)                 | `"button"` |
 
 ```gts
 <g.Button>Button</g.Button>
@@ -240,7 +243,8 @@ attributes.
 
 ### g.Text
 
-Text beside the control, in a `<span>`: a prefix (`https://`), a unit (`USD`) or a count.
+Text beside the control, in a `<span>` (or `@as`): a prefix (`https://`), a unit (`USD`) or a
+count.
 
 ### The modifiers
 
@@ -317,6 +321,15 @@ await search.find(ButtonHarness, 'copy').click()
 | `clickAddon(align?)`                   | Clicks an addon, which focuses the input                             |
 | `fillIn(text)`, `typeIn(text)`         | Replaces what the control holds, or types after it                   |
 | `focus()`, `blur()`                    | Moves focus to the control, or away                                  |
+
+## Changelog
+
+### 2025-10-06 `InputGroup`
+
+Upstream's changelog adds the `min-w-0` class to the `InputGroup` component (see the
+[diff](https://github.com/shadcn-ui/ui/pull/8341/files#diff-0e2ee95d0050ca4c5d82339df86c54e14a6739dc4638fdda0eec8f73aebc2da9)),
+so the group can shrink below its content's width in a flex row. Joinery's has had it from the
+start: it is in the group's own rule, `.jn-input-group`.
 
 ## Upstream
 

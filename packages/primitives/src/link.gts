@@ -58,9 +58,10 @@ export interface LinkComponentSignature {
  *     </Link>
  *   </nav>
  *
- * `aria-current` is `page` on the current route itself, and `true` on a link that is active on
- * the routes below it (`@activeOnSubPaths`), as it isn't the page itself then. It needs the
- * app's router, so it renders inside an app (or a test with `setupRouting`).
+ * `aria-current` is `page` on the current route. A link with `@activeOnSubPaths` marks a section
+ * rather than one page, so wherever it is active, on its own route as well as the ones below it,
+ * `aria-current` is `true`, as in ember-primitives. It needs the app's router, so it renders
+ * inside an app (or a test with `setupRouting`).
  */
 export const Link: TOC<LinkComponentSignature> = <template>
   {{#let

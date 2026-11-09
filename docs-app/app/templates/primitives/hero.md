@@ -26,7 +26,10 @@ The Hero is a `<div>` with `data-jn-hero`, the attributes, and three rules: `wid
 `height: 100dvh` (the dynamic viewport units, which follow a phone's toolbars as they come and
 go) and `position: relative`, so elements within can be sticky or absolutely positioned along
 the outside, if needed (such as for headers and footers). The rules are in `@layer joinery` at
-no specificity, so a class of yours resizes it, as the example's do to fit the preview.
+no specificity, so a class of yours resizes it, as the example's do to fit the preview. A
+Tailwind utility is in a layer of its own, so it wins once `joinery` comes before that layer,
+as the guide's [Tailwind setup](/getting-started/installation.md#tailwind-apps) has it: see
+[layout rules](/primitives/index.md#layout-rules-and-your-css-layers).
 
 ## API
 

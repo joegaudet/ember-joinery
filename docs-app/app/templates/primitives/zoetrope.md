@@ -34,8 +34,10 @@ import { Zoetrope } from '@ember-joinery/primitives/zoetrope'
 
 A button scrolls by as many items as fit. The buttons show only when the items overflow, and
 each is disabled at its end. The track snaps to each item's start and hides its scrollbar. Its
-layout rules are in `@layer joinery` at no specificity, so any CSS of yours wins; select its
-parts by their attributes: `data-jn-zoetrope`, `data-jn-zoetrope-header`,
+layout rules are in `@layer joinery` at no specificity, so your CSS wins (in CSS layers of your
+own, once `joinery` comes before them: see
+[layout rules](/primitives/index.md#layout-rules-and-your-css-layers)); select its parts by
+their attributes: `data-jn-zoetrope`, `data-jn-zoetrope-header`,
 `data-jn-zoetrope-controls` and `data-jn-zoetrope-scroller`.
 
 ## Custom Controls

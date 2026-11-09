@@ -24,8 +24,8 @@ export class LinkHarness extends Harness {
   }
 
   /**
-   * Its `aria-current`: `page` on the current route, `true` on a link active on the routes
-   * below its own (`@activeOnSubPaths`), and `null` when it isn't current.
+   * Its `aria-current`: `page` on the current route, `true` wherever a link with
+   * `@activeOnSubPaths` is active (its own route included), and `null` when it isn't current.
    */
   get current(): string | null {
     return this.element.getAttribute('aria-current')

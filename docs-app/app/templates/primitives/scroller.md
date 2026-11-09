@@ -23,8 +23,10 @@ import { Scroller } from '@ember-joinery/primitives/scroller'
 ```
 
 The Scroller is the element that scrolls: give it a height (or a width) for its content to
-overflow. It has `overflow: auto`, in `@layer joinery` at no specificity, so any CSS of yours
-wins, and `tabindex="0"`, so a keyboard can scroll it.
+overflow. It has `overflow: auto`, in `@layer joinery` at no specificity, so your CSS wins (in
+CSS layers of your own, once `joinery` comes before them: see
+[layout rules](/primitives/index.md#layout-rules-and-your-css-layers)), and `tabindex="0"`, so a
+keyboard can scroll it.
 
 Each function scrolls in the next animation frame, once what's rendering is in; a later call in
 the same frame replaces it. Call one from a template where new content renders, or from an

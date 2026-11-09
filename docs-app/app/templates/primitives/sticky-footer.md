@@ -56,7 +56,9 @@ space the footer doesn't take. Each element has an attribute to style it by:
   [data-jn-sticky-footer-footer]
 ```
 
-The rules are in `@layer joinery` at no specificity, so any CSS of yours wins.
+The rules are in `@layer joinery` at no specificity, so your CSS wins (in CSS layers of your
+own, once `joinery` comes before them: see
+[layout rules](/primitives/index.md#layout-rules-and-your-css-layers)).
 
 ## API
 

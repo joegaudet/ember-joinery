@@ -58,5 +58,6 @@ goes back to an array it showed before.
 
 `IncrementalEach` holds a test waiter while batches are pending, so `await render(...)` and
 `await settled()` both wait for every batch, and tests can check the whole list as with
-`{{#each}}`. It has no harness of its own, as it renders no element: its rows are the parts of
-the component around it.
+`{{#each}}`. It has no harness of its own, on purpose: it renders no element to find, so its
+rows are the parts of the component around it, read through that component's harness (or a
+small `Harness` subclass for a list of your own, as the example's test does).

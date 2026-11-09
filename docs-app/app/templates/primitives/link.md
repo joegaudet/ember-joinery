@@ -63,10 +63,10 @@ alone.
 
 ### State Attributes
 
-| Attribute      | When                                                                                |
-| -------------- | ----------------------------------------------------------------------------------- |
-| `data-active`  | `"true"` when `@href` is the current URL; absent otherwise                          |
-| `aria-current` | `page` on the current route; `true` on a link active below it (`@activeOnSubPaths`) |
+| Attribute      | When                                                                                          |
+| -------------- | --------------------------------------------------------------------------------------------- |
+| `data-active`  | `"true"` when `@href` is the current URL; absent otherwise                                    |
+| `aria-current` | `page` when it is active; with `@activeOnSubPaths`, `true` (on its own route and those below) |
 
 <Example @name="link-active" @title="Styling the active link" />
 
@@ -79,8 +79,9 @@ notes).
 
 ## Accessibility
 
-The current page's link has `aria-current="page"`, which screen readers announce; a link
-active on the routes below its own has `aria-current="true"`, as it isn't the page itself. An
+The current page's link has `aria-current="page"`, which screen readers announce. A link with
+`@activeOnSubPaths` marks a section rather than one page, so wherever it is active, on its own
+route as well as the routes below it, it has `aria-current="true"`, as ember-primitives' does. An
 external link opens a new tab: say so, with text or an icon that has a label, as `isExternal`
 lets you.
 

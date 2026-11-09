@@ -12,7 +12,8 @@ page at a time, instantly for reduced motion, right to left too, and without tra
 level comes from the sections around it, and `getSectionHeadingLevel`), `incremental-each`
 (`IncrementalEach`, which renders a long list a batch at a time) and `shadowed` (`Shadowed`, a
 shadow root, with `@includeStyles`). The layouts bring their own rules, in `@layer joinery`, with
-nothing to import. `@ember-joinery/test-support` adds `ScrollerHarness`, `ZoetropeHarness`,
+nothing to import; an app with CSS layers of its own names `joinery` ahead of them, as
+joinery.css and the Tailwind setup do, for its layers to win. `@ember-joinery/test-support` adds `ScrollerHarness`, `ZoetropeHarness`,
 `HeroHarness`, `StickyFooterHarness`, `LinkHarness`, `ExternalLinkHarness`, `HeadingHarness` and
 `ShadowedHarness`, ember-primitives' shadow DOM helpers (`findInShadow`, `findShadow`,
 `findInFirstShadow`, `hasShadowRoot`), and `data-test-jn-wrapper`: a component that wraps your

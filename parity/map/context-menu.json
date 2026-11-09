@@ -1,0 +1,14 @@
+{
+  "examples": {
+    "context-menu-demo": "context-menu-demo",
+    "context-menu-basic": "context-menu-basic",
+    "context-menu-submenu": "context-menu-submenu",
+    "context-menu-shortcuts": "context-menu-shortcuts",
+    "context-menu-groups": "context-menu-groups",
+    "context-menu-icons": "context-menu-icons",
+    "context-menu-checkboxes": "context-menu-checkboxes",
+    "context-menu-radio": "context-menu-radio",
+    "context-menu-destructive": "context-menu-destructive",
+    "context-menu-rtl": "context-menu-rtl"
+  }
+}

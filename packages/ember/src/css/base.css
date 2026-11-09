@@ -154,3 +154,19 @@
 :where([data-slot], [data-slot] *)::-webkit-outer-spin-button {
   height: auto;
 }
+
+/*
+ * A part in the browser's top layer (`{{topLayer}}` makes it a popover) starts from none of the
+ * browser's popover styles. Those centre it (`inset: 0`, `margin: auto`), size it to fit its
+ * content, and give it a border, padding, `overflow: auto` and the system's colours; upstream's
+ * parts are plain elements placed with `fixed` and their own insets, sizes and colours. (The
+ * margin, padding and border are reset above.)
+ */
+:where([data-slot][popover]) {
+  inset: auto;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  color: inherit;
+  background-color: transparent;
+}

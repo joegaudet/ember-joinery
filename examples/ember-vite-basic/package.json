@@ -14,6 +14,7 @@
     "test": "vite build --mode development && testem ci --port 0"
   },
   "dependencies": {
+    "@ember-joinery/carousel": "^1.0.0",
     "@ember-joinery/code-block": "^1.0.0",
     "@ember-joinery/ember": "^1.0.0",
     "@ember-joinery/test-support": "^1.0.0",

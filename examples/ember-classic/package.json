@@ -10,6 +10,7 @@
     "test": "ember test"
   },
   "dependencies": {
+    "@ember-joinery/carousel": "^1.0.0",
     "@ember-joinery/code-block": "^1.0.0",
     "@ember-joinery/ember": "^1.0.0",
     "@ember-joinery/primitives": "^1.0.0",

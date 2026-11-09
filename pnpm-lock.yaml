@@ -5,6 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  '@ember-joinery/carousel': workspace:*
   '@ember-joinery/code-block': workspace:*
   '@ember-joinery/ember': workspace:*
   '@ember-joinery/primitives': workspace:*
@@ -79,6 +80,9 @@ importers:
       '@babel/runtime':
         specifier: ^7.29.7
         version: 7.29.13
+      '@ember-joinery/carousel':
+        specifier: workspace:*
+        version: link:../packages/carousel
       '@ember-joinery/code-block':
         specifier: workspace:*
         version: link:../packages/code-block
@@ -181,6 +185,9 @@ importers:
       ember-source:
         specifier: ~7.3.0
         version: 7.3.1(@glimmer/component@2.2.1)
+      embla-carousel-autoplay:
+        specifier: ^8.5.2
+        version: 8.6.0(embla-carousel@8.6.0)
       kolay:
         specifier: 5.4.0
         version: 5.4.0(@babel/core@7.29.13)(@codemirror/lang-css@6.3.1)(@ember/test-helpers@5.8.0(@babel/core@7.29.13))(@lezer/javascript@1.5.6)(@lezer/lr@1.4.12)(rolldown@1.2.16)(rollup@4.68.0)(typescript@6.0.3)(vite@8.3.6(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(webpack@5.112.2)
@@ -211,6 +218,9 @@ importers:
 
   examples/ember-classic:
     dependencies:
+      '@ember-joinery/carousel':
+        specifier: workspace:*
+        version: link:../../packages/carousel
       '@ember-joinery/code-block':
         specifier: workspace:*
         version: link:../../packages/code-block
@@ -432,6 +442,9 @@ importers:
 
   examples/ember-vite-basic:
     dependencies:
+      '@ember-joinery/carousel':
+        specifier: workspace:*
+        version: link:../../packages/carousel
       '@ember-joinery/code-block':
         specifier: workspace:*
         version: link:../../packages/code-block
@@ -532,6 +545,85 @@ importers:
       vite:
         specifier: ^8.3.0
         version: 8.3.6(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)
+
+  packages/carousel:
+    dependencies:
+      '@ember-joinery/primitives':
+        specifier: workspace:*
+        version: link:../primitives
+      '@ember/test-waiters':
+        specifier: ^4.1.2
+        version: 4.1.2
+      '@embroider/addon-shim':
+        specifier: ^1.10.3
+        version: 1.11.0
+      decorator-transforms:
+        specifier: ^2.4.0
+        version: 2.4.0(@babel/core@7.29.13)
+      ember-modifier:
+        specifier: ^4.3.0
+        version: 4.3.0(@babel/core@7.29.13)
+      embla-carousel:
+        specifier: ^8.5.2
+        version: 8.6.0
+      embla-carousel-reactive-utils:
+        specifier: ^8.5.2
+        version: 8.6.0(embla-carousel@8.6.0)
+      lucide:
+        specifier: ^0.474.0
+        version: 0.474.0
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.29.7
+        version: 7.29.13
+      '@babel/plugin-transform-typescript':
+        specifier: ^7.29.7
+        version: 7.29.9(@babel/core@7.29.13)
+      '@babel/runtime':
+        specifier: ^7.29.7
+        version: 7.29.13
+      '@ember-joinery/ember':
+        specifier: workspace:*
+        version: link:../ember
+      '@ember-joinery/test-support':
+        specifier: workspace:*
+        version: link:../test-support
+      '@ember/library-tsconfig':
+        specifier: ^3.0.0
+        version: 3.0.0
+      '@ember/test-helpers':
+        specifier: ^5.7.0
+        version: 5.8.0(@babel/core@7.29.13)
+      '@embroider/addon-dev':
+        specifier: ^8.4.2
+        version: 8.5.0(@glint/template@1.11.1)(rollup@4.68.0)
+      '@glimmer/component':
+        specifier: ^2.2.1
+        version: 2.2.1
+      '@glimmer/tracking':
+        specifier: ^1.1.2
+        version: 1.1.2
+      '@glint/ember-tsc':
+        specifier: ^1.14.2
+        version: 1.14.3(ember-source@7.3.1(@glimmer/component@2.2.1))(typescript@6.0.3)
+      '@glint/template':
+        specifier: ^1.9.0
+        version: 1.11.1
+      '@rollup/plugin-babel':
+        specifier: ^7.1.0
+        version: 7.1.0(@babel/core@7.29.13)(rollup@4.68.0)
+      babel-plugin-ember-template-compilation:
+        specifier: ^4.0.1
+        version: 4.0.1
+      ember-source:
+        specifier: ~7.3.0
+        version: 7.3.1(@glimmer/component@2.2.1)
+      rollup:
+        specifier: ^4.64.6
+        version: 4.68.0
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
 
   packages/code-block:
     dependencies:
@@ -776,6 +868,9 @@ importers:
       '@babel/runtime':
         specifier: ^7.29.7
         version: 7.29.13
+      '@ember-joinery/carousel':
+        specifier: workspace:*
+        version: link:../packages/carousel
       '@ember-joinery/code-block':
         specifier: workspace:*
         version: link:../packages/code-block
@@ -872,6 +967,9 @@ importers:
       ember-source:
         specifier: ~7.3.0
         version: 7.3.1(@glimmer/component@2.2.1)
+      embla-carousel-autoplay:
+        specifier: ^8.5.2
+        version: 8.6.0(embla-carousel@8.6.0)
       lucide:
         specifier: ^0.474.0
         version: 0.474.0
@@ -4353,6 +4451,19 @@ packages:
   ember-template-imports@4.4.0:
     resolution: {integrity: sha512-HNOHabTEMbRluci1uScvh3ljMDo9E46dHHNcJAIf5yjOhIQ/zN4Y0DVDWrRfcbihlHvt4v/iF69G+8tffC1YkA==}
     engines: {node: 16.* || >= 18}
+
+  embla-carousel-autoplay@8.6.0:
+    resolution: {integrity: sha512-OBu5G3nwaSXkZCo1A6LTaFMZ8EpkYbwIaH+bPqdBnDGQ2fh4+NbzjXjs2SktoPNKCtflfVMc75njaDHOYXcrsA==}
+    peerDependencies:
+      embla-carousel: 8.6.0
+
+  embla-carousel-reactive-utils@8.6.0:
+    resolution: {integrity: sha512-fMVUDUEx0/uIEDM0Mz3dHznDhfX+znCCDCeIophYb1QGVM7YThSWX+wz11zlYwWFOr74b4QLGg0hrGPJeG2s4A==}
+    peerDependencies:
+      embla-carousel: 8.6.0
+
+  embla-carousel@8.6.0:
+    resolution: {integrity: sha512-SjWyZBHJPbqxHOzckOfo8lHisEaJWmwd23XppYFYVh10bU66/Pn5tkVkbkCMZVdbUE5eTCI2nD8OyIP4Z+uwkA==}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -12215,6 +12326,16 @@ snapshots:
       ember-cli-version-checker: 5.1.2
     transitivePeerDependencies:
       - supports-color
+
+  embla-carousel-autoplay@8.6.0(embla-carousel@8.6.0):
+    dependencies:
+      embla-carousel: 8.6.0
+
+  embla-carousel-reactive-utils@8.6.0(embla-carousel@8.6.0):
+    dependencies:
+      embla-carousel: 8.6.0
+
+  embla-carousel@8.6.0: {}
 
   emoji-regex@8.0.0: {}
 

@@ -1,0 +1,23 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/resizable.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="resizable-panel-group" in ResizablePanelGroup */
+:where(.jn-resizable-panel-group) {
+  @apply flex h-full w-full aria-[orientation=vertical]:flex-col;
+}
+
+/* data-slot="resizable-handle" in ResizableHandle */
+:where(.jn-resizable-handle) {
+  @apply relative flex w-px items-center justify-center bg-border ring-offset-background after:absolute after:inset-y-0 after:start-1/2 after:w-1 after:-translate-x-1/2 rtl:after:translate-x-1/2 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-hidden aria-[orientation=horizontal]:h-px aria-[orientation=horizontal]:w-full aria-[orientation=horizontal]:after:start-0 aria-[orientation=horizontal]:after:h-1 aria-[orientation=horizontal]:after:w-full aria-[orientation=horizontal]:after:translate-x-0 rtl:aria-[orientation=horizontal]:after:-translate-x-0 aria-[orientation=horizontal]:after:-translate-y-1/2 [&[aria-orientation=horizontal]>div]:rotate-90;
+}
+
+/* in ResizableHandle */
+:where(.jn-resizable-handle-icon) {
+  @apply z-10 flex shrink-0;
+}

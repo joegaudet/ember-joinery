@@ -4,8 +4,9 @@
  * demo"); until those ship, these rules use the same token names, so the switch is a deletion.
  */
 :root {
-  --font: Geist, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* Formwright's and real-enums' type. The guide uses Geist, as ui.shadcn.com does. */
+  --font: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --background: #ffffff;
   --foreground: #1c1a17;
   --muted: #f7f6f3;

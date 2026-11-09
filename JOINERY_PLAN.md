@@ -13,7 +13,8 @@ Deviations from the intake, and why:
   Its component pages render `apps/v4/registry/bases/radix/ui`, styled by one of eight style
   sheets (`apps/v4/registry/styles/style-*.css`, Nova by default), with examples from
   `apps/v4/examples/radix/`. Joinery ports that, so the scope is the 497 examples the docs pages
-  reference (501 previews, as four examples show on two pages), not new-york-v4's 244. Charts
+  reference (501 previews: `button-group-demo`, `card-rtl` and `field-demo` each show on two pages,
+  and the Hover Card page shows `hover-card-demo` twice), not new-york-v4's 244. Charts
   still come from `registry/new-york-v4/charts` (the charts gallery), and blocks from
   `registry/bases/radix/blocks`.
 - **All eight shadcn styles.** Upstream's components now carry semantic classes (`cn-button`,

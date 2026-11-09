@@ -26,7 +26,7 @@ A component is done only when it has all of these, in the same PR:
 - its own tests, written with that harness, ending in an axe audit, and covering its WAI-ARIA
   keyboard pattern;
 - a guide page with every upstream example for it, each one tested with the harness;
-- a parity mapping for each of those examples in `parity/map.json`;
+- a parity mapping for each of those examples in `parity/map/<component>.json`;
 - a changeset.
 
 The full checklist is "Definition of done for every component" in the plan.

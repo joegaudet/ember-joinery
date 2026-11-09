@@ -415,6 +415,9 @@
    * and the parity comparison shows a part that doesn't.
    */
   .guide-stage {
+    /* What a part that sets font-sans or font-mono (Kbd) takes, as on ui.shadcn.com: Geist. */
+    --font-sans: var(--g-font);
+    --font-mono: var(--g-mono);
     background: var(--background, var(--g-bg));
     color: var(--foreground, var(--g-fg));
     font-family: var(--g-font);

@@ -2,10 +2,13 @@ import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
 import { render } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
-import { DocumentFileDrop, FileDrop } from '@ember-joinery/ember'
+import { Upload } from 'lucide'
+import { DirectionProvider } from '@ember-joinery/primitives/direction'
+import { DocumentFileDrop, FileDrop, Icon } from '@ember-joinery/ember'
 import {
   DocumentFileDropHarness,
   FileDropHarness,
+  IconHarness,
   dropFiles,
   tab,
 } from '@ember-joinery/test-support'
@@ -86,6 +89,52 @@ module('Integration | components | file-drop', function (hooks) {
     assert.true(off.isDisabled)
     assert.strictEqual(getComputedStyle(off.element).opacity, '0.5')
     await a11yAudit()
+  })
+
+  test('RTL: the zone and the overlay keep their content centred, right to left', async function (assert) {
+    const noop = () => {}
+    await render(
+      <template>
+        <DirectionProvider @dir="rtl">
+          <div style="width: 320px">
+            <FileDrop @onFiles={{noop}}>
+              <Icon @icon={{Upload}} />
+              اسحب صورة إلى هنا، أو انقر للاختيار
+            </FileDrop>
+          </div>
+          <DocumentFileDrop @onFiles={{noop}}>
+            <Icon @icon={{Upload}} />
+            أفلت الملفات في أي مكان
+          </DocumentFileDrop>
+        </DirectionProvider>
+      </template>,
+    )
+    const zone = new FileDropHarness()
+    assert.strictEqual(getComputedStyle(zone.element).direction, 'rtl')
+    const box = zone.element.getBoundingClientRect()
+    const icon = zone.find(IconHarness).element.getBoundingClientRect()
+    assert.true(
+      Math.abs(icon.left + icon.width / 2 - (box.left + box.width / 2)) < 1,
+      'the icon is centred',
+    )
+    assert.true(zone.element.scrollWidth <= zone.element.clientWidth, 'nothing overflows it')
+    const input = zone.input.getBoundingClientRect()
+    assert.true(input.left >= box.left && input.right <= box.right, 'its input stays inside it')
+
+    const overlay = new DocumentFileDropHarness()
+    await overlay.drag([photo])
+    assert.true(overlay.isShown)
+    assert.strictEqual(overlay.text, 'أفلت الملفات في أي مكان')
+    const cover = getComputedStyle(overlay.element)
+    assert.strictEqual(cover.position, 'fixed')
+    assert.deepEqual(
+      [cover.left, cover.right, cover.top, cover.bottom],
+      ['0px', '0px', '0px', '0px'],
+      'inset-0 covers the page from either side',
+    )
+    assert.strictEqual(cover.justifyContent, 'center', 'its content centred')
+    await a11yAudit()
+    await overlay.leave()
   })
 
   test('DocumentFileDrop covers the page while files are dragged over it', async function (assert) {

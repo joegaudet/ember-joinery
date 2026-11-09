@@ -3,6 +3,7 @@ import { setupRenderingTest } from 'test-app/tests/helpers'
 import { render, rerender, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
+import { DirectionProvider } from '@ember-joinery/primitives/direction'
 import { DocumentFileDrop, FileDrop, accepts, filesFrom } from '@ember-joinery/primitives/file-drop'
 import {
   FileDropHarness,
@@ -147,6 +148,34 @@ module('Integration | primitives | file-drop', function (hooks) {
     await rerender()
     await zone.drop([video])
     assert.verifySteps(['clip.webm'])
+    await a11yAudit()
+  })
+
+  test('RTL: the hidden input stays inside the zone, and a drop or a pick works the same', async function (assert) {
+    const take = (files: File[]) => assert.step(names(files))
+    await render(
+      <template>
+        <DirectionProvider @dir="rtl">
+          <FileDrop @accept="video/*" @onFiles={{take}} style="display: block; width: 240px">
+            أفلت مقطع فيديو هنا
+          </FileDrop>
+        </DirectionProvider>
+      </template>,
+    )
+    const zone = new FileDropHarness()
+    assert.strictEqual(getComputedStyle(zone.element).direction, 'rtl')
+    const outer = zone.element.getBoundingClientRect()
+    const input = zone.input.getBoundingClientRect()
+    assert.true(
+      input.left >= outer.left - 1 && input.right <= outer.right + 1,
+      'the visually hidden input sits inside the zone, not off its left',
+    )
+    assert.strictEqual(zone.text, 'أفلت مقطع فيديو هنا', 'its text still names the input')
+    await tab()
+    assert.true(zone.isFocused)
+    await zone.drop([video, notes])
+    await zone.pick([video])
+    assert.verifySteps(['clip.webm', 'clip.webm'])
     await a11yAudit()
   })
 

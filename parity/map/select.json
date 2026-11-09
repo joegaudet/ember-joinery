@@ -1,0 +1,10 @@
+{
+  "$comment": "Waiting for a component that hasn't landed: select-align-item and select-invalid (Field). The unit that lands Field ports them onto the Select page and maps them here. The Primitives Select page shows Joinery's own select-headless, which has no upstream counterpart, so it isn't mapped.",
+  "examples": {
+    "select-demo": "select-demo",
+    "select-groups": "select-groups",
+    "select-scrollable": "select-scrollable",
+    "select-disabled": "select-disabled",
+    "select-rtl": "select-rtl"
+  }
+}

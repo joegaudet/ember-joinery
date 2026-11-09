@@ -1,5 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { type Rendering, rendering as renderingOf } from 'test-app/tests/helpers/rendering'
 import { render } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { AppWindow, Code } from 'lucide'
@@ -25,15 +26,14 @@ function noShadow(shadow: string): boolean {
   return shadow.split(/,(?![^(]*\))/).every(one => /rgba\(\d+, \d+, \d+, 0\)/.test(one))
 }
 
-/** An element's classes and attributes (but its id and the test's own `data-case`), to compare two. */
-function rendering(element: Element): { classes: string[]; attributes: Record<string, string> } {
-  const attributes: Record<string, string> = {}
-  for (const { name, value } of element.attributes) {
-    if (!['class', 'data-case', 'id', 'aria-controls', 'data-test-jn-value'].includes(name)) {
-      attributes[name] = value
-    }
-  }
-  return { classes: [...element.classList].sort(), attributes }
+/**
+ * What a part renders, to compare two: the shared rendering()'s (which leaves out what Ember adds
+ * before 7.1), less what names the part itself, its id, its panel and its value.
+ */
+function rendering(element: Element): Rendering {
+  const { classes, attributes } = renderingOf(element)
+  for (const name of ['id', 'aria-controls', 'data-test-jn-value']) delete attributes[name]
+  return { classes, attributes }
 }
 
 module('Integration | components | tabs', function (hooks) {

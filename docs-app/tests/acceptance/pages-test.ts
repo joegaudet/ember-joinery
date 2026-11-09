@@ -23,6 +23,18 @@ const AUDIT_EXCEPTIONS: Record<string, { rules: Record<string, { enabled: false 
   'components/typography.md': { rules: { 'heading-order': { enabled: false } } },
 }
 
+/**
+ * Where upstream's own colours fall short of the 4.5:1 WCAG AA asks of small text, in its light
+ * themes, and Joinery keeps them (each page's Accessibility notes say so, and how an app can
+ * darken them): a key's text, `--muted-foreground` on `--muted` (about 4.3:1), and the
+ * destructive badge's, `--destructive` on its own 10% tint (about 4:1). The audit leaves those
+ * elements out, and checks everything else on the page.
+ */
+const UPSTREAM_CONTRAST = {
+  include: [['#ember-testing-container']],
+  exclude: [['[data-slot="kbd"]'], ['[data-slot="badge"][data-variant="destructive"]']],
+}
+
 module('Acceptance | guide pages', function (hooks) {
   setupApplicationTest(hooks)
 
@@ -64,7 +76,7 @@ module('Acceptance | guide pages', function (hooks) {
         await waitUntil(() => !example.querySelector('.example-loading'), { timeout: 15000 })
         assert.dom(example.querySelector('.example-preview')).exists(`example ${name} rendered`)
       }
-      await a11yAudit(AUDIT_EXCEPTIONS[page])
+      await a11yAudit(UPSTREAM_CONTRAST, AUDIT_EXCEPTIONS[page])
     })
   }
 

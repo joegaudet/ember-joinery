@@ -1,22 +1,52 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { find, render, settled } from '@ember/test-helpers'
+import { render, settled } from '@ember/test-helpers'
 import { destroy } from '@ember/destroyable'
 import type { TOC } from '@ember/component/template-only'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { InViewport, viewport, type InViewportMode } from '@ember-joinery/primitives/viewport'
-import { scrollIntoView, waitForObservers } from '@ember-joinery/test-support'
+import { Harness, scrollIntoView, waitForObservers } from '@ember-joinery/test-support'
+import { BoxHarness } from 'test-app/tests/fixtures/primitives/box'
 
 /** A scrolling box, with the slot below the fold and a marker at each end. */
 const Scroller: TOC<{ Blocks: { default: [] } }> = <template>
-  <div id="scroller" tabindex="0" aria-label="Scrolling box" style="height: 120px; overflow: auto;">
-    <p id="top">The top</p>
+  <div
+    data-test-jn="scroller"
+    tabindex="0"
+    aria-label="Scrolling box"
+    style="height: 120px; overflow: auto;"
+  >
+    <p data-test-jn-part="top">The top</p>
     <div style="height: 600px;">Scroll down</div>
     {{yield}}
-    <p id="bottom">The bottom</p>
+    <p data-test-jn-part="bottom">The bottom</p>
     <div style="height: 600px;"></div>
   </div>
 </template>
+
+/**
+ * The scrolling box: InViewport's element is its `placeholder` part, and what InViewport holds
+ * is its `content` part (InViewport is transparent, so its parts are the box's).
+ */
+class ScrollerHarness extends Harness {
+  static override component = 'scroller'
+
+  get placeholder(): HTMLElement | null {
+    return this.queryPart('placeholder')
+  }
+
+  get content(): HTMLElement | null {
+    return this.queryPart('content')
+  }
+
+  async scrollToBottom(): Promise<void> {
+    await scrollIntoView(this.part('bottom'))
+  }
+
+  async scrollToTop(): Promise<void> {
+    await scrollIntoView(this.part('top'))
+  }
+}
 
 module('Integration | primitives | viewport', function (hooks) {
   setupRenderingTest(hooks)
@@ -26,20 +56,23 @@ module('Integration | primitives | viewport', function (hooks) {
       await render(
         <template>
           <Scroller>
-            <InViewport class="slot" data-test-slot>
-              <p class="content">Expensive content</p>
+            <InViewport class="slot" data-test-jn-part="placeholder">
+              <p data-test-jn-part="content">Expensive content</p>
             </InViewport>
           </Scroller>
         </template>,
       )
-      assert.dom('div.slot[data-test-slot]').exists('a div, with the attributes')
-      assert.dom('.content').doesNotExist('not rendered below the fold')
+      const scroller = new ScrollerHarness()
+      assert.strictEqual(scroller.placeholder?.tagName, 'DIV', 'a div')
+      assert.true(scroller.placeholder!.classList.contains('slot'), 'with the attributes')
+      assert.strictEqual(scroller.content, null, 'not rendered below the fold')
 
-      await scrollIntoView('#bottom')
-      assert.dom('.slot .content').hasText('Expensive content', 'rendered inside it')
+      await scroller.scrollToBottom()
+      assert.strictEqual(scroller.content?.textContent, 'Expensive content')
+      assert.true(scroller.placeholder!.contains(scroller.content), 'rendered inside it')
 
-      await scrollIntoView('#top')
-      assert.dom('.content').exists('and it stays')
+      await scroller.scrollToTop()
+      assert.notStrictEqual(scroller.content, null, 'and it stays')
       await a11yAudit()
     })
 
@@ -48,46 +81,59 @@ module('Integration | primitives | viewport', function (hooks) {
       await render(
         <template>
           <Scroller>
-            <InViewport @mode={{mode}} class="slot">
-              <p class="content">Replaced</p>
+            <InViewport @mode={{mode}} data-test-jn-part="placeholder">
+              <p data-test-jn-part="content">Replaced</p>
             </InViewport>
           </Scroller>
         </template>,
       )
-      assert.dom('.slot').exists()
-      await scrollIntoView('#bottom')
-      assert.dom('.slot').doesNotExist('the placeholder went')
-      assert.dom('#scroller > .content').hasText('Replaced')
+      const scroller = new ScrollerHarness()
+      assert.notStrictEqual(scroller.placeholder, null)
+      await scroller.scrollToBottom()
+      assert.strictEqual(scroller.placeholder, null, 'the placeholder went')
+      assert.strictEqual(scroller.content?.textContent, 'Replaced')
+      assert.strictEqual(scroller.content?.parentElement, scroller.element, 'in its place')
       await a11yAudit()
     })
 
     test('@tagName, and content already in view renders at once', async function (assert) {
       await render(
         <template>
-          <InViewport @tagName="section" aria-label="Visible">
-            <p class="content">In view</p>
-          </InViewport>
+          <div data-test-jn="box">
+            <InViewport @tagName="section" aria-label="Visible" data-test-jn-part="placeholder">
+              <p data-test-jn-part="content">In view</p>
+            </InViewport>
+          </div>
         </template>,
       )
-      find('section')!.scrollIntoView()
-      await settled() // the observer's first report is waited for
-      assert.dom('section[aria-label="Visible"] .content').hasText('In view')
+      const box = new BoxHarness()
+      await box.scrollIntoView()
+      const section = box.part('placeholder')
+      assert.strictEqual(section.tagName, 'SECTION')
+      assert.strictEqual(section.getAttribute('aria-label'), 'Visible')
+      assert.strictEqual(box.part('content').parentElement, section, 'inside it')
       await a11yAudit()
     })
 
     test('@rootMargin renders it before it scrolls in', async function (assert) {
       await render(
         <template>
-          <div style="height: 100px; overflow: auto;" tabindex="0" aria-label="Box" id="box">
-            <div style="height: 100px;" id="first">First</div>
-            <InViewport @rootMargin="5000px" class="slot">
-              <p class="content">Early</p>
+          <div
+            data-test-jn="box"
+            style="height: 100px; overflow: auto;"
+            tabindex="0"
+            aria-label="Box"
+          >
+            <div style="height: 100px;">First</div>
+            <InViewport @rootMargin="5000px">
+              <p data-test-jn-part="content">Early</p>
             </InViewport>
           </div>
         </template>,
       )
-      await scrollIntoView('#first')
-      assert.dom('.content').exists('within the margin counts')
+      const box = new BoxHarness()
+      await box.scrollIntoView()
+      assert.notStrictEqual(box.queryPart('content'), null, 'within the margin counts')
       await a11yAudit()
     })
   })
@@ -102,11 +148,12 @@ module('Integration | primitives | viewport', function (hooks) {
 
       await render(
         <template>
-          <div id="target" style="height: 50px;">Watched</div>
+          <div data-test-jn="box" style="height: 50px;">Watched</div>
         </template>,
       )
-      const target = find('#target') as HTMLElement
-      target.scrollIntoView()
+      const box = new BoxHarness()
+      await box.scrollIntoView()
+      const target = box.element
       const entries: IntersectionObserverEntry[] = []
       const record = (entry: IntersectionObserverEntry) => entries.push(entry)
       observers.observe(target, record)
@@ -136,25 +183,32 @@ module('Integration | primitives | viewport', function (hooks) {
     test('options: a threshold reports each step', async function (assert) {
       await render(
         <template>
-          <div id="box" style="height: 100px; overflow: auto;" tabindex="0" aria-label="Box">
+          <div
+            data-test-jn="box"
+            data-test-jn-name="scroller"
+            style="height: 100px; overflow: auto;"
+            tabindex="0"
+            aria-label="Box"
+          >
             <div style="height: 100px;"></div>
-            <div id="target" style="height: 100px;">Half and whole</div>
+            <div data-test-jn="box" data-test-jn-name="target" style="height: 100px;">
+              Half and whole
+            </div>
             <div style="height: 300px;"></div>
           </div>
         </template>,
       )
-      find('#box')!.scrollIntoView()
+      const scroller = new BoxHarness('scroller')
+      await scroller.scrollIntoView()
       const ratios: number[] = []
       viewport(this.owner).observe(
-        find('#target')!,
+        new BoxHarness('target').element,
         entry => ratios.push(Math.round(entry.intersectionRatio * 2) / 2),
         { threshold: [0, 0.5, 1] },
       )
       await settled()
-      find('#box')!.scrollTop = 50
-      await waitForObservers()
-      find('#box')!.scrollTop = 100
-      await waitForObservers()
+      await scroller.scrollTo(50)
+      await scroller.scrollTo(100)
       assert.deepEqual(ratios, [0, 0.5, 1])
       await a11yAudit()
     })
@@ -162,11 +216,12 @@ module('Integration | primitives | viewport', function (hooks) {
     test('the observers are disconnected with the owner', async function (assert) {
       await render(
         <template>
-          <div id="target" style="height: 50px;">Watched</div>
+          <div data-test-jn="box" style="height: 50px;">Watched</div>
         </template>,
       )
-      const target = find('#target') as HTMLElement
-      target.scrollIntoView()
+      const box = new BoxHarness()
+      await box.scrollIntoView()
+      const target = box.element
       const owner = { lookup: () => undefined }
       let calls = 0
       viewport(owner).observe(target, () => (calls += 1))

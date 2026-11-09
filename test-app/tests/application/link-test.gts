@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupApplicationTest } from 'test-app/tests/helpers'
-import { click, currentURL, findAll, visit } from '@ember/test-helpers'
+import { currentURL, visit } from '@ember/test-helpers'
 import { array } from '@ember/helper'
 import { on } from '@ember/modifier'
 import type { TOC } from '@ember/component/template-only'
@@ -12,10 +12,11 @@ import {
   link,
 } from '@ember-joinery/primitives/link-helper'
 import { getRouter, setupRouting } from '@ember-joinery/test-support'
+import { LinksHarness } from 'test-app/tests/fixtures/primitives/links'
 
 /**
- * A link as a design system would write one on the helper: active state on `aria-current`
- * and `data-active`, the click routed, and a mark on external links.
+ * A link as a design system would write one on the helper: active state on `aria-current`,
+ * the click routed, and a mark on external links. It is a `link` part, named by its href.
  */
 const NavLink: TOC<{
   Element: HTMLAnchorElement
@@ -31,16 +32,27 @@ const NavLink: TOC<{
     <a
       href={{@href}}
       aria-current={{if l.isActive "page"}}
-      data-active={{if l.isActive "true"}}
       data-external={{if l.isExternal "true"}}
+      data-test-jn-part="link"
+      data-test-jn-value={{@href}}
       {{on "click" l.handleClick}}
       ...attributes
     >{{yield}}</a>
   {{/let}}
 </template>
 
-function activeTexts(): string[] {
-  return findAll('[data-active]').map(element => element.textContent!.trim())
+/** The links a test renders, as one `links` component the harness drives. */
+const Nav: TOC<{ Blocks: { default: [] } }> = <template>
+  <nav aria-label="Pages" data-test-jn="links">{{yield}}</nav>
+</template>
+
+class NavHarness extends LinksHarness {
+  /** The text of each link the NavLink marks as external. */
+  get externalLabels(): string[] {
+    return this.parts('link')
+      .filter(link => link.hasAttribute('data-external'))
+      .map(link => link.textContent!.trim())
+  }
 }
 
 module('Application | primitives | link', function (hooks) {
@@ -54,23 +66,23 @@ module('Application | primitives | link', function (hooks) {
     this.owner.register(
       'template:application',
       <template>
-        <nav aria-label="Pages">
+        <Nav>
           <NavLink @href="/foo">Foo</NavLink>
           <NavLink @href="/bar">Bar</NavLink>
           <NavLink @href="/">Home</NavLink>
-        </nav>
+        </Nav>
       </template>,
     )
     await visit('/')
-    assert.deepEqual(activeTexts(), ['Home'])
-    assert.dom('[aria-current="page"]').hasText('Home')
+    const nav = new NavHarness()
+    assert.deepEqual(nav.currentLabels, ['Home'], 'on aria-current')
 
-    await click('a[href="/foo"]')
+    await nav.follow('/foo')
     assert.strictEqual(currentURL(), '/foo', 'the click was a transition')
-    assert.deepEqual(activeTexts(), ['Foo'])
+    assert.deepEqual(nav.currentLabels, ['Foo'])
 
-    await click('a[href="/bar"]')
-    assert.deepEqual(activeTexts(), ['Bar'])
+    await nav.follow('/bar')
+    assert.deepEqual(nav.currentLabels, ['Bar'])
     await a11yAudit()
   })
 
@@ -84,21 +96,24 @@ module('Application | primitives | link', function (hooks) {
     this.owner.register(
       'template:application',
       <template>
-        <NavLink @href="/foo/a">a</NavLink>
-        <NavLink @href="/foo/b">b</NavLink>
-        <NavLink @href="/foo">Foo</NavLink>
-        <NavLink @href="/foo" @activeOnSubPaths={{true}} id="section">Foo section</NavLink>
+        <Nav>
+          <NavLink @href="/foo/a">a</NavLink>
+          <NavLink @href="/foo/b">b</NavLink>
+          <NavLink @href="/foo">Foo</NavLink>
+          <NavLink @href="/foo" @activeOnSubPaths={{true}}>Foo section</NavLink>
+        </Nav>
       </template>,
     )
     await visit('/')
-    assert.deepEqual(activeTexts(), [])
+    const nav = new NavHarness()
+    assert.deepEqual(nav.currentLabels, [])
 
     await visit('/foo')
-    assert.deepEqual(activeTexts(), ['Foo', 'Foo section'])
+    assert.deepEqual(nav.currentLabels, ['Foo', 'Foo section'])
     await visit('/foo/a')
-    assert.deepEqual(activeTexts(), ['a', 'Foo section'], 'the section is active below it')
+    assert.deepEqual(nav.currentLabels, ['a', 'Foo section'], 'the section is active below it')
     await visit('/foo/b')
-    assert.deepEqual(activeTexts(), ['b', 'Foo section'])
+    assert.deepEqual(nav.currentLabels, ['b', 'Foo section'])
     await a11yAudit()
   })
 
@@ -109,14 +124,17 @@ module('Application | primitives | link', function (hooks) {
     this.owner.register(
       'template:application',
       <template>
-        <NavLink @href="/posts/1">One</NavLink>
-        <NavLink @href="/posts/2">Two</NavLink>
+        <Nav>
+          <NavLink @href="/posts/1">One</NavLink>
+          <NavLink @href="/posts/2">Two</NavLink>
+        </Nav>
       </template>,
     )
     await visit('/posts/1')
-    assert.deepEqual(activeTexts(), ['One'])
-    await click('a[href="/posts/2"]')
-    assert.deepEqual(activeTexts(), ['Two'])
+    const nav = new NavHarness()
+    assert.deepEqual(nav.currentLabels, ['One'])
+    await nav.follow('/posts/2')
+    assert.deepEqual(nav.currentLabels, ['Two'])
     await a11yAudit()
   })
 
@@ -131,16 +149,19 @@ module('Application | primitives | link', function (hooks) {
     this.owner.register(
       'template:application',
       <template>
-        <NavLink @href="/some-root/foo">Foo</NavLink>
-        <NavLink @href="/some-root/">Home</NavLink>
-        <NavLink @href="/elsewhere">Outside the app</NavLink>
+        <Nav>
+          <NavLink @href="/some-root/foo">Foo</NavLink>
+          <NavLink @href="/some-root/">Home</NavLink>
+          <NavLink @href="/elsewhere">Outside the app</NavLink>
+        </Nav>
       </template>,
     )
     await visit('/')
-    assert.deepEqual(activeTexts(), ['Home'])
-    await click('a[href="/some-root/foo"]')
+    const nav = new NavHarness()
+    assert.deepEqual(nav.currentLabels, ['Home'])
+    await nav.follow('/some-root/foo')
     assert.strictEqual(currentURL(), '/foo')
-    assert.deepEqual(activeTexts(), ['Foo'])
+    assert.deepEqual(nav.currentLabels, ['Foo'])
     await a11yAudit()
   })
 
@@ -151,18 +172,21 @@ module('Application | primitives | link', function (hooks) {
     this.owner.register(
       'template:application',
       <template>
-        <NavLink @href="/foo?hello=2&there=3" @includeActiveQueryParams={{true}}>All 2 3</NavLink>
-        <NavLink @href="/foo?hello=1&there=4" @includeActiveQueryParams={{true}}>All 1 4</NavLink>
-        <NavLink @href="/foo?hello=2&there=9" @includeActiveQueryParams={{array "hello"}}>Hello 2</NavLink>
-        <NavLink @href="/foo?hello=9">Path only</NavLink>
+        <Nav>
+          <NavLink @href="/foo?hello=2&there=3" @includeActiveQueryParams={{true}}>All 2 3</NavLink>
+          <NavLink @href="/foo?hello=1&there=4" @includeActiveQueryParams={{true}}>All 1 4</NavLink>
+          <NavLink @href="/foo?hello=2&there=9" @includeActiveQueryParams={{array "hello"}}>Hello 2</NavLink>
+          <NavLink @href="/foo?hello=9">Path only</NavLink>
+        </Nav>
       </template>,
     )
     await visit('/foo?hello=2&there=3')
-    assert.deepEqual(activeTexts(), ['All 2 3', 'Hello 2', 'Path only'])
+    const nav = new NavHarness()
+    assert.deepEqual(nav.currentLabels, ['All 2 3', 'Hello 2', 'Path only'])
     await visit('/foo?hello=1&there=4')
-    assert.deepEqual(activeTexts(), ['All 1 4', 'Path only'])
+    assert.deepEqual(nav.currentLabels, ['All 1 4', 'Path only'])
     await visit('/foo?hello=2')
-    assert.deepEqual(activeTexts(), ['Hello 2', 'Path only'], 'all of them must match')
+    assert.deepEqual(nav.currentLabels, ['Hello 2', 'Path only'], 'all of them must match')
     await a11yAudit()
   })
 
@@ -171,13 +195,16 @@ module('Application | primitives | link', function (hooks) {
     this.owner.register(
       'template:application',
       <template>
-        <NavLink @href="https://developer.mozilla.org">MDN</NavLink>
-        <NavLink @href="/">Home</NavLink>
+        <Nav>
+          <NavLink @href="https://developer.mozilla.org">MDN</NavLink>
+          <NavLink @href="/">Home</NavLink>
+        </Nav>
       </template>,
     )
     await visit('/')
-    assert.dom('[data-external]').hasText('MDN')
-    assert.deepEqual(activeTexts(), ['Home'])
+    const nav = new NavHarness()
+    assert.deepEqual(nav.externalLabels, ['MDN'])
+    assert.deepEqual(nav.currentLabels, ['Home'])
 
     assert.true(isExternalLink('https://developer.mozilla.org/en-US/'))
     assert.false(isExternalLink(`${location.origin}/foo`), 'the same origin')

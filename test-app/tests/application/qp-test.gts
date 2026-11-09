@@ -1,11 +1,16 @@
 import { module, test } from 'qunit'
 import { setupApplicationTest } from 'test-app/tests/helpers'
-import { click, currentURL, find, visit } from '@ember/test-helpers'
+import { currentURL, visit } from '@ember/test-helpers'
 import Controller from '@ember/controller'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { castToBoolean, qp, withQP } from '@ember-joinery/primitives/qp'
 import { setupProperLinks } from '@ember-joinery/primitives/proper-links'
 import { getRouter, setupRouting } from '@ember-joinery/test-support'
+import { LinksHarness } from 'test-app/tests/fixtures/primitives/links'
+import { ReadoutHarness } from 'test-app/tests/fixtures/primitives/readout'
+
+/** Where a link goes, as a URL. */
+const urlOf = (link: HTMLAnchorElement) => new URL(link.getAttribute('href')!)
 
 module('Application | primitives | qp', function (hooks) {
   setupApplicationTest(hooks)
@@ -20,7 +25,7 @@ module('Application | primitives | qp', function (hooks) {
     this.owner.register(
       'template:application',
       <template>
-        <output>{{qp "color"}}</output>
+        <output data-test-jn="readout">{{qp "color"}}</output>
       </template>,
     )
     this.owner.register(
@@ -30,14 +35,15 @@ module('Application | primitives | qp', function (hooks) {
       },
     )
 
+    const color = new ReadoutHarness()
     await visit('/')
-    assert.dom('output').hasText('')
+    assert.strictEqual(color.text, '')
     await visit('/?color=red')
-    assert.dom('output').hasText('red')
+    assert.strictEqual(color.text, 'red')
     await visit('/?color=blue')
-    assert.dom('output').hasText('blue')
+    assert.strictEqual(color.text, 'blue')
     await visit('/')
-    assert.dom('output').hasText('', 'gone with the param')
+    assert.strictEqual(color.text, '', 'gone with the param')
     await a11yAudit()
   })
 
@@ -45,11 +51,11 @@ module('Application | primitives | qp', function (hooks) {
     this.owner.register(
       'template:application',
       <template>
-        <output>{{qp "color"}}</output>
+        <output data-test-jn="readout">{{qp "color"}}</output>
       </template>,
     )
     await visit('/shop?color=green')
-    assert.dom('output').hasText('green')
+    assert.strictEqual(new ReadoutHarness().text, 'green')
     await a11yAudit()
   })
 
@@ -57,17 +63,23 @@ module('Application | primitives | qp', function (hooks) {
     this.owner.register(
       'template:application',
       <template>
-        <a id="set" href={{withQP "color" "red"}}>Red</a>
-        <a id="replace" href={{withQP "size" 2}}>Size 2</a>
-        <a id="remove" href={{withQP "size" null}}>Any size</a>
+        <nav aria-label="Filters" data-test-jn="links">
+          <a href={{withQP "color" "red"}} data-test-jn-part="link" data-test-jn-value="set">Red</a>
+          <a href={{withQP "size" 2}} data-test-jn-part="link" data-test-jn-value="replace">
+            Size 2
+          </a>
+          <a href={{withQP "size" null}} data-test-jn-part="link" data-test-jn-value="remove">
+            Any size
+          </a>
+        </nav>
       </template>,
     )
     await visit('/shop?size=1')
-    const href = (selector: string) => new URL(find(selector)!.getAttribute('href')!)
-    assert.strictEqual(href('#set').pathname, '/shop')
-    assert.strictEqual(href('#set').search, '?size=1&color=red', 'added to the others')
-    assert.strictEqual(href('#replace').search, '?size=2', 'replaced')
-    assert.strictEqual(href('#remove').search, '', 'removed')
+    const links = new LinksHarness()
+    assert.strictEqual(urlOf(links.link('set')).pathname, '/shop')
+    assert.strictEqual(urlOf(links.link('set')).search, '?size=1&color=red', 'added to the others')
+    assert.strictEqual(urlOf(links.link('replace')).search, '?size=2', 'replaced')
+    assert.strictEqual(urlOf(links.link('remove')).search, '', 'removed')
     await a11yAudit()
   })
 
@@ -84,15 +96,20 @@ module('Application | primitives | qp', function (hooks) {
     this.owner.register(
       'template:application',
       <template>
-        <a href={{withQP "view" "grid"}}>Grid</a>
-        <output>{{qp "view"}}</output>
+        <nav aria-label="Views" data-test-jn="links">
+          <a href={{withQP "view" "grid"}} data-test-jn-part="link" data-test-jn-value="grid">
+            Grid
+          </a>
+        </nav>
+        <output data-test-jn="readout">{{qp "view"}}</output>
       </template>,
     )
     await visit('/')
-    assert.strictEqual(new URL(find('a')!.getAttribute('href')!).pathname, '/store/')
-    await click('a')
+    const links = new LinksHarness()
+    assert.strictEqual(urlOf(links.link('grid')).pathname, '/store/')
+    await links.follow('grid')
     assert.strictEqual(currentURL(), '/?view=grid', 'a transition, not a page load')
-    assert.dom('output').hasText('grid')
+    assert.strictEqual(new ReadoutHarness().text, 'grid')
     assert.strictEqual(getRouter(this.owner).rootURL, '/store/')
     await a11yAudit()
   })
@@ -119,13 +136,16 @@ module('Application | primitives | qp', function (hooks) {
     this.owner.register(
       'template:application',
       <template>
-        <output>{{if (castToBoolean (qp "debug")) "debugging" "not debugging"}}</output>
+        <output data-test-jn="readout">
+          {{if (castToBoolean (qp "debug")) "debugging" "not debugging"}}
+        </output>
       </template>,
     )
+    const debug = new ReadoutHarness()
     await visit('/?debug=1')
-    assert.dom('output').hasText('debugging')
+    assert.strictEqual(debug.text, 'debugging')
     await visit('/?debug=0')
-    assert.dom('output').hasText('not debugging')
+    assert.strictEqual(debug.text, 'not debugging')
     await a11yAudit()
   })
 })

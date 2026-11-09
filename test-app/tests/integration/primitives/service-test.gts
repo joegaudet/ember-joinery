@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { click, findAll, render, settled } from '@ember/test-helpers'
+import { click, render, settled } from '@ember/test-helpers'
 import { on } from '@ember/modifier'
 import { destroy, registerDestructor } from '@ember/destroyable'
 import Component from '@glimmer/component'
@@ -10,6 +10,8 @@ import type RouterService from '@ember/routing/router-service'
 import Service from '@ember/service'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { asyncService, service } from '@ember-joinery/primitives/service'
+import { Harness } from '@ember-joinery/test-support'
+import { ReadoutHarness } from 'test-app/tests/fixtures/primitives/readout'
 
 /** State a whole app shares, like a toaster's queue. */
 class Counter {
@@ -34,8 +36,23 @@ class Increment extends Component {
   }
 
   <template>
-    <button type="button" {{on "click" this.counter.increment}}>Add one</button>
+    <button type="button" data-test-jn="increment" {{on "click" this.counter.increment}}>
+      Add one
+    </button>
   </template>
+}
+
+/** A button that adds one, and says what the count is when it shows it. */
+class IncrementHarness extends Harness {
+  static override component = 'increment'
+
+  get label(): string {
+    return this.element.textContent!.replace(/\s+/g, ' ').trim()
+  }
+
+  async add(): Promise<void> {
+    await click(this.element)
+  }
 }
 
 /** A service registered by name, typed through the registry as an app's own would be. */
@@ -63,15 +80,17 @@ module('Integration | primitives | service', function (hooks) {
         <Increment />
         <Increment />
         {{#let (service Counter) as |counter|}}
-          <output>{{counter.count}}</output>
+          <output data-test-jn="readout">{{counter.count}}</output>
         {{/let}}
       </template>,
     )
-    assert.dom('output').hasText('0')
+    const count = new ReadoutHarness()
+    const [first, second] = IncrementHarness.findAll()
+    assert.strictEqual(count.text, '0')
 
-    await click('button')
-    await click(findAll('button')[1]!)
-    assert.dom('output').hasText('2', 'both buttons and the template use the same counter')
+    await first!.add()
+    await second!.add()
+    assert.strictEqual(count.text, '2', 'both buttons and the template use the same counter')
     assert.strictEqual(Counter.made, 1, 'made once')
 
     const shared = service(this.owner, Counter)
@@ -124,15 +143,17 @@ module('Integration | primitives | service', function (hooks) {
     await render(
       <template>
         {{#let (service "test-greeter") as |greeter|}}
-          <output>{{greeter.greeting}}</output>
+          <output data-test-jn="readout" data-test-jn-name="greeting">{{greeter.greeting}}</output>
         {{/let}}
         {{#let (service "router") as |router|}}
-          <p>{{if router.rootURL "the router service"}}</p>
+          <p data-test-jn="readout" data-test-jn-name="router">
+            {{if router.rootURL "the router service"}}
+          </p>
         {{/let}}
       </template>,
     )
-    assert.dom('output').hasText('hello from a registered service')
-    assert.dom('p').hasText('the router service')
+    assert.strictEqual(new ReadoutHarness('greeting').text, 'hello from a registered service')
+    assert.strictEqual(new ReadoutHarness('router').text, 'the router service')
 
     const router: RouterService = service(this.owner, 'router')
     assert.strictEqual(router, this.owner.lookup('service:router'), 'the one @service injects')
@@ -158,7 +179,11 @@ module('Integration | primitives | service', function (hooks) {
           {{#if this.counter.isLoading}}
             <p>Loading…</p>
           {{else if this.counter.resolved}}
-            <button type="button" {{on "click" this.counter.resolved.increment}}>
+            <button
+              type="button"
+              data-test-jn="increment"
+              {{on "click" this.counter.resolved.increment}}
+            >
               Add one ({{this.counter.resolved.count}})
             </button>
           {{/if}}
@@ -171,12 +196,16 @@ module('Integration | primitives | service', function (hooks) {
           <Cart />
         </template>,
       )
-      assert.dom('button').exists({ count: 2 }, 'both loaded')
+      const buttons = IncrementHarness.findAll()
+      assert.strictEqual(buttons.length, 2, 'both loaded')
       assert.strictEqual(loads, 1, 'the loader ran once')
 
-      await click('button')
-      assert.dom('button').hasText('Add one (1)', 'both read the one instance')
-      assert.dom(findAll('button')[1]!).hasText('Add one (1)')
+      await buttons[0]!.add()
+      assert.deepEqual(
+        buttons.map(button => button.label),
+        ['Add one (1)', 'Add one (1)'],
+        'both read the one instance',
+      )
       const state = asyncService(this.owner, loader)
       assert.strictEqual(state.resolved, service(this.owner, Counter), 'the same as service()')
       await a11yAudit()

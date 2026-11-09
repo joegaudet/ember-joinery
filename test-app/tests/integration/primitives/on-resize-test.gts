@@ -1,10 +1,12 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { find, render, settled } from '@ember/test-helpers'
+import { render, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { onResize } from '@ember-joinery/primitives/on-resize'
 import { waitForObservers } from '@ember-joinery/test-support'
+import { BoxHarness } from 'test-app/tests/fixtures/primitives/box'
+import { ReadoutHarness } from 'test-app/tests/fixtures/primitives/readout'
 
 class Sizes {
   @tracked last = ''
@@ -23,17 +25,18 @@ module('Integration | primitives | on-resize', function (hooks) {
     const sizes = new Sizes()
     await render(
       <template>
-        <div id="box" style="width: 100px; height: 50px;" {{onResize sizes.record}}>Resize me</div>
-        <output>{{sizes.last}}</output>
+        <div data-test-jn="box" style="width: 100px; height: 50px;" {{onResize sizes.record}}>
+          Resize me
+        </div>
+        <output data-test-jn="readout">{{sizes.last}}</output>
       </template>,
     )
-    assert.dom('output').hasText('100 × 50', 'at the start (the first report is waited for)')
+    const size = new ReadoutHarness()
+    assert.strictEqual(size.text, '100 × 50', 'at the start (the first report is waited for)')
     assert.strictEqual(sizes.calls, 1)
 
-    const box = find('#box') as HTMLElement
-    box.style.width = '150px'
-    await waitForObservers()
-    assert.dom('output').hasText('150 × 50')
+    await new BoxHarness().resizeTo(150)
+    assert.strictEqual(size.text, '150 × 50')
     assert.strictEqual(sizes.calls, 2)
     await a11yAudit()
   })
@@ -52,7 +55,9 @@ module('Integration | primitives | on-resize', function (hooks) {
     await render(
       <template>
         {{#if state.shown}}
-          <div id="box" style="width: 100px; height: 50px;" {{onResize state.callback}}>Box</div>
+          <div data-test-jn="box" style="width: 100px; height: 50px;" {{onResize state.callback}}>
+            Box
+          </div>
         {{/if}}
       </template>,
     )
@@ -61,18 +66,18 @@ module('Integration | primitives | on-resize', function (hooks) {
     assert.strictEqual(first.calls, 1)
     assert.strictEqual(second.calls, 1, 'the new callback hears the current size')
 
-    const box = find('#box') as HTMLElement
-    box.style.width = '120px'
-    await waitForObservers()
+    const box = new BoxHarness()
+    await box.resizeTo(120)
     assert.strictEqual(first.calls, 1, 'the old one no longer')
     assert.strictEqual(second.calls, 2)
 
+    const element = box.element
     state.shown = false
     await settled()
-    box.style.width = '200px'
-    document.body.append(box) // back in a document, where it could be measured
+    element.style.width = '200px'
+    document.body.append(element) // back in a document, where it could be measured
     await waitForObservers()
-    box.remove()
+    element.remove()
     assert.strictEqual(second.calls, 2, 'nothing after teardown')
     await a11yAudit()
   })

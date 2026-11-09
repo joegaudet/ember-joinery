@@ -4,6 +4,7 @@ import { getRootElement, render } from '@ember/test-helpers'
 import Component from '@glimmer/component'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { load } from '@ember-joinery/primitives/load'
+import { ReadoutHarness } from 'test-app/tests/fixtures/primitives/readout'
 
 const Hi = <template>hi</template>
 
@@ -101,14 +102,14 @@ module('Integration | primitives | load', function (hooks) {
         </Greeting>
       </template>,
     )
-    assert.dom('[data-test-lazy-greeting]').hasText('Hello, Ada')
+    assert.strictEqual(new ReadoutHarness('greeting').text, 'Hello, Ada')
     await a11yAudit()
   })
 
   test('without a success block, the loaded component renders on its own', async function (assert) {
     const Greeting = load(() => import('test-app/tests/fixtures/primitives/lazy-greeting'))
     await render(<template><Greeting /></template>)
-    assert.dom('[data-test-lazy-greeting]').hasText('Hello, stranger')
+    assert.strictEqual(new ReadoutHarness('greeting').text, 'Hello, stranger')
     await a11yAudit()
   })
 
@@ -137,13 +138,15 @@ module('Integration | primitives | load', function (hooks) {
       <template>
         <Loader>
           <:error as |error|>
-            <p role="alert">{{error.reason}}</p>
+            <p role="alert" data-test-jn="readout" data-test-jn-name="error">{{error.reason}}</p>
             {{capture error.original}}
           </:error>
         </Loader>
       </template>,
     )
-    assert.dom('[role="alert"]').hasText('Promise rejected while waiting to resolve')
+    const error = new ReadoutHarness('error')
+    assert.strictEqual(error.text, 'Promise rejected while waiting to resolve')
+    assert.strictEqual(error.element.getAttribute('role'), 'alert')
     assert.strictEqual(seen, failure, 'with what it rejected with')
     await a11yAudit()
   })
@@ -155,11 +158,13 @@ module('Integration | primitives | load', function (hooks) {
     await render(
       <template>
         <Loader>
-          <:error as |error|><p role="alert">{{error.reason}}</p></:error>
+          <:error as |error|>
+            <p role="alert" data-test-jn="readout" data-test-jn-name="error">{{error.reason}}</p>
+          </:error>
         </Loader>
       </template>,
     )
-    assert.dom('[role="alert"]').hasText('Passed function threw an exception')
+    assert.strictEqual(new ReadoutHarness('error').text, 'Passed function threw an exception')
     await a11yAudit()
   })
 

@@ -1,10 +1,11 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { find, render, settled } from '@ember/test-helpers'
+import { render, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { ignoreROError, resizeObserver } from '@ember-joinery/primitives/resize-observer'
 import { waitForObservers } from '@ember-joinery/test-support'
+import { BoxHarness } from 'test-app/tests/fixtures/primitives/box'
 
 class Sizes {
   @tracked last = ''
@@ -22,10 +23,11 @@ module('Integration | primitives | resize-observer', function (hooks) {
   test('a second callback on the same element hears the current size, and only it does', async function (assert) {
     await render(
       <template>
-        <div id="box" style="width: 100px; height: 50px;">Box</div>
+        <div data-test-jn="box" style="width: 100px; height: 50px;">Box</div>
       </template>,
     )
-    const box = find('#box') as HTMLElement
+    const harness = new BoxHarness()
+    const box = harness.element
     const observer = resizeObserver(this.owner)
     const first = new Sizes()
     const second = new Sizes()
@@ -43,13 +45,11 @@ module('Integration | primitives | resize-observer', function (hooks) {
     await waitForObservers()
     assert.strictEqual(second.calls, 1, 'observing again with the same callback changes nothing')
 
-    box.style.width = '140px'
-    await waitForObservers()
+    await harness.resizeTo(140)
     assert.deepEqual([first.calls, second.calls], [2, 2], 'both hear a resize, once each')
 
     observer.unobserve(box, first.record)
-    box.style.width = '160px'
-    await waitForObservers()
+    await harness.resizeTo(160)
     assert.deepEqual([first.calls, second.calls], [2, 3], 'the other still listens')
     observer.unobserve(box, second.record)
     await a11yAudit()
@@ -70,14 +70,15 @@ module('Integration | primitives | resize-observer', function (hooks) {
     assert.strictEqual(resizeObserver(this), observer)
     await render(
       <template>
-        <div id="box" style="width: 30px; height: 20px;">Box</div>
+        <div data-test-jn="box" style="width: 30px; height: 20px;">Box</div>
       </template>,
     )
     const sizes = new Sizes()
-    observer.observe(find('#box')!, sizes.record)
+    const box = new BoxHarness().element
+    observer.observe(box, sizes.record)
     await settled()
     assert.strictEqual(sizes.last, '30 × 20')
-    observer.unobserve(find('#box')!, sizes.record)
+    observer.unobserve(box, sizes.record)
     await a11yAudit()
   })
 

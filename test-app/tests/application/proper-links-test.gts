@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupApplicationTest } from 'test-app/tests/helpers'
-import { click, currentURL, triggerEvent, visit } from '@ember/test-helpers'
+import { currentURL, visit } from '@ember/test-helpers'
 import EmberRouter from '@ember/routing/router'
 import Route from '@ember/routing/route'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
@@ -11,17 +11,24 @@ import {
   shouldHandle,
 } from '@ember-joinery/primitives/proper-links'
 import { getRouter, setupRouting, type RouteMap } from '@ember-joinery/test-support'
+import { LinksHarness } from 'test-app/tests/fixtures/primitives/links'
 
 const Links = <template>
-  <nav aria-label="Pages">
-    <a href="/foo">Foo</a>
-    <a href="/foo/bar">Foo bar</a>
-    <a href="/bar">Bar</a>
-    <a href="/bar" target="_blank" id="new-tab">Bar in a new tab</a>
-    <a href="/bar" download id="download">Download bar</a>
-    <a href="/legacy/page" id="legacy">A server page</a>
-    <a href="#main" id="hash">Skip to the content</a>
-    <a href="/foo"><span id="nested">Foo, from a span</span></a>
+  <nav aria-label="Pages" data-test-jn="links">
+    <a href="/foo" data-test-jn-part="link" data-test-jn-value="foo">Foo</a>
+    <a href="/foo/bar" data-test-jn-part="link" data-test-jn-value="foo-bar">Foo bar</a>
+    <a href="/bar" data-test-jn-part="link" data-test-jn-value="bar">Bar</a>
+    <a href="/bar" target="_blank" data-test-jn-part="link" data-test-jn-value="new-tab">
+      Bar in a new tab
+    </a>
+    <a href="/bar" download data-test-jn-part="link" data-test-jn-value="download">
+      Download bar
+    </a>
+    <a href="/legacy/page" data-test-jn-part="link" data-test-jn-value="legacy">A server page</a>
+    <a href="#main" data-test-jn-part="link" data-test-jn-value="hash">Skip to the content</a>
+    <a href="/foo" data-test-jn-part="link" data-test-jn-value="nested">
+      <span>Foo, from a span</span>
+    </a>
   </nav>
   <main id="main">Content</main>
 </template>
@@ -50,12 +57,13 @@ module('Application | primitives | proper-links', function (hooks) {
     setupProperLinks(this.owner)
     await visit('/')
     assert.strictEqual(currentURL(), '/')
+    const links = new LinksHarness()
 
-    await click('a[href="/foo"]')
+    await links.follow('foo')
     assert.strictEqual(currentURL(), '/foo')
-    await click('a[href="/foo/bar"]')
+    await links.follow('foo-bar')
     assert.strictEqual(currentURL(), '/foo/bar', 'nested routes')
-    await click('#nested')
+    await links.followFrom('nested')
     assert.strictEqual(currentURL(), '/foo', 'from an element inside the link')
     await a11yAudit()
   })
@@ -64,15 +72,16 @@ module('Application | primitives | proper-links', function (hooks) {
     setupRouting(this.owner, map)
     setupProperLinks(this.owner, { ignore: ['/legacy'] })
     await visit('/foo')
+    const links = new LinksHarness()
     document.addEventListener('click', stopDefault)
     try {
-      for (const selector of ['#new-tab', '#download', '#legacy', '#hash']) {
-        await click(selector)
-        assert.strictEqual(currentURL(), '/foo', `${selector} is the browser's`)
+      for (const name of ['new-tab', 'download', 'legacy', 'hash']) {
+        await links.follow(name)
+        assert.strictEqual(currentURL(), '/foo', `${name} is the browser's`)
       }
-      await triggerEvent('a[href="/bar"]', 'click', { metaKey: true, button: 0 })
+      await links.clickWith('bar', { metaKey: true })
       assert.strictEqual(currentURL(), '/foo', 'a Cmd-click opens a tab')
-      await triggerEvent('a[href="/bar"]', 'click', { button: 1 })
+      await links.clickWith('bar', { button: 1 })
       assert.strictEqual(currentURL(), '/foo', 'so does a middle click')
     } finally {
       document.removeEventListener('click', stopDefault)
@@ -92,7 +101,7 @@ module('Application | primitives | proper-links', function (hooks) {
     this.owner.register('router:main', Router)
 
     await visit('/')
-    await click('a[href="/bar"]')
+    await new LinksHarness().follow('bar')
     assert.strictEqual(currentURL(), '/bar')
     await a11yAudit()
   })
@@ -111,20 +120,27 @@ module('Application | primitives | proper-links', function (hooks) {
     this.owner.register(
       'template:application',
       <template>
-        <a href="/app/foo">Foo</a>
-        <a href="/app/legacy/page" id="legacy">Legacy</a>
-        <a href="/elsewhere" id="outside">Outside the app</a>
+        <nav aria-label="Pages" data-test-jn="links">
+          <a href="/app/foo" data-test-jn-part="link" data-test-jn-value="foo">Foo</a>
+          <a href="/app/legacy/page" data-test-jn-part="link" data-test-jn-value="legacy">
+            Legacy
+          </a>
+          <a href="/elsewhere" data-test-jn-part="link" data-test-jn-value="outside">
+            Outside the app
+          </a>
+        </nav>
       </template>,
     )
 
     await visit('/')
-    await click('a[href="/app/foo"]')
+    const links = new LinksHarness()
+    await links.follow('foo')
     assert.strictEqual(currentURL(), '/foo', 'the app path, without the rootURL')
     document.addEventListener('click', stopDefault)
     try {
-      await click('#legacy')
+      await links.follow('legacy')
       assert.strictEqual(currentURL(), '/foo', 'ignored')
-      await click('#outside')
+      await links.follow('outside')
       assert.strictEqual(currentURL(), '/foo', 'outside the rootURL')
     } finally {
       document.removeEventListener('click', stopDefault)
@@ -144,17 +160,22 @@ module('Application | primitives | proper-links', function (hooks) {
     this.owner.register(
       'template:application',
       <template>
-        <a href="/foo?greeting=hello%20there" id="hello">Hello</a>
-        <a href="/nowhere" id="nowhere">Nowhere</a>
+        <nav aria-label="Pages" data-test-jn="links">
+          <a href="/foo?greeting=hello%20there" data-test-jn-part="link" data-test-jn-value="hello">
+            Hello
+          </a>
+          <a href="/nowhere" data-test-jn-part="link" data-test-jn-value="nowhere">Nowhere</a>
+        </nav>
       </template>,
     )
     await visit('/')
-    await click('#hello')
+    const links = new LinksHarness()
+    await links.follow('hello')
     assert.strictEqual(currentURL(), '/foo?greeting=hello%20there')
 
     document.addEventListener('click', stopDefault)
     try {
-      await click('#nowhere')
+      await links.follow('nowhere')
       assert.strictEqual(currentURL(), '/foo?greeting=hello%20there', 'no route: the browser')
     } finally {
       document.removeEventListener('click', stopDefault)

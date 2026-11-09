@@ -3,6 +3,7 @@ import { setupRenderingTest } from 'test-app/tests/helpers'
 import { render } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { inIframe, notInIframe } from '@ember-joinery/primitives/iframe'
+import { ReadoutHarness } from 'test-app/tests/fixtures/primitives/readout'
 
 module('Integration | primitives | iframe', function (hooks) {
   setupRenderingTest(hooks)
@@ -12,12 +13,16 @@ module('Integration | primitives | iframe', function (hooks) {
     assert.true(notInIframe())
     await render(
       <template>
-        <p id="in">{{if (inIframe) "in a frame" "not in a frame"}}</p>
-        <p id="not">{{if (notInIframe) "the top window" "a frame"}}</p>
+        <p data-test-jn="readout" data-test-jn-name="in">
+          {{if (inIframe) "in a frame" "not in a frame"}}
+        </p>
+        <p data-test-jn="readout" data-test-jn-name="not">
+          {{if (notInIframe) "the top window" "a frame"}}
+        </p>
       </template>,
     )
-    assert.dom('#in').hasText('not in a frame')
-    assert.dom('#not').hasText('the top window')
+    assert.strictEqual(new ReadoutHarness('in').text, 'not in a frame')
+    assert.strictEqual(new ReadoutHarness('not').text, 'the top window')
     await a11yAudit()
   })
 

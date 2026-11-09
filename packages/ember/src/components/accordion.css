@@ -1,0 +1,51 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/accordion.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="accordion" in Accordion */
+:where(.jn-accordion) {
+  @apply flex w-full flex-col;
+}
+
+/*
+ * in AccordionTrigger, no slot to attach it to: flex. Upstream's AccordionHeader (Radix's <h3>)
+ * takes it as its className; Joinery's header carries jn-accordion-header for it, by hand.
+ */
+:where(.jn-accordion-header) {
+  @apply flex;
+}
+
+/* data-slot="accordion-trigger" in AccordionTrigger; keep on the element: group/accordion-trigger */
+:where(.jn-accordion-trigger) {
+  @apply relative flex flex-1 items-start justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50;
+}
+
+/*
+ * data-slot="accordion-trigger-icon" in AccordionTrigger, twice: upstream draws two icons with
+ * the same semantic class, ChevronDown (shown while closed) and then ChevronUp (while open), each
+ * with its own inline utilities. On one selector the second rule would win for both, so each
+ * icon also carries a marker of Joinery's, -closed or -open, and the rules below select by it,
+ * by hand. The utilities are the script's, in upstream's order.
+ */
+:where(.jn-accordion-trigger-icon-closed) {
+  @apply pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden;
+}
+
+:where(.jn-accordion-trigger-icon-open) {
+  @apply pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline;
+}
+
+/* data-slot="accordion-content" in AccordionContent */
+:where(.jn-accordion-content) {
+  @apply overflow-hidden;
+}
+
+/* in AccordionContent */
+:where(.jn-accordion-content-inner) {
+  @apply h-(--radix-accordion-content-height) [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground [&_p:not(:last-child)]:mb-4;
+}

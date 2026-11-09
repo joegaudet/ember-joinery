@@ -14,18 +14,33 @@ interface PreviewFrameSignature {
   Element: HTMLIFrameElement
 }
 
-/** Puts a copy of the page's style sheets in the frame's document. */
-function copyStyles(into: Document): void {
+/**
+ * Puts a copy of the page's style sheets in the frame's document. A copied `<link>` loads its
+ * sheet again (from the cache), so this resolves once every one has loaded, or failed to.
+ */
+function copyStyles(into: Document): Promise<void> {
+  const loads: Promise<void>[] = []
   for (const sheet of document.querySelectorAll('style, link[rel="stylesheet"]')) {
-    into.head.append(into.importNode(sheet, true))
+    const copy = into.importNode(sheet, true) as HTMLElement
+    if (copy.tagName === 'LINK') {
+      loads.push(
+        new Promise(resolve => {
+          copy.addEventListener('load', () => resolve(), { once: true })
+          copy.addEventListener('error', () => resolve(), { once: true })
+        }),
+      )
+    }
+    into.head.append(copy)
   }
+  return Promise.all(loads).then(() => undefined)
 }
 
 /**
  * An example at a given viewport width. The preview renders inside an `<iframe>` that wide, so
  * the example's breakpoints (`sm:`, `md:`) and its components' respond to that width, as they
  * would on a phone or a tablet. The block renders into the frame's body (Glimmer's
- * `in-element`), with a copy of the page's style sheets, and the frame grows to its height.
+ * `in-element`) once a copy of the page's style sheets has loaded there, and the frame grows to
+ * its height.
  */
 export default class PreviewFrame extends Component<PreviewFrameSignature> {
   @tracked body: HTMLElement | undefined
@@ -34,12 +49,14 @@ export default class PreviewFrame extends Component<PreviewFrameSignature> {
     let observer: ResizeObserver | undefined
     let done: () => void = () => {}
     const loaded = new Promise<void>(resolve => (done = resolve))
-    const ready = () => {
+    const ready = async () => {
       const doc = iframe.contentDocument
       if (!doc || this.isDestroying) return done()
       doc.documentElement.lang = document.documentElement.lang || 'en'
-      copyStyles(doc)
       doc.body.style.margin = '0'
+      // Render once the styles are in, so the preview never shows unstyled.
+      await copyStyles(doc)
+      if (this.isDestroying || iframe.contentDocument !== doc) return done()
       observer = new ResizeObserver(() => {
         iframe.style.height = `${doc.documentElement.scrollHeight}px`
       })
@@ -47,10 +64,11 @@ export default class PreviewFrame extends Component<PreviewFrameSignature> {
       this.body = doc.body
       done()
     }
-    iframe.addEventListener('load', ready, { once: true })
+    const onLoad = () => void ready()
+    iframe.addEventListener('load', onLoad, { once: true })
     void waitForPromise(loaded)
     return () => {
-      iframe.removeEventListener('load', ready)
+      iframe.removeEventListener('load', onLoad)
       observer?.disconnect()
       done()
     }

@@ -32,33 +32,21 @@ export const DEFAULT_THEME: Readonly<PreviewTheme> = {
   dark: false,
 }
 
-/** The radius steps the style sheets derive from `--radius` (as joinery.css's base does). */
-const RADIUS_STEPS: ReadonlyArray<readonly [name: string, factor: number]> = [
-  ['sm', 0.6],
-  ['md', 0.8],
-  ['lg', 1],
-  ['xl', 1.4],
-  ['2xl', 1.8],
-  ['3xl', 2.2],
-  ['4xl', 2.6],
-]
-
 /** The title-case name of a style or base colour, as the switchers show it. */
 export function titleOf(name: string): string {
   return name[0]!.toUpperCase() + name.slice(1)
 }
 
 /**
- * The stage's tokens, as a `style` attribute: the base colour's, light or dark, then `--radius`
- * and its steps. They are set on the stage itself, so the theme applies to the example alone.
+ * The stage's tokens, as a `style` attribute: the base colour's, light or dark, then `--radius`.
+ * They are set on the stage itself, so the theme applies to the example alone. The radius scale
+ * the style sheets derive from `--radius` (`--radius-md`…) comes from joinery.css's base, which
+ * the guide sets on each stage (joinery-css.mjs).
  */
 export function stageTokens(theme: PreviewTheme): string {
   const colors = baseColors[theme.baseColor] ?? baseColors[DEFAULT_THEME.baseColor]!
   const tokens = { ...colors.light, ...(theme.dark ? colors.dark : {}) }
   tokens['--radius'] = `${theme.radius}rem`
-  for (const [step, factor] of RADIUS_STEPS) {
-    tokens[`--radius-${step}`] = `calc(var(--radius) * ${factor})`
-  }
   return Object.entries(tokens)
     .map(([name, value]) => `${name}: ${value}`)
     .join('; ')

@@ -54,6 +54,42 @@ module('Acceptance | parity route', function (hooks) {
     )
   })
 
+  test('style and base pick the style and base colour the example shows in', async function (assert) {
+    await visit('/parity/button-default')
+    const stage = () => find('[data-parity]') as HTMLElement
+    const button = () => find('[data-parity] [data-slot="button"]') as HTMLElement
+    assert.dom(stage()).hasAttribute('data-style', 'nova', 'Nova by default')
+    const neutral = getComputedStyle(button()).backgroundColor
+    assert.strictEqual(getComputedStyle(button()).height, '32px', "Nova's h-8")
+    assert.strictEqual(getComputedStyle(button()).borderTopLeftRadius, '10px')
+
+    await visit('/parity/button-default?style=lyra')
+    assert.dom(stage()).hasAttribute('data-style', 'lyra')
+    assert.strictEqual(
+      getComputedStyle(button()).borderTopLeftRadius,
+      '0px',
+      "Lyra's square corners, and none of Nova's rules",
+    )
+
+    await visit('/parity/button-default?base=mauve')
+    assert.dom(stage()).hasAttribute('data-style', 'nova')
+    const mauve = getComputedStyle(button()).backgroundColor
+    assert.notStrictEqual(mauve, neutral, 'mauve tokens')
+
+    await visit('/parity/button-default?base=mauve&theme=dark')
+    assert.dom(stage()).hasClass('dark')
+    assert.notStrictEqual(getComputedStyle(button()).backgroundColor, mauve, "mauve's dark tokens")
+
+    // A new style is a new stage (see the controller's stageKey); the page stays dark.
+    await visit('/parity/button-default?base=mauve&theme=dark&style=nova')
+    await visit('/parity/button-default?base=mauve&theme=dark&style=lyra')
+    assert.dom(stage()).hasAttribute('data-style', 'lyra').hasClass('dark')
+    assert.strictEqual(getComputedStyle(button()).borderTopLeftRadius, '0px')
+    assert.dom(document.documentElement).hasClass('dark').doesNotHaveClass('light')
+    assert.strictEqual(getComputedStyle(document.documentElement).colorScheme, 'dark')
+    await a11yAudit({ rules: { region: { enabled: false } } })
+  })
+
   test('an unknown example says so', async function (assert) {
     await visit('/parity/no-such-example')
     assert.dom('[data-parity-missing="no-such-example"]').exists()

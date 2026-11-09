@@ -7,7 +7,9 @@
 //   it: `@scope ([data-style="<style>"]) to ([data-style])`, inside `@layer joinery`. The `to`
 //   limit stops a style at a nested preview that picks another, so no rule of one style leaks
 //   into another's preview. It is built from the package's compiled dist/joinery.css and
-//   dist/styles/<style>.css, so the guide shows exactly what apps get.
+//   dist/styles/<style>.css, so the guide shows exactly what apps get, but for one thing: what
+//   an app's sheet sets on `:root` (the radius scale), the scoped one sets on the preview
+//   (`:scope`), since `<html>` is outside every scope.
 // - `virtual:joinery-themes` is the base colours' tokens, read from dist/themes/<colour>.css, for
 //   the frame to set on its preview.
 
@@ -71,6 +73,14 @@ export function topLevel(css) {
   return blocks.filter(Boolean)
 }
 
+/**
+ * A style's rules with `:root` made `:scope`, for use inside `@scope`: `<html>` is outside every
+ * preview, so a rule for it would never match there, and the preview stands in for it.
+ */
+export function scopeRoot(css) {
+  return css.replace(/:root\b/g, ':scope')
+}
+
 /** Every style, scoped to the previews that pick it, in one style sheet. */
 export function scopedStyles(sheets = styleSheets()) {
   const scoped = []
@@ -83,7 +93,7 @@ export function scopedStyles(sheets = styleSheets()) {
         shared.add(block)
         continue
       }
-      const body = block.slice(layer[0].length, -1)
+      const body = scopeRoot(block.slice(layer[0].length, -1))
       scoped.push(`@scope ([data-style="${name}"]) to ([data-style]) {${body}}`)
     }
   }

@@ -220,6 +220,27 @@ module('Integration | <Example>', function (hooks) {
     await a11yAudit()
   })
 
+  test('the radius switcher scales the radius steps the style sheets use', async function (assert) {
+    await render(<template><Example @name="button-size" @align="start" /></template>)
+    const radius = (size: string) =>
+      getComputedStyle(find(`.example-preview [data-size="${size}"]`)!).borderTopLeftRadius
+
+    // Nova rounds its small sizes to min(var(--radius-md), …), and --radius-md is 0.8 of
+    // --radius, set on the preview as joinery.css sets it on :root.
+    assert.strictEqual(radius('xs'), '8px', 'min(0.8 × 10px, 10px)')
+    assert.strictEqual(radius('sm'), '8px', 'min(0.8 × 10px, 12px)')
+    assert.strictEqual(radius('default'), '10px', 'rounded-lg: --radius')
+
+    await select('[data-test-example-radius]', '1')
+    assert.strictEqual(radius('xs'), '10px', 'min(12.8px, 10px)')
+    assert.strictEqual(radius('sm'), '12px', 'min(12.8px, 12px)')
+    assert.strictEqual(radius('default'), '16px')
+
+    await select('[data-test-example-radius]', '0.3')
+    assert.strictEqual(radius('xs'), '3.84px', '0.8 × 4.8px')
+    await a11yAudit()
+  })
+
   test('the RTL switch lays the preview out right to left, and back', async function (assert) {
     await render(<template><Example @name="button-default" /></template>)
     assert.dom('.example-preview').doesNotHaveAttribute('dir')
@@ -231,11 +252,18 @@ module('Integration | <Example>', function (hooks) {
 
     await click('[data-test-example-rtl]')
     assert.dom('.example-preview').doesNotHaveAttribute('dir')
+    await a11yAudit()
 
     await render(<template><Example @name="button-rtl" @dir="rtl" /></template>)
     assert.dom('[data-test-example-rtl]').hasAria('pressed', 'true', 'an RTL example starts on')
     await click('[data-test-example-rtl]')
     assert.dom('.example-preview').hasAttribute('dir', 'ltr')
+    // Upstream's destructive button is 4.0:1 in Nova (--destructive on bg-destructive/10), under
+    // AA's 4.5:1. Joinery keeps upstream's tokens; the stage's opaque background lets axe see it.
+    await a11yAudit({
+      include: [['#ember-testing']],
+      exclude: [['.example-preview [data-variant="destructive"]']],
+    })
   })
 
   test('a width preset shows the preview in a viewport that wide', async function (assert) {

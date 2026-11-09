@@ -21,6 +21,9 @@ module('Example | button-size', function (hooks) {
     )
     const heights = buttons.map(button => getComputedStyle(button.element).height)
     assert.deepEqual(heights, ['24px', '24px', '28px', '28px', '32px', '32px', '36px', '36px'])
+    // The small sizes round to min(var(--radius-md), …): 0.8 of the theme's 10px radius.
+    const radii = buttons.map(button => getComputedStyle(button.element).borderTopLeftRadius)
+    assert.deepEqual(radii, ['8px', '8px', '8px', '8px', '10px', '10px', '10px', '10px'])
     for (const icon of buttons.filter((_, index) => index % 2 === 1)) {
       assert.strictEqual(icon.label, 'Submit')
       assert.strictEqual(

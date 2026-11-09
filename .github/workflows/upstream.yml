@@ -1,0 +1,45 @@
+name: upstream watch
+
+# Weekly: lists what changed in shadcn-ui/ui and ember-primitives since the commits pinned in
+# upstream.json, mapped to Joinery components, and keeps one tracking issue up to date. A sync
+# PR ports the changes and moves upstream.json forward (see "Upstream sync" in CONTRIBUTING.md).
+
+on:
+  schedule:
+    - cron: '23 5 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: upstream-watch
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watch:
+    name: changes since the last sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      # Plain Node and git: the script needs no dependencies.
+      - run: node scripts/upstream.mjs changes --out upstream-changes.md
+      - run: cat upstream-changes.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Update the tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The issue is the open one whose body starts with the script's marker.
+          number=$(gh issue list --state open --limit 200 --json number,body \
+            --jq 'map(select(.body | startswith("<!-- joinery-upstream-watch -->"))) | .[0].number // empty')
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body-file upstream-changes.md
+          elif grep -q 'Nothing Joinery tracks has changed' upstream-changes.md; then
+            echo 'Upstream has not moved and there is no tracking issue to update.'
+          else
+            gh issue create --title 'Upstream changes since the last sync' --body-file upstream-changes.md
+          fi

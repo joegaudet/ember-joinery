@@ -1,0 +1,54 @@
+name: parity
+
+# Screenshots every mapped upstream example in shadcn/ui's own rendering (parity/) and in the
+# Joinery guide, in light and dark, and fails over each example's threshold. See "Parity" in
+# CONTRIBUTING.md. The final unit of the 1.0 build adds --require-complete, so an upstream
+# example without a mapping fails too.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: parity-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    name: screenshots against shadcn/ui
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            parity/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      # The upstream sources at the commits in upstream.json, and checks that what was generated
+      # from them is current.
+      - run: node scripts/upstream.mjs fetch
+      - run: node scripts/upstream.mjs inventory --check
+      - run: node scripts/port-styles.mjs --check
+      # The reference app is its own workspace, installed only here.
+      - run: pnpm --dir parity install --frozen-lockfile
+      # The Chromium build that matches playwright-core's version, and its system libraries.
+      - run: pnpm exec playwright-core install --with-deps chromium
+      - run: pnpm build
+      - run: pnpm guide:build
+      - run: pnpm parity
+      - name: Upload the report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: parity-report
+          path: parity-report/
+          if-no-files-found: ignore

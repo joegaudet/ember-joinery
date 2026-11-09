@@ -82,3 +82,75 @@
   display: block;
   vertical-align: middle;
 }
+
+/*
+ * The rest of preflight's form controls, for Input, Textarea and Native Select: a file input's
+ * button starts bare, with preflight's 4px after it; a placeholder is fully opaque, in half the
+ * text colour (a style's `placeholder:` colour wins); a textarea resizes only up and down; date
+ * and time inputs are a line tall, without the padding Chrome and Safari give their fields; and
+ * the search and spin buttons are evened out, as preflight does.
+ */
+:where([data-slot], [data-slot] *)::file-selector-button {
+  box-sizing: border-box;
+  margin: 0;
+  margin-inline-end: 4px;
+  padding: 0;
+  border: 0 solid;
+  border-color: var(--border);
+  font: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  border-radius: 0;
+  background-color: transparent;
+  opacity: 1;
+  appearance: button;
+}
+
+:where([data-slot], [data-slot] *)::placeholder {
+  opacity: 1;
+  color: color-mix(in oklab, currentcolor 50%, transparent);
+}
+
+:where(textarea):where([data-slot], [data-slot] *) {
+  resize: vertical;
+}
+
+:where([data-slot], [data-slot] *)::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+:where([data-slot], [data-slot] *)::-webkit-date-and-time-value {
+  min-height: 1lh;
+  text-align: inherit;
+}
+
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit {
+  display: inline-flex;
+}
+
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-year-field,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-month-field,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-day-field,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-hour-field,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-minute-field,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-second-field,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-millisecond-field,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-meridiem-field {
+  padding-block: 0;
+}
+
+:where([data-slot], [data-slot] *)::-webkit-calendar-picker-indicator {
+  line-height: 1;
+}
+
+:where([data-slot], [data-slot] *)::-webkit-inner-spin-button,
+:where([data-slot], [data-slot] *)::-webkit-outer-spin-button {
+  height: auto;
+}

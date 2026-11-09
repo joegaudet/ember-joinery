@@ -1,0 +1,12 @@
+{
+  "$comment": "Waiting for components that haven't landed. For Field: input-otp-pattern, input-otp-form (with Card and Button, which have landed) and input-otp-rtl. The unit that lands Field ports them onto the Input OTP page and maps them here. The Primitives page's input-otp-headless is Joinery's own, with no upstream counterpart, so it isn't mapped.",
+  "examples": {
+    "input-otp-demo": "input-otp-demo",
+    "input-otp-separator": "input-otp-separator",
+    "input-otp-disabled": "input-otp-disabled",
+    "input-otp-controlled": "input-otp-controlled",
+    "input-otp-invalid": "input-otp-invalid",
+    "input-otp-four-digits": "input-otp-four-digits",
+    "input-otp-alphanumeric": "input-otp-alphanumeric"
+  }
+}

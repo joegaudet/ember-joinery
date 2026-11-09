@@ -149,6 +149,8 @@ in `@ember-joinery/primitives/dismiss`. These drive them as a user does:
 | `isInTopLayer(element)`        | Whether it is an open popover or a modal `<dialog>`                                   |
 | `placementOf(element)`         | `{ side, align }`, where an anchored element ended up, from `data-side`/`data-align`  |
 | `setupAnchorFallback(hooks)`   | Forces the Floating UI fallback for a module's tests, as CI's fallback run does       |
+| `hover(element, options?)`     | Rests the pointer on an element, as a mouse does, and waits for a delay it sets off   |
+| `unhover(element, options?)`   | Moves the pointer off an element (`away` from another), and waits as `hover()` does   |
 
 `click()` sends no pointer events, and the dismiss stack listens for `pointerdown`, as Radix's
 does, so use `press()` and `pressOutside()` for presses that should dismiss something.

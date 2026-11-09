@@ -217,6 +217,20 @@ jn-button-variant-outline jn-button-size-sm`) and the markers `extract-classes.m
 Render them in the template (so a server-rendered page is styled), with `...attributes` last,
 so a caller's `class` adds to the component's and their attributes win.
 
+**A part that floats.** A part placed against its trigger (a popover, a tooltip, a menu, a
+select's list) takes Radix's Popper arguments with Radix's defaults, through
+`packages/primitives/src/-private/popper.gts` (imported by relative path), as Popover, Tooltip
+and Hover Card do: `popperOptions()` and `anchorContent` anchor it, `exposeProperties()` sets
+the `--radix-<name>-content-transform-origin` (and the rest) that upstream's classes read,
+`PopperArrow` is Radix's arrow, `Delay` is an open or close delay that `settled()` waits for,
+and `graceArea()` is the path a pointer may cross to the content. In the top layer the content
+is a popover, whose `overflow: auto` would clip an arrow: one rule of Joinery's own after
+extract-classes' output turns it off. Two template traps: where a file imports
+ember-modifier's `modifier`, `(modifier …)` in its templates means that function, not the
+keyword (import it as `functionModifier`); and a curried `(modifier …)` is a new modifier
+whenever its arguments change, so give one that keeps state (a focus scope) an `enabled`
+argument rather than currying it in an `(if …)`.
+
 **Your own element.** Every part takes `@as`, a tag (`<Button @as="a" href="/login">`), through
 `As`. For a component of the caller's own, such as `LinkTo`, there is a part modifier made with
 `part()`: a compound component yields one per part (`<LinkTo {{d.trigger}}>`), and a component
@@ -306,6 +320,10 @@ names as its `page`.
 Behaviour changes start with a failing test in `test-app/tests/`. Write tests with harness
 classes, not raw selectors. A new component gets a harness class; page objects are harness
 subclasses with `@child` declarations. Every test ends in an axe audit.
+
+A part that opens on hover (a tooltip, a hover card) is tested with `hover()` and `unhover()`
+from `@ember-joinery/test-support`, which move the pointer as a mouse does (`click()` sends no
+pointer events); its delays hold `settled()`, so a test waits them out.
 
 A component's harness extends `Harness` from `@ember-joinery/test-support`: it names its
 `data-test-jn` value in `static component`, reaches its parts with `part()`, and reads state

@@ -68,7 +68,10 @@ export class ShadowedHarness extends Harness {
     return this.host.shadowRoot!
   }
 
-  /** The element the content renders in, inside the shadow root. */
+  /**
+   * The element the content renders in, inside the shadow root. With `@includeStyles`, it
+   * starts with the copies of the page's `<style>` and `<link>` elements.
+   */
   get content(): HTMLElement {
     return this.shadowRoot.lastElementChild as HTMLElement
   }
@@ -83,9 +86,21 @@ export class ShadowedHarness extends Harness {
     return [...this.shadowRoot.querySelectorAll<E>(selector)]
   }
 
-  /** The text of what renders in the shadow root, whitespace collapsed. */
+  /**
+   * The text of what renders in the shadow root, whitespace collapsed. The CSS in a `<style>`
+   * (such as the copies `@includeStyles` brings in) and the code in a `<script>` aren't text a
+   * reader sees, so they're left out.
+   */
   get text(): string {
-    return (this.content.textContent ?? '').replace(/\s+/g, ' ').trim()
+    const walker = this.shadowRoot.ownerDocument.createTreeWalker(
+      this.content,
+      NodeFilter.SHOW_TEXT,
+    )
+    let text = ''
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      if (!node.parentElement?.closest('style, script')) text += node.nodeValue
+    }
+    return text.replace(/\s+/g, ' ').trim()
   }
 
   /** The style sheets that apply in the shadow root: its own and the ones it adopted. */

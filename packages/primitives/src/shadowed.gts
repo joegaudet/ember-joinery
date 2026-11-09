@@ -64,18 +64,26 @@ export class Shadowed extends Component<ShadowedSignature> {
     )
   }
 
-  /** With `@includeStyles`, the document's adopted style sheets too, ahead of the root's own. */
+  /**
+   * With `@includeStyles`, the document's adopted style sheets too, ahead of the root's own.
+   * When `@includeStyles` turns off, or the component goes, it takes out the ones it added
+   * (and leaves the root's own, such as a layout primitive's rules, where they are).
+   */
   adoptSheets = modifier((element: HTMLElement, [include]: [boolean | undefined]) => {
     if (!include) return
-    const sheets = element.ownerDocument.adoptedStyleSheets ?? []
     const root = this.shadowRoot
+    const added = (element.ownerDocument.adoptedStyleSheets ?? []).filter(
+      sheet => !root.adoptedStyleSheets.includes(sheet),
+    )
+    if (!added.length) return
     try {
-      root.adoptedStyleSheets = [
-        ...sheets,
-        ...root.adoptedStyleSheets.filter(sheet => !sheets.includes(sheet)),
-      ]
+      root.adoptedStyleSheets = [...added, ...root.adoptedStyleSheets]
     } catch {
       // A sheet made in another window (an iframe) can't be adopted here; the copies remain.
+      return
+    }
+    return () => {
+      root.adoptedStyleSheets = root.adoptedStyleSheets.filter(sheet => !added.includes(sheet))
     }
   })
 

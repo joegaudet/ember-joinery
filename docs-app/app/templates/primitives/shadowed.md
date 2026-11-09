@@ -40,6 +40,8 @@ rules into it.
 The same component. With `@includeStyles`, ember-primitives `@import`s the `href` of each
 `<link>` on the page; Joinery copies each `<style>` and `<link rel="stylesheet">` in `<head>`,
 so the styles a dev server injects come too, and adopts the page's constructed style sheets.
+The copies render at the start of the content's `<div>`. When `@includeStyles` turns off, both
+go again.
 
 ## Testing
 
@@ -57,7 +59,7 @@ import {
 
 const preview = new ShadowedHarness('preview') // <Shadowed @name="preview">
 preview.query('h1') // also queryAll(selector)
-preview.text
+preview.text // what a reader sees: the CSS of a copied <style> is left out
 preview.shadowRoot // also host, content, styleSheetCount
 
 findInShadow('[data-preview]', 'h1') // in the shadow root of an element or a selector

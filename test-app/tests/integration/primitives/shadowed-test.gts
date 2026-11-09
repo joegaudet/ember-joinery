@@ -14,6 +14,10 @@ import {
   hasShadowRoot,
 } from '@ember-joinery/test-support'
 
+class Include {
+  @tracked on = true
+}
+
 class Counter {
   @tracked count = 0
   increment = () => (this.count += 1)
@@ -82,9 +86,49 @@ module('Integration | primitives | shadowed', function (hooks) {
       assert.strictEqual(getComputedStyle(withStyles.query('p')!).color, 'rgb(255, 0, 0)')
       assert.notStrictEqual(getComputedStyle(without.query('p')!).color, 'rgb(255, 0, 0)')
       assert.true(withStyles.styleSheetCount > without.styleSheetCount)
+      assert.ok(withStyles.query('style'), 'the copies are in the content’s element')
+      assert.strictEqual(withStyles.text, 'styled', 'their CSS isn’t text')
       await a11yAudit()
     } finally {
       style.remove()
+    }
+  })
+
+  test('@includeStyles turned off takes the page’s sheets out again, and leaves its own', async function (assert) {
+    const sheet = new CSSStyleSheet()
+    sheet.replaceSync('.adopted { color: rgb(0, 128, 0); }')
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet]
+    const state = new Include()
+    try {
+      await render(
+        <template>
+          <Shadowed @includeStyles={{state.on}}>
+            <p class="adopted">adopted</p>
+            <Zoetrope aria-label="Cards">
+              <:content><a href="/cards/1">Card</a></:content>
+            </Zoetrope>
+          </Shadowed>
+        </template>,
+      )
+      const preview = new ShadowedHarness()
+      const color = () => getComputedStyle(preview.query('p')!).color
+      const track = () => getComputedStyle(preview.query('[data-jn-zoetrope-scroller]')!)
+      assert.strictEqual(color(), 'rgb(0, 128, 0)', 'the page’s adopted sheet applies')
+      assert.true(preview.shadowRoot.adoptedStyleSheets.includes(sheet))
+
+      state.on = false
+      await settled()
+      assert.notStrictEqual(color(), 'rgb(0, 128, 0)', 'not any more')
+      assert.false(preview.shadowRoot.adoptedStyleSheets.includes(sheet))
+      assert.strictEqual(preview.query('style'), null, 'nor the copies')
+      assert.strictEqual(track().display, 'flex', 'the Zoetrope’s own rules stay')
+
+      state.on = true
+      await settled()
+      assert.strictEqual(color(), 'rgb(0, 128, 0)', 'and back')
+      await a11yAudit()
+    } finally {
+      document.adoptedStyleSheets = document.adoptedStyleSheets.filter(other => other !== sheet)
     }
   })
 

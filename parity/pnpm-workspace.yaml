@@ -1,0 +1,12 @@
+# The parity reference app is its own workspace, so its React dependencies stay out of the
+# main install: only `pnpm parity` and the parity workflow install it
+# (`pnpm --dir parity install`). See parity/README.md.
+packages:
+  - '.'
+
+allowBuilds:
+  esbuild: true
+  core-js: false
+  '@parcel/watcher': false
+  protobufjs: false
+  sharp: false

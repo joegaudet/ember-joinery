@@ -11,6 +11,8 @@ export default tseslint.config(
       '**/declarations/**',
       '**/*.d.ts',
       '**/.upstream/**',
+      '**/.generated/**',
+      'parity-report/**',
       '.claude/**',
       'docs/**',
       'examples/**',

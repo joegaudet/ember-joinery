@@ -6,12 +6,11 @@ The `DirectionProvider` component is used to set the text direction (`ltr` or `r
 application. This is essential for supporting right-to-left languages like Arabic, Hebrew, and
 Persian.
 
-Upstream's preview is its login Card in right-to-left mode (`card-rtl`, which is mapped on
-Card's page); it comes with Card, Input and Label. Until they land, Joinery's own example shows
-the Card's text and buttons right to left. To see more examples, look for the RTL section on
-components pages.
+Here's a preview of the component in RTL mode, in Arabic (upstream's preview also offers Hebrew
+and English, a picker the frame doesn't have; its RTL switch turns the direction back). To see
+more examples, look for the RTL section on components pages.
 
-<Example @name="direction-demo" @title="Direction" />
+<Example @name="card-rtl" @title="Direction" @dir="rtl" />
 
 ## Installation
 

@@ -1,4 +1,4 @@
 {
-  "$comment": "card-rtl is shown on this page too, and mapped on Card's (the inventory's page for it); it waits for Card, Input and Label. The Direction page shows Joinery's own direction-demo until they land; it has no upstream counterpart, so it isn't mapped. The unit that lands Card puts <Example @name=\"card-rtl\" @dir=\"rtl\" /> on this page.",
+  "$comment": "card-rtl, this page's only example, is shown on Card's page too, and mapped there (the inventory's page for it).",
   "examples": {}
 }

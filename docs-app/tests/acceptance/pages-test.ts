@@ -35,6 +35,20 @@ const UPSTREAM_CONTRAST = {
   exclude: [['[data-slot="kbd"]'], ['[data-slot="badge"][data-variant="destructive"]']],
 }
 
+/**
+ * Upstream's examples name their landmarks as upstream's components do: every Breadcrumb is a
+ * nav called `breadcrumb`, every Pagination one called `pagination`. A page that shows several
+ * has several of the same, which axe's `landmark-unique` rule flags, though each example is
+ * fine on its own (its test audits it alone). So the page's audit runs that rule over the
+ * guide's own landmarks, leaving the examples' previews out, and every other rule over all of it
+ * (but for upstream's contrast shortfalls, above, and the page's own exceptions).
+ */
+const ALL_BUT_LANDMARK_UNIQUE = { rules: { 'landmark-unique': { enabled: false } } }
+const GUIDE_LANDMARKS = {
+  include: [['#ember-testing-container']],
+  exclude: [['.example-preview']],
+}
+
 module('Acceptance | guide pages', function (hooks) {
   setupApplicationTest(hooks)
 
@@ -76,7 +90,10 @@ module('Acceptance | guide pages', function (hooks) {
         await waitUntil(() => !example.querySelector('.example-loading'), { timeout: 15000 })
         assert.dom(example.querySelector('.example-preview')).exists(`example ${name} rendered`)
       }
-      await a11yAudit(UPSTREAM_CONTRAST, AUDIT_EXCEPTIONS[page])
+      await a11yAudit(UPSTREAM_CONTRAST, {
+        rules: { ...AUDIT_EXCEPTIONS[page]?.rules, ...ALL_BUT_LANDMARK_UNIQUE.rules },
+      })
+      await a11yAudit(GUIDE_LANDMARKS, { runOnly: ['landmark-unique'] })
     })
   }
 

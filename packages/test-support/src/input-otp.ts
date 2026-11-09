@@ -1,4 +1,4 @@
-import { blur, fillIn, find, focus, getRootElement, settled } from '@ember/test-helpers'
+import { blur, click, fillIn, find, focus, getRootElement, settled } from '@ember/test-helpers'
 import { Harness } from './harness.ts'
 import { controlDescription, controlLabel, isMarkedInvalid, textOf } from './-private/control.ts'
 import { selectors } from './selectors.ts'
@@ -50,7 +50,13 @@ function remove(input: HTMLInputElement, forward: boolean): void {
   selectionMoved(input)
 }
 
-/** Moves the caret, as an arrow key, Home or End does in a left-to-right text input. */
+/**
+ * Moves the caret, as an arrow key, Home or End does in a browser's text input holding a code.
+ * A code (digits, Latin letters) is a left-to-right run in either direction, so the browser's
+ * ArrowLeft goes back through it and ArrowRight on, right to left too. `InputOTP` turns the
+ * arrows round itself right to left, where its slots run from the right, so there its keydown
+ * is `defaultPrevented` and this doesn't run.
+ */
 function move(input: HTMLInputElement, key: 'ArrowLeft' | 'ArrowRight' | 'Home' | 'End'): void {
   const length = input.value.length
   const start = input.selectionStart ?? length
@@ -62,6 +68,16 @@ function move(input: HTMLInputElement, key: 'ArrowLeft' | 'ArrowRight' | 'Home' 
   else caret = key === 'ArrowLeft' ? Math.max(0, start - 1) : Math.min(length, end + 1)
   input.setSelectionRange(caret, caret)
   selectionMoved(input)
+}
+
+/**
+ * Where a click at a point puts the caret in `input`, as the browser works it out, or `null`
+ * when it can't say (the point is off screen, or over something else).
+ */
+function caretAt(input: HTMLInputElement, x: number, y: number): number | null {
+  const position = input.ownerDocument.caretPositionFromPoint(x, y)
+  if (!position || position.offsetNode !== input) return null
+  return position.offset
 }
 
 /**
@@ -209,7 +225,8 @@ export class InputOTPHarness extends Harness {
 
   /**
    * Presses a key that edits or moves through the code, as a browser does in a text input:
-   * Backspace and Delete delete, the arrows, Home and End move the caret (left to right).
+   * Backspace and Delete delete, the arrows, Home and End move the caret. Right to left,
+   * `InputOTP` turns the arrows round, so ArrowLeft moves to the next slot, on the left.
    */
   async press(key: InputOTPKey): Promise<void> {
     if (!this.isFocused) await this.focus()
@@ -223,11 +240,28 @@ export class InputOTPHarness extends Harness {
     await settled()
   }
 
-  /** Puts the caret before one character, as clicking that slot does. */
+  /**
+   * Clicks over one slot, as a user does in Chromium: the click lands on the input above it.
+   * A click that focuses the input leaves what focus selects when that is a character (the
+   * code is complete, and focus selects its last one), as the browser leaves a selection a
+   * focus handler makes. Otherwise the caret goes where the browser puts it for a click at
+   * that point (`caretPositionFromPoint`), and the input selects a character from there. The
+   * input's text is squeezed into a sliver (input-otp's styles, which hide it), so that is at
+   * one end of the code whichever slot the click is over: left to right, after it, so a click
+   * selects the last character or the slot after it, as on ui.shadcn.com. To reach another
+   * character, `press` the arrow keys. Where the browser can't say (the slot is off screen),
+   * the caret goes after the code.
+   */
   async clickSlot(index: number): Promise<void> {
-    if (!this.isFocused) await this.focus()
     const input = this.input
-    const caret = Math.min(index, input.value.length)
+    const box = this.slot(index).getBoundingClientRect()
+    const clientX = box.left + box.width / 2
+    const clientY = box.top + box.height / 2
+    // Where the click lands, in the layout it lands on (focus restyles the input after it).
+    const caret = caretAt(input, clientX, clientY) ?? input.value.length
+    const focusing = !this.isFocused
+    await click(input, { clientX, clientY })
+    if (focusing && input.selectionStart !== input.selectionEnd) return
     input.setSelectionRange(caret, caret)
     selectionMoved(input)
     await settled()

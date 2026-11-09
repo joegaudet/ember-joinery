@@ -4,6 +4,7 @@ import { click, render, settled } from '@ember/test-helpers'
 import { on } from '@ember/modifier'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
+import { DirectionProvider } from '@ember-joinery/primitives/direction'
 import {
   InputOTP,
   INPUT_OTP_LABEL,
@@ -147,9 +148,92 @@ module('Integration | primitives | input-otp', function (hooks) {
     assert.strictEqual(otp.value, '294')
     await otp.press('End')
     assert.strictEqual(otp.activeIndex, 3)
+    await a11yAudit()
+  })
 
-    await otp.clickSlot(1)
-    assert.deepEqual(otp.activeIndexes, [1], 'clicking a slot selects its character')
+  test('a click on a slot puts the caret where the browser does: after the code', async function (assert) {
+    await render(
+      <template>
+        <InputOTP @name="full" @maxLength={{4}} @defaultValue="1234" aria-label="Full" as |otp|>
+          <div style="display: flex">
+            {{#each otp.slots as |slot|}}
+              <otp.Slot @index={{slot.index}} style="width: 40px; height: 40px" />
+            {{/each}}
+          </div>
+        </InputOTP>
+        <InputOTP @name="part" @maxLength={{4}} @defaultValue="12" aria-label="Part" as |otp|>
+          <div style="display: flex">
+            {{#each otp.slots as |slot|}}
+              <otp.Slot @index={{slot.index}} style="width: 40px; height: 40px" />
+            {{/each}}
+          </div>
+        </InputOTP>
+      </template>,
+    )
+    // The input's text is squeezed into a sliver at its start, so a click anywhere over the
+    // slots lands after it, as on ui.shadcn.com: the slot a click is over doesn't choose.
+    const full = new InputOTPHarness('full')
+    await full.clickSlot(1)
+    assert.true(full.isFocused, 'a click focuses the input')
+    assert.deepEqual(full.activeIndexes, [3], 'complete, it selects the last character')
+    await full.press('ArrowLeft')
+    await full.press('ArrowLeft')
+    assert.deepEqual(full.activeIndexes, [1], 'the arrows reach the others')
+    await full.clickSlot(2)
+    assert.deepEqual(full.activeIndexes, [3], 'a click goes back to the last')
+
+    const part = new InputOTPHarness('part')
+    await part.clickSlot(1)
+    assert.strictEqual(part.activeIndex, 2, 'where the next character goes')
+    await part.typeIn('3')
+    assert.strictEqual(part.value, '123', 'so typing adds one')
+    await a11yAudit()
+  })
+
+  test('right to left, the arrows turn round, as the slots run from the right', async function (assert) {
+    await render(
+      <template>
+        <DirectionProvider @dir="rtl">
+          <InputOTP @maxLength={{4}} @defaultValue="1234" aria-label="Code" as |otp|>
+            <div style="display: flex">
+              {{#each otp.slots as |slot|}}
+                <otp.Slot @index={{slot.index}} style="width: 40px; height: 40px" />
+              {{/each}}
+            </div>
+          </InputOTP>
+        </DirectionProvider>
+      </template>,
+    )
+    const otp = new InputOTPHarness()
+    const left = (index: number) => otp.slot(index).getBoundingClientRect().left
+    assert.ok(left(0) > left(3), 'the first slot is on the right')
+
+    await otp.focus()
+    assert.deepEqual(otp.activeIndexes, [3], 'focus selects the last character, on the left')
+    await otp.press('ArrowLeft')
+    assert.deepEqual(otp.activeIndexes, [3], 'nothing is further left')
+    await otp.press('ArrowRight')
+    assert.deepEqual(otp.activeIndexes, [2], 'right selects the one to its right, before it')
+    assert.ok(left(2) > left(3))
+    await otp.press('ArrowRight')
+    await otp.press('ArrowRight')
+    assert.deepEqual(otp.activeIndexes, [0])
+    await otp.press('ArrowRight')
+    assert.deepEqual(otp.activeIndexes, [0], 'nothing is further right')
+    await otp.press('ArrowLeft')
+    assert.deepEqual(otp.activeIndexes, [1], 'left selects the next one, on its left')
+    await otp.typeIn('9')
+    assert.strictEqual(otp.value, '1934', 'typing replaces it')
+    assert.deepEqual(otp.activeIndexes, [2], 'and moves on, to the left')
+    await otp.press('Home')
+    assert.deepEqual(otp.activeIndexes, [0], 'Home selects the first, on the right')
+    await otp.press('End')
+    assert.deepEqual(otp.activeIndexes, [3], 'End the last')
+    await otp.press('Backspace')
+    await otp.press('ArrowRight')
+    assert.deepEqual(otp.activeIndexes, [2], 'from where the next character goes, too')
+    await otp.press('ArrowLeft')
+    assert.strictEqual(otp.activeIndex, 3)
     await a11yAudit()
   })
 
@@ -463,7 +547,11 @@ module('Integration | primitives | input-otp', function (hooks) {
       <template>
         <div style="width: 200px">
           <InputOTP @name="reach" @maxLength={{4}} aria-label="Reach" as |otp|>
-            {{#each otp.slots as |slot|}}<otp.Slot @index={{slot.index}} />{{/each}}
+            <div style="display: flex">
+              {{#each otp.slots as |slot|}}
+                <otp.Slot @index={{slot.index}} style="width: 50px; height: 40px" />
+              {{/each}}
+            </div>
             <span data-test-hover>{{if otp.isHovering "hover"}}</span>
           </InputOTP>
           <InputOTP
@@ -480,6 +568,8 @@ module('Integration | primitives | input-otp', function (hooks) {
       </template>,
     )
     const reach = new InputOTPHarness('reach')
+    const takesThePointer = (x: number, y: number) =>
+      document.elementFromPoint(x, y) === reach.input
     reach.input.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
     await settled()
     assert.dom('[data-test-hover]').hasText('hover')
@@ -493,6 +583,12 @@ module('Integration | primitives | input-otp', function (hooks) {
     await reach.focus()
     assert.strictEqual(width(reach.input), width(reach.element) + 40, 'focused, 40px wider')
     assert.strictEqual(reach.input.style.clipPath, 'inset(0px 40px 0px 0px)', 'clipped there')
+    await reach.blur()
+    const box = reach.element.getBoundingClientRect()
+    const middle = box.top + box.height / 2
+    assert.true(takesThePointer(box.left + 1, middle), 'it takes the pointer at the first slot')
+    assert.true(takesThePointer(box.right - 1, middle), 'and at the last')
+    assert.false(takesThePointer(box.right + 5, middle), 'but not past it')
 
     const still = new InputOTPHarness('still')
     await still.focus()
@@ -502,6 +598,47 @@ module('Integration | primitives | input-otp', function (hooks) {
       "@pushPasswordManagerStrategy='none' doesn't",
     )
     assert.strictEqual(getComputedStyle(still.input).textAlign, 'center')
+    await a11yAudit()
+  })
+
+  test('right to left, it reaches past the slots on the left, and every slot takes a click', async function (assert) {
+    await render(
+      <template>
+        <DirectionProvider @dir="rtl">
+          <div style="width: 200px">
+            <InputOTP @maxLength={{4}} @defaultValue="1234" aria-label="Code" as |otp|>
+              <div style="display: flex">
+                {{#each otp.slots as |slot|}}
+                  <otp.Slot @index={{slot.index}} style="width: 50px; height: 40px" />
+                {{/each}}
+              </div>
+            </InputOTP>
+          </div>
+        </DirectionProvider>
+      </template>,
+    )
+    const otp = new InputOTPHarness()
+    const width = (element: Element) => Number.parseFloat(getComputedStyle(element).width)
+    const takesThePointer = (x: number, y: number) => document.elementFromPoint(x, y) === otp.input
+    await otp.focus()
+    await otp.blur()
+    assert.strictEqual(width(otp.input), width(otp.element) + 40, '40px wider')
+    assert.strictEqual(otp.input.style.clipPath, 'inset(0px 0px 0px 40px)', 'clipped on the left')
+    const box = otp.element.getBoundingClientRect()
+    const input = otp.input.getBoundingClientRect()
+    assert.ok(Math.abs(input.right - box.right) < 0.5, 'it reaches left, past the last slot')
+    assert.ok(input.left < box.left)
+    for (const slot of otp.slots) {
+      const { left, top, width: wide, height } = slot.getBoundingClientRect()
+      const index = slot.getAttribute('data-test-jn-value')
+      assert.true(takesThePointer(left + wide / 2, top + height / 2), `slot ${index} takes a click`)
+    }
+    const middle = box.top + box.height / 2
+    assert.true(takesThePointer(box.right - 1, middle), 'the first slot, to its right edge')
+    assert.false(takesThePointer(box.left - 5, middle), 'but nothing past the last')
+
+    await otp.clickSlot(0)
+    assert.true(otp.isFocused, 'a click on the first slot focuses it')
     await a11yAudit()
   })
 

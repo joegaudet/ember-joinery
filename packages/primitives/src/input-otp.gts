@@ -7,7 +7,9 @@ import { on } from '@ember/modifier'
 import { buildWaiter } from '@ember/test-waiters'
 import type { WithBoundArgs } from '@glint/template'
 import Modifier from 'ember-modifier'
+import { As, type TagName } from './as.gts'
 import { controllable } from './controllable-state.ts'
+import { getDirection } from './direction.gts'
 
 const waiter = buildWaiter('@ember-joinery/primitives:input-otp')
 
@@ -40,6 +42,9 @@ export interface OTPSlot {
 
 type SelectionDirection = 'forward' | 'backward' | 'none'
 
+/** The side of the slots the input reaches past for a password manager's badge. */
+type BadgeSide = 'left' | 'right'
+
 const EMPTY_SLOT: OTPSlot = {
   index: -1,
   char: null,
@@ -65,20 +70,24 @@ export interface InputOTPSlotSignature {
     index: number
     /** @internal Bound by `InputOTP`. */
     slots: readonly OTPSlot[]
+    /** The tag to render instead of `div`. */
+    as?: TagName
   }
   Blocks: {
     /** What it shows, given its state; without a block, its character. */
     default: [slot: OTPSlot]
   }
-  Element: HTMLDivElement
+  Element: HTMLElement
 }
 
 /**
- * One character's box: a `div` with `data-active` (`"true"` while the selection is on it), and
- * its character inside, or whatever its block draws from the slot it yields (a caret, say).
+ * One character's box: a `div` (or `@as`) with `data-active` (`"true"` while the selection is
+ * on it), and its character inside, or whatever its block draws from the slot it yields (a
+ * caret, say).
  */
 export const InputOTPSlot: TOC<InputOTPSlotSignature> = <template>
-  <div
+  <As
+    @as={{@as}}
     data-active={{activeAttribute @slots @index}}
     data-test-jn-part="slot"
     data-test-jn-value="{{@index}}"
@@ -89,7 +98,7 @@ export const InputOTPSlot: TOC<InputOTPSlotSignature> = <template>
     {{else}}
       {{#let (slotAt @slots @index) as |slot|}}{{slot.char}}{{/let}}
     {{/if}}
-  </div>
+  </As>
 </template>
 
 export interface InputOTPSignature {
@@ -126,8 +135,9 @@ export interface InputOTPSignature {
     /** Where the (invisible) text sits in the input. Default `left`. */
     textAlign?: 'left' | 'center' | 'right'
     /**
-     * `increase-width` (the default) lets the input reach 40px past the slots, where there is
-     * room, so a password manager's badge sits beyond the last one; `none` doesn't.
+     * `increase-width` (the default) lets the input reach 40px past the slots, at their inline
+     * end (the right, or the left right to left), where the viewport leaves room, so a password
+     * manager's badge sits beyond the last one; `none` doesn't.
      */
     pushPasswordManagerStrategy?: 'increase-width' | 'none'
     /** Classes for the container that holds the slots and the input. */
@@ -183,8 +193,8 @@ export class InputOTP extends Component<InputOTPSignature> {
   @tracked isHovering = false
   @tracked selectionStart: number | null = null
   @tracked selectionEnd: number | null = null
-  /** Whether the input reaches past the slots for a password manager's badge. */
-  @tracked reachesForBadge = false
+  /** The side the input reaches past the slots for a password manager's badge, if it does. */
+  @tracked badgeSide: BadgeSide | null = null
 
   /** The selection last seen, for telling which way it moved. */
   previousSelection: [number | null, number | null, SelectionDirection] = [null, null, 'none']
@@ -199,6 +209,11 @@ export class InputOTP extends Component<InputOTPSignature> {
 
   get isComplete(): boolean {
     return this.value.length === this.maxLength
+  }
+
+  /** Where the input reaches past the slots, unless `@pushPasswordManagerStrategy` is `none`. */
+  get reach(): BadgeSide | null {
+    return this.args.pushPasswordManagerStrategy === 'none' ? null : this.badgeSide
   }
 
   @cached
@@ -395,6 +410,32 @@ export class InputOTP extends Component<InputOTPSignature> {
     this.isFocused = false
   }
 
+  /**
+   * Right to left, the slots run from the right, but a code is a left-to-right run (digits and
+   * Latin letters), so the browser's arrows would move the selection the wrong way across them.
+   * There, ArrowLeft goes on to the next character and ArrowRight back to the one before, as
+   * the browser's ArrowRight and ArrowLeft do left to right. Home and End go to the first and
+   * the last either way, as the browser's do.
+   */
+  handleKeyDown = (event: KeyboardEvent): void => {
+    const { key } = event
+    if (key !== 'ArrowLeft' && key !== 'ArrowRight') return
+    if (event.defaultPrevented || event.isComposing) return
+    if (event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return
+    const input = event.currentTarget as HTMLInputElement
+    if (slotDirection(input) !== 'rtl') return
+    event.preventDefault()
+    const forward = key === 'ArrowLeft'
+    const length = input.value.length
+    const start = input.selectionStart ?? length
+    const end = input.selectionEnd ?? start
+    let caret: number
+    if (start !== end) caret = forward ? end : start
+    else caret = forward ? Math.min(length, end + 1) : Math.max(0, start - 1)
+    input.setSelectionRange(caret, caret)
+    this.syncSelection(input)
+  }
+
   handleMouseOver = (event: MouseEvent): void => {
     const hovering = !(event.currentTarget as HTMLInputElement).disabled
     if (this.isHovering !== hovering) this.isHovering = hovering
@@ -405,16 +446,23 @@ export class InputOTP extends Component<InputOTPSignature> {
   }
 
   /**
-   * Once it has focus, the input reaches past the slots, where the viewport leaves room, so a
-   * password manager's badge (drawn at an input's inline end) sits beyond the last slot.
+   * Each time it takes focus, the input reaches past the slots where the viewport leaves room,
+   * so a password manager's badge (drawn at an input's inline end) sits beyond the last slot.
+   * It reaches toward the inline end, which is the side its wider box grows to: an absolutely
+   * placed box with both insets and a width drops the end one. input-otp reaches only once it
+   * finds a badge, but its check (`elementFromPoint` hitting anything but the container, which
+   * takes no pointer) finds one wherever the input is, so it reaches on every focus too.
    */
   #reachForBadge(input: HTMLInputElement): void {
-    if (this.reachesForBadge || this.args.pushPasswordManagerStrategy === 'none') return
+    if (this.args.pushPasswordManagerStrategy === 'none') return
     const container = input.closest('[data-input-otp-container]')
     const view = input.ownerDocument.defaultView
     if (!container || !view) return
-    const room = view.innerWidth - container.getBoundingClientRect().right
-    if (room >= PASSWORD_MANAGER_BADGE_SPACE) this.reachesForBadge = true
+    const box = container.getBoundingClientRect()
+    const side: BadgeSide = getDirection(input.parentElement ?? input) === 'rtl' ? 'left' : 'right'
+    const room = side === 'left' ? box.left : view.innerWidth - box.right
+    const reach = room >= PASSWORD_MANAGER_BADGE_SPACE ? side : null
+    if (this.badgeSide !== reach) this.badgeSide = reach
   }
 
   <template>
@@ -451,15 +499,11 @@ export class InputOTP extends Component<InputOTPSignature> {
           {{on "paste" this.handlePaste capture=true}}
           {{on "focus" this.handleFocus}}
           {{on "blur" this.handleBlur}}
+          {{on "keydown" this.handleKeyDown}}
           {{on "mouseover" this.handleMouseOver}}
           {{on "mouseleave" this.handleMouseLeave}}
           ...attributes
-          {{OTPInputModifier
-            otp=this
-            value=this.value
-            textAlign=@textAlign
-            reachesForBadge=this.reachesForBadge
-          }}
+          {{OTPInputModifier otp=this value=this.value textAlign=@textAlign reach=this.reach}}
         />
       </div>
     </div>
@@ -473,7 +517,7 @@ interface OTPInputModifierSignature {
       otp: InputOTP
       value: string
       textAlign: 'left' | 'center' | 'right' | undefined
-      reachesForBadge: boolean
+      reach: BadgeSide | null
     }
   }
 }
@@ -490,10 +534,10 @@ class OTPInputModifier extends Modifier<OTPInputModifierSignature> {
   override modify(
     input: HTMLInputElement,
     _: [],
-    { otp, textAlign = 'left', reachesForBadge }: OTPInputModifierSignature['Args']['Named'],
+    { otp, textAlign = 'left', reach }: OTPInputModifierSignature['Args']['Named'],
   ): void {
     otp.show(input)
-    style(input, textAlign, reachesForBadge)
+    style(input, textAlign, reach)
     if (!this.#connected) {
       this.#connected = true
       styleContainer(input)
@@ -532,14 +576,24 @@ function styleContainer(input: HTMLInputElement): void {
   box.style.setProperty('pointer-events', 'none')
 }
 
-/** The input's own styles, as input-otp's: it covers the slots, and draws nothing. */
-function style(input: HTMLInputElement, textAlign: string, reachesForBadge: boolean): void {
+/** The direction the slots run in: their container's. */
+function slotDirection(input: HTMLInputElement): 'ltr' | 'rtl' {
+  return getDirection(input.closest('[data-input-otp-container]') ?? input)
+}
+
+/**
+ * The input's own styles, as input-otp's: it covers the slots, and draws nothing. Reaching for
+ * a badge, it is 40px wider, toward `reach`, and clipped there, so it takes the pointer over
+ * the slots alone: every slot, the first one right to left included, takes a click.
+ */
+function style(input: HTMLInputElement, textAlign: string, reach: BadgeSide | null): void {
   const style = input.style
   const badge = `${PASSWORD_MANAGER_BADGE_SPACE}px`
   style.setProperty('position', 'absolute')
   style.setProperty('inset', '0')
-  style.setProperty('width', reachesForBadge ? `calc(100% + ${badge})` : '100%')
-  if (reachesForBadge) style.setProperty('clip-path', `inset(0 ${badge} 0 0)`)
+  style.setProperty('width', reach ? `calc(100% + ${badge})` : '100%')
+  if (reach === 'right') style.setProperty('clip-path', `inset(0 ${badge} 0 0)`)
+  else if (reach === 'left') style.setProperty('clip-path', `inset(0 0 0 ${badge})`)
   else style.removeProperty('clip-path')
   style.setProperty('height', '100%')
   style.setProperty('display', 'flex')

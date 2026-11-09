@@ -8,6 +8,7 @@ import {
   type OTPSlot,
 } from '@ember-joinery/primitives/input-otp'
 import { part, type PartModifier } from '@ember-joinery/primitives/part'
+import { As, type TagName } from '@ember-joinery/primitives/as'
 import { Minus } from 'lucide'
 import Icon, { type IconNode } from './icon.gts'
 import {
@@ -41,8 +42,10 @@ export interface InputOTPSlotSignature {
     index: number
     /** @internal Bound by `InputOTP`. */
     slots: readonly OTPSlot[]
+    /** The tag to render instead of `div`. */
+    as?: TagName
   }
-  Element: HTMLDivElement
+  Element: HTMLElement
 }
 
 /**
@@ -52,6 +55,7 @@ export interface InputOTPSlotSignature {
  */
 const InputOTPSlot: TOC<InputOTPSlotSignature> = <template>
   <InputOTPSlotPrimitive
+    @as={{@as}}
     @index={{@index}}
     @slots={{@slots}}
     class="jn-input-otp-slot"
@@ -72,13 +76,16 @@ export interface InputOTPSeparatorSignature {
   Args: {
     /** The icon it draws: one from `lucide`. Default lucide's `minus` (`MinusIcon`). */
     icon?: IconNode
+    /** The tag to render instead of `div`. For an element that draws its own, use `otp.separator`. */
+    as?: TagName
   }
-  Element: HTMLDivElement
+  Element: HTMLElement
 }
 
 /** What goes between groups: a `role="separator"` with a minus sign, as upstream's. */
 const InputOTPSeparator: TOC<InputOTPSeparatorSignature> = <template>
-  <div
+  <As
+    @as={{@as}}
     class="jn-input-otp-separator"
     role="separator"
     data-slot="input-otp-separator"
@@ -86,7 +93,7 @@ const InputOTPSeparator: TOC<InputOTPSeparatorSignature> = <template>
     ...attributes
   >
     <Icon @icon={{if @icon @icon Minus}} />
-  </div>
+  </As>
 </template>
 
 /** What an input OTP yields: its parts, and its state. */

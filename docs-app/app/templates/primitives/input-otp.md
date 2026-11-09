@@ -75,29 +75,31 @@ Joinery's is input-otp's single input, which every style sheet styles, and cover
 
 ## API
 
-| Argument                       | Type                            | Default             | What it does                                                                                          |
-| ------------------------------ | ------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------- |
-| `@maxLength`                   | `number`                        |                     | How many characters the code has (required)                                                           |
-| `@value`                       | `string`                        |                     | The code, controlled                                                                                  |
-| `@defaultValue`                | `string`                        |                     | The first code, uncontrolled                                                                          |
-| `@onValueChange`               | `(value) => void`               |                     | Called with each new code                                                                             |
-| `@onComplete`                  | `(value) => void`               |                     | Called with the code when it becomes complete                                                         |
-| `@pattern`                     | `string \| RegExp`              |                     | What the code may hold                                                                                |
-| `@pasteTransformer`            | `(pasted) => string`            |                     | Turns pasted text into the code to insert                                                             |
-| `@placeholder`                 | `string`                        |                     | A character per slot while it is empty (`aria-placeholder` too)                                       |
-| `@autoSubmit`                  | `boolean`                       | `false`             | Submits the form when the code is complete                                                            |
-| `@label`                       | `string`                        | `One-time password` | Its name when nothing else names it                                                                   |
-| `@textAlign`                   | `'left' \| 'center' \| 'right'` | `left`              | Where the input's invisible text sits                                                                 |
-| `@pushPasswordManagerStrategy` | `'increase-width' \| 'none'`    | `increase-width`    | Lets the focused input reach 40px past the slots, where there is room, for a password manager's badge |
-| `@containerClass`              | `string`                        |                     | Classes for the container                                                                             |
-| `@name`                        | `string`                        |                     | Its name, for `InputOTPHarness` (`data-test-jn-name`)                                                 |
+| Argument                       | Type                            | Default             | What it does                                                                                                      |
+| ------------------------------ | ------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `@maxLength`                   | `number`                        |                     | How many characters the code has (required)                                                                       |
+| `@value`                       | `string`                        |                     | The code, controlled                                                                                              |
+| `@defaultValue`                | `string`                        |                     | The first code, uncontrolled                                                                                      |
+| `@onValueChange`               | `(value) => void`               |                     | Called with each new code                                                                                         |
+| `@onComplete`                  | `(value) => void`               |                     | Called with the code when it becomes complete                                                                     |
+| `@pattern`                     | `string \| RegExp`              |                     | What the code may hold                                                                                            |
+| `@pasteTransformer`            | `(pasted) => string`            |                     | Turns pasted text into the code to insert                                                                         |
+| `@placeholder`                 | `string`                        |                     | A character per slot while it is empty (`aria-placeholder` too)                                                   |
+| `@autoSubmit`                  | `boolean`                       | `false`             | Submits the form when the code is complete                                                                        |
+| `@label`                       | `string`                        | `One-time password` | Its name when nothing else names it                                                                               |
+| `@textAlign`                   | `'left' \| 'center' \| 'right'` | `left`              | Where the input's invisible text sits                                                                             |
+| `@pushPasswordManagerStrategy` | `'increase-width' \| 'none'`    | `increase-width`    | Lets the focused input reach 40px past the slots' inline end, where there is room, for a password manager's badge |
+| `@containerClass`              | `string`                        |                     | Classes for the container                                                                                         |
+| `@name`                        | `string`                        |                     | Its name, for `InputOTPHarness` (`data-test-jn-name`)                                                             |
 
 It yields `{ slots, Slot, value, isComplete, isFocused, isHovering }`. Each slot is
 `{ index, char, placeholderChar, isActive, hasFakeCaret }`; `Slot` takes `@index`, renders a
-`<div data-active>` with its character, or yields the slot to a block of yours. The container
+`<div data-active>` (or `@as`) with its character, or yields the slot to a block of yours. The container
 carries `data-input-otp-container` and `data-test-jn="input-otp"`; the input,
 `data-input-otp` and `data-test-jn-part="input"`; a slot, `data-test-jn-part="slot"` and its
-index as `data-test-jn-value`. Its styles go through the CSSOM (and its few shared rules, for
+index as `data-test-jn-value`. Right to left, where the slots run from the right, it turns the
+arrow keys round (`ArrowLeft` selects the next character), which input-otp leaves to the
+browser. Its styles go through the CSSOM (and its few shared rules, for
 the selection and autofill colours, into an adopted style sheet), so a strict Content Security
 Policy allows them.
 

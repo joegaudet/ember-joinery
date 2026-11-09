@@ -126,28 +126,31 @@ Upstream's example, a "Verify your login" [Card](/components/card.md) with a res
 
 Joinery's styles use logical properties, so the slots run right to left inside any element
 with `dir="rtl"` (see [Direction](/primitives/direction.md)), and each group's rounded ends
-follow. Upstream's right-to-left example, in a Field with an Arabic label, comes with Field.
+follow. The arrow keys follow the slots: `ArrowLeft` selects the next character, on the left,
+and `ArrowRight` the one before. input-otp leaves the arrows to the browser, which moves through
+the code as the left-to-right run of digits it is, the wrong way across slots that run right
+to left. Upstream's right-to-left example, in a Field with an Arabic label, comes with Field.
 
 ## API Reference
 
 ### InputOTP
 
-| Argument                       | Type                            | Default             | What it does                                                                      |
-| ------------------------------ | ------------------------------- | ------------------- | --------------------------------------------------------------------------------- |
-| `@maxLength`                   | `number`                        |                     | How many characters the code has (required)                                       |
-| `@value`                       | `string`                        |                     | The code, when you control it: it shows it, and a change goes to `@onValueChange` |
-| `@defaultValue`                | `string`                        |                     | The code it starts with when you don't control it                                 |
-| `@onValueChange`               | `(value: string) => void`       |                     | Called with each new code, controlled or not (upstream's `onChange`)              |
-| `@onComplete`                  | `(value: string) => void`       |                     | Called with the code when it becomes complete                                     |
-| `@pattern`                     | `string \| RegExp`              |                     | What the code may hold: a change it doesn't match is refused                      |
-| `@pasteTransformer`            | `(pasted: string) => string`    |                     | Turns pasted text into the code to insert (strip dashes, say)                     |
-| `@placeholder`                 | `string`                        |                     | A character per slot while the code is empty, yielded as `slot.placeholderChar`   |
-| `@autoSubmit`                  | `boolean`                       | `false`             | Submits its form as soon as the code is complete, as ember-primitives' does       |
-| `@label`                       | `string`                        | `One-time password` | Its name, when nothing else names it; given, it names it always                   |
-| `@textAlign`                   | `'left' \| 'center' \| 'right'` | `left`              | Where the input's (invisible) text sits                                           |
-| `@pushPasswordManagerStrategy` | `'increase-width' \| 'none'`    | `increase-width`    | Lets the focused input reach 40px past the slots for a password manager's badge   |
-| `@containerClass`              | `string`                        |                     | Classes for the container around the slots (upstream's `containerClassName`)      |
-| `@name`                        | `string`                        |                     | Its name, for `InputOTPHarness` (`data-test-jn-name`); the form field's is `name` |
+| Argument                       | Type                            | Default             | What it does                                                                                |
+| ------------------------------ | ------------------------------- | ------------------- | ------------------------------------------------------------------------------------------- |
+| `@maxLength`                   | `number`                        |                     | How many characters the code has (required)                                                 |
+| `@value`                       | `string`                        |                     | The code, when you control it: it shows it, and a change goes to `@onValueChange`           |
+| `@defaultValue`                | `string`                        |                     | The code it starts with when you don't control it                                           |
+| `@onValueChange`               | `(value: string) => void`       |                     | Called with each new code, controlled or not (upstream's `onChange`)                        |
+| `@onComplete`                  | `(value: string) => void`       |                     | Called with the code when it becomes complete                                               |
+| `@pattern`                     | `string \| RegExp`              |                     | What the code may hold: a change it doesn't match is refused                                |
+| `@pasteTransformer`            | `(pasted: string) => string`    |                     | Turns pasted text into the code to insert (strip dashes, say)                               |
+| `@placeholder`                 | `string`                        |                     | A character per slot while the code is empty, yielded as `slot.placeholderChar`             |
+| `@autoSubmit`                  | `boolean`                       | `false`             | Submits its form as soon as the code is complete, as ember-primitives' does                 |
+| `@label`                       | `string`                        | `One-time password` | Its name, when nothing else names it; given, it names it always                             |
+| `@textAlign`                   | `'left' \| 'center' \| 'right'` | `left`              | Where the input's (invisible) text sits                                                     |
+| `@pushPasswordManagerStrategy` | `'increase-width' \| 'none'`    | `increase-width`    | Lets the focused input reach 40px past the slots' inline end for a password manager's badge |
+| `@containerClass`              | `string`                        |                     | Classes for the container around the slots (upstream's `containerClassName`)                |
+| `@name`                        | `string`                        |                     | Its name, for `InputOTPHarness` (`data-test-jn-name`); the form field's is `name`           |
 
 Its attributes go on its `<input>`, as upstream's props do: `id`, `name`, `disabled`,
 `required`, `inputmode` (`numeric` unless you give another), `autocomplete`
@@ -156,17 +159,17 @@ Its attributes go on its `<input>`, as upstream's props do: `id`, `name`, `disab
 
 It yields `otp`:
 
-| Member           | What it is                                                                        |
-| ---------------- | --------------------------------------------------------------------------------- |
-| `otp.Group`      | A row of slots drawn as one field (`@as` for another tag)                         |
-| `otp.Slot`       | One character's box: `@index`, from 0. Mark an error with `aria-invalid="true"`   |
-| `otp.Separator`  | What goes between groups, a minus sign; `@icon` draws another lucide icon         |
-| `otp.group`      | A modifier that makes your own element a group                                    |
-| `otp.separator`  | A modifier that makes your own element a separator (it draws its own content)     |
-| `otp.slots`      | Each slot's state: `index`, `char`, `placeholderChar`, `isActive`, `hasFakeCaret` |
-| `otp.value`      | The code now                                                                      |
-| `otp.isComplete` | Whether it has all its characters                                                 |
-| `otp.isFocused`  | Whether it has focus                                                              |
+| Member           | What it is                                                                                              |
+| ---------------- | ------------------------------------------------------------------------------------------------------- |
+| `otp.Group`      | A row of slots drawn as one field (`@as` for another tag)                                               |
+| `otp.Slot`       | One character's box: `@index`, from 0 (`@as` for another tag). Mark an error with `aria-invalid="true"` |
+| `otp.Separator`  | What goes between groups, a minus sign; `@icon` draws another lucide icon (`@as` for another tag)       |
+| `otp.group`      | A modifier that makes your own element a group                                                          |
+| `otp.separator`  | A modifier that makes your own element a separator (it draws its own content)                           |
+| `otp.slots`      | Each slot's state: `index`, `char`, `placeholderChar`, `isActive`, `hasFakeCaret`                       |
+| `otp.value`      | The code now                                                                                            |
+| `otp.isComplete` | Whether it has all its characters                                                                       |
+| `otp.isFocused`  | Whether it has focus                                                                                    |
 
 ### Data attributes
 
@@ -194,9 +197,15 @@ character, as input-otp does.
 | Typing                    | Replaces the selected character, or adds one, and moves to the next                  |
 | `Backspace`               | Deletes the selected character, or the one before the caret                          |
 | `Delete`                  | Deletes the selected character                                                       |
-| `ArrowLeft`, `ArrowRight` | Select the character before or after                                                 |
+| `ArrowLeft`, `ArrowRight` | Select the character before or after; right to left, `ArrowLeft` selects the next    |
 | `Home`, `End`             | Go to the first character, or after the last                                         |
 | `Ctrl`+`V`, `⌘`+`V`       | Pastes into the selection, through `@pasteTransformer`, cut to `@maxLength`          |
+
+A click puts the caret where it lands in the input's text, unless it focuses the input while
+the code is complete: then the last character stays selected, as `Tab` selects it. input-otp's
+styles squeeze that text into a sliver to hide it, so the caret goes to one end of the code
+whichever slot the click is over: left to right, after it, selecting the last character or the
+next empty slot, as on ui.shadcn.com. The arrow keys reach the others.
 
 ## Accessibility
 
@@ -213,7 +222,10 @@ character, as input-otp does.
 
 `InputOTPHarness` from `@ember-joinery/test-support` drives an `<InputOTP>`, or the headless
 one. It types, deletes and moves the caret the way a browser edits the input, and pastes and
-autofills as a browser does. `fillOTP(code, within?)` is ember-primitives' helper:
+autofills as a browser does. A click selects what Chromium does for a click at that point
+(`caretPositionFromPoint`), so with a complete code, `clickSlot(2)` then `typeIn('7')` replaces
+the last character, as it would for a user; `press` the arrow keys to reach another.
+`fillOTP(code, within?)` is ember-primitives' helper:
 
 ```ts
 import { InputOTPHarness, fillOTP } from '@ember-joinery/test-support'
@@ -228,26 +240,26 @@ assert.true(otp.isComplete)
 await fillOTP('123456') // the only InputOTP in the test
 ```
 
-| Member                                  | What it is                                                         |
-| --------------------------------------- | ------------------------------------------------------------------ |
-| `input`                                 | The `<input>` that holds the code                                  |
-| `value`, `maxLength`                    | The code, and how many characters it has                           |
-| `isComplete`                            | Whether it has them all                                            |
-| `slots`, `slot(index)`                  | The slots, or one by its index                                     |
-| `chars`                                 | What each slot shows (`''` for an empty one)                       |
-| `activeIndexes`, `activeIndex`          | The slots the selection is on, or the first (`null` without focus) |
-| `hasCaret(index)`                       | Whether that slot draws the caret                                  |
-| `groups`, `separators`                  | Its groups and separators                                          |
-| `label`, `description`                  | The input's accessible name, and what its `aria-describedby` names |
-| `isDisabled`, `isRequired`, `isFocused` | Its state                                                          |
-| `isInvalid`                             | `aria-invalid` on the input or on any slot                         |
-| `typeIn(text)`                          | Types a key at a time into the selection                           |
-| `press(key)`                            | `Backspace`, `Delete`, `ArrowLeft`, `ArrowRight`, `Home` or `End`  |
-| `clickSlot(index)`                      | Puts the caret before that character, as a click there does        |
-| `paste(text)`                           | Pastes from the clipboard into the selection                       |
-| `autofill(code)`                        | Fills the whole code in at once, as a browser's autofill does      |
-| `fillIn(code)`, `clear()`               | Replaces the code, or empties it                                   |
-| `focus()`, `blur()`                     | Moves focus to it, or away                                         |
+| Member                                  | What it is                                                                              |
+| --------------------------------------- | --------------------------------------------------------------------------------------- |
+| `input`                                 | The `<input>` that holds the code                                                       |
+| `value`, `maxLength`                    | The code, and how many characters it has                                                |
+| `isComplete`                            | Whether it has them all                                                                 |
+| `slots`, `slot(index)`                  | The slots, or one by its index                                                          |
+| `chars`                                 | What each slot shows (`''` for an empty one)                                            |
+| `activeIndexes`, `activeIndex`          | The slots the selection is on, or the first (`null` without focus)                      |
+| `hasCaret(index)`                       | Whether that slot draws the caret                                                       |
+| `groups`, `separators`                  | Its groups and separators                                                               |
+| `label`, `description`                  | The input's accessible name, and what its `aria-describedby` names                      |
+| `isDisabled`, `isRequired`, `isFocused` | Its state                                                                               |
+| `isInvalid`                             | `aria-invalid` on the input or on any slot                                              |
+| `typeIn(text)`                          | Types a key at a time into the selection                                                |
+| `press(key)`                            | `Backspace`, `Delete`, `ArrowLeft`, `ArrowRight`, `Home` or `End`                       |
+| `clickSlot(index)`                      | Clicks over that slot, and selects what the browser does (the end of the code, usually) |
+| `paste(text)`                           | Pastes from the clipboard into the selection                                            |
+| `autofill(code)`                        | Fills the whole code in at once, as a browser's autofill does                           |
+| `fillIn(code)`, `clear()`               | Replaces the code, or empties it                                                        |
+| `focus()`, `blur()`                     | Moves focus to it, or away                                                              |
 
 ## Upstream
 

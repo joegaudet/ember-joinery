@@ -261,6 +261,30 @@ module('Integration | components | input-otp', function (hooks) {
     await a11yAudit()
   })
 
+  test('@as renders a group, a slot or a separator as another tag', async function (assert) {
+    await render(
+      <template>
+        <InputOTP @maxLength={{2}} as |otp|>
+          <otp.Group @as="span"><otp.Slot @as="span" @index={{0}} /></otp.Group>
+          <otp.Separator @as="span" />
+          <otp.Group><otp.Slot @index={{1}} /></otp.Group>
+        </InputOTP>
+      </template>,
+    )
+    const otp = new InputOTPHarness()
+    assert.dom(otp.groups[0]).hasTagName('span').hasClass('jn-input-otp-group')
+    assert.dom(otp.slot(0)).hasTagName('span').hasClass('jn-input-otp-slot')
+    assert.dom(otp.slot(1)).hasTagName('div')
+    assert
+      .dom(otp.separators[0])
+      .hasTagName('span')
+      .hasClass('jn-input-otp-separator')
+      .hasAttribute('role', 'separator')
+    await otp.typeIn('4')
+    assert.deepEqual(otp.chars, ['4', ''])
+    await a11yAudit()
+  })
+
   test('a separator takes an icon of your own', async function (assert) {
     await render(
       <template>
@@ -299,6 +323,65 @@ module('Integration | components | input-otp', function (hooks) {
     assert.strictEqual(style.borderTopRightRadius, '10px', 'first:rounded-s-lg, on the right')
     assert.strictEqual(px(style.borderRightWidth), 1, 'first:border-s, on the right')
     assert.strictEqual(otp.label, 'رمز التحقق')
+
+    await otp.focus()
+    assert.deepEqual(otp.activeIndexes, [2], 'focus selects the last character, on the left')
+    await otp.press('ArrowRight')
+    assert.deepEqual(otp.activeIndexes, [1], 'ArrowRight selects the one to its right')
+    await otp.press('ArrowRight')
+    assert.deepEqual(otp.activeIndexes, [0])
+    await otp.press('ArrowLeft')
+    assert.deepEqual(otp.activeIndexes, [1], 'ArrowLeft the one to its left')
+
+    // Once it has had focus, the input reaches past the last slot, on the left, for a password
+    // manager's badge, and still takes the pointer over every slot, the first one on the right.
+    await otp.blur()
+    for (const slot of otp.slots) {
+      const { left, top, width, height } = slot.getBoundingClientRect()
+      assert.strictEqual(
+        document.elementFromPoint(left + width / 2, top + height / 2),
+        otp.input,
+        `slot ${slot.getAttribute('data-test-jn-value')} takes a click`,
+      )
+    }
+
+    // As in Chromium: a click that focuses it leaves the last character selected, as focus
+    // selects it; once it has focus, a click puts the caret at the start of the sliver of text,
+    // so it selects the first character, whichever slot it is over.
+    await otp.clickSlot(1)
+    assert.deepEqual(otp.activeIndexes, [2], 'a click that focuses it selects as focus does')
+    await otp.clickSlot(1)
+    assert.deepEqual(otp.activeIndexes, [0], 'a click once it has focus selects the first')
+    await a11yAudit()
+  })
+
+  test('a click on a slot puts the caret after the code, as on ui.shadcn.com', async function (assert) {
+    await render(
+      <template>
+        <InputOTP @maxLength={{6}} @defaultValue="123456" as |otp|>
+          <otp.Group>
+            <otp.Slot @index={{0}} />
+            <otp.Slot @index={{1}} />
+            <otp.Slot @index={{2}} />
+          </otp.Group>
+          <otp.Separator />
+          <otp.Group>
+            <otp.Slot @index={{3}} />
+            <otp.Slot @index={{4}} />
+            <otp.Slot @index={{5}} />
+          </otp.Group>
+        </InputOTP>
+      </template>,
+    )
+    // The input's text is squeezed under the first slot, so a click on any other lands after
+    // the code, and selects its last character, whichever slot it is over.
+    const otp = new InputOTPHarness()
+    for (const index of [1, 2, 3, 4, 5]) {
+      await otp.clickSlot(index)
+      assert.deepEqual(otp.activeIndexes, [5], `a click on slot ${index} selects the last`)
+    }
+    await otp.typeIn('7')
+    assert.strictEqual(otp.value, '123457', 'so typing replaces the last character')
     await a11yAudit()
   })
 })

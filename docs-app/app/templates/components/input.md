@@ -3,9 +3,7 @@
 A text input component for forms and user data entry with built-in styling and accessibility
 features.
 
-Upstream's first example shows an input in a Field, with a label and a description; Field
-hasn't landed in Joinery yet, and the example comes with it. The examples below show an input
-on its own.
+<Example @name="input-demo" @title="Input" />
 
 ## Installation
 
@@ -41,43 +39,38 @@ It renders a native `<input>`, so `type`, `placeholder`, `name`, `disabled`, `re
 ## Field
 
 Use `Field`, `FieldLabel`, and `FieldDescription` to create an input with a label and
-description. Upstream's example comes with Field.
+description (see [Field](/components/field.md)).
+
+<Example @name="input-field" @title="Field" />
 
 ## Field Group
 
-Use `FieldGroup` to show multiple `Field` blocks and to build forms. Upstream's example comes
-with Field.
+Use `FieldGroup` to show multiple `Field` blocks and to build forms.
+
+<Example @name="input-fieldgroup" @title="Field Group" />
 
 ## Disabled
 
-Use the `disabled` attribute to disable the input. To style the disabled state, add the
-`data-disabled` attribute to the `Field` component. Upstream's example, in a Field, comes with
-Field.
+Use the `disabled` attribute to disable the input. To style the disabled state, give the
+`Field` component `@disabled={{true}}` (upstream's `data-disabled`).
 
-```gts
-<Input type="email" placeholder="Email" disabled />
-```
+<Example @name="input-disabled" @title="Disabled" />
 
 ## Invalid
 
-Use the `aria-invalid` attribute to mark the input as invalid. To style the invalid state, add
-the `data-invalid` attribute to the `Field` component. Upstream's example, in a Field, comes
-with Field.
+Use the `aria-invalid` attribute to mark the input as invalid. To style the invalid state, give
+the `Field` component `@invalid={{true}}` (upstream's `data-invalid`).
 
-```gts
-<Input placeholder="Error" aria-invalid="true" />
-```
+<Example @name="input-invalid" @title="Invalid" />
 
 Give it the value `"true"`: React renders upstream's bare `aria-invalid` as `"true"`, but in a
 template a bare `aria-invalid` is empty, which ARIA reads as false.
 
 ## File
 
-Use `type="file"` to create a file input. Upstream's example, in a Field, comes with Field.
+Use `type="file"` to create a file input.
 
-```gts
-<Input id="picture" type="file" />
-```
+<Example @name="input-file" @title="File" />
 
 Listen for the files with `{{on "change"}}` and read `event.target.files`; `@onValueChange`
 hears the browser's `C:\fakepath\…` string, and `@value` can only clear a file input.
@@ -85,50 +78,51 @@ hears the browser's `C:\fakepath\…` string, and `@value` can only clear a file
 ## Inline
 
 Use `Field` with `orientation="horizontal"` to create an inline input. Pair with
-[`Button`](/components/button.md) to create a search input with a button. Upstream's example
-comes with Field.
+[`Button`](/components/button.md) to create a search input with a button.
+
+<Example @name="input-inline" @title="Inline" />
 
 ## Grid
 
-Use a grid layout to place multiple inputs side by side. Upstream's example, two Fields in a
-`FieldGroup`, comes with Field.
+Use a grid layout to place multiple inputs side by side.
+
+<Example @name="input-grid" @title="Grid" />
 
 ## Required
 
-Use the `required` attribute to indicate required inputs. Upstream's example, in a Field, comes
-with Field.
+Use the `required` attribute to indicate required inputs.
 
-```gts
-<Input placeholder="This field is required" required />
-```
+<Example @name="input-required" @title="Required" />
 
 ## Badge
 
-Use [`Badge`](/components/badge.md) in the label to highlight a recommended field. Upstream's
-example comes with Field.
+Use [`Badge`](/components/badge.md) in the label to highlight a recommended field.
+
+<Example @name="input-badge" @title="Badge" />
 
 ## Input Group
 
 To add icons, text, or buttons inside an input, use the `InputGroup` component. See the
 [Input Group](/components/input-group.md) component for more examples. Upstream's example, in a
-Field, comes with Field.
+Field, is still to port.
 
 ## Button Group
 
 To add buttons to an input, use the `ButtonGroup` component. See the
 [Button Group](/components/button-group.md) component for more examples. Upstream's example, in
-a Field, comes with Field.
+a Field, is still to port.
 
 ## Form
 
 A full form example with multiple inputs, a select, and a button. Upstream's example comes with
-Field and Select.
+Select.
 
 ## RTL
 
 Joinery's styles use logical properties, so an input lays itself out right to left inside any
-element with `dir="rtl"` (see [Direction](/primitives/direction.md)). Upstream's right-to-left
-example, in a Field, comes with Field.
+element with `dir="rtl"` (see [Direction](/primitives/direction.md)).
+
+<Example @name="input-rtl" @title="RTL" @dir="rtl" />
 
 ## Controlled
 

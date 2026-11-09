@@ -2,10 +2,7 @@
 
 A set of layered sections of content—known as tab panels—that are displayed one at a time.
 
-Upstream's first example puts each panel in a Card, which hasn't landed in Joinery yet; it
-comes with Card. Until then, this is upstream's Usage snippet, live:
-
-<Example @name="tabs-usage" @title="Tabs" />
+<Example @name="tabs-demo" @title="Tabs" />
 
 ## Installation
 
@@ -103,8 +100,9 @@ Disable a tab with `@disabled={{true}}` (not the `disabled` attribute), so it is
 
 To enable RTL support, see the [Direction](/primitives/direction.md) guide. The tabs take their
 direction from the nearest `dir`, or from `@dir`: right to left, they run from the right, the
-left arrow moves forward, and a vertical line tab's line moves to the left side. Upstream's
-example (`tabs-rtl`) puts each panel in a Card; it comes with Card.
+left arrow moves forward, and a vertical line tab's line moves to the left side.
+
+<Example @name="tabs-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 

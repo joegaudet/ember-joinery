@@ -1,9 +1,10 @@
 {
-  "$comment": "Waiting for components that haven't landed: tabs-demo and tabs-rtl (Card). The Tabs page shows Joinery's own tabs-usage, upstream's Usage snippet live, until then; it has no upstream counterpart, so it isn't mapped. The unit that lands Card ports these examples onto the Tabs page and maps them here.",
   "examples": {
+    "tabs-demo": "tabs-demo",
     "tabs-line": "tabs-line",
     "tabs-vertical": "tabs-vertical",
     "tabs-disabled": "tabs-disabled",
-    "tabs-icons": "tabs-icons"
+    "tabs-icons": "tabs-icons",
+    "tabs-rtl": "tabs-rtl"
   }
 }

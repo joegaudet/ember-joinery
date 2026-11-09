@@ -154,7 +154,8 @@ export interface CommandItemSignature {
     base: CommandPrimitiveYield['Item']
   }
   Blocks: { default: [] }
-  Element: HTMLDivElement
+  /** A `<div>`, or the tag `@as` names: an `<a>` for a link. */
+  Element: HTMLDivElement | HTMLAnchorElement
 }
 
 /** An option: its icon and text, a Shortcut if it has one, and a check at its end. */

@@ -970,7 +970,8 @@ export interface CommandItemSignature {
     command: CommandState
   }
   Blocks: { default: [] }
-  Element: HTMLDivElement
+  /** A `<div>`, or the tag `@as` names: an `<a>` for a link. */
+  Element: HTMLDivElement | HTMLAnchorElement
 }
 
 /**

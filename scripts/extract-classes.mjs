@@ -17,22 +17,39 @@
 //   variants look for them;
 // - everything else: utilities, which the CSS output `@apply`s to the slot's rule.
 //
-// The order the rules go in matters. Upstream builds an element's class list in call order: a
-// cva()'s base string (its semantic class, then its inline utilities), then each variant's
-// string (the variant's or size's semantic class, then any utilities after it), then the
-// compound variants; a cn() call likewise runs argument by argument. The registry build swaps
-// each semantic class for its style rule's utilities in place, and tailwind-merge (`cn`) keeps
-// the later of two conflicting classes. So an inline utility beats its own string's style rule
-// (`.jn-badge`), but a later string's style rule (`.jn-badge-variant-destructive`) beats it.
+// The order the rules go in matters, and it is the registry build's: shadcn's `transformStyle`
+// (in the `shadcn` package, which the parity app runs as upstream's build does) swaps each
+// semantic class for its style rule's utilities, and tailwind-merge (`cn`) keeps the later of two
+// conflicting classes. Where the swapped utilities land depends on the call:
+//
+// - A cva()'s base string and each variant's string are resolved in place: the string's style
+//   utilities, then its inline ones. cva joins the base, then the variants, so an inline utility
+//   beats its own string's style rule (`.jn-badge`) but loses to a variant's
+//   (`.jn-badge-variant-destructive`).
+// - A cn() call gathers the semantic classes of all its plain string arguments and puts their
+//   style utilities at the front of the call: into its first argument, ahead of that string's
+//   inline utilities, when that argument is a plain string, or as a new first argument when it
+//   isn't. So every inline utility in the call beats every style rule of the call's semantic
+//   classes, and a later argument's semantic class never overrides an earlier inline utility.
+// - Some semantic classes are never resolved, so on ui.shadcn.com they style nothing: those in
+//   a cn() argument that isn't a plain string (`open && "cn-x"`, a ternary), in a cn() call that
+//   isn't a `className` (Calendar's `classNames={{ dropdown_root: cn(…) }}`, Input OTP's
+//   `containerClassName`), in a cva compound variant, and any a cva string of the same file has
+//   already resolved. transformStyle also keeps five classes on the element for its other
+//   transforms (`cn-font-heading`, `cn-menu-target`, `cn-menu-translucent`, `cn-logical-sides`,
+//   `cn-rtl-flip`); those aren't flagged.
 //
 // Joinery's rules are all `:where()`, so source order decides between them. The extracted rules
-// go after the ported style sheet, which gets the first case right. For the second, the script
-// reads all eight upstream style sheets and checks each inline utility against the style rules
-// of the strings after it in the same call (leaving out those that can't apply together, such
-// as two options of one variant). A utility that a later class overrides in every style moves
-// out of the base rule into one that skips that class,
+// go after the ported style sheet, which gets the inline-beats-own-rule case right, and every
+// cn() case. For cva, the script reads all eight upstream style sheets and checks each inline
+// utility against the style rules of the cva's later strings (leaving out those that can't
+// apply together, such as two options of one variant). A utility that a later class overrides
+// in every style moves out of the base rule into one that skips that class,
 // `:where(.jn-badge:not(.jn-badge-variant-destructive))`. One that only some styles override
-// stays in the base rule, under a NOTE naming the styles where it comes out wrong.
+// stays in the base rule, under a NOTE naming the styles where it comes out wrong. A NOTE also
+// marks each semantic class upstream never resolves (Joinery's sheet would style it, and
+// ui.shadcn.com doesn't), and each one a cn() call moves ahead of an earlier argument that
+// isn't a plain string (`cn(buttonVariants(…), "cn-x")`: the button's classes then beat it).
 //
 // Strings that only apply under a condition (`isActive && "…"`, `a ? "…" : "…"`) are reported
 // with their condition and left as comments in the CSS: the component decides how to express
@@ -46,6 +63,50 @@ import ts from 'typescript'
 import { PATHS, checkoutDir, repoRoot } from './upstream.mjs'
 
 const MARKER = /^(group|peer)(\/[\w-]+)?$/
+
+/** The semantic classes transformStyle keeps on the element for its other transforms. */
+export const KEPT = new Set([
+  'jn-font-heading',
+  'jn-menu-target',
+  'jn-menu-translucent',
+  'jn-logical-sides',
+  'jn-rtl-flip',
+])
+
+/** A plain string, as transformStyle reads one: a string literal or a template with no `${}`. */
+const isPlain = node => ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)
+
+const isCnCall = node =>
+  Boolean(node) &&
+  ts.isCallExpression(node) &&
+  ts.isIdentifier(node.expression) &&
+  node.expression.text === 'cn'
+
+/**
+ * Whether transformStyle resolves a cn() call's semantic classes, or why not: it does for
+ * `className={cn(…)}`, for a cn() anywhere inside `className={…}` when that expression isn't a
+ * cn() call itself, and for `className: cn(…)` in any object.
+ */
+function cnResolution(node, source) {
+  const parent = node.parent
+  if (ts.isPropertyAssignment(parent) && parent.initializer === node) {
+    const name = propertyName(parent, source)
+    if (name === 'className') return true
+  }
+  for (let current = parent; current; current = current.parent) {
+    if (!ts.isJsxAttribute(current)) continue
+    const name = current.name.getText(source)
+    if (name !== 'className') return `its cn() call is in ${name}, not a className`
+    const expression =
+      current.initializer && ts.isJsxExpression(current.initializer)
+        ? current.initializer.expression
+        : undefined
+    return expression === node || !isCnCall(expression)
+      ? true
+      : 'its cn() call is inside another cn() call'
+  }
+  return 'its cn() call is not a className'
+}
 
 /** Splits a class string into semantic classes (renamed `jn-`), markers and utilities. */
 export function splitClasses(value) {
@@ -181,10 +242,13 @@ export function extractClasses(code, fileName = 'component.tsx') {
   )
   const entries = []
   let calls = 0
-  const add = (node, origin, call, found, extra = {}) => {
+  // `resolution`: true when transformStyle resolves the string's semantic classes, or why not.
+  const add = (node, origin, call, found, extra = {}, resolution = true) => {
     for (const { value, condition } of found) {
       const classes = splitClasses(value)
       if (!classes.semantic.length && !classes.utilities.length && !classes.markers.length) continue
+      const why = condition ? 'it is behind a condition' : resolution
+      const unresolved = why === true ? [] : classes.semantic.filter(name => !KEPT.has(name))
       entries.push({
         origin,
         call,
@@ -193,6 +257,7 @@ export function extractClasses(code, fileName = 'component.tsx') {
         ...extra,
         ...(condition && { condition }),
         ...classes,
+        ...(unresolved.length && { unresolved: { classes: unresolved, why } }),
       })
     }
   }
@@ -202,18 +267,32 @@ export function extractClasses(code, fileName = 'component.tsx') {
       const callee = node.expression.text
       if (callee === 'cn') {
         const call = calls++
-        for (const argument of node.arguments) {
+        const resolution = cnResolution(node, source)
+        node.arguments.forEach((argument, index) => {
           const found = []
           collectStrings(argument, source, undefined, found)
-          add(argument, 'cn', call, found)
-        }
+          // transformStyle moves this string's style rules to the front of the call, ahead of
+          // any earlier argument that isn't a plain string.
+          const ahead = node.arguments
+            .slice(0, index)
+            .filter(earlier => !isPlain(earlier))
+            .map(earlier => earlier.getText(source).replace(/\s+/g, ' '))
+          add(
+            argument,
+            'cn',
+            call,
+            found,
+            resolution === true && ahead.length ? { ahead } : {},
+            resolution === true ? isPlain(argument) || 'it is not a plain string' : resolution,
+          )
+        })
       } else if (callee === 'cva') {
         const call = calls++
         const [base, config] = node.arguments
         if (base) {
           const found = []
           collectStrings(base, source, undefined, found)
-          add(base, 'cva', call, found)
+          add(base, 'cva', call, found, {}, ts.isStringLiteral(base) || 'it is not a plain string')
         }
         if (config && ts.isObjectLiteralExpression(config)) {
           const variants = objectProperty(config, 'variants', source)?.initializer
@@ -228,9 +307,14 @@ export function extractClasses(code, fileName = 'component.tsx') {
                 if (!ts.isPropertyAssignment(option)) continue
                 const found = []
                 collectStrings(option.initializer, source, undefined, found)
-                add(option, 'cva-variant', call, found, {
-                  variant: `${propertyName(group, source)}.${propertyName(option, source)}`,
-                })
+                add(
+                  option,
+                  'cva-variant',
+                  call,
+                  found,
+                  { variant: `${propertyName(group, source)}.${propertyName(option, source)}` },
+                  ts.isStringLiteral(option.initializer) || 'it is not a plain string',
+                )
               }
             }
           }
@@ -251,7 +335,14 @@ export function extractClasses(code, fileName = 'component.tsx') {
                 if (!property) continue
                 const found = []
                 collectStrings(property.initializer, source, undefined, found)
-                add(property, 'cva-compound', call, found, { variant: when })
+                add(
+                  property,
+                  'cva-compound',
+                  call,
+                  found,
+                  { variant: when },
+                  'it is in a cva compound variant',
+                )
               }
             }
           }
@@ -266,11 +357,40 @@ export function extractClasses(code, fileName = 'component.tsx') {
         : ts.isJsxExpression(init) && init.expression
           ? stringValue(init.expression)
           : undefined
-      if (literal !== undefined) add(node, 'className', calls++, [{ value: literal }])
+      if (literal !== undefined) {
+        const plain =
+          isPlain(init) || (ts.isJsxExpression(init) && init.expression && isPlain(init.expression))
+        add(
+          node,
+          'className',
+          calls++,
+          [{ value: literal }],
+          {},
+          plain || 'it is not a plain string',
+        )
+      }
     }
     ts.forEachChild(node, visit)
   }
   visit(source)
+
+  // transformStyle resolves every cva first, and a class a cva string has resolved isn't
+  // resolved again anywhere in the file.
+  const byCva = new Set()
+  const cvaFirst = [
+    ...entries.filter(entry => entry.origin === 'cva' || entry.origin === 'cva-variant'),
+    ...entries.filter(entry => entry.origin === 'cn' || entry.origin === 'className'),
+  ]
+  for (const entry of cvaFirst) {
+    if (entry.unresolved) continue
+    const repeated = entry.semantic.filter(name => !KEPT.has(name) && byCva.has(name))
+    if (repeated.length) {
+      entry.unresolved = { classes: repeated, why: 'a cva string of this file resolved it already' }
+    }
+    if (entry.origin !== 'cn' && entry.origin !== 'className') {
+      for (const name of entry.semantic) byCva.add(name)
+    }
+  }
   return entries
 }
 
@@ -353,6 +473,13 @@ export function exclusive(a, b) {
 }
 
 /**
+ * Whether transformStyle resolves a string's semantic classes where the string is: a cva's base
+ * and variant strings. A cn() call moves its strings' style rules to its front, so they never
+ * override its inline utilities.
+ */
+const inPlace = entry => entry.origin === 'cva' || entry.origin === 'cva-variant'
+
+/**
  * The entries, each with `overriddenBy` where a later string of the same call has a style rule
  * that overrides one of its utilities: `{ utility, by, with, styles, every }`, where `by` is the
  * later class, `with` its overriding utilities, `styles` the sheets it happens in, and `every`
@@ -364,8 +491,10 @@ export function findOverrides(entries, sheets) {
     if (!entry.utilities.length) return entry
     const found = []
     for (const later of entries.slice(index + 1)) {
-      if (later.call !== entry.call || exclusive(entry, later)) continue
-      for (const className of later.semantic) {
+      if (later.call !== entry.call || !inPlace(later) || exclusive(entry, later)) continue
+      for (const className of later.semantic.filter(
+        name => !later.unresolved?.classes.includes(name),
+      )) {
         for (const utility of entry.utilities) {
           const by = {}
           for (const style of styles) {
@@ -420,6 +549,37 @@ function describe(entry) {
 
 const plural = (count, one, many) => (count === 1 ? one : many)
 
+const classList = names => names.map(name => `.${name}`).join(', ')
+
+/**
+ * NOTEs for what transformStyle does to a string's semantic classes that the ported sheet
+ * can't follow: classes it never resolves, and classes a cn() call moves ahead of an earlier
+ * argument (only those with a rule in some style, when the sheets were read).
+ */
+function transformNotes(entry, sheets) {
+  const notes = []
+  if (entry.unresolved) {
+    const { classes, why } = entry.unresolved
+    notes.push(
+      `/* NOTE: upstream's registry build never resolves ${classList(classes)} here (${why}), so on ui.shadcn.com ${plural(classes.length, 'its style rule applies', 'their style rules apply')} nowhere; to match, keep ${plural(classes.length, 'that class', 'those classes')} off this element, or ${plural(classes.length, 'its rule', 'their rules')} from reaching it. */`,
+    )
+  }
+  if (entry.ahead) {
+    const moved = entry.semantic.filter(
+      name =>
+        !KEPT.has(name) &&
+        !entry.unresolved?.classes.includes(name) &&
+        (!sheets || Object.values(sheets).some(rules => rules.get(name)?.length)),
+    )
+    if (moved.length) {
+      notes.push(
+        `/* NOTE: upstream's registry build moves ${classList(moved)}'s style rule to the front of this cn() call, ahead of ${entry.ahead.join(', ')}, whose classes then beat it; Joinery's sheet orders the rules by where the sheet has them. */`,
+      )
+    }
+  }
+  return notes
+}
+
 /**
  * The inline utilities as CSS: one `@apply` rule per class string that has a slot, with the
  * markers and anything conditional or slot-less left as comments for the component to handle.
@@ -430,10 +590,10 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
   const lines = [
     '/*',
     ` * Inline utilities from ${PATHS.ui}/${name}.tsx${commit ? ` (shadcn-ui/ui@${commit.slice(0, 7)})` : ''},`,
-    " * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: in upstream's",
-    " * class list each follows its own string's semantic class, so it wins over that class's rule.",
-    ' * Where a later class of the same call (a variant, a size) overrides one, its rule skips that',
-    ' * class with :not().',
+    " * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's",
+    " * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead",
+    ' * of all of them), so each wins over those rules. Where a later string of the same cva (a',
+    ' * variant, a size) overrides one, its rule skips that class with :not().',
     ...(sheets === null
       ? [' * The style sheets were missing, so later classes were not checked.']
       : []),
@@ -444,11 +604,13 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
     const notes = []
     if (entry.markers.length) notes.push(`keep on the element: ${entry.markers.join(' ')}`)
     if (entry.semantic.length > 1) notes.push(`also: ${entry.semantic.slice(1).join(' ')}`)
+    const warnings = transformNotes(entry, sheets)
     if (!entry.utilities.length) {
-      if (notes.length) {
+      if (notes.length || warnings.length) {
         lines.push(
           '',
-          `/* ${subject ? `:where(${subject})` : describe(entry)}: ${notes.join('; ')} */`,
+          `/* ${subject ? `:where(${subject})` : describe(entry)}${notes.length ? `: ${notes.join('; ')}` : ''} */`,
+          ...warnings,
         )
       }
       continue
@@ -462,6 +624,7 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
       )
       lines.push(
         `/* ${describe(entry)}, ${why}: ${entry.utilities.join(' ')}${later.length ? `; later in the call, ${later.join(', ')}` : ''} */`,
+        ...warnings,
       )
       continue
     }
@@ -474,6 +637,7 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
     const kept = entry.utilities.filter(utility => !moved.has(utility))
     lines.push(`/* ${describe(entry)}${notes.length ? `; ${notes.join('; ')}` : ''} */`)
     if (kept.length) lines.push(`:where(${subject}) {`, `  @apply ${kept.join(' ')};`, '}')
+    lines.push(...warnings)
     for (const { utility, by, styles } of overridden.filter(o => !o.every)) {
       lines.push(
         `/* NOTE: upstream's later .${by} overrides ${utility} in ${styles.join(', ')}, which this rule can't express; handle it in ${plural(styles.length, 'that style', 'those styles')}. */`,

@@ -119,15 +119,27 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    Upstream also writes utility classes inline in the component. For those, run
    `node scripts/extract-classes.mjs <name>`: it prints them as `@apply` rules, which go after
    the style sheet's rules. Keep its output whole, because the order is upstream's. Upstream's
-   class list runs in call order: a string's semantic class, then its inline utilities, then
-   the next string's (a cva's variant and size classes, a later `cn()` argument). Of two
-   conflicting classes, the later wins. So an inline utility beats its own class's style rule
-   but loses to a later class's: Badge's inline `focus-visible:ring-ring/50` loses to the ring
-   colour in `jn-badge-variant-destructive`. The script checks each inline utility against the
-   later classes' rules in all eight sheets. When a later class overrides it, the script moves it
-   to a rule that skips that class (`:where(.jn-badge:not(.jn-badge-variant-destructive))`), and
-   a `NOTE` marks any case this can't express. The output also lists the `group/*` markers the
-   element must keep, and leaves conditional classes as comments.
+   registry build (shadcn's `transformStyle`) swaps each semantic class for its style rule's
+   utilities, and of two conflicting classes the later wins. Where the rule's utilities land
+   depends on the call:
+   - In a `cva()`, each string is swapped in place (its rule, then its inline utilities), and the
+     strings run base, then variants. So an inline utility beats its own class's rule but loses
+     to a later variant's: Badge's inline `focus-visible:ring-ring/50` loses to the ring colour
+     in `jn-badge-variant-destructive`. The script checks each inline utility against the later
+     strings' rules in all eight sheets. When a later class overrides it, the script moves it to
+     a rule that skips that class (`:where(.jn-badge:not(.jn-badge-variant-destructive))`), and a
+     `NOTE` marks any case this can't express.
+   - A `cn()` call gathers the semantic classes of all its plain string arguments and puts their
+     rules at the front of the call, so every inline utility in it beats all of them, a later
+     argument's included. Where the first argument isn't a plain string
+     (`cn(buttonVariants(…), "cn-x …")`), the rules go ahead of it too, and a `NOTE` says so.
+   - Some semantic classes are never swapped, so ui.shadcn.com never styles them: those behind a
+     condition (`open && "cn-x"`), in a `cn()` call that isn't a `className` (Calendar's
+     `classNames={{…}}`, Input OTP's `containerClassName`), and in a cva compound variant. A
+     `NOTE` marks each one; to match upstream, keep that class off the element.
+
+   The output also lists the `group/*` markers the element must keep, and leaves conditional
+   classes as comments.
 
 A component is done when it has everything listed under "Definition of done for every
 component" in the plan: its primitive, the styled component, its harness, tests written with the

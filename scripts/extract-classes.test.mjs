@@ -297,3 +297,90 @@ function Calendar({ className }) {
     /DayPicker classNames\.months in Calendar, no slot to attach it to: relative flex/,
   )
 })
+
+test("cn() puts every plain string's style rule first, as transformStyle does, so none overrides an inline utility", () => {
+  // In a cn() call, transformStyle merges the style rules of every plain string's semantic
+  // classes into the first string, ahead of its inline utilities: min-w-0 beats
+  // .jn-badge-variant-outline's min-w-8 here, where in a cva it would lose.
+  const source = `
+function Tag({ className }) {
+  return <span data-slot="tag" className={cn("cn-badge min-w-0", "cn-badge-variant-outline", className)} />
+}
+`
+  const entries = findOverrides(extractClasses(source), SHEETS)
+  assert.equal(entries[0].overriddenBy, undefined)
+  assert.equal(entries[1].unresolved, undefined)
+  const css = renderCss(entries, { name: 'tag', sheets: SHEETS })
+  assert.match(css, /:where\(\.jn-badge\) \{\n {2}@apply min-w-0;\n\}/)
+  assert.doesNotMatch(css, /:where\([^)]*:not\(|NOTE/)
+})
+
+test('a NOTE marks each semantic class the registry build never resolves', () => {
+  const source = `
+const badgeVariants = cva("cn-badge inline-flex", {
+  variants: { size: { lg: "cn-badge-size-lg" } },
+  compoundVariants: [{ size: "lg", className: "cn-badge-compound border-2" }],
+})
+
+function Calendar({ open, className }) {
+  return (
+    <DayPicker
+      className={cn("cn-calendar p-2", open && "cn-calendar-open ring-2", open && "cn-rtl-flip", className)}
+      classNames={{ dropdown_root: cn("cn-calendar-dropdown-root relative", defaultClassNames.dropdown_root) }}
+    >
+      <span data-slot="badge" className={cn("cn-badge px-1")} />
+    </DayPicker>
+  )
+}
+`
+  const entries = extractClasses(source)
+  const unresolved = Object.fromEntries(
+    entries
+      .filter(entry => entry.unresolved)
+      .map(entry => [entry.unresolved.classes.join(' '), entry.unresolved.why]),
+  )
+  assert.deepEqual(unresolved, {
+    'jn-badge-compound': 'it is in a cva compound variant',
+    'jn-calendar-open': 'it is behind a condition',
+    'jn-calendar-dropdown-root': 'its cn() call is in classNames, not a className',
+    'jn-badge': 'a cva string of this file resolved it already',
+  })
+  assert.equal(
+    entries.find(entry => entry.semantic.includes('jn-rtl-flip')).unresolved,
+    undefined,
+    'a class transformStyle keeps for its other transforms is not flagged',
+  )
+  assert.equal(entries.find(entry => entry.semantic.includes('jn-calendar')).unresolved, undefined)
+  const css = renderCss(entries, { name: 'calendar', sheets: null })
+  assert.match(
+    css,
+    /\/\* NOTE: upstream's registry build never resolves \.jn-calendar-dropdown-root here \(its cn\(\) call is in classNames, not a className\), so on ui\.shadcn\.com its style rule applies nowhere; to match, keep that class off this element, or its rule from reaching it\. \*\//,
+  )
+  assert.match(css, /never resolves \.jn-calendar-open here \(it is behind a condition\)/)
+  assert.match(css, /never resolves \.jn-badge-compound here \(it is in a cva compound variant\)/)
+
+  // A className that isn't the attribute itself but sits inside one is resolved, as upstream's
+  // `className={open ? cn(…) : undefined}` is.
+  const nested = extractClasses(
+    `<div className={open ? cn("cn-panel p-2") : undefined} containerClassName={cn("cn-otp gap-1")} />`,
+  )
+  assert.equal(nested[0].unresolved, undefined)
+  assert.equal(nested[1].unresolved.why, 'its cn() call is in containerClassName, not a className')
+})
+
+test("a NOTE marks a cn() string whose rule moves ahead of an earlier argument that isn't a string", () => {
+  const source = `
+function Next({ size, className }) {
+  return <button data-slot="next" className={cn(buttonVariants({ size }), "cn-badge-variant-outline col-start-3", className)} />
+}
+`
+  const entries = extractClasses(source)
+  assert.deepEqual(entries[0].ahead, ['buttonVariants({ size })'])
+  assert.match(
+    renderCss(entries, { name: 'next', sheets: SHEETS }),
+    /NOTE: upstream's registry build moves \.jn-badge-variant-outline's style rule to the front of this cn\(\) call, ahead of buttonVariants\(\{ size \}\), whose classes then beat it/,
+  )
+  // With no rule for the class in any style, there is nothing to move, and nothing to say.
+  const bare = extractClasses(source.replace('cn-badge-variant-outline', 'cn-next'))
+  assert.doesNotMatch(renderCss(bare, { name: 'next', sheets: SHEETS }), /NOTE/)
+})

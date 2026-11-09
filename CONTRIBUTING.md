@@ -42,8 +42,9 @@ Overriding only the test app loads two copies of Ember.
 CI also runs the suite once more with CSS anchor positioning turned off, so the Floating UI
 fallback is tested too. Locally that's `pnpm test:anchor-fallback`: it builds the test app with
 `JOINERY_ANCHOR_FALLBACK=1`, which puts `globalThis.JOINERY_ANCHOR_FALLBACK = true` on the page
-before any module runs. `@ember-joinery/primitives` reads that global each time it positions a
-part (not once at import), and uses Floating UI whenever it is `true`.
+before any module runs. Until `@ember-joinery/primitives/anchor` (†) exists, that run repeats
+the first. The contract for it: read that global each time it positions a part (not once at
+import), and use Floating UI whenever it is `true`.
 
 ## Generated files
 
@@ -55,18 +56,32 @@ collide. Don't edit them by hand.
   alone). The barrels are gitignored. A package lists its barrel folders under
   `"joinery": { "barrels": [...] }` in its `package.json`; an add-on's `src/test-support` gets
   its own. A barrel re-exports every module's named exports, and a default export under the
-  PascalCase of its file name (`button-group.gts` becomes `ButtonGroup`). A folder with its own
-  `index.ts` counts as one module. Names starting with `_`, and `-private` folders, stay out.
-  Two modules exporting the same name fail the build.
+  PascalCase of its file name (`button-group.gts` becomes `ButtonGroup`). That name can't spell
+  an acronym (`input-otp.gts` gives `InputOtp`), so where upstream's name has one (`InputOTP`),
+  export the component by that name instead of as the default. A folder with its own index
+  (`anchor/index.ts`) counts as one module, and the files beside its index stay private. Names
+  starting with `_`, and `-private` folders, stay out. Two modules exporting the same name fail
+  the build.
 
 ## Packages and their build
 
 The packages are v2 addons: `primitives` and `ember` build with `@embroider/addon-dev` and
 rollup, `test-support` with `tsc`. Each one's `dist/` (and `declarations/`) is what the test app,
-the guide and the examples import, so rebuild after changing a package. `@ember-joinery/ember`
-also builds its CSS: `packages/ember/build-css.mjs` lists the CSS files it ships, and after
-every rollup build the Tailwind v4 CLI compiles each into `dist/` (`dist/joinery.css` and the
-rest).
+the guide and the examples import, so rebuild after changing a package. The build empties both
+first, so a deleted module leaves nothing behind.
+
+Every module in a rollup-built package's barrel is also a subpath export, one per feature
+(`scripts/entrypoints.mjs` finds them with the barrel's rules). `src/visually-hidden.gts` is
+`@ember-joinery/primitives/visually-hidden`; a folder feature, `src/anchor/index.ts`, builds to
+`dist/anchor.js` and is `@ember-joinery/primitives/anchor`. Files beside a folder's index,
+`-private` folders and `_` names are bundled into the modules that use them, not published on
+their own; import them by relative path inside the package only. A file and a folder with the
+same name (`anchor.ts` and `anchor/`) fail the build.
+
+`@ember-joinery/ember` also builds its CSS: `packages/ember/build-css.mjs` lists the CSS files it
+ships, and after every rollup build the Tailwind v4 CLI compiles each into `dist/`
+(`dist/joinery.css` and the rest). In watch mode (`pnpm start` in the package), editing any CSS
+file under `src/` rebuilds them.
 
 ## Porting a component
 

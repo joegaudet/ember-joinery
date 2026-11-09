@@ -1,0 +1,25 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/alert-dialog.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="alert-dialog-overlay" in AlertDialogOverlay */
+:where(.jn-alert-dialog-overlay) {
+  @apply fixed inset-0 z-50;
+}
+
+/* data-slot="alert-dialog-content" in AlertDialogContent; keep on the element: group/alert-dialog-content */
+:where(.jn-alert-dialog-content) {
+  @apply fixed top-1/2 start-1/2 z-50 grid w-full -translate-x-1/2 rtl:translate-x-1/2 -translate-y-1/2 outline-none;
+}
+
+/* data-slot="alert-dialog-footer" in AlertDialogFooter */
+:where(.jn-alert-dialog-footer) {
+  @apply flex flex-col-reverse gap-2 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end;
+}
+
+/* :where(.jn-alert-dialog-title): also: jn-font-heading */

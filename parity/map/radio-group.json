@@ -1,6 +1,11 @@
 {
-  "$comment": "Waiting for components that haven't landed: radio-group-description, radio-group-choice-card, radio-group-fieldset, radio-group-disabled, radio-group-invalid and radio-group-rtl (Field). The unit that lands Field ports these examples onto the Radio Group page and maps them here.",
   "examples": {
-    "radio-group-demo": "radio-group-demo"
+    "radio-group-demo": "radio-group-demo",
+    "radio-group-description": "radio-group-description",
+    "radio-group-choice-card": "radio-group-choice-card",
+    "radio-group-fieldset": "radio-group-fieldset",
+    "radio-group-disabled": "radio-group-disabled",
+    "radio-group-invalid": "radio-group-invalid",
+    "radio-group-rtl": "radio-group-rtl"
   }
 }

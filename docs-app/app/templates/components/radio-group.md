@@ -52,34 +52,43 @@ RadioGroup
 
 ## Description
 
-Radio group items with a description using the `Field` component. Upstream's example comes
-with Field.
+Radio group items with a description using the [Field](/components/field.md) component.
+
+<Example @name="radio-group-description" @title="Description" />
 
 ## Choice Card
 
-Use `FieldLabel` to wrap the entire `Field` for a clickable card-style selection. Upstream's
-example comes with Field.
+Use `FieldLabel` to wrap the entire `Field` for a clickable card-style selection.
+
+<Example @name="radio-group-choice-card" @title="Choice Card" />
 
 ## Fieldset
 
 Use `FieldSet` and `FieldLegend` to group radio items with a label and description.
-Upstream's example comes with Field.
+
+<Example @name="radio-group-fieldset" @title="Fieldset" />
 
 ## Disabled
 
 Use `@disabled` on `group.Item` to disable individual items, or on the group to disable them
-all. The arrow keys pass over a disabled item. Upstream's example comes with Field.
+all. The arrow keys pass over a disabled item.
+
+<Example @name="radio-group-disabled" @title="Disabled" />
 
 ## Invalid
 
-Use `aria-invalid` on `group.Item` and `data-invalid` on `Field` to show validation errors.
-Upstream's example comes with Field.
+Use `aria-invalid="true"` on `group.Item` and `@invalid={{true}}` on `Field` (upstream's
+`data-invalid`) to show validation errors.
+
+<Example @name="radio-group-invalid" @title="Invalid" />
 
 ## RTL
 
 The group lays itself out right to left inside any element with `dir="rtl"` (see
 [Direction](/primitives/direction.md)), or with `@dir="rtl"`, and its left and right arrow
-keys swap. Upstream's right-to-left example comes with Field.
+keys swap.
+
+<Example @name="radio-group-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 
@@ -153,7 +162,7 @@ arrows swap, and Enter does nothing.
 ## Accessibility
 
 - The group has the `radiogroup` role; name it with `aria-label` or `aria-labelledby` (or a
-  `FieldSet`'s legend, when Field lands).
+  `FieldSet`'s legend, as the Fieldset example does).
 - Each item has the `radio` role and `aria-checked`; name it with a label, as the examples do.
 - `aria-invalid="true"` on an item marks an error; `@required` sets `aria-required` on the
   group.

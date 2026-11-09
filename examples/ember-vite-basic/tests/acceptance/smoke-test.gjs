@@ -5,6 +5,7 @@ import { a11yAudit } from 'ember-a11y-testing/test-support'
 import * as ember from '@ember-joinery/ember'
 import * as testSupport from '@ember-joinery/test-support'
 import { ButtonHarness, IconHarness } from '@ember-joinery/test-support'
+import { CarouselHarness } from '@ember-joinery/carousel/test-support'
 import { CodeBlockHarness, setupClipboard } from '@ember-joinery/code-block/test-support'
 
 /** Every cascade layer the page's style sheets declare, in order. */
@@ -87,5 +88,23 @@ module('Acceptance | smoke', function (hooks) {
       assert.strictEqual(clipboard.text, 'pnpm add @ember-joinery/code-block')
       await a11yAudit()
     })
+  })
+
+  test('a Joinery Carousel, on Embla, moves between its slides here', async function (assert) {
+    await visit('/')
+    const carousel = new CarouselHarness('slides')
+    assert.strictEqual(
+      getComputedStyle(carousel.content).overflow,
+      'hidden',
+      'joinery.css styles it',
+    )
+    assert.deepEqual(carousel.slideTexts, ['One', 'Two', 'Three'])
+    assert.deepEqual(carousel.slidesInView, [0])
+    await carousel.scrollNext()
+    assert.deepEqual(carousel.slidesInView, [1], 'Embla moved it')
+    await carousel.press('ArrowRight')
+    assert.deepEqual(carousel.slidesInView, [2])
+    assert.false(carousel.canScrollNext)
+    await a11yAudit()
   })
 })

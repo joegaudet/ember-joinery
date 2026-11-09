@@ -5,6 +5,7 @@ import { on } from '@ember/modifier'
 import { modifier } from 'ember-modifier'
 import { ArrowUp } from 'lucide'
 import { Button, Icon } from '@ember-joinery/ember'
+import { Carousel } from '@ember-joinery/carousel'
 import { CodeBlock, highlightedCode } from '@ember-joinery/code-block'
 import { anchorTo } from '@ember-joinery/primitives/anchor'
 import { dismissable } from '@ember-joinery/primitives/dismiss'
@@ -107,5 +108,15 @@ const install = 'pnpm add @ember-joinery/code-block'
         {{#each (highlightedCode install "bash") as |line|}}<b.Line @code={{line}} />{{/each}}
       </b.Content>
     </CodeBlock>
+    {{! The carousel add-on, so this build covers Embla, its one dependency outside Ember. }}
+    <Carousel @name="slides" aria-label="Slides" style="width: 240px; margin: 0 48px" as |c|>
+      <c.Content>
+        <c.Item>One</c.Item>
+        <c.Item>Two</c.Item>
+        <c.Item>Three</c.Item>
+      </c.Content>
+      <c.Previous />
+      <c.Next />
+    </Carousel>
   </main>
 </template>

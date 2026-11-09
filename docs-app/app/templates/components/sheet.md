@@ -3,9 +3,7 @@
 Extends the Dialog component to display content that complements the main content of the
 screen.
 
-Upstream's first example edits a profile with Input and Label, which haven't landed in Joinery
-yet; it comes with them. The examples below show a sheet from each side, and one without its
-close button.
+<Example @name="sheet-demo" @title="Sheet" />
 
 ## Installation
 
@@ -75,7 +73,7 @@ Joinery's styles use logical properties, so a sheet lays itself out right to lef
 element with `dir="rtl"` (see [Direction](/primitives/direction.md)): its text starts on the
 right, and its close button sits in the top left. `@side` stays physical, as upstream's does,
 so a right-to-left page opens its sheet from the left with `@side="left"`. Upstream's example
-is its profile form in Arabic, with Field and Input; it comes with them.
+is its profile form in Arabic, laid out with Field; it comes with it.
 
 ## API Reference
 

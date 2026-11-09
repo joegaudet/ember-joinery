@@ -3,9 +3,9 @@
 A window overlaid on either the primary window or another dialog window, rendering the content
 underneath inert.
 
-Upstream's first example edits a profile in a form, with Field, Input and Label, which haven't
-landed in Joinery yet; it comes with them. The examples below show the dialog with Buttons and
-text.
+Upstream's first example edits a profile in a form laid out with Field, which hasn't landed in
+Joinery yet, and the example comes with it. The examples below show the dialog with Buttons,
+text and a read-only Input.
 
 ## Installation
 
@@ -85,14 +85,12 @@ Dialog
 
 ## Custom Close Button
 
-Replace the default close control with your own button. Upstream's example shares a link from a
-read-only Input with a Label; it comes with them. With a Button of your own:
+Replace the default close control with your own button.
 
-```gts
-<d.Footer class="sm:justify-start">
-  <Button type="button" {{d.close}}>Close</Button>
-</d.Footer>
-```
+<Example @name="dialog-close-button" @title="Custom Close Button" />
+
+A Button of your own closes the dialog with the `close` modifier (`<Button {{d.close}}>`), as
+upstream's `DialogClose asChild` does.
 
 ## No Close Button
 
@@ -120,7 +118,7 @@ Long content can scroll while the header stays in view.
 Joinery's styles use logical properties, so a dialog lays itself out right to left inside any
 element with `dir="rtl"` (see [Direction](/primitives/direction.md)): the close button moves to
 the top left, and the dialog stays centred. Upstream's right-to-left example is its profile
-form in Arabic, with Field, Input and Label; it comes with them.
+form in Arabic, laid out with Field; it comes with it.
 
 ## API Reference
 

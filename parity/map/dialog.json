@@ -1,6 +1,7 @@
 {
-  "$comment": "Waiting for components that haven't landed: dialog-demo and dialog-rtl (Field, Input and Label), dialog-close-button (Input and Label). The unit that lands each one ports its examples onto the Dialog page and maps them here.",
+  "$comment": "Waiting for a component that hasn't landed: dialog-demo and dialog-rtl (Field). The unit that lands it ports them onto the Dialog page and maps them here.",
   "examples": {
+    "dialog-close-button": "dialog-close-button",
     "dialog-no-close-button": "dialog-no-close-button",
     "dialog-sticky-footer": "dialog-sticky-footer",
     "dialog-scrollable-content": "dialog-scrollable-content"

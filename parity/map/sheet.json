@@ -1,6 +1,7 @@
 {
-  "$comment": "Waiting for components that haven't landed: sheet-demo (Input and Label), sheet-rtl (Field and Input). The unit that lands each one ports its examples onto the Sheet page and maps them here.",
+  "$comment": "Waiting for a component that hasn't landed: sheet-rtl (Field). The unit that lands it ports it onto the Sheet page and maps it here.",
   "examples": {
+    "sheet-demo": "sheet-demo",
     "sheet-side": "sheet-side",
     "sheet-no-close-button": "sheet-no-close-button"
   }

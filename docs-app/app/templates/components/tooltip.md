@@ -66,8 +66,7 @@ Use `@side` on `t.Content` to change the position of the tooltip.
 
 ## With Keyboard Shortcut
 
-A tooltip showing an icon button's keyboard shortcut. Upstream's example, `tooltip-keyboard`,
-comes with Kbd.
+<Example @name="tooltip-keyboard" @title="With Keyboard Shortcut" />
 
 ## Disabled Button
 

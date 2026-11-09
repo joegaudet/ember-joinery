@@ -1,6 +1,7 @@
 {
-  "$comment": "Waiting for components that haven't landed: popover-demo (Input and Label) and popover-form (Field and Input). The unit that lands them ports each example onto the Popover page and maps it here.",
+  "$comment": "Waiting for a component that hasn't landed: popover-form (Field). The unit that lands Field ports it onto the Popover page and maps it here.",
   "examples": {
+    "popover-demo": "popover-demo",
     "popover-basic": "popover-basic",
     "popover-alignments": "popover-alignments",
     "popover-rtl": "popover-rtl"

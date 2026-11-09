@@ -2,10 +2,7 @@
 
 Displays rich content in a portal, triggered by a button.
 
-Upstream's first example puts a form of Inputs and Labels in the popover, and comes with them
-(see [Demo](#demo) below). Here is its basic one:
-
-<Example @name="popover-basic" @title="Popover" />
+<Example @name="popover-demo" @title="Popover" />
 
 ## Installation
 
@@ -54,11 +51,6 @@ Popover
 └── p.Content
 ```
 
-## Demo
-
-Upstream's first example, `popover-demo`, lays out Labels and Inputs for a layer's dimensions
-in a wider popover. It comes with Input and Label.
-
 ## Basic
 
 A simple popover with a header, title, and description.
@@ -73,8 +65,7 @@ Use `@align` on `p.Content` to control the horizontal alignment.
 
 ## With Form
 
-A popover with form fields inside. Upstream's example, `popover-form`, comes with Field and
-Input.
+A popover with form fields inside. Upstream's example, `popover-form`, comes with Field.
 
 ## RTL
 

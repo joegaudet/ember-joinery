@@ -190,3 +190,32 @@ module('dark mode', function (hooks) {
 `system.fromAnotherTab('dark')` saves a choice and sends the `storage` event, as another tab
 would (`null` clears it), and `system.stored` is the saved choice. Pass `storageKey` when the
 app configures its own.
+
+## Keyboard and focus
+
+A test can't press the real Tab key: `triggerKeyEvent(element, 'keydown', 'Tab')` sends the
+event, but focus stays where it is. `tab()` does what the browser would: the focused element
+gets the `keydown`, and unless the page prevents it, focus moves to the next element in the
+tab order. That is how a test checks a focus trap or a roving tab stop.
+
+```ts
+import { pressKey, tab, tabOrder, typeKeys } from '@ember-joinery/test-support'
+
+await tab() // to the next element in the tab order
+await tab({ shift: true }) // to the previous one
+tabOrder(form) // the elements Tab visits, in order
+await pressKey('ArrowDown') // keydown and keyup on the focused element; true if prevented
+await pressKey('Tab', { shiftKey: true })
+await typeKeys('ba') // one key press per character, for typeahead
+```
+
+`tab()` follows a browser's rules: positive tabindexes first (lowest first), then document
+order; one stop per group of native radio buttons (the checked one); nothing hidden, inert or
+disabled. Past the last element, focus leaves the page, so nothing is focused afterwards. The
+test runner's own controls (QUnit's toolbar, testem's frame) aren't in the order. `pressKey` and
+`typeKeys` take `KeyboardEvent#key` values (`'a'`, `' '`, `'Home'`) and send key events only:
+they don't type into inputs or press buttons, which `typeIn` and `click` do.
+
+`RovingFocusGroupHarness` drives a `<RovingFocusGroup>` from
+`@ember-joinery/primitives/roving-focus`: `items` and `ids`, `item(id)`, the `focused` item,
+the `tabStop` Tab comes back to, `focus(id)` and `press(key)`.

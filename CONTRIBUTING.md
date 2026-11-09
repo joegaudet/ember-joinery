@@ -118,6 +118,11 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    together, `part()` and `As` for each part a caller may render as their own element (`@as`,
    `<LinkTo {{d.trigger}}>`), `Presence` for a part that animates out, and `getDirection()`
    wherever the text direction matters. The guide's Primitives section shows each.
+   For focus: `{{focusScope}}` (or `createFocusScope()`) for a part that takes focus in, can
+   trap it and gives it back, `RovingFocus` for items the arrow keys move between, `Typeahead`
+   and `getNextMatch()` for typing to an item, and `focusable` and `{{restoreFocus}}` for
+   finding focus a place. Test them with `tab()`, `pressKey()` and `typeKeys()` from
+   `@ember-joinery/test-support`: a test can't press the real Tab key.
 3. Its styles come from the ported style sheets, `packages/ember/src/styles/<style>.css`, which
    `node scripts/port-styles.mjs` writes from upstream's (it renames `cn-` to `jn-`, drops the
    `.style-<name>` wrapper and puts each selector in `:where()`; don't edit them by hand).

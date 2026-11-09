@@ -26,8 +26,10 @@ const models = [
 
 <template>
   {{!
-    Upstream's next/image is a plain <img>. Each item is a listitem, as the group is a list,
-    so the accessibility audit passes; upstream's leave the role off.
+    Upstream's next/image is a plain <img>, with h-auto: ui.shadcn.com's preflight gives an
+    image height: auto, so aspect-square sizes it rather than its height attribute, and the
+    guide has no preflight. Each item is a listitem, as the group is a list, so the
+    accessibility audit passes; upstream's leave the role off.
   }}
   <div class="flex w-full max-w-xl flex-col gap-6">
     <ItemGroup class="grid grid-cols-3 gap-4">
@@ -39,7 +41,7 @@ const models = [
               alt={{model.name}}
               width="128"
               height="128"
-              class="aspect-square w-full rounded-sm object-cover"
+              class="aspect-square h-auto w-full rounded-sm object-cover"
             />
           </i.Header>
           <i.Content>

@@ -20,6 +20,12 @@ module('Example | item-header', function (hooks) {
     for (const model of models) {
       const image = model.header.querySelector('img')!
       assert.dom(image).hasAttribute('alt', model.title)
+      // offset sizes, which the test container's scale() leaves alone
+      const [width, height] = [image.offsetWidth, image.offsetHeight]
+      assert.true(
+        width > 128 && Math.abs(width - height) <= 1,
+        `the image fills its column and stays square, not its 128px height (${width}×${height})`,
+      )
       assert.strictEqual(
         getComputedStyle(model.header).flexBasis,
         '100%',

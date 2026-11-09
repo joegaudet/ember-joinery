@@ -16,6 +16,9 @@ updates:
       # One PR a week for everything that shouldn't break anything.
       minor-and-patch:
         update-types: ['minor', 'patch']
+        # A playwright-core upgrade brings a new Chromium, which can move every parity
+        # screenshot (and leaves a preinstalled browser behind), so it gets a PR of its own.
+        exclude-patterns: ['playwright-core']
       # Ember's packages move together; review their majors together.
       ember:
         patterns: ['ember-*', '@ember/*', '@embroider/*', '@glimmer/*', '@glint/*']

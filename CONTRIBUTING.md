@@ -162,9 +162,15 @@ nothing mapped, `pnpm parity` has nothing to compare and passes. To compare loca
 ```bash
 node scripts/upstream.mjs fetch
 pnpm --dir parity install
+pnpm exec playwright-core install chromium   # unless PLAYWRIGHT_BROWSERS_PATH already has it
 pnpm build && pnpm guide:build
 pnpm parity --only button          # components or upstream example ids; all mapped by default
 ```
+
+The comparison runs playwright-core's own Chromium build, as CI does. `PARITY_CHROMIUM` points it
+at another Chromium binary, but that one's screenshots won't match CI's, so use it to look, not to
+set thresholds. `parity/README.md` has the details, including the fonts and why the stages leave
+out the docs pages' preview classes.
 
 ## Upstream sync
 

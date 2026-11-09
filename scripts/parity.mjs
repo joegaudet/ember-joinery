@@ -14,11 +14,17 @@
 // already running instead. With nothing mapped it has nothing to compare, and passes without
 // needing any of that.
 //
-// Each comparison loads both pages at the same fixed viewport, with the same fonts (served from
-// the parity app's @fontsource packages and injected into both pages), animations and
-// transitions off, and `prefers-reduced-motion`. A diff over the example's threshold (1% of
-// pixels unless its map entry sets one, with a reason) fails. The HTML report, with the three
-// images side by side, goes to parity-report/.
+// Each comparison loads both pages at the same fixed viewport, with the same fonts (the parity
+// app's @fontsource packages, served by a server of this script's own on every run, so they load
+// whichever servers the pages come from, and injected into both pages; a font that doesn't load
+// is an error, not a fallback), animations and transitions off, and `prefers-reduced-motion`. A
+// diff over the example's threshold (1% of pixels unless its map entry sets one, with a reason)
+// fails. The HTML report, with the three images side by side, goes to parity-report/.
+//
+// The browser is playwright-core's own Chromium build (`pnpm exec playwright-core install
+// chromium`, as CI does, or one preinstalled under PLAYWRIGHT_BROWSERS_PATH for the same
+// version). PARITY_CHROMIUM points it at another Chromium binary instead; the screenshots then
+// differ from CI's, so use it only to look at a comparison, not to set thresholds.
 
 import { spawnSync } from 'node:child_process'
 import { createServer } from 'node:http'
@@ -342,12 +348,21 @@ ${results.map(reportRow).join('\n')}
 // ---------------------------------------------------------------------------------------------
 // Pages, servers and the browser
 
-/** The CSS both pages get before a screenshot: the same fonts, no motion, a fixed scheme. */
-export function injectedCss(theme) {
-  return `@import url('/__parity/fonts/geist/index.css');
-@import url('/__parity/fonts/geist-mono/index.css');
-@import url('/__parity/fonts/noto-sans-arabic/index.css');
-@import url('/__parity/fonts/noto-sans-hebrew/index.css');
+/** The faces both pages load, each with a string to load it for (Arabic and Hebrew for RTL). */
+export const FONTS = [
+  { name: 'geist', family: 'Geist Variable', text: 'a' },
+  { name: 'geist-mono', family: 'Geist Mono Variable', text: 'a' },
+  { name: 'noto-sans-arabic', family: 'Noto Sans Arabic Variable', text: 'ع' },
+  { name: 'noto-sans-hebrew', family: 'Noto Sans Hebrew Variable', text: 'א' },
+]
+
+/**
+ * The CSS both pages get before a screenshot: the same fonts (from the font server at
+ * `fontsUrl`), no motion, a fixed scheme.
+ */
+export function injectedCss(theme, fontsUrl = '') {
+  const origin = fontsUrl.replace(/\/$/, '')
+  return `${FONTS.map(font => `@import url('${origin}/__parity/fonts/${font.name}/index.css');`).join('\n')}
 :root {
   --font-sans: 'Geist Variable', sans-serif !important;
   --font-heading: 'Geist Variable', sans-serif !important;
@@ -425,6 +440,8 @@ export function staticServer(mounts) {
     response.writeHead(200, {
       'content-type': TYPES[extname(file)] ?? 'application/octet-stream',
       'cache-control': 'no-store',
+      // The font server serves pages on other origins, and fonts need CORS.
+      'access-control-allow-origin': '*',
     })
     response.end(readFileSync(file))
   })
@@ -434,12 +451,19 @@ export function staticServer(mounts) {
 const urlOf = (server, path = '/') => `http://127.0.0.1:${server.address().port}${path}`
 
 /** The fonts both pages load, from the parity app's @fontsource packages. */
-function fontMounts(root = repoRoot) {
+export function fontMounts(root = repoRoot) {
   const fonts = join(root, 'parity', 'node_modules', '@fontsource-variable')
-  return ['geist', 'geist-mono', 'noto-sans-arabic', 'noto-sans-hebrew'].map(name => ({
-    prefix: `/__parity/fonts/${name}/`,
-    dir: join(fonts, name),
+  const mounts = FONTS.map(font => ({
+    prefix: `/__parity/fonts/${font.name}/`,
+    dir: join(fonts, font.name),
   }))
+  const missing = mounts.filter(mount => !existsSync(join(mount.dir, 'index.css')))
+  if (missing.length) {
+    throw new Error(
+      `the parity fonts are missing (${missing.map(m => basename(m.dir)).join(', ')}); run \`pnpm --dir parity install\``,
+    )
+  }
+  return mounts
 }
 
 function run(command, args, options = {}) {
@@ -452,7 +476,7 @@ const referenceReady = () => document.documentElement.dataset.parityReady !== un
 const joineryReady = () => Boolean(document.querySelector('[data-parity], [data-parity-missing]'))
 
 /** Opens a page, waits until it has rendered, and screenshots it. */
-async function screenshot(context, url, { theme, ready }) {
+async function screenshot(context, url, { theme, ready, fontsUrl }) {
   const page = await context.newPage()
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
@@ -462,20 +486,17 @@ async function screenshot(context, url, { theme, ready }) {
     const failed = await page.$('[data-parity-missing], [data-parity-error]')
     if (failed)
       throw new Error((await failed.textContent())?.trim() || 'the page reported an error')
-    await page.addStyleTag({ content: injectedCss(theme) })
-    await page.evaluate(async () => {
+    await page.addStyleTag({ content: injectedCss(theme, fontsUrl) })
+    const unloaded = await page.evaluate(async fonts => {
       // The injected faces load on use; load them now so the screenshot never catches a fallback.
-      await Promise.all(
-        [
-          ['400 16px "Geist Variable"', 'a'],
-          ['400 16px "Geist Mono Variable"', 'a'],
-          ['400 16px "Noto Sans Arabic Variable"', 'ع'],
-          ['400 16px "Noto Sans Hebrew Variable"', 'א'],
-        ].map(([font, text]) => document.fonts.load(font, text)),
+      const faces = await Promise.all(
+        fonts.map(font => document.fonts.load(`400 16px "${font.family}"`, font.text)),
       )
       await document.fonts.ready
       await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)))
-    })
+      return fonts.filter((_font, index) => !faces[index].length).map(font => font.family)
+    }, FONTS)
+    if (unloaded.length) throw new Error(`these fonts didn't load: ${unloaded.join(', ')}`)
     return await page.screenshot({ fullPage: true, animations: 'disabled', caret: 'hide' })
   } catch (error) {
     throw new Error(`${url}: ${error.message}${errors.length ? `\n${errors.join('\n')}` : ''}`, {
@@ -528,10 +549,7 @@ async function startReference(options, compared, log, root) {
   const dist = join(root, 'parity', 'dist')
   if (!existsSync(join(dist, 'index.html')))
     throw new Error('parity/dist is missing; run without --no-build')
-  return staticServer([
-    { prefix: '/', dir: dist, fallback: join(dist, 'index.html') },
-    ...fontMounts(root),
-  ])
+  return staticServer([{ prefix: '/', dir: dist, fallback: join(dist, 'index.html') }])
 }
 
 async function startJoinery(root) {
@@ -543,7 +561,6 @@ async function startJoinery(root) {
   return staticServer([
     { prefix: GUIDE_BASE, dir: guide, fallback: join(guide, 'index.html') },
     { prefix: '/ember-joinery/', dir: site },
-    ...fontMounts(root),
   ])
 }
 
@@ -578,6 +595,10 @@ export async function parity(options, { log = console.log, root = repoRoot } = {
   const servers = []
   let browser
   try {
+    // The fonts come from a server of their own, whichever servers the pages come from.
+    const fontServer = await staticServer(fontMounts(root))
+    servers.push(fontServer)
+    const fontsUrl = urlOf(fontServer, '')
     let referenceUrl = options.referenceUrl
     if (!referenceUrl) {
       const server = await startReference(options, compared, log, root)
@@ -631,9 +652,14 @@ export async function parity(options, { log = console.log, root = repoRoot } = {
           const upstream = await screenshot(context, urls.upstream, {
             theme,
             ready: referenceReady,
+            fontsUrl,
           })
           writeFileSync(join(reportDir, file('upstream')), upstream)
-          const joinery = await screenshot(context, urls.joinery, { theme, ready: joineryReady })
+          const joinery = await screenshot(context, urls.joinery, {
+            theme,
+            ready: joineryReady,
+            fontsUrl,
+          })
           writeFileSync(join(reportDir, file('joinery')), joinery)
           const comparison = await comparePngs(upstream, joinery)
           writeFileSync(join(reportDir, file('diff')), comparison.diff)

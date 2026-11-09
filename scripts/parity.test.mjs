@@ -7,6 +7,7 @@ import { PNG } from 'pngjs'
 import {
   DEFAULT_THRESHOLD,
   comparePngs,
+  fontMounts,
   injectedCss,
   layoutFor,
   loadMaps,
@@ -38,8 +39,7 @@ const INVENTORY = {
   blocks: [{ name: 'login-01' }],
 }
 
-function fixture(files) {
-  const root = mkdtempSync(join(tmpdir(), 'parity-'))
+function fixture(files, root = mkdtempSync(join(tmpdir(), 'parity-'))) {
   for (const [path, content] of Object.entries(files)) {
     mkdirSync(dirname(join(root, path)), { recursive: true })
     writeFileSync(join(root, path), typeof content === 'string' ? content : JSON.stringify(content))
@@ -273,10 +273,48 @@ test('renderReport shows each comparison side by side', () => {
 })
 
 test('injectedCss loads the fonts, fixes the scheme and stops motion', () => {
-  const css = injectedCss('dark')
-  assert.match(css, /^@import url\('\/__parity\/fonts\/geist\/index.css'\);/)
+  const css = injectedCss('dark', 'http://127.0.0.1:4000/')
+  assert.match(
+    css,
+    /^@import url\('http:\/\/127\.0\.0\.1:4000\/__parity\/fonts\/geist\/index.css'\);/,
+  )
+  assert.match(
+    css,
+    /@import url\('http:\/\/127\.0\.0\.1:4000\/__parity\/fonts\/noto-sans-hebrew\/index.css'\);/,
+  )
   assert.match(css, /color-scheme: dark !important/)
   assert.match(css, /animation-duration: 0s !important/)
+})
+
+test("fontMounts serves the parity app's fonts, and says what to install when they are missing", () => {
+  const root = fixture({
+    'parity/node_modules/@fontsource-variable/geist/index.css': '',
+    'parity/node_modules/@fontsource-variable/geist-mono/index.css': '',
+  })
+  try {
+    assert.throws(
+      () => fontMounts(root),
+      /fonts are missing \(noto-sans-arabic, noto-sans-hebrew\); run `pnpm --dir parity install`/,
+    )
+    fixture(
+      {
+        'parity/node_modules/@fontsource-variable/noto-sans-arabic/index.css': '',
+        'parity/node_modules/@fontsource-variable/noto-sans-hebrew/index.css': '',
+      },
+      root,
+    )
+    assert.deepEqual(
+      fontMounts(root).map(mount => mount.prefix),
+      [
+        '/__parity/fonts/geist/',
+        '/__parity/fonts/geist-mono/',
+        '/__parity/fonts/noto-sans-arabic/',
+        '/__parity/fonts/noto-sans-hebrew/',
+      ],
+    )
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
 })
 
 test('parseArgs', () => {
@@ -312,6 +350,7 @@ test('staticServer serves files, falls back to the app, and stays in its folder'
   try {
     const asset = await fetch(`${base}/guide/assets/a.js`)
     assert.equal(asset.headers.get('content-type'), 'text/javascript')
+    assert.equal(asset.headers.get('access-control-allow-origin'), '*', 'fonts load cross-origin')
     assert.equal(await asset.text(), 'x')
     assert.equal(await (await fetch(`${base}/guide/parity/button-demo`)).text(), '<p>app</p>')
     // An encoded slash survives URL parsing, so this reaches the server as /guide/../secret.txt.

@@ -40,7 +40,9 @@ import { DropdownMenu } from '@ember-joinery/primitives/dropdown-menu'
 
 - **State.** Pass `@open` with `@onOpenChange` to control it, or start it with `@defaultOpen`.
   It yields `isOpen`, `open`, `close`, `toggle` and `setOpen`. A submenu's state works the same
-  way. A checkbox item's (`@checked`, `@onCheckedChange`) and a radio group's (`@value`,
+  way, and as Radix's, a submenu closes (`@onOpenChange(false)`) when the menu it is in closes and
+  when it goes away, so one your state holds open isn't open again the next time its menu opens.
+  A checkbox item's (`@checked`, `@onCheckedChange`) and a radio group's (`@value`,
   `@onValueChange`) are yours, as Radix's are.
 - **Items.** Selecting one (a click, Enter or Space, or a press on the trigger let go over it)
   calls `@onSelect` with a cancelable event, then closes the menu unless you prevented it. A

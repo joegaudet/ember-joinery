@@ -674,6 +674,120 @@ module('Integration | primitives | dropdown-menu', function (hooks) {
     await a11yAudit()
   })
 
+  test('a submenu’s state is its own: @defaultOpen, and @onOpenChange hears it close with the menu it is in', async function (assert) {
+    const changes: Record<string, boolean[]> = { invite: [], more: [] }
+    const heard = (name: string) => (open: boolean) => changes[name]!.push(open)
+    await render(
+      <template>
+        <DropdownMenu as |m|>
+          <m.Trigger>Team</m.Trigger>
+          <m.Content>
+            <m.Item>Team</m.Item>
+            <m.Sub @onOpenChange={{heard "invite"}} as |s|>
+              <s.Trigger>Invite users</s.Trigger>
+              <s.Content>
+                <m.Item>Email</m.Item>
+                <m.Sub @defaultOpen={{true}} @onOpenChange={{heard "more"}} as |more|>
+                  <more.Trigger>More</more.Trigger>
+                  <more.Content><m.Item>Slack</m.Item></more.Content>
+                </m.Sub>
+              </s.Content>
+            </m.Sub>
+          </m.Content>
+        </DropdownMenu>
+      </template>,
+    )
+    const menu = new DropdownMenuHarness()
+    await menu.open()
+    const sub = menu.sub('Invite users')
+    assert.false(sub.isOpen)
+    await sub.open()
+    const more = sub.sub('More')
+    assert.true(sub.isOpen)
+    assert.true(more.isOpen, '@defaultOpen: it opens with the submenu it is in')
+    assert.true(more.isShown)
+    assert.deepEqual(changes, { invite: [true], more: [] })
+    await a11yAudit()
+
+    await menu.hover('Team')
+    assert.false(sub.isOpen, 'another item closes it')
+    assert.deepEqual(
+      changes,
+      { invite: [true, false], more: [false] },
+      'a submenu closes with the submenu it is in',
+    )
+
+    await sub.open()
+    assert.true(more.isOpen, 'rendered anew, it starts from @defaultOpen again')
+    await menu.pressEscape()
+    assert.false(menu.isOpen)
+    assert.deepEqual(changes, { invite: [true, false, true, false], more: [false, false] })
+    await a11yAudit()
+  })
+
+  test('a submenu’s state is yours with @open and @onOpenChange, which hears it close with its menu and as it goes', async function (assert) {
+    class SubState {
+      @tracked open = false
+      @tracked shown = true
+      changes: boolean[] = []
+      setOpen = (open: boolean) => {
+        this.changes.push(open)
+        this.open = open
+      }
+    }
+    const state = new SubState()
+    await render(
+      <template>
+        <DropdownMenu as |m|>
+          <m.Trigger>Team</m.Trigger>
+          <m.Content>
+            <m.Item>Team</m.Item>
+            {{#if state.shown}}
+              <m.Sub @open={{state.open}} @onOpenChange={{state.setOpen}} as |s|>
+                <s.Trigger>Invite users</s.Trigger>
+                <s.Content><m.Item>Email</m.Item></s.Content>
+              </m.Sub>
+            {{/if}}
+          </m.Content>
+        </DropdownMenu>
+      </template>,
+    )
+    const menu = new DropdownMenuHarness()
+    await menu.open()
+    const sub = menu.sub('Invite users')
+    await sub.open()
+    assert.true(sub.isOpen)
+    assert.deepEqual(state.changes, [true])
+    state.open = false
+    await settled()
+    assert.false(sub.isOpen, 'closed by @open')
+    state.open = true
+    await settled()
+    assert.true(sub.isOpen, 'opened by @open')
+    assert.true(sub.isShown)
+    await a11yAudit()
+
+    await menu.pressEscape()
+    assert.false(menu.isOpen)
+    assert.deepEqual(
+      state.changes,
+      [true, false],
+      'its menu closing closes it, through @onOpenChange',
+    )
+    assert.false(state.open)
+    await menu.open()
+    assert.false(sub.isOpen, 'so its menu opens with it closed')
+
+    state.open = true
+    await settled()
+    assert.true(sub.isOpen)
+    state.shown = false
+    await settled()
+    assert.deepEqual(state.changes, [true, false, false], 'it closes as it goes, as Radix’s does')
+    assert.false(state.open)
+    await a11yAudit()
+  })
+
   test('the keyboard opens a submenu on its first item, and the arrow back closes it', async function (assert) {
     await render(
       <template>

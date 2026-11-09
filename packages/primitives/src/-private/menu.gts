@@ -11,7 +11,7 @@ import { tracked } from '@glimmer/tracking'
 import { hash } from '@ember/helper'
 import { on } from '@ember/modifier'
 import Modifier, { modifier as functionModifier } from 'ember-modifier'
-import { registerDestructor } from '@ember/destroyable'
+import { isDestroyed, isDestroying, registerDestructor } from '@ember/destroyable'
 import type Owner from '@ember/owner'
 import type { TOC } from '@ember/component/template-only'
 import type { WithBoundArgs } from '@glint/template'
@@ -1148,7 +1148,9 @@ export interface MenuSubSignature {
 /**
  * A submenu, as Radix's `Sub`: it yields its Trigger and Content. Its state is its own, or
  * yours (`@open`, `@onOpenChange`, `@defaultOpen`), and it is shown only while every menu it is
- * in is open.
+ * in is open. As Radix's, it closes (`@onOpenChange(false)`) when the menu it is in closes and
+ * when it goes away, so a submenu your state holds open isn't open again the next time its menu
+ * opens.
  */
 export class MenuSub extends Component<MenuSubSignature> {
   openState = controllable(this, 'open', false)
@@ -1161,15 +1163,39 @@ export class MenuSub extends Component<MenuSubSignature> {
 
   constructor(owner: Owner, args: MenuSubSignature['Args']) {
     super(owner, args)
-    registerDestructor(this, () => clearTimeout(this.#graceTimer))
+    registerDestructor(this, () => {
+      clearTimeout(this.#graceTimer)
+      // Radix's MenuSub calls `onOpenChange(false)` as it unmounts.
+      this.setOpen(false)
+    })
   }
 
   get root(): MenuRoot {
     return this.args.menu
   }
 
+  /** The menu it is in: the submenu its trigger is in, or the root. */
+  get parentLevel(): MenuLevel {
+    return this.parent ?? this.root
+  }
+
   get isOpen(): boolean {
-    return this.openState.value && (this.parent ?? this.root).isOpen
+    return this.openState.value && this.parentLevel.isOpen
+  }
+
+  /**
+   * Radix's "prevent the parent menu from reopening with open submenus": while the menu it is in
+   * is closed, it closes too. The template calls it with that menu's state, so it runs whenever
+   * the state changes, however it changed (`@open` in your state, too); the close waits for the
+   * render to end, which can't change state it has read.
+   */
+  closeWithParent = (parentOpen: boolean): undefined => {
+    if (parentOpen) return undefined
+    queueMicrotask(() => {
+      if (isDestroying(this) || isDestroyed(this) || this.parentLevel.isOpen) return
+      this.setOpen(false)
+    })
+    return undefined
   }
 
   get contentId(): string {
@@ -1279,6 +1305,7 @@ export class MenuSub extends Component<MenuSubSignature> {
   )
 
   <template>
+    {{this.closeWithParent this.parentLevel.isOpen}}
     {{yield
       (hash
         Trigger=(component MenuSubTrigger part=this.trigger)

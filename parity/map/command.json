@@ -1,0 +1,10 @@
+{
+  "examples": {
+    "command-demo": "command-demo",
+    "command-basic": "command-basic",
+    "command-shortcuts": "command-shortcuts",
+    "command-groups": "command-groups",
+    "command-scrollable": "command-scrollable",
+    "command-rtl": "command-rtl"
+  }
+}

@@ -292,6 +292,40 @@ module('Integration | components | field', function (hooks) {
     await a11yAudit()
   })
 
+  test("a vertical field stretches its children, but not past a width of a child's own variant", async function (assert) {
+    await render(
+      <template>
+        <div style="width: 320px">
+          <Field @name="vertical">
+            <FieldLabel for="notify">Notifications</FieldLabel>
+            <Switch id="notify" />
+            <Switch id="compact" @size="sm" aria-label="Compact" />
+            <Input id="email" aria-label="Email" />
+          </Field>
+          <Field @name="responsive" @orientation="responsive">
+            <Switch id="beta" aria-label="Beta" />
+          </Field>
+        </div>
+      </template>,
+    )
+    const vertical = new FieldHarness('vertical')
+    const [notify, compact] = vertical.findAll(SwitchHarness)
+    assert.strictEqual(vertical.labelElement!.offsetWidth, 320, '*:w-full over w-fit')
+    assert.strictEqual(vertical.find(InputHarness).element.offsetWidth, 320)
+    assert.strictEqual(
+      notify!.element.offsetWidth,
+      32,
+      'data-[size=default]:w-[32px] wins over *:w-full, as upstream’s does',
+    )
+    assert.strictEqual(compact!.element.offsetWidth, 24, 'data-[size=sm]:w-[24px]')
+    assert.strictEqual(
+      new FieldHarness('responsive').find(SwitchHarness).element.offsetWidth,
+      32,
+      'in a responsive field too',
+    )
+    await a11yAudit()
+  })
+
   test('a responsive field lays out by the width of its field group', async function (assert) {
     class State {
       @tracked width = 600

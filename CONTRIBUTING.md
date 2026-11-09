@@ -231,18 +231,32 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   aligns it). The frame has Preview, Template and Test tabs and a copy button.
 - Every example has a test, `docs-app/tests/examples/<name>-test.gts`, written with harness
   classes and ending in an axe audit. The guide shows it in the example's Test tab, so write it
-  the way you'd want a reader to write theirs.
+  the way you'd want a reader to write theirs. `docs-app/tests/unit/examples-test.ts` fails
+  when an example has no test, a test has no example, or a test never calls `a11yAudit()`.
+  (The Introduction's test still uses raw selectors; it moves to a harness once the guide can
+  import the harness base.)
+- The guide's own CSS (`docs-app/app/styles/app.css`) sits in `@layer guide`, below
+  `@layer joinery`, so Joinery's rules win wherever a component renders. Its prose and link
+  rules are `@scope`d to stop at an example, and the example's preview and the parity route
+  are a `guide-stage`: the text styles the page would pass down (font, size, line height,
+  colour) start over there, as in upstream's preview. The stage adds no reset of its own, so
+  the guide and the parity comparison see Joinery as an app without Tailwind does. Keep new
+  guide rules inside the layer, and scope any that select bare elements.
 - `/parity/<name>` renders one example with no frame and no guide around it, centred as
-  upstream's preview is, for the screenshot comparison. `?theme=dark` puts `.dark` on `<html>`,
-  `?dir=rtl` lays it out right to left, and `?align=start|end` places it. The example's root
-  carries `data-parity="<name>"`; an unknown name renders `data-parity-missing` instead.
+  upstream's preview is, for the screenshot comparison. `?theme=dark` puts `.dark` on `<html>`
+  and `?theme=light` (the default) puts `.light` there; either also pins `color-scheme`, so the
+  browser's or OS's preference can't change the page. `?dir=rtl` lays it out right to left,
+  and `?align=start|end` places it. The example's root carries `data-parity="<name>"`; an
+  unknown name renders `data-parity-missing` instead.
 
 ## The website
 
 `docs/site/` is hand-written HTML, not generated. For now `site.css` is a placeholder that uses
 shadcn's token names; the finished site is styled with Joinery's own CSS. The live demo is
 `test-app/app`, built into `docs/site/demo/` by `pnpm demo:build`, and `pages.yml` builds the
-demo and the guide into `docs/site/` and deploys it from `main`. When a change touches anything
+demo and the guide into `docs/site/` and deploys it from `main`. The deploy needs the
+repository's Pages source set to "GitHub Actions" (Settings, Pages), a repository setting only
+the maintainer can change. When a change touches anything
 the site shows (packages, components, arguments, an API used in a snippet), update `docs/site/`
 in the same PR. `docs/social-card.html` is the source of `docs/site/social-card.png`; its header
 has the command that renders it.
@@ -254,3 +268,13 @@ Embroider), `ember-classic` (classic ember-cli with ember-auto-import 2) and `em
 (Vite with Tailwind CSS v4). Each asks for the published version ranges, which the workspace
 overrides with the local packages, and each has a smoke test that `pnpm test:examples` and CI
 run.
+
+The Tailwind app declares `@layer theme, base, joinery, components, utilities;` before
+importing Tailwind: Joinery's layer above `base`, so preflight's resets don't undo its rules,
+and below `utilities`, so a class on a component overrides them. Its tests check both.
+
+Two things wait on later work. The smoke tests only import the packages so far; the first
+display component (†) renders itself in each of them, which is what proves a classic app
+consumes `.gts` v2 addon components. And the apps import only `joinery.css`: the theme (†)
+adds `tokens.css` to every app and `tailwind.css` to the Tailwind one, and the Installation
+page with them.

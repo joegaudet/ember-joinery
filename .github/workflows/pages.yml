@@ -3,6 +3,9 @@ name: pages
 # Publishes docs/site to GitHub Pages at joegaudet.com/ember-joinery/: the marketing page, plus
 # the demo (built from test-app into docs/site/demo) and the guide (built from docs-app into
 # docs/site/guide, with docs/site/404.html so the guide's deep links load).
+#
+# It deploys only once the repository's Pages source is set to "GitHub Actions" (Settings,
+# Pages). That's a repository setting, so the maintainer sets it.
 on:
   push:
     branches: [main]

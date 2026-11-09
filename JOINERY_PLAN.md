@@ -20,6 +20,11 @@ Deviations from the intake, and why:
   sheets mechanically (`cn-` becomes `jn-`), so it ships Nova as the default and the other seven
   (Luma, Lyra, Maia, Mira, Rhea, Sera, Vega) as alternatives, and the guide's theme switcher
   offers all of them.
+- **Clarified while building** (no decision changed). The generated `meta.json` covers every
+  A–Z section of the guide (Components, Primitives, Charts, Blocks, Formwright and Reference),
+  not only Components. The Guide section now says what "Autonomous execution" already did: the
+  acceptance test builds `PAGES` from the templates directory. And setting the repository's
+  Pages source to GitHub Actions, which `pages.yml` needs, is listed among what stays with Joe.
 
 **What we're copying:** [ui.shadcn.com](https://ui.shadcn.com/): every component, every example
 on its component pages, a subset of its blocks, and its theming. The source of truth is the code
@@ -489,6 +494,7 @@ Joe asked for the whole plan to be built by subagents without feedback, as one b
   - publishing: the npm-bootstrap environment's `NPM_TOKEN`, approving the bootstrap run,
     setting up trusted publishers, and pushing the tag;
   - required status checks on `main`;
+  - setting the repository's Pages source to "GitHub Actions", so `pages.yml` can deploy;
   - merging the sibling PRs on ember-formwright and real-enums.
 
 ## The gate (CONTRIBUTING.md)

@@ -3,6 +3,7 @@ import compatModules from '@embroider/virtual/compat-modules'
 import Resolver from 'ember-resolver'
 import loadInitializers from 'ember-load-initializers'
 import config from 'test-app/config/environment'
+import '@ember-joinery/ember/tokens.css'
 import '@ember-joinery/ember/joinery.css'
 import './styles/app.css'
 

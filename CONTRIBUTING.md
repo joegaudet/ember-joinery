@@ -334,9 +334,9 @@ and a line saying what it comes with, and stays out of the parity map (so
 `--require-complete` still counts it). The page's map names it, and what it waits for, in its
 `$comment`. When you land a component, look for its name there (`grep -l 'Badge'
 parity/map/*.json`), port the examples that waited for it onto their pages, map them, and take
-them out of the `$comment`. So Spinner's page waits only for Input Group, and Button's for
-Dropdown Menu: its `button-group-demo` (mapped on Button Group's page) goes back in Button's
-Button Group section, which links to Button Group's page.
+them out of the `$comment`. So Button's page waits for Dropdown Menu: its `button-group-demo` (mapped
+on Button Group's page) goes back in Button's Button Group section, which links to Button Group's
+page.
 
 **The parity map** lists every example on the page. One shown on two pages
 (`button-group-demo` is on Button's and Button Group's) is mapped on the page the inventory

@@ -307,6 +307,21 @@ test('the nav routes', async function (assert) {
 In a rendering test it starts the router too, so what reads the URL (`qp`, `link`) has one once
 you `transitionTo()` it.
 
+## One-time codes
+
+`fillOTP(code, within?)` fills an `InputOTP` (styled or headless) with a code, as
+ember-primitives' `fillOTP` does: the only one in the test, or the one inside `within` (a
+selector or an element). `InputOTPHarness` does more: it types, deletes and moves the caret as a
+browser edits the input, and pastes and autofills a code.
+
+```ts
+import { InputOTPHarness, fillOTP } from '@ember-joinery/test-support'
+
+await fillOTP('123456')
+await fillOTP('123456', '[data-test-login]')
+await new InputOTPHarness().paste('654321')
+```
+
 ## Observers
 
 `settled()` waits for the first report of an element that Joinery's `viewport` or `onResize`

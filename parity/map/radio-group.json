@@ -2,7 +2,11 @@
   "examples": {
     "radio-group-demo": "radio-group-demo",
     "radio-group-description": "radio-group-description",
-    "radio-group-choice-card": "radio-group-choice-card",
+    "radio-group-choice-card": {
+      "example": "radio-group-choice-card",
+      "threshold": 0.07,
+      "reason": "A FieldTitle's line height. Upstream's cn() drops the field-title rule's leading-snug for the text-sm after it in Nova, so its title is 20px tall; scripts/port-styles.mjs keeps a rule's classes as written, so Joinery's is 19.25px and what follows each title sits 0.75px higher. Fixing it means port-styles.mjs applying tailwind-merge within each rule, as upstream's cn() does (the field-title rules, Sera's label and the combobox content, across the eight sheets)."
+    },
     "radio-group-fieldset": "radio-group-fieldset",
     "radio-group-disabled": "radio-group-disabled",
     "radio-group-invalid": "radio-group-invalid",

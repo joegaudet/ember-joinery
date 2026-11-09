@@ -242,7 +242,7 @@ module('Integration | components | field', function (hooks) {
     assert.strictEqual(
       description.marginTop,
       '-6px',
-      '[[data-variant=legend]+&]:-mt-1.5, after a legend',
+      '[[data-variant=legend]+&]:-mt-1.5 after a legend, over nth-last-2:-mt-1',
     )
     const checkboxes = set.find(FieldGroupHarness).element
     assert.strictEqual(style(checkboxes).rowGap, '12px', 'data-[slot=checkbox-group]:gap-3')
@@ -256,6 +256,11 @@ module('Integration | components | field', function (hooks) {
     assert.strictEqual(style(vertical.element).flexDirection, 'column')
     assert.strictEqual(style(vertical.element).rowGap, '8px', 'gap-2')
     assert.strictEqual(vertical.find(InputHarness).element.offsetWidth, 320, '*:w-full')
+    assert.strictEqual(
+      vertical.labelElement!.offsetWidth,
+      320,
+      "*:w-full wins over the field label's own w-fit, as upstream's does",
+    )
     const label = style(vertical.labelElement!)
     assert.strictEqual(label.fontSize, '14px', "the label's text-sm")
     assert.strictEqual(label.fontWeight, '500', "the label's font-medium")
@@ -310,6 +315,11 @@ module('Integration | components | field', function (hooks) {
     const field = new FieldHarness('name')
     assert.strictEqual(field.orientation, 'responsive')
     assert.strictEqual(style(field.element).flexDirection, 'row', '@md/field-group:flex-row')
+    const input = field.find(InputHarness).element
+    assert.true(
+      input.offsetWidth < 300,
+      "@md/field-group:*:w-auto: the input's own w-full gives way to its content's width",
+    )
     assert.strictEqual(style(field.element).alignItems, 'flex-start', 'beside its content')
     state.width = 400
     await rerender()

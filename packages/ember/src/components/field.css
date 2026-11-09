@@ -128,3 +128,25 @@
 :where(.jn-field-description) {
   @apply [[data-variant=legend]+&]:-mt-1.5;
 }
+
+/*
+ * A field sizes its children: a vertical or responsive field stretches each to its width
+ * (`*:w-full`), but for a visually hidden one (`[&>.sr-only]:w-auto`), and a responsive field,
+ * once its group is 28rem wide, sizes each to its content (`@md/field-group:*:w-auto`).
+ * Upstream's Tailwind sorts these variants after a child's own width (a FieldLabel's `w-fit`,
+ * an Input's `w-full`), so they win there. Here a child's rules can come later (field.css puts
+ * FieldLabel's after Field's, and input.css follows field.css), so these restate them one step
+ * more specific (`:nth-child(n)` matches every child), to win the same way.
+ */
+:where(.jn-field-orientation-vertical, .jn-field-orientation-responsive) > :nth-child(n) {
+  @apply w-full;
+}
+
+:where(.jn-field-orientation-vertical, .jn-field-orientation-responsive)
+  > :where(.sr-only):nth-child(n) {
+  @apply w-auto;
+}
+
+:where(.jn-field-orientation-responsive) > :nth-child(n) {
+  @apply @md/field-group:w-auto;
+}

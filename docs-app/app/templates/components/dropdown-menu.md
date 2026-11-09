@@ -200,8 +200,10 @@ ArrowDown. `@disabled` turns it off. For your own element or component, use `{{m
 | `@onPointerDownOutside`, `@onFocusOutside`, `@onInteractOutside` | `(event) => void`                        |            | `preventDefault()` keeps it open                        |
 | `@as`                                                            | tag name                                 | `div`      | The tag to render                                       |
 
-Its width is at least its trigger's (`--radix-dropdown-menu-trigger-width`) and its height at
-most the room below it (`--radix-dropdown-menu-content-available-height`), as upstream's.
+Its width is its trigger's (`--radix-dropdown-menu-trigger-width`), but never less than 8rem
+(the style's `min-w-32`): a long item doesn't widen it. Its height is at most the
+room below it (`--radix-dropdown-menu-content-available-height`). Both are upstream's. Give the
+Content a `class` with a width of its own to change it, as upstream's examples do (`w-40`).
 
 ### Items
 
@@ -212,6 +214,7 @@ most the room below it (`--radix-dropdown-menu-content-available-height`), as up
 | `m.CheckboxItem` | `@checked` (`true`, `false` or `"indeterminate"`), `@onCheckedChange`, `@inset`, `@disabled`, `@icon`             |
 | `m.RadioGroup`   | `@value`, `@onValueChange`; yields `{ Item, value }`, whose `Item` takes `@value`, `@inset`, `@disabled`, `@icon` |
 | `m.Label`        | `@inset`                                                                                                          |
+| `m.Shortcut`     | `@as` (default `span`)                                                                                            |
 | `m.Sub`          | `@open`, `@defaultOpen`, `@onOpenChange`; yields `{ Trigger, Content, trigger, isOpen, setOpen }`                 |
 | `s.Trigger`      | `@inset`, `@disabled`, `@icon` (its chevron)                                                                      |
 | `s.Content`      | the Content's, but `@side` and `@align`: it goes beside its trigger, aligned with its top                         |
@@ -220,7 +223,9 @@ Selecting an item calls `@onSelect` with a cancelable event and closes the menu;
 `event.preventDefault()` keeps it open. A checkbox or radio item's state is yours, as Radix's
 is: the menu's content is gone while it is closed, so it has nowhere to keep one of its own.
 `m.Group` is a `role="group"`, `m.Separator` a horizontal `role="separator"`, and `m.Shortcut` a
-`<span>` at the item's end.
+`<span>` at the item's end (`@as` renders another tag). A submenu closes, calling
+`@onOpenChange(false)`, when the menu it is in closes, as Radix's does, so one your state holds
+open isn't open again the next time the menu opens.
 
 `{{m.item}}` makes your own element or component an item, styled as one (`variant`, `inset`
 and the Item's other arguments are its named arguments): `<LinkTo @route="profile" {{m.item}}>`.

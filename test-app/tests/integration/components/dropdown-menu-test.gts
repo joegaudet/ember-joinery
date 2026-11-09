@@ -363,4 +363,32 @@ module('Integration | components | dropdown-menu', function (hooks) {
     assert.deepEqual(selected, ['profile'])
     await a11yAudit()
   })
+
+  test('the shortcut takes @as, as every part does', async function (assert) {
+    await render(
+      <template>
+        <DropdownMenu as |m|>
+          <m.Trigger>Open</m.Trigger>
+          <m.Content>
+            <m.Item>Profile <m.Shortcut @as="kbd">⌘P</m.Shortcut></m.Item>
+            <m.Item>Billing <m.Shortcut>⌘B</m.Shortcut></m.Item>
+          </m.Content>
+        </DropdownMenu>
+      </template>,
+    )
+    const menu = new DropdownMenuHarness()
+    await menu.open()
+    const shortcut = (label: string) =>
+      menu.item(label).querySelector<HTMLElement>('[data-test-jn-part="shortcut"]')!
+    assert
+      .dom(shortcut('Profile'))
+      .hasTagName('kbd')
+      .hasClass('jn-dropdown-menu-shortcut')
+      .hasAttribute('data-slot', 'dropdown-menu-shortcut')
+    assert.dom(shortcut('Billing')).hasTagName('span', 'a span unless @as says otherwise')
+    assert.strictEqual(getComputedStyle(shortcut('Profile')).fontSize, '12px', 'still text-xs')
+    assert.strictEqual(menu.shortcut('Profile'), '⌘P', 'the harness reads it')
+    assert.deepEqual(menu.items, ['Profile', 'Billing'], 'and leaves it out of the item’s text')
+    await a11yAudit()
+  })
 })

@@ -6,7 +6,7 @@ import { hash } from '@ember/helper'
 import type { TOC } from '@ember/component/template-only'
 import type { WithBoundArgs } from '@glint/template'
 import { Check, ChevronRight } from 'lucide'
-import type { TagName } from '@ember-joinery/primitives/as'
+import { As, type TagName } from '@ember-joinery/primitives/as'
 import {
   menuCheckboxItemPart,
   menuItemPart,
@@ -404,19 +404,23 @@ export interface MenuShortcutSignature {
   Args: {
     /** @internal The menu's look. */
     look: MenuLook
+    /** The tag to render. Default `span`. */
+    as?: TagName
   }
   Blocks: { default: [] }
-  Element: HTMLSpanElement
+  Element: HTMLElement
 }
 
 /** An item's keyboard shortcut, at its end: a hint only, which the menu doesn't listen for. */
 export const MenuShortcut: TOC<MenuShortcutSignature> = <template>
-  <span
+  <As
+    @as={{@as}}
+    @tag="span"
     class={{@look.shortcut.class}}
     data-slot={{@look.shortcut.slot}}
     data-test-jn-part="shortcut"
     ...attributes
-  >{{yield}}</span>
+  >{{yield}}</As>
 </template>
 
 // ----- Contents -------------------------------------------------------------------------------

@@ -108,6 +108,12 @@ Use `c.CheckboxItem` for toggles.
 
 <Example @name="context-menu-checkboxes" @title="Checkboxes" />
 
+Here the example parts from ui.shadcn.com's, on purpose. Upstream's passes `defaultChecked`,
+which Radix's checkbox item doesn't take (its state is only ever `checked`), so on
+ui.shadcn.com all three items open unchecked and don't toggle. This one keeps the state the
+example means: Show Bookmarks Bar and Show Developer Tools start checked, and each item toggles,
+with its state in the example's own `@tracked` fields, as a checkbox item's always is.
+
 ## Radio
 
 Use `c.RadioGroup`'s items for exclusive choices.

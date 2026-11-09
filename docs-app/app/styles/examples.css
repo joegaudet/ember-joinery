@@ -142,3 +142,17 @@
     font-size: 1em;
   }
 }
+
+/*
+ * The chart page's tooltip demo lays out four fixed-size cells (`h-[137px] w-[224px] p-4`) that
+ * hold their padding, as preflight's `border-box` sizing makes them in any Tailwind app. Its
+ * cells aren't Joinery parts, which get that sizing from joinery.css, so this gives it to that
+ * example alone, below the utilities as above.
+ */
+@layer guide {
+  :where([data-example='chart-tooltip'], [data-parity='chart-tooltip']) :where(*),
+  :where([data-example='chart-tooltip'], [data-parity='chart-tooltip']) :where(*)::before,
+  :where([data-example='chart-tooltip'], [data-parity='chart-tooltip']) :where(*)::after {
+    box-sizing: border-box;
+  }
+}

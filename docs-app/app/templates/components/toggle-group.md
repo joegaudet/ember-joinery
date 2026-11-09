@@ -78,8 +78,13 @@ Use `@orientation="vertical"` for vertical toggle groups.
 
 ## Custom
 
-A custom toggle group example. Upstream's (`toggle-group-font-weight-selector`) is laid out in
-a Field, which hasn't landed in Joinery yet; it comes with Field.
+A custom toggle group example.
+
+<Example @name="toggle-group-font-weight-selector" @title="Custom" />
+
+It is laid out in a [Field](/components/field.md). A `<label>` can't label a group, so the
+`FieldLabel` has an `id` and the group names itself by it with `aria-labelledby`, which
+upstream's leaves off.
 
 ## RTL
 
@@ -157,6 +162,11 @@ Radix's own Toggle Group does, and as APG's toolbar pattern asks.
 - A `multiple` group's items are toggle buttons (`aria-pressed`). A `single` group's are radios
   (`role="radio"` and `aria-checked`), as Radix's.
 - An icon-only item needs `aria-label`.
+- Upstream's Custom example draws two captions in `--muted-foreground` on `--muted` (the pressed
+  item's, and the `<code>` in its description), about 4.3:1 in the light Neutral theme, under the
+  4.5:1 WCAG AA asks of small text. Joinery keeps upstream's colours; to meet AA, darken that
+  text in your own CSS, such as `.text-muted-foreground` inside `[data-state="on"]` with
+  `color: var(--foreground)`.
 
 ## Testing
 

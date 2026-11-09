@@ -1,8 +1,13 @@
 {
-  "$comment": "Waiting for components that haven't landed: field-demo, field-select and field-rtl (Select), field-slider (Slider). The unit that lands each ports its examples onto the Field page and maps them here.",
+  "$comment": "Waiting for a component that hasn't landed: field-demo, field-select and field-rtl (Select). The unit that lands it ports them onto the Field page and maps them here.",
   "examples": {
     "field-input": "field-input",
     "field-textarea": "field-textarea",
+    "field-slider": {
+      "example": "field-slider",
+      "threshold": 0.08,
+      "reason": "A FieldTitle's line height, as in field-choice-card: upstream's FieldTitle is 20px tall and Joinery's 19.25px, so the description and the slider under it sit 0.75px higher, and in a box 65px tall that moves every edge of the text, the track and both thumbs. The fix is the same one, port-styles.mjs applying tailwind-merge within each rule."
+    },
     "field-fieldset": "field-fieldset",
     "field-checkbox": "field-checkbox",
     "field-radio": "field-radio",

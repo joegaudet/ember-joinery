@@ -149,8 +149,12 @@ Upstream's example labels a Select of departments; it comes with Select. Until t
 
 ## Slider
 
-Upstream's example titles a price-range Slider with `FieldTitle`, and shows its two values in
-the description; it comes with Slider.
+<Example @name="field-slider" @title="Slider" />
+
+A `FieldTitle` titles the field, since a `<label>` can't label a slider's thumbs, and the
+description shows the two values. The [Slider](/components/slider.md) is named for its group
+with `role="group"` and `aria-label`: upstream's `aria-label` sits on a root with no role,
+which names nothing.
 
 ## Fieldset
 

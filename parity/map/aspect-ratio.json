@@ -1,0 +1,8 @@
+{
+  "examples": {
+    "aspect-ratio-demo": "aspect-ratio-demo",
+    "aspect-ratio-square": "aspect-ratio-square",
+    "aspect-ratio-portrait": "aspect-ratio-portrait",
+    "aspect-ratio-rtl": "aspect-ratio-rtl"
+  }
+}

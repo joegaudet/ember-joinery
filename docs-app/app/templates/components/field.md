@@ -131,7 +131,8 @@ follows:
 
 Upstream builds forms with `Field` and React Hook Form, TanStack Form or Formisch. Joinery's
 forms are [Formwright](/formwright/index.md)'s, whose Field layout uses this anatomy; it comes
-with the Formwright bridge.
+with the Formwright bridge. For a form of plain native controls, the primitives'
+[Native Form](/primitives/native-form.md) hands you its `FormData` as an object.
 
 ## Input
 

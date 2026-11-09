@@ -50,6 +50,7 @@ module('Integration | primitives | visually-hidden', function (hooks) {
     )
     assert.dom('h2').hasText('Settings')
     assert.true(isVisuallyHidden(find('h2')!))
+    await a11yAudit()
   })
 
   test('the modifier hides any element, and puts its styles back', async function (assert) {
@@ -88,5 +89,6 @@ module('Integration | primitives | visually-hidden', function (hooks) {
       </template>,
     )
     assert.dom(new CloseButton().part('label')).hasText('Close')
+    await a11yAudit()
   })
 })

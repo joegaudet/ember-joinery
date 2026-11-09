@@ -31,6 +31,18 @@ module('Integration | primitives | direction', function (hooks) {
     await a11yAudit()
   })
 
+  test('@as renders another tag, for phrasing content', async function (assert) {
+    await render(
+      <template>
+        <p>Hello, <DirectionProvider @as="span" @dir="rtl">عالم</DirectionProvider>.</p>
+      </template>,
+    )
+    const provider = find('[data-slot="direction-provider"]')!
+    assert.dom(provider).hasTagName('span').hasAttribute('dir', 'rtl')
+    assert.strictEqual(getComputedStyle(provider).display, 'contents', 'still no box')
+    await a11yAudit()
+  })
+
   test('@direction wins over @dir, and the default is ltr', async function (assert) {
     class State {
       @tracked direction: Direction | undefined = 'rtl'
@@ -50,6 +62,7 @@ module('Integration | primitives | direction', function (hooks) {
     state.direction = undefined
     await settled()
     assert.dom('p').hasText('ltr', 'then @dir')
+    await a11yAudit()
   })
 
   test('getDirection reads the nearest dir, and an explicit one wins', async function (assert) {
@@ -76,6 +89,7 @@ module('Integration | primitives | direction', function (hooks) {
     assert.strictEqual(getDirection(), 'ltr', 'with no element, <html>')
     assert.true(isRTL(find('#inherits')))
     assert.false(isRTL(find('#nested')))
+    await a11yAudit()
   })
 
   test('content in the top layer keeps the direction it was rendered in', async function (assert) {
@@ -92,5 +106,6 @@ module('Integration | primitives | direction', function (hooks) {
     assert.strictEqual(getDirection(layer), 'rtl')
     assert.strictEqual(getComputedStyle(layer).direction, 'rtl')
     layer.hidePopover()
+    await a11yAudit()
   })
 })

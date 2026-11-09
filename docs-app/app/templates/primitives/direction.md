@@ -22,8 +22,12 @@ For a whole right-to-left app, set `dir="rtl"` on `<html>` as well, as shadcn's 
 provider is for a part of a page that differs from the rest.
 
 The provider renders a `<div dir>` with `display: contents`, so it adds no box to the layout.
-Components don't need a context to find it: they read the direction from the document where
-they are, so it also holds for content in the top layer, such as an open popover.
+Inside phrasing content, such as a `<p>` or a `<button>`, where a `<div>` isn't allowed, give it
+`@as="span"`. It sets `display` through the CSSOM rather than a `style` attribute, so a strict
+Content Security Policy doesn't block it. Components don't need a context to find it: they read
+the direction from the document where they are, so it also holds for content in the top layer,
+such as an open popover. (Radix's provider renders no element; this one needs one to carry
+`dir`.)
 
 ```ts
 import { getDirection, isRTL } from '@ember-joinery/primitives/direction'
@@ -35,12 +39,20 @@ isRTL(element)
 
 ## API
 
-| Argument     | Type             | Default | What it does                               |
-| ------------ | ---------------- | ------- | ------------------------------------------ |
-| `@dir`       | `'ltr' \| 'rtl'` | `ltr`   | The direction of everything inside         |
-| `@direction` | `'ltr' \| 'rtl'` |         | The same, by the name shadcn uses; it wins |
+| Argument     | Type             | Default | What it does                                   |
+| ------------ | ---------------- | ------- | ---------------------------------------------- |
+| `@dir`       | `'ltr' \| 'rtl'` | `ltr`   | The direction of everything inside             |
+| `@direction` | `'ltr' \| 'rtl'` |         | The same, by the name shadcn uses; it wins     |
+| `@as`        | tag name         | `div`   | The tag to render (`span` in phrasing content) |
 
 It yields the direction. Its element takes attributes, and has `data-slot="direction-provider"`.
+
+## Testing
+
+The provider wraps content, so, like `VisuallyHidden`, it isn't a component root for the
+harnesses and has no harness: a part inside it still belongs to the component around it. Test
+the direction where it matters, in the content: a component's harness, or `getDirection` on
+its element, as the example's test does.
 
 ## Upstream
 

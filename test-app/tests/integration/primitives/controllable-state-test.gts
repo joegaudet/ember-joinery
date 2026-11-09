@@ -89,6 +89,7 @@ module('Integration | primitives | controllable-state', function (hooks) {
     assert.strictEqual(expanded(), 'false')
     await click('button')
     assert.strictEqual(expanded(), 'true', 'and works without @onOpenChange')
+    await a11yAudit()
   })
 
   test('controlled, it follows @open, and the caller decides', async function (assert) {
@@ -131,6 +132,7 @@ module('Integration | primitives | controllable-state', function (hooks) {
       </template>,
     )
     assert.strictEqual(expanded(), 'false')
+    await a11yAudit()
   })
 
   test('the @value pattern, and no call when the value stays the same', async function (assert) {
@@ -149,7 +151,16 @@ module('Integration | primitives | controllable-state', function (hooks) {
     await a11yAudit()
   })
 
-  test('ControllableState reads its inputs live, outside a component too', function (assert) {
+  test('the name must be one of the component’s arguments', async function (assert) {
+    class Misspelt extends Component<DisclosureSignature> {
+      // @ts-expect-error: 'opn' isn't one of its arguments, so it doesn't compile
+      open = controllable(this, 'opn', false)
+    }
+    assert.strictEqual(typeof Misspelt, 'function', 'the type checker caught it')
+    await a11yAudit()
+  })
+
+  test('ControllableState reads its inputs live, outside a component too', async function (assert) {
     class Caller {
       @tracked value: number | undefined = undefined
       calls: number[] = []
@@ -173,5 +184,6 @@ module('Integration | primitives | controllable-state', function (hooks) {
     state.set(11)
     assert.strictEqual(state.value, 10, 'controlled, set() only reports')
     assert.deepEqual(caller.calls, [6, 11])
+    await a11yAudit()
   })
 })

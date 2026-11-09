@@ -9,6 +9,7 @@ several, with a separator between them and the Mac's keys on a Mac. They are emb
 ## Usage
 
 ```gts
+import { array } from '@ember/helper'
 import { Key, KeyCombo } from '@ember-joinery/primitives/keys'
 
 <template>
@@ -19,6 +20,9 @@ import { Key, KeyCombo } from '@ember-joinery/primitives/keys'
   <KeyCombo @keys={{array "Shift" "Alt" "N"}} @separator="then" />
 </template>
 ```
+
+In the string form, keys are joined with `+`, and the plus key itself is `++`: `"ctrl++"` is
+Ctrl and +. The array form takes each key as given.
 
 `isMac()` says whether the page runs on a Mac (or an iPad or iPhone), for handling shortcuts
 the same way you show them.

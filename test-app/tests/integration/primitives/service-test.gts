@@ -67,9 +67,10 @@ module('Integration | primitives | service', function (hooks) {
     await a11yAudit()
   })
 
-  test('each test gets its own instance', function (assert) {
+  test('each test gets its own instance', async function (assert) {
     assert.strictEqual(service(this.owner, Counter).count, 0, 'nothing carried over')
     assert.strictEqual(Counter.made, 1)
+    await a11yAudit()
   })
 
   test('the instance is destroyed with its owner', async function (assert) {
@@ -81,9 +82,10 @@ module('Integration | primitives | service', function (hooks) {
     destroy(owner)
     await settled()
     assert.strictEqual(Counter.destroyed, 1, 'its destructor ran')
+    await a11yAudit()
   })
 
-  test('a function makes the instance itself, once per owner', function (assert) {
+  test('a function makes the instance itself, once per owner', async function (assert) {
     let calls = 0
     const make = () => {
       calls += 1
@@ -93,12 +95,14 @@ module('Integration | primitives | service', function (hooks) {
     assert.strictEqual(service(this.owner, make), first)
     assert.strictEqual(first.label, 'made by hand')
     assert.strictEqual(calls, 1)
+    await a11yAudit()
   })
 
-  test('in JavaScript it needs a context', function (assert) {
+  test('in JavaScript it needs a context', async function (assert) {
     assert.throws(
       () => (service as (definition: typeof Counter) => Counter)(Counter),
       /service\(this, Toasts\)/,
     )
+    await a11yAudit()
   })
 })

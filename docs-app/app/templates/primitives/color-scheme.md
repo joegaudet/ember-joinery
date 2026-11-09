@@ -49,8 +49,10 @@ So a dark page doesn't flash light while the app loads, put `colorSchemeScript()
 | `preference`         | What the user chose: `system`, `light` or `dark` (tracked)                    |
 | `current`            | The scheme in effect, `light` or `dark` (tracked)                             |
 | `system`             | What the system prefers now (tracked)                                         |
+| `saved`              | The choice saved for the next visit, or `null` (tracked)                      |
 | `isDark`, `isLight`  | `current`, as booleans                                                        |
 | `set(preference)`    | Changes the preference, saves it and applies it                               |
+| `clear()`            | Forgets the saved choice and goes back to the default preference              |
 | `toggle()`           | Switches between light and dark                                               |
 | `configure(options)` | Changes the options below                                                     |
 | `onChange(listener)` | Calls `listener(current, preference)` on each change; returns the unsubscribe |
@@ -64,9 +66,25 @@ So a dark page doesn't flash light while the app loads, put `colorSchemeScript()
 | `lightClass`                | none                   | A class set while light                                 |
 | `disableTransitionOnChange` | `false`                | Turn transitions off for the change, as next-themes can |
 
+`set('system')` saves `system`, as next-themes does, so the next visit follows the system too.
+`clear()` removes the saved choice instead.
+
 The module also has ember-primitives' `prefers.dark()`, `prefers.light()`, `prefers.none()`
-and `prefers.custom(name)`, and `getColorScheme`, `setColorScheme` and `removeColorScheme` for
-one element's `color-scheme`.
+and `prefers.custom(name)`, and `getColorScheme`, `setColorScheme` and `removeColorScheme`,
+which read and write the `color-scheme` property alone, of `<html>` or of the element given
+(`setColorScheme('dark')`, `setColorScheme(preview, 'dark')`).
+
+### From ember-primitives
+
+| ember-primitives                                                   | Joinery                                                 |
+| ------------------------------------------------------------------ | ------------------------------------------------------- |
+| `sync()`                                                           | Nothing to call: it applies itself when first asked for |
+| `colorScheme.current`, `isDark`, `isLight`                         | `current`, `isDark`, `isLight`                          |
+| `colorScheme.update(value)`                                        | `set(value)`                                            |
+| `colorScheme.on.update(fn)`, `colorScheme.off.update(fn)`          | `onChange(fn)`, which returns the unsubscribe           |
+| `localPreference.read()`, `isSet()`                                | `saved`, `saved !== null`                               |
+| `localPreference.update(value)`, `delete()`                        | `set(value)`, `clear()`                                 |
+| `prefers`, `getColorScheme`, `setColorScheme`, `removeColorScheme` | The same names                                          |
 
 ## Testing
 

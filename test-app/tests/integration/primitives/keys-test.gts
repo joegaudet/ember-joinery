@@ -69,6 +69,21 @@ module('Integration | primitives | keys', function (hooks) {
     await a11yAudit()
   })
 
+  test('in the string form, ++ is the plus key', async function (assert) {
+    platform(false)
+    await render(
+      <template>
+        <KeyCombo @name="zoom" @keys="ctrl++" />
+        <KeyCombo @name="plus" @keys="+" />
+        <KeyCombo @name="between" @keys="shift + + + a" />
+      </template>,
+    )
+    assert.deepEqual(new KeyComboHarness('zoom').keys, ['ctrl', '+'])
+    assert.deepEqual(new KeyComboHarness('plus').keys, ['+'])
+    assert.deepEqual(new KeyComboHarness('between').keys, ['shift', '+', 'a'])
+    await a11yAudit()
+  })
+
   test('KeyCombo shows @mac on a Mac, and @keys elsewhere', async function (assert) {
     platform(true)
     assert.true(isMac())
@@ -83,5 +98,6 @@ module('Integration | primitives | keys', function (hooks) {
     platform(true)
     await render(<template><KeyCombo @keys="ctrl+k" /></template>)
     assert.deepEqual(new KeyComboHarness().keys, ['ctrl', 'k'], 'without @mac, @keys everywhere')
+    await a11yAudit()
   })
 })

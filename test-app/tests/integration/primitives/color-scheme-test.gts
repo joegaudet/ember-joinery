@@ -76,12 +76,14 @@ module('Integration | primitives | color-scheme', function (hooks) {
     await render(<template><ModeToggle /></template>)
     assert.dom('output').hasText('dark / dark')
     assert.dom(html).hasClass('dark')
+    await a11yAudit()
   })
 
   test('an unknown saved value is ignored', async function (assert) {
     localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, 'sepia')
     await render(<template><ModeToggle /></template>)
     assert.dom('output').hasText('system / light')
+    await a11yAudit()
   })
 
   test('a choice made in another tab applies here', async function (assert) {
@@ -94,6 +96,28 @@ module('Integration | primitives | color-scheme', function (hooks) {
     system.fromAnotherTab(null)
     await settled()
     assert.dom('output').hasText('system / light', 'cleared there, it follows the system again')
+    await a11yAudit()
+  })
+
+  test('saved says what is saved, and clear() forgets it', async function (assert) {
+    await render(<template><ModeToggle /></template>)
+    const scheme = colorScheme(this.owner)
+    assert.strictEqual(scheme.saved, null, 'nothing saved before the user chooses')
+
+    await click('#dark')
+    assert.strictEqual(scheme.saved, 'dark')
+
+    scheme.clear()
+    await settled()
+    assert.strictEqual(scheme.saved, null)
+    assert.strictEqual(system.stored, null, 'removed from storage')
+    assert.dom('output').hasText('system / light', 'back to following the system')
+    assert.dom(html).doesNotHaveClass('dark')
+
+    system.fromAnotherTab('dark')
+    await settled()
+    assert.strictEqual(scheme.saved, 'dark', 'a choice from another tab counts')
+    await a11yAudit()
   })
 
   test('one instance per app, from JavaScript or a template', async function (assert) {
@@ -105,6 +129,7 @@ module('Integration | primitives | color-scheme', function (hooks) {
     assert.dom('output').hasText('dark / dark', 'the template sees the same instance')
     assert.true(scheme.isDark)
     assert.false(scheme.isLight)
+    await a11yAudit()
   })
 
   test('onChange hears each change of the scheme in effect', async function (assert) {
@@ -118,6 +143,7 @@ module('Integration | primitives | color-scheme', function (hooks) {
     stop()
     scheme.set('light')
     assert.deepEqual(heard, ['dark:dark', 'light:system', 'dark:system'])
+    await a11yAudit()
   })
 
   test('configure() sets the storage key, classes and element', async function (assert) {
@@ -145,6 +171,7 @@ module('Integration | primitives | color-scheme', function (hooks) {
       localStorage.removeItem('my-theme')
       element.remove()
     }
+    await a11yAudit()
   })
 
   test('with storageKey null, nothing is saved', async function (assert) {
@@ -152,6 +179,7 @@ module('Integration | primitives | color-scheme', function (hooks) {
     scheme.set('dark')
     assert.strictEqual(system.stored, null)
     assert.dom(html).hasClass('dark')
+    await a11yAudit()
   })
 
   test('disableTransitionOnChange turns transitions off for the change', async function (assert) {
@@ -163,6 +191,7 @@ module('Integration | primitives | color-scheme', function (hooks) {
     assert.true(added.textContent!.includes('transition:none!important'))
     await settled()
     assert.strictEqual(document.head.querySelectorAll('style').length, before, 'then removed')
+    await a11yAudit()
   })
 
   test('<html> is put back when the app is destroyed', async function (assert) {
@@ -178,9 +207,10 @@ module('Integration | primitives | color-scheme', function (hooks) {
     } finally {
       html.classList.remove('dark')
     }
+    await a11yAudit()
   })
 
-  test('colorSchemeScript() applies the saved scheme before the app runs', function (assert) {
+  test('colorSchemeScript() applies the saved scheme before the app runs', async function (assert) {
     localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, 'dark')
     try {
       new Function(colorSchemeScript())()
@@ -198,9 +228,10 @@ module('Integration | primitives | color-scheme', function (hooks) {
       html.classList.remove('dark', 'night')
       html.style.removeProperty('color-scheme')
     }
+    await a11yAudit()
   })
 
-  test('the helpers read and write color-scheme directly', function (assert) {
+  test('the helpers read and write color-scheme directly', async function (assert) {
     assert.false(prefers.dark())
     assert.true(prefers.light())
     system.setSystem('dark')
@@ -211,5 +242,11 @@ module('Integration | primitives | color-scheme', function (hooks) {
     assert.strictEqual(getColorScheme(element), 'dark')
     removeColorScheme(element)
     assert.strictEqual(getColorScheme(element), '')
+
+    setColorScheme('dark')
+    assert.strictEqual(getColorScheme(), 'dark', 'with no element, <html>')
+    removeColorScheme()
+    assert.strictEqual(getColorScheme(), '')
+    await a11yAudit()
   })
 })

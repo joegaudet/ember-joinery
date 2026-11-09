@@ -1,6 +1,9 @@
 import type { TOC } from '@ember/component/template-only'
 
-/** Keys as a list, or as one string joined with `+`: `['ctrl', 'k']` or `'ctrl+k'`. */
+/**
+ * Keys as a list, or as one string joined with `+`: `['ctrl', 'k']` or `'ctrl+k'`. In the
+ * string, the plus key is `++` (`'ctrl++'`).
+ */
 export type Keys = string | readonly string[]
 
 interface NavigatorWithUAData extends Navigator {
@@ -17,12 +20,24 @@ export function isMac(): boolean {
   return /mac|ios/i.test(platform) || /Mac OS|Macintosh|iPhone|iPad/.test(nav.userAgent)
 }
 
+/**
+ * The keys in `"ctrl+k"`. The plus key itself is written `++`: `"ctrl++"` is Ctrl and +, and
+ * `"+"` alone is the plus key.
+ */
 function split(keys: Keys): string[] {
   if (typeof keys !== 'string') return [...keys]
-  return keys
-    .split('+')
-    .map(key => key.trim())
-    .filter(Boolean)
+  const segments = keys.split('+').map(key => key.trim())
+  const result: string[] = []
+  for (let index = 0; index < segments.length; index++) {
+    const key = segments[index]!
+    if (key) result.push(key)
+    else if (index + 1 < segments.length && !segments[index + 1]) {
+      // Two empty segments in a row: the + between them is the key.
+      result.push('+')
+      index++
+    }
+  }
+  return result
 }
 
 /** The keys to show: `mac` on a Mac, when given, and `keys` everywhere else. */
@@ -58,7 +73,7 @@ export const Key: TOC<KeySignature> = <template>
 
 export interface KeyComboSignature {
   Args: {
-    /** The keys, in order: `"ctrl+k"` or `(array "ctrl" "k")`. */
+    /** The keys, in order: `"ctrl+k"` or `(array "ctrl" "k")`; the plus key is `"ctrl++"`. */
     keys: Keys
     /** The keys to show on a Mac instead, such as `"⌘+k"`. */
     mac?: Keys

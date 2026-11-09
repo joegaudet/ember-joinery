@@ -53,10 +53,11 @@ function isLocalStorage(area: Storage | null): boolean {
   }
 }
 
-function writeStorage(key: string | null, value: ColorSchemePreference): void {
+function writeStorage(key: string | null, value: ColorSchemePreference | null): void {
   if (key === null) return
   try {
-    localStorage.setItem(key, value)
+    if (value === null) localStorage.removeItem(key)
+    else localStorage.setItem(key, value)
   } catch {
     // storage can be off; the choice then lasts for the page
   }
@@ -101,6 +102,11 @@ export class ColorScheme {
   @tracked preference: ColorSchemePreference
   /** What the system prefers now. */
   @tracked system: ColorSchemeValue
+  /**
+   * The choice saved for the next visit, or `null` when there is none (the user hasn't chosen,
+   * `clear()` forgot it, or nothing is saved). ember-primitives' `localPreference.read()`.
+   */
+  @tracked saved: ColorSchemePreference | null
 
   #settings: Settings = {
     storageKey: COLOR_SCHEME_STORAGE_KEY,
@@ -119,7 +125,8 @@ export class ColorScheme {
   constructor() {
     this.#media = window.matchMedia(DARK_QUERY)
     this.system = this.#media.matches ? 'dark' : 'light'
-    this.preference = readStorage(this.#settings.storageKey) ?? this.#settings.defaultPreference
+    this.saved = readStorage(this.#settings.storageKey) ?? null
+    this.preference = this.saved ?? this.#settings.defaultPreference
 
     this.#media.addEventListener('change', this.#onSystemChange)
     window.addEventListener('storage', this.#onStorage)
@@ -144,13 +151,28 @@ export class ColorScheme {
     return this.current === 'light'
   }
 
-  /** Changes the preference, saves it, and applies it. */
+  /**
+   * Changes the preference, saves it, and applies it. `set('system')` saves `system`, as
+   * next-themes does; `clear()` forgets the choice instead.
+   */
   set = (preference: ColorSchemePreference): void => {
     if (!isPreference(preference)) {
       throw new Error(`Joinery: a color scheme is 'system', 'light' or 'dark', not '${preference}'`)
     }
     this.preference = preference
     writeStorage(this.#settings.storageKey, preference)
+    this.saved = readStorage(this.#settings.storageKey) ?? null
+    this.#apply()
+  }
+
+  /**
+   * Forgets the saved choice and goes back to the default preference (`system`, unless
+   * `configure()` set another), as ember-primitives' `localPreference.delete()` does.
+   */
+  clear = (): void => {
+    writeStorage(this.#settings.storageKey, null)
+    this.saved = null
+    this.preference = this.#settings.defaultPreference
     this.#apply()
   }
 
@@ -168,7 +190,8 @@ export class ColorScheme {
     this.#restore()
     this.#settings = { ...before, ...options, element: options.element ?? before.element }
     if (options.storageKey !== undefined || options.defaultPreference !== undefined) {
-      this.preference = readStorage(this.#settings.storageKey) ?? this.#settings.defaultPreference
+      this.saved = readStorage(this.#settings.storageKey) ?? null
+      this.preference = this.saved ?? this.#settings.defaultPreference
     }
     this.#applied = undefined
     this.#apply()
@@ -194,8 +217,8 @@ export class ColorScheme {
     if (key === null || (event.key !== null && event.key !== key)) return
     if (!isLocalStorage(event.storageArea)) return
     const value = event.newValue
-    this.preference =
-      event.key !== null && isPreference(value) ? value : this.#settings.defaultPreference
+    this.saved = event.key !== null && isPreference(value) ? value : null
+    this.preference = this.saved ?? this.#settings.defaultPreference
     this.#apply()
   }
 
@@ -270,8 +293,18 @@ export function getColorScheme(element: HTMLElement = document.documentElement):
   return element.style.getPropertyValue('color-scheme')
 }
 
-/** Sets `color-scheme` on one element, such as a preview that stays dark. */
-export function setColorScheme(element: HTMLElement, value: string): void {
+/**
+ * Sets `color-scheme` on `<html>`, or on one element, such as a preview that stays dark. This
+ * sets only the property; `ColorScheme` is what applies, saves and syncs the user's choice.
+ *
+ *   setColorScheme('dark')
+ *   setColorScheme(preview, 'dark')
+ */
+export function setColorScheme(value: string): void
+export function setColorScheme(element: HTMLElement, value: string): void
+export function setColorScheme(...args: [string] | [HTMLElement, string]): void {
+  const [element, value] =
+    args.length === 1 ? [document.documentElement, args[0]] : (args as [HTMLElement, string])
   element.style.setProperty('color-scheme', value)
 }
 

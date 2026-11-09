@@ -1,4 +1,6 @@
 import type { TOC } from '@ember/component/template-only'
+import { modifier } from 'ember-modifier'
+import { As, type TagName } from './as.gts'
 
 /** A text direction: left to right, or right to left. */
 export type Direction = 'ltr' | 'rtl'
@@ -41,34 +43,61 @@ function resolve(direction: Direction | undefined, dir: Direction | undefined): 
   return direction ?? dir ?? 'ltr'
 }
 
+/**
+ * `display: contents`, set through the CSSOM: a strict Content Security Policy (`style-src`
+ * without `'unsafe-inline'`) blocks a `style` attribute, but not this.
+ */
+const displayContents = modifier((element: HTMLElement) => {
+  element.style.setProperty('display', 'contents')
+})
+
 export interface DirectionProviderSignature {
   Args: {
     /** The direction of everything inside: `ltr` or `rtl`. Default `ltr`. */
     dir?: Direction
     /** The same as `@dir`, by the name shadcn's `DirectionProvider` uses. It wins over `@dir`. */
     direction?: Direction
+    /**
+     * The tag to render. Default `div`; use `span` inside phrasing content, such as a `<p>` or
+     * a `<button>`, where a `<div>` isn't allowed.
+     */
+    as?: TagName
   }
   Blocks: {
     /** The content, given the direction. */
     default: [dir: Direction]
   }
-  Element: HTMLDivElement
+  Element: HTMLElement
 }
 
 /**
  * Sets the text direction for everything inside it, as Radix's `DirectionProvider` does. It
- * renders a `<div dir>` with `display: contents`, so it adds no box to the layout, and every
- * Joinery component inside reads the direction from the document (`getDirection`), so their
- * arrow keys, sides and alignment follow it. Set `dir` on `<html>` too for a whole RTL app.
+ * renders a `<div dir>` (or `@as`) with `display: contents`, so it adds no box to the layout,
+ * and every Joinery component inside reads the direction from the document (`getDirection`),
+ * so their arrow keys, sides and alignment follow it. Set `dir` on `<html>` too for a whole
+ * RTL app.
  *
  *   <DirectionProvider @dir="rtl">
  *     <Tabs …/>
  *   </DirectionProvider>
+ *
+ * Radix's provider renders nothing; this one needs an element to carry `dir`, because Joinery's
+ * components read the direction from the DOM rather than from a context. It wraps content, so
+ * it isn't a component root for the harnesses (no `data-test-jn`): a part inside it still
+ * belongs to the component around it. Tests read the direction where it matters, from the
+ * component inside (`getDirection(element)`).
  */
 export const DirectionProvider: TOC<DirectionProviderSignature> = <template>
   {{#let (resolve @direction @dir) as |dir|}}
-    <div dir={{dir}} data-slot="direction-provider" style="display: contents" ...attributes>
+    <As
+      @as={{@as}}
+      @tag="div"
+      dir={{dir}}
+      data-slot="direction-provider"
+      ...attributes
+      {{displayContents}}
+    >
       {{yield dir}}
-    </div>
+    </As>
   {{/let}}
 </template>

@@ -56,5 +56,6 @@ module('Integration | primitives | as', function (hooks) {
     await settled()
     assert.strictEqual(find('#swap')!.localName, 'strong')
     assert.dom('#swap').hasText('Content')
+    await a11yAudit()
   })
 })

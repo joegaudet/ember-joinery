@@ -70,6 +70,9 @@ const selected = new ControllableState({
 The default is read once, the first time the state is read. A component that switches between
 controlled and uncontrolled during its life gets a warning, as in React.
 
+`controllable`'s name must be one of the component's arguments, and the state takes that
+argument's type: `controllable(this, 'opn', false)` doesn't compile.
+
 ## Testing
 
 A component's harness drives it the same way whichever owns the state. Test both: leave the

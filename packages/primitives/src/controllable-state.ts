@@ -135,15 +135,19 @@ function capitalize(name: string): string {
  *     toggle = () => this.open.set(open => !open)
  *   }
  *
+ * The name must be one of the component's arguments, so a misspelling (`'opn'`) doesn't
+ * compile, and the state's type is that argument's.
+ *
  * @param component anything with `args`, usually a Glimmer component
  * @param name the controlled argument's name
  * @param fallback the value when neither the argument nor its default is given
  */
-export function controllable<T, Name extends string = string>(
-  component: { readonly args: object },
+export function controllable<Args extends object, Name extends keyof Args & string>(
+  component: { readonly args: Args },
   name: Name,
-  fallback: T,
-): ControllableState<T> {
+  fallback: NonNullable<Args[Name]>,
+): ControllableState<NonNullable<Args[Name]>> {
+  type T = NonNullable<Args[Name]>
   const args = () => component.args as Record<string, unknown>
   const key = capitalize(name)
   return new ControllableState<T>({

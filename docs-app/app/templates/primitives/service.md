@@ -34,7 +34,12 @@ A function in place of the class is called once per owner to make the instance:
 `service(this, () => new Cart(42))`.
 
 Unlike `@service`, nothing is registered by name, so a module that never asks for the class
-never loads it. It is ember-primitives' `createService`, and covers its `service` helper's use.
+never loads it. It is ember-primitives' `createService`, with a template form.
+
+Two of ember-primitives' service utilities aren't here yet. Its `(service "name")` helper looks
+up a service registered by name, which `(service Class)` doesn't do; until it comes, read a
+registered service with `@service` in a component. Its `createAsyncService`, which loads the
+class on demand, comes later too, with the other app utilities (`store`, `head`, `qp`…).
 
 ## Testing
 

@@ -140,6 +140,8 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    press or focus outside (with its trigger in `inside`), and `Portal` only where a part must
    render somewhere else. Test them with `press()`, `pressOutside()` and `pressEscape()`:
    `click()` sends no `pointerdown`, which the dismiss stack listens for.
+   For a native control (`<input>`, `<textarea>`, `<select>`): `{{nativeValue}}`, which gives
+   it `@value`, `@defaultValue` and `@onValueChange`, as Input, Textarea and Native Select have.
 3. Its styles come from the ported style sheets, `packages/ember/src/styles/<style>.css`, which
    `node scripts/port-styles.mjs` writes from upstream's (it renames `cn-` to `jn-`, drops the
    `.style-<name>` wrapper, puts each selector in `:where()`, and makes physical sides logical,

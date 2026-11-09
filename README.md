@@ -24,7 +24,7 @@ on a headless primitives layer, and each with a test harness.
   [Formwright](https://joegaudet.com/ember-formwright/) bridge.
 
 ```gts
-import { Dialog, Button } from '@ember-joinery/ember'
+import { Dialog, Button, Input } from '@ember-joinery/ember'
 
 <template>
   <Dialog @name="edit-profile" as |d|>
@@ -34,6 +34,7 @@ import { Dialog, Button } from '@ember-joinery/ember'
         <d.Title>Edit profile</d.Title>
         <d.Description>Make changes to your profile here.</d.Description>
       </d.Header>
+      <Input @name="name" @value={{this.name}} @onValueChange={{this.setName}} />
       <d.Footer>
         <d.Close>Cancel</d.Close>
         <Button>Save changes</Button>

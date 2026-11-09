@@ -2,6 +2,7 @@ import Component from '@glimmer/component'
 import { service } from '@ember/service'
 import { PageNav } from 'kolay/components'
 import type RouterService from '@ember/routing/router-service'
+import { Toaster } from '@ember-joinery/ember'
 import { title } from '../titles.ts'
 
 const LOGO = `${import.meta.env.BASE_URL}logo.svg`
@@ -76,5 +77,14 @@ export default class ApplicationTemplate extends Component {
         </p>
       </footer>
     {{/if}}
+
+    {{!
+      The examples' toasts (Sonner's page), shown as on ui.shadcn.com, whose reference app
+      renders its Toaster top-center. Its wrapper is a stage in Nova, as a preview starts: the
+      guide loads Joinery's styles only for the stages that pick one (joinery-css.mjs).
+    }}
+    <div class="guide-stage guide-toaster" data-style="nova">
+      <Toaster @position="top-center" />
+    </div>
   </template>
 }

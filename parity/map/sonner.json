@@ -1,0 +1,9 @@
+{
+  "$comment": "Each example is its buttons until one is pressed: both sides render their Toaster (the reference app's at top-center, the guide's too) with no toasts, so the comparison is of the buttons.",
+  "examples": {
+    "sonner-demo": "sonner-demo",
+    "sonner-types": "sonner-types",
+    "sonner-description": "sonner-description",
+    "sonner-position": "sonner-position"
+  }
+}

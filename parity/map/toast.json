@@ -1,0 +1,4 @@
+{
+  "$comment": "Upstream's Toast page has no examples: it points to Sonner, whose examples are mapped in sonner.json.",
+  "examples": {}
+}

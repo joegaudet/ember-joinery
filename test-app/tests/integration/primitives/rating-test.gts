@@ -2,6 +2,7 @@ import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
 import { click, find, render, rerender } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
+import { on } from '@ember/modifier'
 import type { TOC } from '@ember/component/template-only'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
@@ -166,17 +167,45 @@ module('Integration | primitives | rating', function (hooks) {
       </template>,
     )
     const text = new RatingHarness('text')
-    assert.deepEqual(
-      text.items.map(item => item.querySelector('[aria-hidden]')!.textContent!.trim()),
-      ['x', 'x', 'x', 'x', 'x'],
-    )
+    assert.strictEqual(text.starTexts, 'x x x x x', 'each icon’s text')
     const faces = new RatingHarness('faces')
-    assert.deepEqual(
-      faces.items.map(item => item.querySelector('[data-face]')!.textContent),
-      ['(x)', '(x)', '()', '()', '()'],
-    )
+    assert.strictEqual(faces.starTexts, '(x) (x) () () ()')
     await faces.select(3)
-    assert.strictEqual(faces.item(3).querySelector('[data-face]')!.textContent, '(x)')
+    assert.strictEqual(faces.starTexts, '(x) (x) (x) () ()')
+    assert.dom('[data-face]', faces.item(3)).exists('the component renders in the item')
+    await a11yAudit()
+  })
+
+  test('the harness fills in a number input of the block’s own for values between items', async function (assert) {
+    class State {
+      @tracked value = 2
+      set = (value: number) => (this.value = value)
+    }
+    const state = new State()
+    const setFrom = (event: Event) =>
+      state.set(parseFloat((event.target as HTMLInputElement).value))
+    await render(
+      <template>
+        <Rating @value={{state.value}} @onValueChange={{state.set}} aria-label="Score" as |r|>
+          <input
+            type="number"
+            min="0"
+            max="5"
+            step="0.1"
+            aria-label="Score, to a tenth"
+            value={{r.value}}
+            {{on "change" setFrom}}
+          />
+          <r.Stars />
+        </Rating>
+      </template>,
+    )
+    const rating = new RatingHarness()
+    await rating.select(3.4)
+    assert.strictEqual(rating.value, 3.4)
+    assert.strictEqual(rating.percentOf(4), 40)
+    await rating.select(5)
+    assert.strictEqual(rating.value, 5, 'an item still picks')
     await a11yAudit()
   })
 

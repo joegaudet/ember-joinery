@@ -37,6 +37,30 @@ isChangeable, needsSummary, summary, Stars, Item, Range }`: `<r.Stars @icon={{My
 - **Forms.** Its radios share a name of their own, or `@formName`, so a form submits the
   rating.
 
+## Display only
+
+ember-primitives' display-only demo, three ways: a rating that only says its value for
+assistive technology, one whose `<:label>` block shows it, and one whose own block lays out
+`rating.Stars` beside it. A display-only rating is readonly, so a click changes nothing.
+
+<Example @name="rating-headless-display" @title="Display only" />
+
+## A component for each icon
+
+`@icon` takes a component, which each item renders with its `@value`, `@isSelected`,
+`@percentSelected` and `@readonly` (`RatingIconSignature`). Here each item shows its value, and
+turns over while the rating reaches it.
+
+<Example @name="rating-headless-icon" @title="Custom component" />
+
+## No styles
+
+The block lays the rating out: `{{rating.value}} of {{rating.total}}` above `rating.Stars`,
+which draws every item with the `@icon` it is given. Nothing styles it but the layout of the
+items. The block form has no label of its own, so name it with `aria-label` or a `<legend>`.
+
+<Example @name="rating-headless-no-styles" @title="No styles" />
+
 ## API
 
 | Argument         | Type                           | Default             | What it does                    |
@@ -63,7 +87,10 @@ The root renders `role="radiogroup"`, `aria-readonly`, `data-value`, `data-total
 
 Name it with the `<:label>` block (a `<legend>`) or `aria-label`; each radio is named by its
 value. A `rating.Range` needs its own `aria-label`. The keyboard is the browser's, as for any
-group of native radios.
+group of native radios: see the styled [Rating](/components/rating.md#keyboard-interactions)'s
+table. Each item's icon is inside its label but hidden from assistive technology, so a
+component given as `@icon` needs no name of its own. A display-only rating says its rating,
+as `@summary` words it, unless its `<:label>` block or its own block shows it.
 
 ## Testing
 
@@ -73,6 +100,7 @@ import { RatingHarness } from '@ember-joinery/test-support'
 const rating = new RatingHarness()
 await rating.select(3)
 assert.strictEqual(rating.stars, '★ ★ ★ ☆ ☆')
+assert.strictEqual(rating.starTexts, '★ ★ ★ ★ ★') // each item's icon, as it is drawn
 ```
 
 The [Rating](/components/rating.md#testing) page lists its members.

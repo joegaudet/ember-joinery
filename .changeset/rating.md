@@ -10,4 +10,6 @@ through `@step`, `@readonly`, a display-only mode (`@interactive={{false}}`) tha
 itself, and its strings as arguments (`@itemLabel`, `@summary`).
 `@ember-joinery/primitives/rating` is the headless one, whose block lays it out with `Stars`,
 `Item` and `Range`; `@ember-joinery/ember`'s draws lucide's Star in shadcn's terms, in three
-sizes, with half stars. `@ember-joinery/test-support` adds `RatingHarness`.
+sizes, with half stars. `@ember-joinery/test-support` adds `RatingHarness`, which reads each
+item's state (`stars`) and its icon's text (`starTexts`), and picks a value between the items on
+a range or number input.

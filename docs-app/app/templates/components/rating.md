@@ -145,6 +145,7 @@ assert.strictEqual(recipe.stars, '★ ★ ★ ★ ☆')
 | `total`            | How many items it has                                                  |
 | `options`          | Each item's value                                                      |
 | `stars`            | Each item as `★` while the rating reaches it, `☆` otherwise            |
+| `starTexts`        | Each item's icon text, as drawn (empty for an `<svg>`), with spaces    |
 | `label`            | The group's name: its legend, `aria-label` or `aria-labelledby`        |
 | `summary`          | What a display-only rating says, or `''`                               |
 | `labelOf(value)`   | The name of the item worth `value`                                     |
@@ -155,7 +156,7 @@ assert.strictEqual(recipe.stars, '★ ★ ★ ★ ☆')
 | `isReadonly`       | `aria-readonly="true"`                                                 |
 | `isDisabled`       | Whether it is disabled                                                 |
 | `focused`          | The value of the item whose radio has focus, or `null`                 |
-| `select(value)`    | Picks it with a click (or, between items, on its range input)          |
+| `select(value)`    | Picks it with a click (or, between items, on a range or number input)  |
 | `focus()`          | Focuses the picked radio, or the first                                 |
 | `press(key)`       | Presses a key on the focused radio, doing what the browser does for it |
 

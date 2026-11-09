@@ -59,6 +59,20 @@ export class RatingHarness extends Harness {
       .join(' ')
   }
 
+  /**
+   * What each item shows, its icon's text (the part hidden from assistive technology), joined
+   * with spaces: `★ ★ ★ ★ ★`, or `1 2 3 4 5` for icons that show their value. An icon with no
+   * text, such as an `<svg>`, gives `''`.
+   */
+  get starTexts(): string {
+    return this.items
+      .map(item => {
+        const icon = item.querySelector('[aria-hidden="true"]')
+        return icon ? textOf(icon) : ''
+      })
+      .join(' ')
+  }
+
   /** How much of the item worth `value` the rating fills, from 0 to 100. */
   percentOf(value: number): number {
     return parseFloat(this.item(value).getAttribute('data-percent-selected') ?? '0')
@@ -105,8 +119,8 @@ export class RatingHarness extends Harness {
 
   /**
    * Picks `value`, as a click on its item does: picking the current rating clears it. A value
-   * between the items' is filled in on the rating's range input (`rating.Range`), when it has
-   * one.
+   * between the items' is filled in on the rating's range input (`rating.Range`), or on a
+   * number or range input of the block's own, when it has one.
    */
   async select(value: number): Promise<void> {
     const item = this.queryPart('item', String(value))
@@ -114,13 +128,15 @@ export class RatingHarness extends Harness {
       await click(item.querySelector('input[type="radio"]')!)
       return
     }
-    const range = this.queryPart<HTMLInputElement>('range')
-    if (range) {
-      await fillIn(range, String(value))
+    const input =
+      this.queryPart<HTMLInputElement>('range') ??
+      this.element.querySelector<HTMLInputElement>('input[type="number"], input[type="range"]')
+    if (input) {
+      await fillIn(input, String(value))
       return
     }
     throw new Error(
-      `Joinery harness: ${this} has no item worth ${value} (its items: ${this.values('item').join(', ')})`,
+      `Joinery harness: ${this} has no item worth ${value}, and no number or range input (its items: ${this.values('item').join(', ')})`,
     )
   }
 

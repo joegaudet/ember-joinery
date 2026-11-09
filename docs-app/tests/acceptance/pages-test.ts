@@ -13,6 +13,16 @@ const PAGES = Object.keys(
   .map(path => path.replace('../../app/templates/', ''))
   .sort()
 
+/**
+ * The axe rules a page turns off, each with its reason. A page belongs here only when what it
+ * shows can't meet the rule; every other rule still runs on it.
+ */
+const AUDIT_EXCEPTIONS: Record<string, { rules: Record<string, { enabled: false }> }> = {
+  // Typography's specimens are real headings, h1 to h4, each under its own section's h2, as on
+  // ui.shadcn.com: a specimen resets the outline, so the h4 comes right after an h2.
+  'components/typography.md': { rules: { 'heading-order': { enabled: false } } },
+}
+
 module('Acceptance | guide pages', function (hooks) {
   setupApplicationTest(hooks)
 
@@ -54,7 +64,7 @@ module('Acceptance | guide pages', function (hooks) {
         await waitUntil(() => !example.querySelector('.example-loading'), { timeout: 15000 })
         assert.dom(example.querySelector('.example-preview')).exists(`example ${name} rendered`)
       }
-      await a11yAudit()
+      await a11yAudit(AUDIT_EXCEPTIONS[page])
     })
   }
 

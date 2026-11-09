@@ -294,6 +294,7 @@ export class Example extends Component<ExampleSignature> {
                   {{#each this.themeKey key="@identity"}}
                     <div
                       class="example-preview guide-stage {{if this.dark 'dark'}}"
+                      data-example={{@name}}
                       data-align={{if @align @align "center"}}
                       data-style={{this.styleName}}
                       dir={{this.dir}}
@@ -308,6 +309,7 @@ export class Example extends Component<ExampleSignature> {
               {{#each this.themeKey key="@identity"}}
                 <div
                   class="example-preview guide-stage {{if this.dark 'dark'}}"
+                  data-example={{@name}}
                   data-align={{if @align @align "center"}}
                   data-style={{this.styleName}}
                   dir={{this.dir}}

@@ -12,3 +12,70 @@
 @import '@ember-joinery/ember/tailwind.css';
 @import 'tailwindcss/utilities.css' layer(utilities) source(none);
 @source '../examples';
+
+/*
+ * Typography's examples are upstream's own markup: bare headings, paragraphs, a list, a
+ * blockquote and a table, styled with nothing but utility classes. On ui.shadcn.com, as in any
+ * Tailwind app (the only kind those classes work in), they sit on Tailwind's preflight and the
+ * base layer of shadcn's CSS: no margin, padding or border but what a class gives, a border
+ * that takes `--border`, headings and small text at the size a class sets, no list bullets, a
+ * table without gaps. The stage has neither (see app.css), so this gives those examples, and
+ * no others, the share of both they rely on: the parity route's stage (`data-parity`) and the
+ * frame's (`data-example`) each name their example. It sits in the guide's layer, below the
+ * utilities, so every class still wins.
+ */
+@layer guide {
+  :where([data-example|='typography'], [data-parity|='typography']) :where(*),
+  :where([data-example|='typography'], [data-parity|='typography']) :where(*)::before,
+  :where([data-example|='typography'], [data-parity|='typography']) :where(*)::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+    border-color: var(--border);
+    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+  }
+
+  :where([data-example|='typography'], [data-parity|='typography']) :where(h1, h2, h3, h4, h5, h6) {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  :where([data-example|='typography'], [data-parity|='typography']) :where(a) {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  :where([data-example|='typography'], [data-parity|='typography']) :where(b, strong) {
+    font-weight: bolder;
+  }
+
+  :where([data-example|='typography'], [data-parity|='typography']) :where(code, kbd, samp, pre) {
+    font-family: var(
+      --font-mono,
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      'Liberation Mono',
+      'Courier New',
+      monospace
+    );
+    font-size: 1em;
+  }
+
+  :where([data-example|='typography'], [data-parity|='typography']) :where(small) {
+    font-size: 80%;
+  }
+
+  :where([data-example|='typography'], [data-parity|='typography']) :where(table) {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+
+  :where([data-example|='typography'], [data-parity|='typography']) :where(ol, ul, menu) {
+    list-style: none;
+  }
+}

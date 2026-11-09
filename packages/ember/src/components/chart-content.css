@@ -1,0 +1,80 @@
+/*
+ * The parts of a chart's tooltip and legend that upstream's chart.tsx (shadcn-ui/ui@8ab2771)
+ * gives no semantic class: scripts/extract-classes.mjs lists their utilities in chart.css as
+ * "no slot to attach it to", and these rules attach them to the classes Joinery's
+ * ChartTooltipContent and ChartLegendContent render (@ember-joinery/chart). The utilities are
+ * upstream's, in its order; the ones upstream applies under a condition (`indicator === "dot"`,
+ * `nestLabel`, `verticalAlign === "top"`) apply under the data attribute that carries it.
+ */
+
+/* tooltipLabel */
+:where(.jn-chart-tooltip-label) {
+  @apply font-medium;
+}
+
+/* The entries' list */
+:where(.jn-chart-tooltip-items) {
+  @apply grid gap-1.5;
+}
+
+/* An entry; `items-center` only when indicator === "dot" */
+:where(.jn-chart-tooltip-item) {
+  @apply flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground;
+}
+:where(.jn-chart-tooltip-item[data-indicator='dot']) {
+  @apply items-center;
+}
+
+/* An entry's indicator, by its kind; `my-0.5` only for a dashed one beside a nested label */
+:where(.jn-chart-tooltip-indicator) {
+  @apply shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg);
+}
+:where(.jn-chart-tooltip-indicator[data-indicator='dot']) {
+  @apply h-2.5 w-2.5;
+}
+:where(.jn-chart-tooltip-indicator[data-indicator='line']) {
+  @apply w-1;
+}
+:where(.jn-chart-tooltip-indicator[data-indicator='dashed']) {
+  @apply w-0 border-[1.5px] border-dashed bg-transparent;
+}
+:where(.jn-chart-tooltip-indicator[data-indicator='dashed'][data-nested='true']) {
+  @apply my-0.5;
+}
+
+/* An entry's name and value; `items-end` when nestLabel, else `items-center` */
+:where(.jn-chart-tooltip-body) {
+  @apply flex flex-1 justify-between leading-none;
+}
+:where(.jn-chart-tooltip-body[data-nested='true']) {
+  @apply items-end;
+}
+:where(.jn-chart-tooltip-body[data-nested='false']) {
+  @apply items-center;
+}
+:where(.jn-chart-tooltip-names) {
+  @apply grid gap-1.5;
+}
+:where(.jn-chart-tooltip-name) {
+  @apply text-muted-foreground;
+}
+:where(.jn-chart-tooltip-value) {
+  @apply font-mono font-medium text-foreground tabular-nums;
+}
+
+/* ChartLegendContent; `pb-3` when verticalAlign === "top", else `pt-3` */
+:where(.jn-chart-legend) {
+  @apply flex items-center justify-center gap-4;
+}
+:where(.jn-chart-legend[data-vertical-align='top']) {
+  @apply pb-3;
+}
+:where(.jn-chart-legend:not([data-vertical-align='top'])) {
+  @apply pt-3;
+}
+:where(.jn-chart-legend-item) {
+  @apply flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground;
+}
+:where(.jn-chart-legend-swatch) {
+  @apply h-2 w-2 shrink-0 rounded-[2px];
+}

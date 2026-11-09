@@ -1,0 +1,52 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/chart.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="chart" in ChartContainer */
+:where(.jn-chart) {
+  @apply flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden;
+}
+
+/* in tooltipLabel, no slot to attach it to: font-medium */
+
+/* in tooltipLabel, no slot to attach it to: font-medium */
+
+/* in ChartTooltipContent */
+:where(.jn-chart-tooltip) {
+  @apply grid min-w-32 items-start;
+}
+
+/* in ChartTooltipContent, no slot to attach it to: grid gap-1.5 */
+
+/* in ChartTooltipContent, no slot to attach it to: flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground */
+
+/* in ChartTooltipContent, only when indicator === "dot": items-center */
+
+/* in ChartTooltipContent, no slot to attach it to: shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg) */
+
+/* in ChartTooltipContent, no slot to attach it to: flex flex-1 justify-between leading-none */
+
+/* in ChartTooltipContent, only when nestLabel: items-end */
+
+/* in ChartTooltipContent, only when !(nestLabel): items-center */
+
+/* in ChartTooltipContent, no slot to attach it to: grid gap-1.5 */
+
+/* in ChartTooltipContent, no slot to attach it to: text-muted-foreground */
+
+/* in ChartTooltipContent, no slot to attach it to: font-mono font-medium text-foreground tabular-nums */
+
+/* in ChartLegendContent, no slot to attach it to: flex items-center justify-center gap-4 */
+
+/* in ChartLegendContent, only when verticalAlign === "top": pb-3 */
+
+/* in ChartLegendContent, only when !(verticalAlign === "top"): pt-3 */
+
+/* in ChartLegendContent, no slot to attach it to: flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground */
+
+/* in ChartLegendContent, no slot to attach it to: h-2 w-2 shrink-0 rounded-[2px] */

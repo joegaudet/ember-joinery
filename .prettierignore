@@ -20,3 +20,5 @@ packages/ember/src/styles/
 packages/ember/src/themes/
 # Copied unchanged from the shadcn package (see its header).
 packages/ember/src/css/shadcn.css
+# Copied unchanged from sonner (see its header).
+packages/ember/src/components/sonner.css

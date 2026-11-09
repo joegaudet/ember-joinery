@@ -112,4 +112,5 @@ class ServiceHelperManager {
   }
 }
 
-setHelperManager(owner => new ServiceHelperManager(owner as Owner), service)
+// The owner parameter is typed for 7.x; 6.12's types leave it untyped, so it is annotated here.
+setHelperManager((owner: unknown) => new ServiceHelperManager(owner as Owner), service)

@@ -91,7 +91,8 @@ export interface ComboboxValueSignature {
     Part: ComboboxPrimitiveBlockParams['Value']
   }
   /** Your own rendering of the chosen item, or items: `as |values|`. */
-  Blocks: { default: [value: unknown] }
+  // An item is whatever @items holds, so the template can read its fields.
+  Blocks: { default: [value: any] }
 }
 
 /** The chosen item's label, or a block to render the value yourself: upstream's `ComboboxValue`. */
@@ -370,7 +371,8 @@ export interface ComboboxListSignature {
     Part: ComboboxPrimitiveBlockParams['List']
   }
   /** Called for each filtered item (or group): `as |item index|`. */
-  Blocks: { default: [item: unknown, index: number] }
+  // An item is whatever @items holds, so the template can read its fields.
+  Blocks: { default: [item: any, index: number] }
   Element: HTMLDivElement
 }
 

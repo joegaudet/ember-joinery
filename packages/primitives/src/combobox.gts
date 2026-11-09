@@ -22,6 +22,7 @@ import {
   anchorContent,
   buttonType,
   displayContents,
+  ensureId,
   popperOptions,
 } from './-private/popper.gts'
 
@@ -672,7 +673,8 @@ export interface ComboboxValueSignature {
     placeholder?: string
   }
   /** Your own rendering of the chosen item (or items, with `@multiple`): `as |value|`. */
-  Blocks: { default: [value: unknown] }
+  // An item is whatever @items holds, so the template can read its fields.
+  Blocks: { default: [value: any] }
 }
 
 /**
@@ -695,7 +697,8 @@ export interface ComboboxCollectionSignature {
     /** The items to render: a group's (its `@items`), or else the filtered list's. */
     items: readonly unknown[]
   }
-  Blocks: { default: [item: unknown, index: number] }
+  // An item is whatever @items holds, so the template can read its fields.
+  Blocks: { default: [item: any, index: number] }
 }
 
 /** Base UI's `Combobox.Collection`: renders each item, filtered. */
@@ -739,7 +742,8 @@ export interface ComboboxListSignature {
    * Called for each filtered item (or group, when `@items` are groups), as Base UI's List calls
    * its function child: `as |item index|`. Without `@items`, render the items yourself.
    */
-  Blocks: { default: [item: unknown, index: number] }
+  // An item is whatever @items holds, so the template can read its fields.
+  Blocks: { default: [item: any, index: number] }
   Element: HTMLDivElement
 }
 
@@ -785,6 +789,14 @@ class PopupBehaviour extends Modifier<PopupBehaviourSignature> {
       }
     }
     element.addEventListener('focusin', onFocus)
+    // A popup with the input inside is a dialog, named by its trigger unless the caller named it.
+    const named = element.hasAttribute('aria-label') || element.hasAttribute('aria-labelledby')
+    let restoreTriggerId = () => {}
+    const trigger = combobox.triggerRef.current
+    if (combobox.inputInsidePopup && !named && trigger) {
+      restoreTriggerId = ensureId(trigger, idFor(combobox, 'trigger'))
+      element.setAttribute('aria-labelledby', trigger.id)
+    }
     if (combobox.inputInsidePopup) {
       queueMicrotask(() => {
         if (combobox.isOpen) combobox.inputRef.current?.focus()
@@ -792,6 +804,8 @@ class PopupBehaviour extends Modifier<PopupBehaviourSignature> {
     }
     registerDestructor(this, () => {
       element.removeEventListener('focusin', onFocus)
+      if (!named) element.removeAttribute('aria-labelledby')
+      restoreTriggerId()
       restore()
       // Its input may have gone already, taking focus with it to the body.
       const active = document.activeElement
@@ -1722,7 +1736,10 @@ export class Combobox extends Component<ComboboxSignature> {
       const input = this.inputRef.current
       const named = element.hasAttribute('aria-label') || element.hasAttribute('aria-labelledby')
       if (!named && input) {
-        const labels = [...(input.labels ?? [])].map(label => label.id).filter(Boolean)
+        const labels = [...(input.labels ?? [])].map(label => {
+          if (!label.id) label.id = idFor(label, 'label')
+          return label.id
+        })
         const name =
           input.getAttribute('aria-label') ?? input.getAttribute('placeholder') ?? undefined
         if (labels.length) element.setAttribute('aria-labelledby', labels.join(' '))

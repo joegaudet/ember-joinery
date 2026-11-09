@@ -9,7 +9,10 @@ Its charts, @ember-joinery/chart, port recharts, which shadcn/ui's Chart wraps: 
 selection (getTicks, getEquidistantTicks), nice tick values (getNiceTickValues), text
 measurement (DOMUtils' getStringSize), cartesian layout (the plot area, scales, stacking, bar
 positions, tick lines) and tooltip placement (getTooltipTranslateXY), and its rectangle path
-(getRectanglePath). All four are MIT licensed; their notices and licences follow.
+(getRectanglePath). Its Drawer ports vaul, which shadcn/ui's Drawer is built on: vaul's
+behaviour in @ember-joinery/primitives' drawer, and vaul's style sheet, copied into
+@ember-joinery/ember's compiled CSS. All five are MIT licensed; their notices and licences
+follow.
 
 --------------------------------------------------------------------------------
 shadcn/ui
@@ -130,3 +133,31 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+--------------------------------------------------------------------------------
+vaul
+https://github.com/emilkowalski/vaul
+
+Ported from version 1.1.2 (its style.css copied, but for one invalid rule).
+
+MIT License
+
+Copyright (c) 2023 Emil Kowalski
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

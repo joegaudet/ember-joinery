@@ -22,3 +22,5 @@ packages/ember/src/themes/
 packages/ember/src/css/shadcn.css
 # Copied unchanged from sonner (see its header).
 packages/ember/src/components/sonner.css
+# Copied from vaul (see its header).
+packages/ember/src/components/vaul.css

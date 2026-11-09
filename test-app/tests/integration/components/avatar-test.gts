@@ -16,11 +16,12 @@ const IMAGE =
 const BROKEN = 'data:image/png;base64,AAAA'
 
 /**
- * The audit, but for the contrast of the fallback's and the count's own text: upstream draws
- * them `--muted-foreground` on `--muted`, 4.34:1 in the default theme, under the 4.5:1 WCAG AA
- * asks of their 14px text (the Avatar page's Accessibility notes say how an app can darken it).
- * Everything around them is audited.
+ * Upstream draws the initials and the count `--muted-foreground` on `--muted`, 4.34:1 in the
+ * default theme, under the 4.5:1 WCAG AA asks of their 14px text (the Avatar page's
+ * Accessibility notes say how an app can darken it). So the audit runs every rule but colour
+ * contrast over all of each test, then colour contrast over all of it but those two.
  */
+const ALL_BUT_CONTRAST = { rules: { 'color-contrast': { enabled: false } } }
 const BUT_THE_INITIALS = {
   include: [['#ember-testing-container']],
   exclude: [['[data-slot="avatar-fallback"]'], ['[data-slot="avatar-group-count"]']],
@@ -76,7 +77,8 @@ module('Integration | components | avatar', function (hooks) {
       .hasClass('jn-avatar-fallback')
       .hasAttribute('data-slot', 'avatar-fallback')
       .hasText('CN')
-    await a11yAudit(BUT_THE_INITIALS)
+    await a11yAudit(ALL_BUT_CONTRAST)
+    await a11yAudit(BUT_THE_INITIALS, { runOnly: ['color-contrast'] })
   })
 
   test('every size renders its data attribute, and the style sheet sizes it', async function (assert) {
@@ -102,7 +104,8 @@ module('Integration | components | avatar', function (hooks) {
       getComputedStyle(new AvatarHarness(size).fallback!).fontSize
     assert.strictEqual(fontSize('default'), '14px', 'text-sm')
     assert.strictEqual(fontSize('sm'), '12px', 'text-xs in a small avatar')
-    await a11yAudit(BUT_THE_INITIALS)
+    await a11yAudit(ALL_BUT_CONTRAST)
+    await a11yAudit(BUT_THE_INITIALS, { runOnly: ['color-contrast'] })
   })
 
   test('its style sheet makes it round, with the image filling it and a muted fallback', async function (assert) {
@@ -144,7 +147,8 @@ module('Integration | components | avatar', function (hooks) {
       'bg-muted behind the initials',
     )
     assert.strictEqual(fallback.status, 'idle', 'no image: idle, and the fallback shows')
-    await a11yAudit(BUT_THE_INITIALS)
+    await a11yAudit(ALL_BUT_CONTRAST)
+    await a11yAudit(BUT_THE_INITIALS, { runOnly: ['color-contrast'] })
   })
 
   test('a badge sits on the bottom end corner, sized by the avatar, and hides its icon when small', async function (assert) {
@@ -236,7 +240,8 @@ module('Integration | components | avatar', function (hooks) {
       '20px',
       'the icon grows with them',
     )
-    await a11yAudit(BUT_THE_INITIALS)
+    await a11yAudit(ALL_BUT_CONTRAST)
+    await a11yAudit(BUT_THE_INITIALS, { runOnly: ['color-contrast'] })
   })
 
   test('RTL: the badge moves to the left, and the group overlaps the other way', async function (assert) {
@@ -268,7 +273,8 @@ module('Integration | components | avatar', function (hooks) {
       -8,
       'its margin on the left',
     )
-    await a11yAudit(BUT_THE_INITIALS)
+    await a11yAudit(ALL_BUT_CONTRAST)
+    await a11yAudit(BUT_THE_INITIALS, { runOnly: ['color-contrast'] })
   })
 
   test('it takes attributes and classes, @as, and @src on the avatar', async function (assert) {
@@ -331,6 +337,7 @@ module('Integration | components | avatar', function (hooks) {
     const icon = new AvatarHarness('icon')
     assert.strictEqual(icon.find(IconHarness).label, 'Add someone')
     assert.throws(() => new AvatarHarness('missing').element, /no avatar "missing" found/)
-    await a11yAudit(BUT_THE_INITIALS)
+    await a11yAudit(ALL_BUT_CONTRAST)
+    await a11yAudit(BUT_THE_INITIALS, { runOnly: ['color-contrast'] })
   })
 })

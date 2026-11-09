@@ -25,19 +25,17 @@ const AUDIT_EXCEPTIONS: Record<string, { rules: Record<string, { enabled: false 
 
 /**
  * Where upstream's own colours fall short of the 4.5:1 WCAG AA asks of small text, in its light
- * themes, and Joinery keeps them (each page's Accessibility notes say so, and how an app can
- * darken them): a key's text, an avatar's initials and a group's count, `--muted-foreground` on
- * `--muted` (about 4.3:1), and the destructive badge's, `--destructive` on its own 10% tint
- * (about 4:1). The audit leaves those elements out, and checks everything else on the page.
+ * themes, and Joinery keeps them, the component lists those elements in
+ * `upstream-contrast/<component>.ts`, with its reason (its page's Accessibility notes say so
+ * too, and how an app can darken them): one file each, so components land side by side. A
+ * page's colour-contrast audit leaves those elements out, and every other rule runs on them.
  */
-const UPSTREAM_CONTRAST = {
+const UPSTREAM_CONTRAST = Object.values(
+  import.meta.glob<string[]>('./upstream-contrast/*.ts', { eager: true, import: 'default' }),
+).flat()
+const CONTRAST_BUT_UPSTREAM = {
   include: [['#ember-testing-container']],
-  exclude: [
-    ['[data-slot="kbd"]'],
-    ['[data-slot="badge"][data-variant="destructive"]'],
-    ['[data-slot="avatar-fallback"]'],
-    ['[data-slot="avatar-group-count"]'],
-  ],
+  exclude: UPSTREAM_CONTRAST.map(selector => [selector]),
 }
 
 /**
@@ -53,17 +51,22 @@ const UPSTREAM_CONTRAST = {
  *   ui.shadcn.com.
  *
  * So the page's audit runs these rules over the guide's own content, leaving the examples'
- * previews out, and every other rule over all of it (but for upstream's contrast shortfalls,
- * above). A page's own exceptions apply to both.
+ * previews out.
  */
 const PAGE_RULES = ['heading-order', 'landmark-unique']
-const ALL_BUT_PAGE_RULES = Object.fromEntries(
-  PAGE_RULES.map(rule => [rule, { enabled: false as const }]),
-)
 const GUIDE_CONTENT = {
   include: [['#ember-testing-container']],
   exclude: [['.example-preview']],
 }
+
+/**
+ * The page's first audit runs every rule over all of it but the page's own exceptions, the
+ * page rules above and `color-contrast`, which the audits after it run over their own share of
+ * the page. A page's own exceptions apply to all three.
+ */
+const SCOPED_RULES = Object.fromEntries(
+  ['color-contrast', ...PAGE_RULES].map(rule => [rule, { enabled: false as const }]),
+)
 
 module('Acceptance | guide pages', function (hooks) {
   setupApplicationTest(hooks)
@@ -107,7 +110,9 @@ module('Acceptance | guide pages', function (hooks) {
         assert.dom(example.querySelector('.example-preview')).exists(`example ${name} rendered`)
       }
       const exceptions = AUDIT_EXCEPTIONS[page]?.rules ?? {}
-      await a11yAudit(UPSTREAM_CONTRAST, { rules: { ...exceptions, ...ALL_BUT_PAGE_RULES } })
+      await a11yAudit({ rules: { ...exceptions, ...SCOPED_RULES } })
+      if (!exceptions['color-contrast'])
+        await a11yAudit(CONTRAST_BUT_UPSTREAM, { runOnly: ['color-contrast'] })
       await a11yAudit(GUIDE_CONTENT, { runOnly: PAGE_RULES.filter(rule => !exceptions[rule]) })
     })
   }

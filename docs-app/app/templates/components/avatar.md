@@ -217,7 +217,8 @@ None: an avatar shows a picture and takes no focus. To make one a control, put i
   say who it is, put the name beside the avatar, as an [Item](/components/item.md) does.
 - The fallback and the count draw `--muted-foreground` on `--muted`, as upstream's do: 4.34:1 in
   the default theme, under the 4.5:1 WCAG AA asks of 14px text. The guide's audits leave those
-  two out and check everything else. To meet AA, darken the text in your own CSS:
+  two out of the colour-contrast check only, and run every other rule on them. To meet AA,
+  darken the text in your own CSS:
 
   ```css
   [data-slot='avatar-fallback'],

@@ -307,8 +307,11 @@ small text in its light themes (Kbd's keys, `--muted-foreground` on `--muted`; t
 Badge, `--destructive` on its own tint), Joinery keeps them: the component's page says so in its
 Accessibility notes, with the CSS that meets AA, and the audits leave out only those elements
 (`a11yAudit({ include: [['#ember-testing-container']], exclude: [[selector]] })` in a test that
-needs it, and `UPSTREAM_CONTRAST` in the guide's pages test), so everything around them is still
-checked.
+needs it, and a file in `docs-app/tests/acceptance/upstream-contrast/` for the guide's pages
+test), so everything around them is still checked. Better still, leave them out of the
+colour-contrast rule alone, as Avatar's tests and the pages test do: one audit with
+`color-contrast` turned off, then one that runs only it (`runOnly: ['color-contrast']`) with
+those elements excluded, so every other rule still runs on them.
 
 **The guide page** follows its ui.shadcn.com page: the title and description, the first example,
 Installation, Usage, then each of upstream's sections in upstream's order, with its `<Example>`
@@ -483,7 +486,11 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   `docs-app/tests/acceptance/pages-test.ts` renders every page and audits it with axe, so a new
   page needs no list edited. A page's examples may repeat a landmark, as upstream's do (every
   Breadcrumb is a nav called `breadcrumb`), so its `landmark-unique` check covers the guide's
-  own landmarks and leaves the previews out; each example's own test audits it alone.
+  own landmarks and leaves the previews out; each example's own test audits it alone. Where a
+  component keeps upstream's colours though they fall short of WCAG AA's contrast (see
+  "Upstream's colours and AA"), it lists those elements, with the reason, in its own
+  `docs-app/tests/acceptance/upstream-contrast/<component>.ts`: the pages test leaves them out
+  of the colour-contrast rule only, and runs every other rule on them.
 - Examples are `.gts` files in `docs-app/app/examples/`, one per upstream example, named
   `<component>-<example>`, each exporting the example as its default export. Show one in a page
   with `<Example @name="…" />` (add `@title`, and `@align="start"` where upstream's preview

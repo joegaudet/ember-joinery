@@ -75,8 +75,8 @@ Control the size of buttons using `@size` on individual buttons.
 ## Nested
 
 Nest `<ButtonGroup>` components to create button groups with spacing. Upstream's example
-(`button-group-nested`) has an Input Group and a Tooltip in it, which haven't landed in Joinery
-yet; it comes with them.
+(`button-group-nested`) has an Input, an Input Group and a Tooltip in it, which haven't landed
+in Joinery yet; it comes with them.
 
 ## Separator
 
@@ -209,7 +209,7 @@ give `@as` a tag, or put the `text` modifier on your own component:
 | ButtonGroup | `class`              | `jn-button-group jn-button-group-orientation-<orientation>`, `group/button-group` |
 |             | `role`               | `group`                                                                           |
 |             | `data-slot`          | `button-group`                                                                    |
-|             | `data-orientation`   | its `@orientation`                                                                |
+|             | `data-orientation`   | its `@orientation`, when given (as upstream's)                                    |
 |             | `data-test-jn`       | `button-group`                                                                    |
 | Separator   | `class`, `data-slot` | `jn-button-group-separator`, `button-group-separator`                             |
 |             | `role`               | `none`, or `separator` with `@decorative={{false}}`                               |

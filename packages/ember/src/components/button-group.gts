@@ -25,10 +25,6 @@ export function buttonGroupClasses({
   return `jn-button-group group/button-group jn-button-group-orientation-${orientation}`
 }
 
-function orientationOf(orientation: ButtonGroupOrientation | undefined): ButtonGroupOrientation {
-  return orientation ?? 'horizontal'
-}
-
 /** What the separator part takes, as a component and as a modifier. */
 export interface ButtonGroupSeparatorOptions {
   /** Default `vertical`: a line between two buttons in a row. */
@@ -159,7 +155,8 @@ const ButtonGroup: TOC<ButtonGroupSignature> = <template>
     role="group"
     class={{buttonGroupClasses orientation=@orientation}}
     data-slot="button-group"
-    data-orientation={{orientationOf @orientation}}
+    {{! as upstream's: only when @orientation is given }}
+    data-orientation={{@orientation}}
     data-test-jn="button-group"
     data-test-jn-name={{@name}}
     ...attributes

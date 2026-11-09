@@ -39,7 +39,10 @@ export class ButtonGroupHarness extends Harness {
       .join(' ')
   }
 
-  /** Its `@orientation`: `horizontal` or `vertical`. */
+  /**
+   * Its `@orientation`: `horizontal` (the default, which renders no `data-orientation`, as
+   * upstream's) or `vertical`.
+   */
   get orientation(): string {
     return this.element.getAttribute('data-orientation') ?? 'horizontal'
   }

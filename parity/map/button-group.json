@@ -1,5 +1,5 @@
 {
-  "$comment": "Waiting for components that haven't landed: button-group-demo and button-group-rtl (Dropdown Menu; button-group-demo is shown on Button's page too, and mapped here, its inventory page), button-group-nested (Input Group, Tooltip), button-group-input (Input), button-group-input-group (Input Group, Tooltip), button-group-dropdown (Dropdown Menu), button-group-select (Select, Input), button-group-popover (Popover, Field, Textarea). The unit that lands the last of each one's components ports it onto the Button Group page (button-group-demo onto Button's too) and maps it here.",
+  "$comment": "Waiting for components that haven't landed: button-group-demo and button-group-rtl (Dropdown Menu; button-group-demo is shown on Button's page too, and mapped here, its inventory page), button-group-nested (Input, Input Group, Tooltip), button-group-input (Input), button-group-input-group (Input Group, Tooltip), button-group-dropdown (Dropdown Menu), button-group-select (Select, Input), button-group-popover (Popover, Field, Textarea). The unit that lands the last of each one's components ports it onto the Button Group page (button-group-demo onto Button's too) and maps it here.",
   "examples": {
     "button-group-orientation": "button-group-orientation",
     "button-group-size": "button-group-size",

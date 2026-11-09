@@ -1,5 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
 import { render, settled } from '@ember/test-helpers'
 import { LinkTo } from '@ember/routing'
 import { tracked } from '@glimmer/tracking'
@@ -31,15 +32,6 @@ const IMAGE =
 
 /** A rendered length in pixels. */
 const px = (value: string) => Number.parseFloat(value)
-
-/** An element's classes and attributes (but the test's own `data-case`), to compare two. */
-function rendering(element: Element): { classes: string[]; attributes: Record<string, string> } {
-  const attributes: Record<string, string> = {}
-  for (const { name, value } of element.attributes) {
-    if (name !== 'class' && name !== 'data-case') attributes[name] = value
-  }
-  return { classes: [...element.classList].sort(), attributes }
-}
 
 module('Integration | components | item', function (hooks) {
   setupRenderingTest(hooks)
@@ -254,7 +246,7 @@ module('Integration | components | item', function (hooks) {
       assert.deepEqual(rendering(component), rendering(modifiers[index]!), `${index}: the same`)
     })
     assert.deepEqual(
-      [...components[0]!.classList].sort(),
+      rendering(components[0]!).classes,
       itemClasses({ variant: 'default', size: 'default' }).split(' ').sort(),
     )
     for (const [name, value] of Object.entries(itemAttributes({ name: 'x' }))) {

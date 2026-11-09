@@ -6,7 +6,7 @@
 // written: tailwind.css is one, since apps feed its `@theme inline` to their own Tailwind.
 
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, existsSync, mkdirSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -45,12 +45,27 @@ export function buildCss({ outDir = join(packageDir, 'dist') } = {}) {
   }
 }
 
-/** The rollup plugin: rebuilds the CSS after every (re)build, and watches the inputs. */
+/**
+ * What a CSS rebuild depends on: the entries, and every style sheet under src/ that they
+ * `@import` (the ported styles in src/styles/ and the rest).
+ */
+export function watchedFiles() {
+  const files = new Set(entries.map(entry => resolve(packageDir, entry.input)))
+  const src = join(packageDir, 'src')
+  if (existsSync(src)) {
+    for (const name of readdirSync(src, { recursive: true })) {
+      if (name.endsWith('.css')) files.add(join(src, name))
+    }
+  }
+  return [...files].sort()
+}
+
+/** The rollup plugin: rebuilds the CSS after every (re)build, and watches its sources. */
 export function joineryCss() {
   return {
     name: 'joinery-css',
     buildStart() {
-      for (const entry of entries) this.addWatchFile(resolve(packageDir, entry.input))
+      for (const file of watchedFiles()) this.addWatchFile(file)
     },
     writeBundle(options) {
       buildCss({ outDir: options.dir ? resolve(options.dir) : undefined })

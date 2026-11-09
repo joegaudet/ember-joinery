@@ -44,10 +44,10 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "build": "node ../../scripts/gen-barrels.mjs . && rollup --config",
-    "start": "node ../../scripts/gen-barrels.mjs . && rollup --config --watch",
+    "build": "node ../../scripts/gen-barrels.mjs . && rm -rf declarations && rollup --config",
+    "start": "node ../../scripts/gen-barrels.mjs . && rm -rf declarations && rollup --config --watch",
     "typecheck": "node ../../scripts/gen-barrels.mjs . && ember-tsc --noEmit",
-    "prepack": "node ../../scripts/gen-barrels.mjs . && rollup --config"
+    "prepack": "node ../../scripts/gen-barrels.mjs . && rm -rf declarations && rollup --config"
   },
   "dependencies": {
     "@embroider/addon-shim": "^1.10.3",

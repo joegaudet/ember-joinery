@@ -1,0 +1,64 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/item.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="item-group" in ItemGroup; keep on the element: group/item-group */
+:where(.jn-item-group) {
+  @apply flex w-full flex-col;
+}
+
+/* in itemVariants; keep on the element: group/item */
+:where(.jn-item) {
+  @apply flex w-full flex-wrap items-center transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors;
+}
+
+/* in itemMediaVariants */
+:where(.jn-item-media) {
+  @apply flex shrink-0 items-center justify-center [&_svg]:pointer-events-none;
+}
+
+/* data-slot="item-content" in ItemContent */
+:where(.jn-item-content) {
+  @apply flex flex-1 flex-col [&+[data-slot=item-content]]:flex-none;
+}
+
+/* data-slot="item-title" in ItemTitle */
+:where(.jn-item-title) {
+  @apply line-clamp-1 flex w-fit items-center;
+}
+
+/* data-slot="item-description" in ItemDescription */
+:where(.jn-item-description) {
+  @apply line-clamp-2 font-normal [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary;
+}
+
+/* data-slot="item-actions" in ItemActions */
+:where(.jn-item-actions) {
+  @apply flex items-center;
+}
+
+/* data-slot="item-header" in ItemHeader */
+:where(.jn-item-header) {
+  @apply flex basis-full items-center justify-between;
+}
+
+/* data-slot="item-footer" in ItemFooter */
+:where(.jn-item-footer) {
+  @apply flex basis-full items-center justify-between;
+}
+
+/*
+ * Written by hand, not by extract-classes.mjs, which reads one file: ItemSeparator renders
+ * upstream's Separator (apps/v4/registry/bases/radix/ui/separator.tsx), and these are that
+ * component's inline utilities. ItemSeparator's own classes (the style sheet's
+ * `jn-item-separator` rule, `my-2` in every style) come after them in Separator's cn() call
+ * and override none of them, so they hold here, after the sheet, as they do upstream.
+ */
+:where(.jn-item-separator) {
+  @apply shrink-0 bg-border data-horizontal:h-px data-horizontal:w-full data-vertical:w-px data-vertical:self-stretch;
+}

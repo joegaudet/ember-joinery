@@ -1,0 +1,18 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/checkbox.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="checkbox" in Checkbox; keep on the element: peer */
+:where(.jn-checkbox) {
+  @apply relative shrink-0 outline-none after:absolute after:-inset-x-3 after:-inset-y-2 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+/* data-slot="checkbox-indicator" in Checkbox */
+:where(.jn-checkbox-indicator) {
+  @apply grid place-content-center text-current transition-none;
+}

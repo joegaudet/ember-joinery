@@ -84,6 +84,16 @@
 }
 
 /*
+ * An element the `hidden` attribute hides stays hidden whatever `display` a class gives it, as
+ * preflight keeps it (`until-found` aside). Joinery's parts rely on it where upstream's unmount:
+ * a closed collapsible's content stays in the document, `hidden`, and upstream's examples lay
+ * it out with `flex`.
+ */
+:where([data-slot], [data-slot] *):where([hidden]:not([hidden='until-found'])) {
+  display: none !important;
+}
+
+/*
  * The rest of preflight's form controls, for Input, Textarea and Native Select: a file input's
  * button starts bare, with preflight's 4px after it; a placeholder is fully opaque, in half the
  * text colour (a style's `placeholder:` colour wins); a textarea resizes only up and down; date

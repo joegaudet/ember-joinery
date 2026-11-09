@@ -44,6 +44,32 @@ module('Integration | components | collapsible', function (hooks) {
     await a11yAudit()
   })
 
+  test('closed content stays hidden whatever display it is given, as under preflight', async function (assert) {
+    // Upstream's examples lay the content out with classes (`flex`, `p-2.5`), which Tailwind's
+    // preflight keeps from showing a `hidden` element; Joinery's base does the same for its parts.
+    await render(
+      <template>
+        <Collapsible @name="details" as |c|>
+          <c.Trigger>Product details</c.Trigger>
+          <c.Content style="display: flex; padding: 10px">More about it.</c.Content>
+        </Collapsible>
+      </template>,
+    )
+    const details = new CollapsibleHarness('details')
+    assert.dom(details.content).hasAttribute('hidden')
+    assert.strictEqual(getComputedStyle(details.content!).display, 'none')
+    assert.strictEqual(details.content!.offsetHeight, 0, 'it takes no space')
+    assert.false(details.isShown)
+
+    await details.open()
+    assert.true(details.isShown)
+    assert.strictEqual(getComputedStyle(details.content!).display, 'flex', 'the given display')
+
+    await details.close()
+    assert.false(details.isShown, 'hidden again')
+    await a11yAudit()
+  })
+
   test('a Button becomes the trigger with the yielded modifier, as upstream asChild', async function (assert) {
     await render(
       <template>

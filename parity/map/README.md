@@ -20,7 +20,9 @@ blocks). Each maps upstream example ids to the Joinery guide examples that port 
 
 - A string is the Joinery example's name (`docs-app/app/examples/<name>.gts`).
 - `threshold` overrides the default (1% of the content box's pixels may differ; see "Parity" in
-  CONTRIBUTING.md) and needs a written `reason`.
+  CONTRIBUTING.md) and needs a written `reason`. It is one fraction for both themes, or one for
+  each, `{ "light": 0.04, "dark": 0.13 }`, where the two themes differ by more than a point or
+  so, so the theme that differs less isn't given the other's slack.
 - `skip` marks an example that can't be compared, with the reason. It still counts as mapped.
 
 An example shown on two pages is mapped once, in either page's file. `pnpm parity` checks every

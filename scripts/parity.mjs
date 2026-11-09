@@ -107,10 +107,30 @@ export function layoutFor(id, inventory) {
 
 const ENTRY_KEYS = new Set(['example', 'threshold', 'reason', 'skip'])
 
+const isFraction = value => typeof value === 'number' && value > 0 && value < 1
+
+/** Whether a map entry's threshold is one fraction, or one for each theme. */
+function isThreshold(threshold) {
+  if (isFraction(threshold)) return true
+  if (!threshold || typeof threshold !== 'object' || Array.isArray(threshold)) return false
+  const themes = Object.keys(threshold)
+  return (
+    themes.length === THEMES.length &&
+    THEMES.every(theme => themes.includes(theme) && isFraction(threshold[theme]))
+  )
+}
+
+/** An entry's threshold in one theme: its own for both, its own for that theme, or the default. */
+export function thresholdFor(entry, theme) {
+  const { threshold = DEFAULT_THRESHOLD } = entry
+  return typeof threshold === 'number' ? threshold : threshold[theme]
+}
+
 /**
  * Checks one map file's JSON and returns its entries. A value is the Joinery example's name, or
  * `{ example, threshold?, reason? }`, or `{ skip: reason }` for an example that can't be compared
- * (it still counts as mapped). A threshold needs a reason.
+ * (it still counts as mapped). A threshold is one fraction for both themes, or
+ * `{ "light": …, "dark": … }`, and needs a reason.
  */
 export function validateMapFile(component, json, inventory) {
   const errors = []
@@ -159,8 +179,10 @@ export function validateMapFile(component, json, inventory) {
       continue
     }
     if (entry.threshold !== undefined) {
-      if (typeof entry.threshold !== 'number' || !(entry.threshold > 0 && entry.threshold < 1)) {
-        errors.push(`${where}: "${id}": "threshold" is a fraction of the pixels, between 0 and 1`)
+      if (!isThreshold(entry.threshold)) {
+        errors.push(
+          `${where}: "${id}": "threshold" is a fraction of the pixels, between 0 and 1, or one for each theme ({ "light": …, "dark": … })`,
+        )
       }
       if (typeof entry.reason !== 'string' || !entry.reason.trim()) {
         errors.push(`${where}: "${id}": a threshold needs a "reason"`)
@@ -899,12 +921,13 @@ export async function parity(options, { log = console.log, root = repoRoot, font
           theme,
           layout: layoutFor(entry.id, inventory),
         })
+        const threshold = thresholdFor(entry, theme)
         const base = {
           id: entry.id,
           component: entry.component,
           example: entry.example,
           theme,
-          threshold: entry.threshold,
+          threshold,
           ...(entry.reason && { reason: entry.reason }),
         }
         const file = kind => `images/${entry.id}-${theme}-${kind}.png`
@@ -932,7 +955,7 @@ export async function parity(options, { log = console.log, root = repoRoot, font
           writeFileSync(join(reportDir, file('upstream-box')), comparison.areas.upstream)
           writeFileSync(join(reportDir, file('joinery-box')), comparison.areas.joinery)
           writeFileSync(join(reportDir, file('diff')), comparison.diff)
-          const status = passes(comparison.ratio, entry.threshold) ? 'pass' : 'fail'
+          const status = passes(comparison.ratio, threshold) ? 'pass' : 'fail'
           results.push({
             ...base,
             status,

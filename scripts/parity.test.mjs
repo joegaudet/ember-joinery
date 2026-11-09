@@ -20,6 +20,7 @@ import {
   requiredIds,
   selectEntries,
   staticServer,
+  thresholdFor,
   unmapped,
   validateMapFile,
 } from './parity.mjs'
@@ -165,6 +166,34 @@ test('validateMapFile accepts names, thresholds with reasons, and skips', () => 
       skip: 'Shown on Button Group too; compared there.',
     },
   ])
+  assert.strictEqual(thresholdFor(entries[0], 'dark'), DEFAULT_THRESHOLD)
+  assert.strictEqual(thresholdFor(entries[1], 'light'), 0.03, 'one threshold for both themes')
+  assert.strictEqual(thresholdFor(entries[1], 'dark'), 0.03)
+})
+
+test('validateMapFile takes a threshold for each theme', () => {
+  const threshold = { light: 0.02, dark: 0.04 }
+  const { entries, errors } = validateMapFile(
+    'chart',
+    {
+      examples: {
+        'chart-area-default': { example: 'chart-area-default', threshold, reason: 'Dark differs.' },
+      },
+    },
+    INVENTORY,
+  )
+  assert.deepEqual(errors, [])
+  assert.deepEqual(entries, [
+    {
+      id: 'chart-area-default',
+      component: 'chart',
+      example: 'chart-area-default',
+      threshold,
+      reason: 'Dark differs.',
+    },
+  ])
+  assert.strictEqual(thresholdFor(entries[0], 'light'), 0.02)
+  assert.strictEqual(thresholdFor(entries[0], 'dark'), 0.04)
 })
 
 test('validateMapFile reports what is wrong with an entry', () => {
@@ -207,6 +236,21 @@ test('validateMapFile reports what is wrong with an entry', () => {
     ).errors[0],
     /between 0 and 1/,
   )
+  for (const threshold of [
+    { light: 0.02 },
+    { light: 0.02, dark: 1.5 },
+    { light: 0.02, dim: 0.1 },
+  ]) {
+    assert.match(
+      validateMapFile(
+        'button',
+        { examples: { 'button-demo': { example: 'a', threshold, reason: 'r' } } },
+        INVENTORY,
+      ).errors[0] ?? '',
+      /one for each theme/,
+      JSON.stringify(threshold),
+    )
+  }
   assert.match(validateMapFile('button', [], INVENTORY).errors[0], /expected an object/)
 })
 

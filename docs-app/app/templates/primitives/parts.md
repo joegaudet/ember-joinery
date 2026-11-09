@@ -22,7 +22,10 @@ import { As } from '@ember-joinery/primitives/as'
 ```
 
 It renders `@as`, or else `@tag`, with the attributes, modifiers and block it is given. It uses
-Ember's built-in `element` helper on Ember 7.1 and later, and works the same on 6.12.
+Ember's built-in `element` helper on Ember 7.1 and later. Ember 6.12 has no such helper, so
+there it renders a classic component, whose element also gets the `id="ember…"` and
+`ember-view` class Ember gives every classic component; a part's own `id` replaces that id.
+Don't depend on either. Only a 6.12 build includes that fallback.
 
 ## Part modifiers
 
@@ -64,6 +67,12 @@ How a part meets the element's own attributes:
 
 - The part's attributes win, except `class`, which adds to the element's classes. An attribute
   the part stops setting goes back to the element's own value.
+- Both hold when the element's own attributes re-render. LinkTo re-renders its `class` (for
+  `active`) on every route change, and `title={{this.title}}` changes with its value: the part
+  puts its own classes and attributes back, and keeps the element's new value for when it
+  stops setting that attribute.
+- Two parts on one element (a tooltip's trigger and a dialog's): their classes add up, and for
+  an attribute both set, the last to set it wins.
 - On events, listeners that come before the part modifier run first (put `...attributes`
   before it), and can stop the part's by calling `event.preventDefault()`, as in Radix.
 - A part can take arguments, such as an item's value: `part((named) => …)` for

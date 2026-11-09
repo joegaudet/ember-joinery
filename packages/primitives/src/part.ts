@@ -13,11 +13,15 @@ export type PartListeners = {
 export interface PartSpec<E extends Element = HTMLElement> {
   /**
    * The part's attributes: its ARIA (`aria-expanded`, `aria-controls`), `role`, `id`,
-   * `data-state`, `data-slot` and `data-test-jn-part`. They are kept up to date, and an
-   * attribute the part stops setting goes back to what the element had.
+   * `data-state`, `data-slot` and `data-test-jn-part`. They are kept up to date, they win over
+   * the element's own (even when those re-render), and an attribute the part stops setting goes
+   * back to the element's own value. Put classes in `class`, not here.
    */
   attributes?: Readonly<Record<string, AttributeValue>>
-  /** Classes to add, space separated. They go next to the element's own. */
+  /**
+   * Classes to add, space separated. They go next to the element's own, and stay when the
+   * element's own `class` re-renders.
+   */
   class?: string | null
   /**
    * Listeners. As in Radix, a listener is skipped when an earlier one for the same event (one
@@ -59,6 +63,61 @@ function classesOf(value: string | null | undefined): string[] {
   return value ? value.split(/\s+/).filter(Boolean) : []
 }
 
+/** Hears which of an element's attributes something other than a part changed. */
+type Watcher = (changed: ReadonlySet<string>) => void
+
+/**
+ * One observer for every part's element. It reports the changes something other than a part
+ * makes, such as the template re-rendering the element's `class` (LinkTo does, for `active`,
+ * on every route change) or an attribute (`title={{this.title}}`), so the part can put its own
+ * back. Parts write through `write()`, which drops their own changes from the record, so parts
+ * never hear each other, and two parts on one element can't keep undoing each other.
+ */
+let observer: MutationObserver | undefined
+const watchers = new WeakMap<Element, Set<Watcher>>()
+
+function deliver(records: MutationRecord[]): void {
+  const changed = new Map<Element, Set<string>>()
+  for (const { target, attributeName } of records) {
+    if (!attributeName) continue
+    const element = target as Element
+    let names = changed.get(element)
+    if (!names) changed.set(element, (names = new Set()))
+    names.add(attributeName)
+  }
+  for (const [element, names] of changed) {
+    for (const watcher of watchers.get(element) ?? []) watcher(names)
+  }
+}
+
+/** Tells `watcher` about the changes others make to the element's attributes, until called. */
+function watch(element: Element, watcher: Watcher): () => void {
+  observer ??= new MutationObserver(deliver)
+  let watching = watchers.get(element)
+  if (!watching) {
+    watchers.set(element, (watching = new Set()))
+    // It stays observed after its parts go (an observer can't let go of one element);
+    // changes to an element with no part are ignored, and go with the element.
+    observer.observe(element, { attributes: true })
+  }
+  const set = watching
+  set.add(watcher)
+  return () => void set.delete(watcher)
+}
+
+/**
+ * Makes a part's changes to the DOM: delivers what others changed so far, so each part sees
+ * the element's own values first, then makes the change and drops it from the record.
+ */
+function write(change: () => void): void {
+  if (observer) {
+    const pending = observer.takeRecords()
+    if (pending.length) deliver(pending)
+  }
+  change()
+  observer?.takeRecords()
+}
+
 /**
  * A modifier that turns any element into one of a component's parts: it sets the part's
  * attributes, adds its classes and listens for its events, and keeps them current. A component
@@ -91,9 +150,13 @@ function classesOf(value: string | null | undefined): string[] {
  * touched on the element. A part that takes arguments, such as an item's value, reads them from
  * the modifier's arguments: `part((named) => …)` for `<a {{m.item value="profile"}}>`.
  *
- * The part's attributes win over the element's own, except `class`, which adds to it; on
- * events, the caller's listeners run first when they come first (`...attributes` before the
- * part modifier), and can stop the part's by calling `preventDefault()`.
+ * The part's attributes win over the element's own, and its classes add to the element's.
+ * That holds when the element's own re-render (a `class` that changes, as LinkTo's does on
+ * every route change, or `title={{this.title}}`): the part puts its own back, and keeps the
+ * element's new value to restore when it stops setting that attribute. Where two parts on one
+ * element set the same attribute, the last to set it wins. On events, the caller's listeners
+ * run first when they come first (`...attributes` before the part modifier), and can stop the
+ * part's by calling `preventDefault()`.
  */
 export function part<
   E extends Element = HTMLElement,
@@ -102,43 +165,71 @@ export function part<
 >(spec: (named: Named, positional: Positional) => PartSpec<E>): PartModifier<E, Named, Positional> {
   return class Part extends Modifier<PartSignature<E, Named, Positional>> {
     #element: E | undefined
-    /** The attributes this part set, with what the element had before. */
+    /** The attributes the part sets now, as it wrote them. */
+    #attributes = new Map<string, string>()
+    /** For each attribute the part sets, the element's own value (`null` for none), kept current. */
     #originals = new Map<string, string | null>()
-    /** The classes this part added (and the element didn't already have). */
+    /** The classes the part wants now. */
+    #wanted = new Set<string>()
+    /** The classes the part added (the element didn't have them of its own). */
     #classes = new Set<string>()
     #handlers = new Map<string, (event: Event) => void>()
     #listeners = new Map<string, (event: Event) => void>()
     #cleanup: (() => void) | undefined
+    #unwatch: (() => void) | undefined
 
     override modify(element: E, positional: Positional, named: Named): void {
       const next = spec(named, positional)
       const installing = this.#element === undefined
       if (installing) {
         this.#element = element
+        this.#unwatch = watch(element, changed => this.#sync(element, changed))
         registerDestructor(this, () => this.#teardown())
       }
 
-      this.#applyAttributes(element, next.attributes ?? {})
-      this.#applyClasses(element, classesOf(next.class))
+      write(() => {
+        this.#applyAttributes(element, next.attributes ?? {})
+        this.#applyClasses(element, classesOf(next.class))
+      })
       this.#applyListeners(element, next.on ?? {})
 
       if (installing && next.element) this.#cleanup = next.element(element) ?? undefined
     }
 
+    /** Something else changed these attributes: keep its values as the element's own, and win. */
+    #sync(element: E, changed: ReadonlySet<string>): void {
+      write(() => {
+        for (const name of changed) {
+          if (name === 'class') {
+            this.#addClasses(element)
+            continue
+          }
+          const value = this.#attributes.get(name)
+          if (value === undefined) continue
+          const own = element.getAttribute(name)
+          this.#originals.set(name, own)
+          if (own !== value) element.setAttribute(name, value)
+        }
+      })
+    }
+
     #applyAttributes(element: E, attributes: Readonly<Record<string, AttributeValue>>): void {
-      const wanted = new Map<string, string | null>()
-      for (const [name, value] of Object.entries(attributes)) wanted.set(name, normalize(value))
+      const wanted = new Map<string, string>()
+      for (const [name, value] of Object.entries(attributes)) {
+        const normalized = normalize(value)
+        if (normalized !== null) wanted.set(name, normalized)
+      }
 
       for (const [name, original] of this.#originals) {
-        if (wanted.get(name) != null) continue
+        if (wanted.has(name)) continue
         restore(element, name, original)
         this.#originals.delete(name)
       }
       for (const [name, value] of wanted) {
-        if (value === null) continue
         if (!this.#originals.has(name)) this.#originals.set(name, element.getAttribute(name))
         if (element.getAttribute(name) !== value) element.setAttribute(name, value)
       }
+      this.#attributes = wanted
     }
 
     #applyClasses(element: E, classes: string[]): void {
@@ -148,8 +239,14 @@ export function part<
         element.classList.remove(name)
         this.#classes.delete(name)
       }
-      for (const name of wanted) {
-        if (this.#classes.has(name) || element.classList.contains(name)) continue
+      this.#wanted = wanted
+      this.#addClasses(element)
+    }
+
+    /** Adds each class the part wants that the element lacks, such as one a re-render dropped. */
+    #addClasses(element: E): void {
+      for (const name of this.#wanted) {
+        if (element.classList.contains(name)) continue
         element.classList.add(name)
         this.#classes.add(name)
       }
@@ -182,11 +279,16 @@ export function part<
       if (!element) return
       this.#cleanup?.()
       for (const [type, listener] of this.#listeners) element.removeEventListener(type, listener)
-      for (const [name, original] of this.#originals) restore(element, name, original)
-      for (const name of this.#classes) element.classList.remove(name)
+      write(() => {
+        for (const [name, original] of this.#originals) restore(element, name, original)
+        for (const name of this.#classes) element.classList.remove(name)
+      })
+      this.#unwatch?.()
       this.#listeners.clear()
       this.#handlers.clear()
+      this.#attributes.clear()
       this.#originals.clear()
+      this.#wanted.clear()
       this.#classes.clear()
     }
   }

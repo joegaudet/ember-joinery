@@ -124,6 +124,107 @@ module('Integration | primitives | part', function (hooks) {
     await settled()
     assert.dom('span').hasAttribute('title', 'Own', 'the original comes back')
     assert.dom('span').doesNotHaveAttribute('data-on')
+    await a11yAudit()
+  })
+
+  test("the part's classes and attributes stay when the element's own re-render", async function (assert) {
+    class State {
+      @tracked classes = 'one'
+      @tracked title = 'Own'
+      @tracked expanded = false
+    }
+    const state = new State()
+    const trigger = part(() => ({
+      attributes: { title: 'From the part', 'aria-expanded': String(state.expanded) },
+      class: 'jn-trigger',
+    }))
+
+    await render(
+      <template>
+        <button type="button" class={{state.classes}} title={{state.title}} {{trigger}}>
+          Go
+        </button>
+      </template>,
+    )
+    assert.dom('button').hasClass('one').hasClass('jn-trigger')
+    assert.dom('button').hasAttribute('title', 'From the part')
+
+    // As LinkTo's `active` class does on a route change: only the element's own change.
+    state.classes = 'two'
+    state.title = 'Own, changed'
+    await settled()
+    assert.dom('button').hasClass('two').doesNotHaveClass('one')
+    assert.dom('button').hasClass('jn-trigger', "the part's class is put back")
+    assert.dom('button').hasAttribute('title', 'From the part', "the part's attribute still wins")
+
+    // Both at once: the element's class and the part's state change in one render.
+    state.classes = 'three'
+    state.expanded = true
+    await settled()
+    assert.dom('button').hasClass('three').hasClass('jn-trigger').hasAria('expanded', 'true')
+    await a11yAudit()
+  })
+
+  test('an attribute it stops setting goes back to the element’s current value', async function (assert) {
+    class State {
+      @tracked titled = true
+      @tracked title = 'First'
+    }
+    const state = new State()
+    const labelled = part(() => ({
+      attributes: { title: state.titled ? 'From the part' : undefined },
+    }))
+
+    await render(
+      <template>
+        <span title={{state.title}} {{labelled}}>Text</span>
+      </template>,
+    )
+    state.title = 'Second'
+    await settled()
+    assert.dom('span').hasAttribute('title', 'From the part')
+
+    state.titled = false
+    await settled()
+    assert.dom('span').hasAttribute('title', 'Second', "the element's value now, not its first")
+
+    state.titled = true
+    await settled()
+    state.title = 'Third'
+    await settled()
+    state.titled = false
+    await settled()
+    assert.dom('span').hasAttribute('title', 'Third')
+    await a11yAudit()
+  })
+
+  test('two parts on one element: the last to set an attribute wins', async function (assert) {
+    class State {
+      @tracked open = false
+    }
+    const state = new State()
+    const dialogTrigger = part(() => ({
+      attributes: { 'data-state': state.open ? 'open' : 'closed', 'aria-haspopup': 'dialog' },
+      class: 'jn-dialog-trigger',
+    }))
+    const tooltipTrigger = part(() => ({
+      attributes: { 'data-state': 'delayed-open' },
+      class: 'jn-tooltip-trigger',
+    }))
+
+    await render(
+      <template>
+        <button type="button" {{dialogTrigger}} {{tooltipTrigger}}>Open</button>
+      </template>,
+    )
+    assert.dom('button').hasAttribute('data-state', 'delayed-open')
+    assert.dom('button').hasClass('jn-dialog-trigger').hasClass('jn-tooltip-trigger')
+
+    state.open = true
+    await settled()
+    assert.dom('button').hasAttribute('data-state', 'open', 'the dialog trigger set it last')
+    assert.dom('button').hasAttribute('aria-haspopup', 'dialog')
+    await a11yAudit()
   })
 
   test("the caller's listener comes first, and can stop the part's", async function (assert) {
@@ -144,6 +245,7 @@ module('Integration | primitives | part', function (hooks) {
     assert.deepEqual(calls, ['mine', 'part'])
     await click('#stop')
     assert.deepEqual(calls, ['mine', 'part', 'mine'], 'preventDefault() skipped the part')
+    await a11yAudit()
   })
 
   test('a part can take arguments, and hear when its element comes and goes', async function (assert) {
@@ -178,5 +280,6 @@ module('Integration | primitives | part', function (hooks) {
     await settled()
     assert.deepEqual(seen, ['+apple', '+pear', '-apple'], 'installed once each, cleaned up once')
     assert.dom(find('li')).hasAttribute('data-test-jn-value', 'pear')
+    await a11yAudit()
   })
 })

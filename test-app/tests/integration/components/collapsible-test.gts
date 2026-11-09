@@ -1,5 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
 import { focus, render, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
@@ -29,7 +30,8 @@ module('Integration | components | collapsible', function (hooks) {
     assert.dom(faq.trigger).hasAttribute('type', 'button').hasAttribute('aria-expanded', 'false')
     assert.dom(faq.content).hasAttribute('data-slot', 'collapsible-content').hasAttribute('hidden')
     assert.true(faq.controlsContent)
-    assert.strictEqual(faq.element.className, '', 'upstream gives it no classes')
+    // Before 7.1, Ember gives the root `ember-view` too; rendering() leaves that out.
+    assert.deepEqual(rendering(faq.element).classes, [], 'upstream gives it no classes')
 
     await faq.open()
     assert.strictEqual(faq.text, 'Yes. Free to use for personal and commercial projects.')

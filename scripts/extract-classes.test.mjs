@@ -7,6 +7,7 @@ import {
   overrides,
   renderCss,
   sheetRules,
+  sizeMarker,
   splitClasses,
 } from './extract-classes.mjs'
 
@@ -139,6 +140,36 @@ test('renderCss writes a rule per slot and comments for the rest', () => {
   )
   assert.match(css, /only when size === "sm": gap-1 \*\//)
   assert.match(css, /in Card, no slot to attach it to: sr-only/)
+})
+
+test("an icon sized by a class keeps a size- marker, so upstream's svg:not([class*='size-']) rules skip it", () => {
+  const code = `
+function Spinner({ className }) {
+  return <IconPlaceholder lucide="Loader2Icon" data-slot="spinner" className={cn("size-4 animate-spin", className)} />
+}
+function Chevron() {
+  return <ChevronDownIcon className="pointer-events-none md:size-3 opacity-50" />
+}
+function Box() {
+  return <div data-slot="box" className="size-8 [&_svg:not([class*='size-'])]:size-4" />
+}
+`
+  const entries = extractClasses(code)
+  const [spinner, chevron, box] = entries
+  assert.strictEqual(sizeMarker(spinner, entries), 'jn-size-4')
+  assert.strictEqual(sizeMarker(chevron, entries), 'jn-size-own', 'a size behind a variant')
+  assert.strictEqual(sizeMarker(box, entries), undefined, 'the rules look for icons only')
+  const css = renderCss(entries, { name: 'spinner' })
+  assert.match(
+    css,
+    /data-slot="spinner" in Spinner; keep on the element: jn-size-4 \*\/\n:where\(\.jn-spinner\)/,
+  )
+
+  // A semantic class of the element that already says size- is enough.
+  const sized = extractClasses(
+    'const v = cva("cn-x size-4", { variants: { size: { sm: "cn-x-size-sm" } } })\n',
+  ).map(entry => ({ ...entry, element: 'svg' }))
+  assert.strictEqual(sizeMarker(sized[0], sized), undefined)
 })
 
 const BADGE = `

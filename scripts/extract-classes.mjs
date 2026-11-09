@@ -17,6 +17,12 @@
 //   variants look for them;
 // - everything else: utilities, which the CSS output `@apply`s to the slot's rule.
 //
+// An icon's size utility leaves a marker behind too. Upstream's rules size the icons inside a
+// part unless an icon has a size of its own, which they tell by its class
+// (`[&_svg:not([class*='size-'])]:size-4`). When an icon's `size-4` moves into its rule, the
+// icon keeps `jn-size-4` instead (no rule styles it), so those rules still leave it alone; see
+// `sizeMarker`.
+//
 // The order the rules go in matters, and it is the registry build's: shadcn's `transformStyle`
 // (in the `shadcn` package, which the parity app runs as upstream's build does) swaps each
 // semantic class for its style rule's utilities, and tailwind-merge (`cn`) keeps the later of two
@@ -76,6 +82,27 @@ export const KEPT = new Set([
   'jn-logical-sides',
   'jn-rtl-flip',
 ])
+
+/** An element that draws an icon: an `<svg>`, a lucide-react icon, or upstream's placeholder. */
+const ICON = /^(svg|IconPlaceholder|\w+Icon)$/
+
+/**
+ * The class an icon keeps in place of a size utility its rule now applies, or undefined.
+ * Upstream's rules skip an icon that has a size of its own by matching
+ * `svg:not([class*='size-'])`, so an icon whose upstream classes say `size-` needs a class that
+ * does too: `jn-size-4` for `size-4`, or `jn-size-own` for a size behind a variant
+ * (`md:size-4`). None for an element that isn't an icon, or when a semantic class of the same
+ * element (the same call's strings) already says `size-`.
+ */
+export function sizeMarker(entry, entries = [entry]) {
+  if (!ICON.test(entry.element ?? '')) return undefined
+  const sizes = entry.utilities.filter(utility => utility.includes('size-'))
+  if (!sizes.length) return undefined
+  const element = entries.filter(other => other.call === entry.call)
+  if (element.some(other => other.semantic.some(name => name.includes('size-')))) return undefined
+  const plain = sizes.find(utility => /^size-[\w.]+$/.test(utility))
+  return plain ? `jn-${plain}` : 'jn-size-own'
+}
 
 /** A plain string, as transformStyle reads one: a string literal or a template with no `${}`. */
 const isPlain = node => ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)
@@ -607,7 +634,8 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
   for (const entry of entries) {
     const subject = subjectFor(entry, entries)
     const notes = []
-    if (entry.markers.length) notes.push(`keep on the element: ${entry.markers.join(' ')}`)
+    const keep = [...entry.markers, sizeMarker(entry, entries)].filter(Boolean)
+    if (keep.length) notes.push(`keep on the element: ${keep.join(' ')}`)
     if (entry.semantic.length > 1) notes.push(`also: ${entry.semantic.slice(1).join(' ')}`)
     const warnings = transformNotes(entry, sheets)
     if (!entry.utilities.length) {

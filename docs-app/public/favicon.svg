@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="t">
+  <title id="t">Joinery</title>
+  <style>
+    .a { stop-color: #d97706; }
+    .b { stop-color: #7c2d12; }
+    @media (prefers-color-scheme: dark) {
+      .a { stop-color: #f59e0b; }
+      .b { stop-color: #9a3412; }
+    }
+  </style>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop class="a" offset="0"/>
+      <stop class="b" offset="1"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#g)"/>
+  <!-- the logo's dovetail, cut larger and with a heavier joint line so it reads at 16px -->
+  <path d="M8 8H34V56H8Z" fill="#fff" fill-opacity="0.55"/>
+  <path d="M32 8H56V56H32V47L16 52V34L32 39V25L16 30V12L32 17Z" fill="#fff" stroke="url(#g)" stroke-width="4" stroke-linejoin="round"/>
+</svg>

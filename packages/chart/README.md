@@ -50,8 +50,9 @@ yields recharts' parts, with recharts' arguments and defaults: `XAxis`, `YAxis`,
 `ChartLegend`. `ChartTooltipContent` and `ChartLegendContent` are shadcn's. The geometry is
 recharts 3's (margins, nice ticks, overlapping labels dropped, stacking, bar bands, curves), so
 a chart draws the paths recharts draws, with recharts' class names. The chart follows its
-container's size, and with the accessibility layer (on by default) it takes focus and the arrow
-keys move its tooltip.
+container's size (until it has been measured, it draws at the container's `@initialDimension`,
+320 × 200 by default), and with the accessibility layer (on by default) it takes focus and the
+arrow keys move its tooltip.
 
 Its harnesses, `ChartHarness`, `ChartTooltipHarness` and `ChartLegendHarness`, are in
 `@ember-joinery/chart/test-support`: they read a chart's series, axes, grid, labels and legend,

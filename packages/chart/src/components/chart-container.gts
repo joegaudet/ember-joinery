@@ -26,6 +26,11 @@ export interface ChartContainerSignature {
     id?: string
     /** The chart's name, for its harness (`data-test-jn-name`). */
     name?: string
+    /**
+     * The size the chart draws at before the container has been measured (and in a page
+     * rendered on the server), as shadcn's `initialDimension`. Default 320 × 200.
+     */
+    initialDimension?: { width: number; height: number }
   }
   Blocks: {
     /** The chart, from the parts it yields: `<ChartContainer as |chart|><chart.BarChart …>`. */
@@ -53,6 +58,10 @@ export default class ChartContainer extends Component<ChartContainerSignature> {
     return `chart-${this.args.id ?? idFor(this)}`
   }
 
+  get initialDimension(): { width: number; height: number } {
+    return this.args.initialDimension ?? INITIAL_DIMENSION
+  }
+
   <template>
     <div
       class="jn-chart"
@@ -66,13 +75,13 @@ export default class ChartContainer extends Component<ChartContainerSignature> {
       {{yield
         (hash
           AreaChart=(component
-            AreaChart config=@config inContainer=true initialDimension=INITIAL_DIMENSION
+            AreaChart config=@config inContainer=true initialDimension=this.initialDimension
           )
           BarChart=(component
-            BarChart config=@config inContainer=true initialDimension=INITIAL_DIMENSION
+            BarChart config=@config inContainer=true initialDimension=this.initialDimension
           )
           LineChart=(component
-            LineChart config=@config inContainer=true initialDimension=INITIAL_DIMENSION
+            LineChart config=@config inContainer=true initialDimension=this.initialDimension
           )
         )
       }}

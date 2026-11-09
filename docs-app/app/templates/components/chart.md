@@ -443,14 +443,15 @@ left to right unless you reverse it, as upstream's right-to-left example does
 
 The box a chart draws in, and its colours.
 
-| Argument  | Type          | Default   | What it does                                       |
-| --------- | ------------- | --------- | -------------------------------------------------- |
-| `@config` | `ChartConfig` |           | The labels, icons and colours of the chart's data  |
-| `@id`     | `string`      | a new one | Its id, in `data-chart`                            |
-| `@name`   | `string`      |           | Its name, for `ChartHarness` (`data-test-jn-name`) |
+| Argument            | Type                | Default     | What it does                                                 |
+| ------------------- | ------------------- | ----------- | ------------------------------------------------------------ |
+| `@config`           | `ChartConfig`       |             | The labels, icons and colours of the chart's data            |
+| `@id`               | `string`            | a new one   | Its id, in `data-chart`                                      |
+| `@name`             | `string`            |             | Its name, for `ChartHarness` (`data-test-jn-name`)           |
+| `@initialDimension` | `{ width, height }` | `320 × 200` | The size the chart draws at before the container is measured |
 
 It takes attributes on its element, `class` and `style` included, and yields `AreaChart`,
-`BarChart` and `LineChart`, each given the config.
+`BarChart` and `LineChart`, each given the config and the initial size.
 
 ### AreaChart, BarChart, LineChart
 

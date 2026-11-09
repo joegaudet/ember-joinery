@@ -1,0 +1,112 @@
+{
+  "$comment": "The Chart docs page's examples and the charts gallery (registry/new-york-v4/charts) map here. Waiting: chart-area-interactive (Select). The gallery's bar, pie, radar, radial and tooltip charts come with the chart units that port those charts, and are mapped here when they land.",
+  "examples": {
+    "chart-demo": {
+      "example": "chart-demo",
+      "threshold": 0.13,
+      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is. The parity stage gives this full-width example no width, so the card collapses: Nova's Card clips what overflows it (overflow-hidden), new-york-v4's doesn't. Measured at 11.57% (dark)."
+    },
+    "chart-example": "chart-example",
+    "chart-example-grid": "chart-example-grid",
+    "chart-example-axis": "chart-example-axis",
+    "chart-example-tooltip": "chart-example-tooltip",
+    "chart-example-legend": "chart-example-legend",
+    "chart-tooltip": "chart-tooltip",
+    "chart-rtl": "chart-rtl",
+    "chart-area-default": {
+      "example": "chart-area-default",
+      "threshold": 0.18,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 16.60% (dark)."
+    },
+    "chart-area-linear": {
+      "example": "chart-area-linear",
+      "threshold": 0.18,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 16.85% (dark)."
+    },
+    "chart-area-step": {
+      "example": "chart-area-step",
+      "threshold": 0.19,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 17.10% (dark)."
+    },
+    "chart-area-legend": {
+      "example": "chart-area-legend",
+      "threshold": 0.2,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 18.99% (dark)."
+    },
+    "chart-area-stacked": {
+      "example": "chart-area-stacked",
+      "threshold": 0.2,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 18.71% (dark)."
+    },
+    "chart-area-stacked-expand": {
+      "example": "chart-area-stacked-expand",
+      "threshold": 0.18,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 16.84% (dark)."
+    },
+    "chart-area-icons": {
+      "example": "chart-area-icons",
+      "threshold": 0.2,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 18.68% (dark)."
+    },
+    "chart-area-gradient": {
+      "example": "chart-area-gradient",
+      "threshold": 0.17,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 15.93% (dark)."
+    },
+    "chart-area-axes": {
+      "example": "chart-area-axes",
+      "threshold": 0.19,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 18.00% (dark)."
+    },
+    "chart-line-interactive": {
+      "example": "chart-line-interactive",
+      "threshold": 0.14,
+      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is. The parity stage gives this full-width example no width, so the card collapses: Nova's Card clips what overflows it (overflow-hidden), new-york-v4's doesn't. Measured at 12.38% (dark)."
+    },
+    "chart-line-default": {
+      "example": "chart-line-default",
+      "threshold": 0.15,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 13.70% (dark)."
+    },
+    "chart-line-linear": {
+      "example": "chart-line-linear",
+      "threshold": 0.15,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 13.87% (dark)."
+    },
+    "chart-line-step": {
+      "example": "chart-line-step",
+      "threshold": 0.15,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 13.99% (dark)."
+    },
+    "chart-line-multiple": {
+      "example": "chart-line-multiple",
+      "threshold": 0.16,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 14.69% (dark)."
+    },
+    "chart-line-dots": {
+      "example": "chart-line-dots",
+      "threshold": 0.16,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 14.23% (dark)."
+    },
+    "chart-line-dots-custom": {
+      "example": "chart-line-dots-custom",
+      "threshold": 0.16,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 14.60% (dark)."
+    },
+    "chart-line-dots-colors": {
+      "example": "chart-line-dots-colors",
+      "threshold": 0.16,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 14.25% (dark)."
+    },
+    "chart-line-label": {
+      "example": "chart-line-label",
+      "threshold": 0.16,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 14.33% (dark)."
+    },
+    "chart-line-label-custom": {
+      "example": "chart-line-label-custom",
+      "threshold": 0.17,
+      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Measured at 15.02% (dark)."
+    }
+  }
+}

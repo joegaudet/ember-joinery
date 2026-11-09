@@ -57,8 +57,11 @@ with `data-icon="inline-start"` for a start position, or after the label with
 
 ## Badge
 
-Add a spinner to a badge to indicate a loading state, with `data-icon="inline-start"` or
-`data-icon="inline-end"` as in a button. Upstream's example comes with Badge.
+Add a spinner to a [badge](/components/badge.md) to indicate a loading state, with
+`data-icon="inline-start"` or `data-icon="inline-end"` as in a button. In a badge it is drawn at
+the badge's icon size (`size-3`), as upstream's.
+
+<Example @name="spinner-badge" @title="Badge" />
 
 ## Input Group
 

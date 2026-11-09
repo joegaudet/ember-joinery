@@ -2,11 +2,7 @@
 
 A control that allows the user to toggle between checked and not checked.
 
-Upstream's first example lays its checkboxes out with Field, which hasn't landed in Joinery
-yet; it comes with Field. Until then, Joinery's own example labels its checkboxes with native
-labels:
-
-<Example @name="checkbox-native" @title="Checkbox" />
+<Example @name="checkbox-demo" @title="Checkbox" />
 
 ## Installation
 
@@ -78,28 +74,35 @@ import { Minus } from 'lucide'
 
 ## Invalid State
 
-Set `aria-invalid` on the checkbox and `data-invalid` on the field wrapper to show the invalid
-styles. Upstream's example comes with Field.
+Set `aria-invalid="true"` on the checkbox and `@invalid={{true}}` on the
+[Field](/components/field.md) around it to show the invalid styles.
+
+<Example @name="checkbox-invalid" @title="Invalid State" />
 
 ## Basic
 
-Pair the checkbox with `Field` and `FieldLabel` for proper layout and labeling. Upstream's
-example comes with Field.
+Pair the checkbox with `Field` and `FieldLabel` for proper layout and labeling.
+
+<Example @name="checkbox-basic" @title="Basic" />
 
 ## Description
 
-Use `FieldContent` and `FieldDescription` for helper text. Upstream's example comes with
-Field.
+Use `FieldContent` and `FieldDescription` for helper text.
+
+<Example @name="checkbox-description" @title="Description" />
 
 ## Disabled
 
-Use `@disabled` to prevent interaction and add the `data-disabled` attribute to the `<Field>`
-component for disabled styles. Upstream's example comes with Field; the first example above
-has a disabled checkbox with a native label.
+Use `@disabled` to prevent interaction and give the `<Field>` `@disabled={{true}}` (upstream's
+`data-disabled`) for disabled styles.
+
+<Example @name="checkbox-disabled" @title="Disabled" />
 
 ## Group
 
-Use multiple fields to create a checkbox list. Upstream's example comes with Field.
+Use multiple fields to create a checkbox list.
+
+<Example @name="checkbox-group" @title="Group" />
 
 ## Table
 
@@ -108,7 +111,9 @@ Use multiple fields to create a checkbox list. Upstream's example comes with Fie
 ## RTL
 
 The checkbox lays itself out right to left inside any element with `dir="rtl"` (see
-[Direction](/primitives/direction.md)). Upstream's right-to-left example comes with Field.
+[Direction](/primitives/direction.md)).
+
+<Example @name="checkbox-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 

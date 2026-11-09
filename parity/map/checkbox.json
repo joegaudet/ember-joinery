@@ -1,6 +1,13 @@
 {
-  "$comment": "Waiting for components that haven't landed: checkbox-demo, checkbox-rtl, checkbox-invalid, checkbox-basic, checkbox-description, checkbox-disabled and checkbox-group (Field). The Checkbox page shows Joinery's own checkbox-native and checkbox-indeterminate as well; they have no upstream counterpart, so they aren't mapped. The unit that lands Field ports these examples onto the Checkbox page and maps them here.",
+  "$comment": "The Checkbox page also shows Joinery's own checkbox-indeterminate; it has no upstream counterpart, so it isn't mapped.",
   "examples": {
-    "checkbox-table": "checkbox-table"
+    "checkbox-demo": "checkbox-demo",
+    "checkbox-invalid": "checkbox-invalid",
+    "checkbox-basic": "checkbox-basic",
+    "checkbox-description": "checkbox-description",
+    "checkbox-disabled": "checkbox-disabled",
+    "checkbox-group": "checkbox-group",
+    "checkbox-table": "checkbox-table",
+    "checkbox-rtl": "checkbox-rtl"
   }
 }

@@ -28,8 +28,8 @@ pnpm lint
 pnpm typecheck
 node --test scripts/*.test.mjs
 pnpm test                          # test-app, Ember 7.3
-pnpm --filter docs-app test        # † every guide example and page
-pnpm test:examples                 # † vite-basic, classic, tailwind, formwright
+pnpm --filter docs-app test        # every guide example and page
+pnpm test:examples                 # vite-basic, classic, tailwind (formwright †), one at a time
 pnpm parity                        # † screenshot comparison with shadcn/ui
 ```
 
@@ -62,6 +62,15 @@ collide. Don't edit them by hand.
   (`anchor/index.ts`) counts as one module, and the files beside its index stay private. Names
   starting with `_`, and `-private` folders, stay out. Two modules exporting the same name fail
   the build.
+- **The guide's page order.** Kolay orders a section's pages by its `meta.json` and fails the
+  build if the list misses a page. The A–Z sections (Components, Primitives, Charts, Blocks,
+  Formwright, Reference) get theirs from `scripts/gen-guide-meta.mjs`, which docs-app's Vite
+  config runs on every build, test run and dev server start; those files are gitignored. A
+  section's `index.md` is its overview and always comes first. Getting started, and the order
+  of the sections themselves, are hand-written `meta.json` files: add a Getting started page to
+  `docs-app/app/templates/getting-started/meta.json` where it belongs in the reading order.
+- **The guide's page list.** The pages acceptance test builds its `PAGES` from
+  `docs-app/app/templates`, so a new page is tested as soon as it exists.
 
 ## Packages and their build
 
@@ -206,21 +215,42 @@ gh pr create --base main --title 'chore: version packages' --body 'Versions and 
 
 ## The guide
 
-`docs-app/` (†) is the guide at `/ember-joinery/guide/`, built with
-[Kolay](https://github.com/universal-ember/kolay). `pnpm guide:start` serves it locally.
+`docs-app/` is the guide at `/ember-joinery/guide/`, built with
+[Kolay](https://github.com/universal-ember/kolay). `pnpm guide:start` serves it locally, and
+`pnpm guide:build` builds it into `docs/site/guide/` (with `docs/site/404.html`, so deep links
+load on GitHub Pages). Its tests run in the same Chrome as the test app's.
 
 - There is one page per component, `docs-app/app/templates/components/<name>.md`, laid out like
-  its ui.shadcn.com page. `meta.json` files set the order. Add each new page to `PAGES` in
-  `docs-app/tests/acceptance/pages-test.ts`.
+  its ui.shadcn.com page. Primitives, charts, blocks and the Formwright bridge have sections of
+  their own. The A–Z sections' `meta.json` files are generated (see "Generated files"), and
+  `docs-app/tests/acceptance/pages-test.ts` renders every page and audits it with axe, so a new
+  page needs no list edited.
 - Examples are `.gts` files in `docs-app/app/examples/`, one per upstream example, named
-  `<component>-<example>`. Show one in a page with `<Example @name="…" />`.
+  `<component>-<example>`, each exporting the example as its default export. Show one in a page
+  with `<Example @name="…" />` (add `@title`, and `@align="start"` where upstream's preview
+  aligns it). The frame has Preview, Template and Test tabs and a copy button.
 - Every example has a test, `docs-app/tests/examples/<name>-test.gts`, written with harness
   classes and ending in an axe audit. The guide shows it in the example's Test tab, so write it
   the way you'd want a reader to write theirs.
+- `/parity/<name>` renders one example with no frame and no guide around it, centred as
+  upstream's preview is, for the screenshot comparison. `?theme=dark` puts `.dark` on `<html>`,
+  `?dir=rtl` lays it out right to left, and `?align=start|end` places it. The example's root
+  carries `data-parity="<name>"`; an unknown name renders `data-parity-missing` instead.
 
 ## The website
 
-`docs/site/` (†) is hand-written HTML styled with Joinery's own CSS, not generated. The live demo
-is `test-app/app`, built into `docs/site/demo/` by `pnpm demo:build`. When a change touches
-anything the site shows (packages, components, arguments, an API used in a snippet), update
-`docs/site/` in the same PR. `docs/social-card.html` is the source of `docs/site/social-card.png`.
+`docs/site/` is hand-written HTML, not generated. For now `site.css` is a placeholder that uses
+shadcn's token names; the finished site is styled with Joinery's own CSS. The live demo is
+`test-app/app`, built into `docs/site/demo/` by `pnpm demo:build`, and `pages.yml` builds the
+demo and the guide into `docs/site/` and deploys it from `main`. When a change touches anything
+the site shows (packages, components, arguments, an API used in a snippet), update `docs/site/`
+in the same PR. `docs/social-card.html` is the source of `docs/site/social-card.png`; its header
+has the command that renders it.
+
+## The example apps
+
+`examples/` holds an app for each way Joinery is consumed: `ember-vite-basic` (Vite and
+Embroider), `ember-classic` (classic ember-cli with ember-auto-import 2) and `ember-tailwind`
+(Vite with Tailwind CSS v4). Each asks for the published version ranges, which the workspace
+overrides with the local packages, and each has a smoke test that `pnpm test:examples` and CI
+run.

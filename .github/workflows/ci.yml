@@ -67,7 +67,7 @@ jobs:
       # The suite runs in the runner's preinstalled Chrome.
       - run: pnpm test
 
-  # Until docs-app exists, `--filter docs-app` matches nothing and pnpm runs nothing.
+  # The guide's typecheck, and its tests: every page rendered and audited, every example's test.
   guide:
     name: guide (every example and page)
     runs-on: ubuntu-latest
@@ -83,7 +83,8 @@ jobs:
       - run: pnpm --filter docs-app typecheck
       - run: pnpm --filter docs-app test
 
-  # Likewise, each example passes with nothing to do until its app exists under examples/.
+  # Each example app's smoke test. ember-formwright passes with nothing to do until its app
+  # exists under examples/.
   examples:
     name: example (${{ matrix.example }})
     runs-on: ubuntu-latest

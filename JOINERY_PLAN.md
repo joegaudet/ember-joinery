@@ -309,8 +309,9 @@ and axe audit, so about 575 example tests, plus the integration suite.
 - **The example frame**, as in Formwright, plus a theme switcher (base colour, radius,
   light/dark), an RTL toggle, and width presets (375, 768, 1440).
 - **Theme builder page:** edit the tokens, watch every component update live, and copy the CSS.
-- Every page is listed in `PAGES` in the acceptance test, and every example has
-  `docs-app/tests/examples/<name>-test.gts`, written with harnesses and ending in an axe audit.
+- The acceptance test renders every page (its `PAGES` come from the templates directory), and
+  every example has `docs-app/tests/examples/<name>-test.gts`, written with harnesses and ending
+  in an axe audit.
 
 ## Marketing site and demo
 
@@ -472,7 +473,8 @@ Joe asked for the whole plan to be built by subagents without feedback, as one b
   component or generated:
   - the package barrels (`src/index.ts`) and the test-support index are generated from the files
     present, by `scripts/gen-barrels.mjs` on every build (they are gitignored);
-  - the guide's component `meta.json` is generated, in alphabetical order;
+  - the `meta.json` of the guide's A–Z sections (Components, and likewise Primitives, Charts,
+    Blocks, Formwright and Reference) is generated, in alphabetical order;
   - each component has its own `parity/map/<component>.json`;
   - the acceptance test's `PAGES` is built from the templates directory.
 

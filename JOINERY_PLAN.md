@@ -569,7 +569,9 @@ workspace.
   becomes `NativeForm`.
 - **Toasts outside components.** sonner's module-level `toast()` needs owner-scoped state for test
   isolation: `toast` resolves the app's Toaster through the owner, and test-support provides a
-  `setupToaster(hooks)` helper.
+  `setupToaster(hooks)` helper. Built so: the toasts are a per-owner service, `toast()` uses the
+  owner of the newest rendered `<Toaster>`, and `setupToaster(hooks)` points it at each test's
+  owner through `globalThis.JOINERY_TOAST_OWNER`, as `JOINERY_ANCHOR_FALLBACK` does for anchoring.
 - Classic apps need ember-auto-import ≥ 2 to consume `.gts` v2 addons; the classic example proves it.
 
 ## Next steps

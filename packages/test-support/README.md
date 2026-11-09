@@ -211,6 +211,31 @@ module('dark mode', function (hooks) {
 would (`null` clears it), and `system.stored` is the saved choice. Pass `storageKey` when the
 app configures its own.
 
+## Toasts
+
+`toast()` is called from anywhere, so it finds its app through the rendered `<Toaster>`.
+`setupToaster(hooks)` points it at each test's owner from the start of the test (through
+`globalThis.JOINERY_TOAST_OWNER`), so a toast made before a Toaster renders goes to the test,
+and never to the next one. The toasts are the owner's, so they go with it. `ToasterHarness`
+drives the Toaster and `ToastHarness` one toast:
+
+```ts
+import { ToasterHarness, setupToaster } from '@ember-joinery/test-support'
+
+module('saving', function (hooks) {
+  setupRenderingTest(hooks)
+  setupToaster(hooks)
+
+  test('it says so', async function (assert) {
+    await render(<template><SaveButton /><Toaster /></template>)
+    await click('[data-test-save]')
+    const toast = new ToasterHarness().toast() // the newest
+    assert.strictEqual(toast.title, 'Saved')
+    await toast.clickAction()
+  })
+})
+```
+
 ## Keyboard and focus
 
 A test can't press the real Tab key: `triggerKeyEvent(element, 'keydown', 'Tab')` sends the

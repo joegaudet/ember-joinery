@@ -18,6 +18,7 @@ import { inertOthers, type Undo } from './hide-others.ts'
 import { idFor } from './id.ts'
 import { topLayer } from './layer.ts'
 import { part, type PartModifier } from './part.ts'
+import { ignoreROError } from './resize-observer.ts'
 import { scrollLock } from './scroll-lock.ts'
 import { Typeahead, getNextMatch, isTypeaheadKey } from './typeahead.ts'
 import {
@@ -246,6 +247,9 @@ class ContentBehaviour extends Modifier<ContentBehaviourSignature> {
     })
     const restoreProperties =
       state.position === 'popper' ? exposeProperties(element, 'select') : () => {}
+    // Its size follows the trigger's (`min-w-(--radix-select-trigger-width)`), which anchoring
+    // sets from a resize observer: the browser's benign "ResizeObserver loop" message follows.
+    ignoreROError()
     // Focusable itself, as Radix's FocusScope makes it, for when no option has focus.
     const ownTabindex = element.hasAttribute('tabindex')
     if (!ownTabindex) element.setAttribute('tabindex', '-1')

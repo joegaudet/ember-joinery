@@ -15,6 +15,7 @@ import { idFor } from './id.ts'
 import { topLayer } from './layer.ts'
 import { part, type PartModifier } from './part.ts'
 import { Presence } from './presence.gts'
+import { ignoreROError } from './resize-observer.ts'
 import { Typeahead, getNextMatch } from './typeahead.ts'
 import {
   ElementRef,
@@ -773,6 +774,9 @@ class PopupBehaviour extends Modifier<PopupBehaviourSignature> {
     this.#installed = true
     combobox.popupRef.set(element)
     const restore = exposeAnchorProperties(element)
+    // Its width follows its anchor's (`w-(--anchor-width)`), which anchoring sets from a resize
+    // observer: the browser's benign "ResizeObserver loop" message follows.
+    ignoreROError()
     const onFocus = (event: FocusEvent) => {
       // Focus on the popup itself (or the list) goes to the input.
       const target = event.target as Element

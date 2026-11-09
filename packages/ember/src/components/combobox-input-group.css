@@ -1,0 +1,40 @@
+/*
+ * Input Group's inline utilities (apps/v4/registry/bases/radix/ui/input-group.tsx,
+ * shadcn-ui/ui@8ab2771), for the input group ComboboxInput draws: upstream's ComboboxInput
+ * renders an InputGroup, which hasn't landed in Joinery yet. When it does, ComboboxInput
+ * renders it, and this file goes (input-group.css has these rules for every group).
+ *
+ * Scoped to the combobox's group. The group's `w-full` is left out: upstream's ComboboxInput
+ * gives it `w-auto` (combobox.css), which tailwind-merge puts in its place. The file sorts
+ * before combobox.css, so that rule comes after these, as upstream's class order has it.
+ */
+
+/* data-slot="input-group" in InputGroup; keep on the element: group/input-group */
+:where(.jn-combobox-input.jn-input-group) {
+  @apply relative flex min-w-0 items-center outline-none has-[>textarea]:h-auto;
+}
+
+/* in inputGroupAddonVariants */
+:where(.jn-combobox-input .jn-input-group-addon) {
+  @apply flex cursor-text items-center justify-center select-none;
+}
+
+/* in inputGroupAddonVariants (cva-variant align.inline-start) */
+:where(.jn-combobox-input .jn-input-group-addon-align-inline-start) {
+  @apply order-first;
+}
+
+/* in inputGroupAddonVariants (cva-variant align.inline-end) */
+:where(.jn-combobox-input .jn-input-group-addon-align-inline-end) {
+  @apply order-last;
+}
+
+/* in inputGroupButtonVariants */
+:where(.jn-combobox-input .jn-input-group-button) {
+  @apply flex items-center shadow-none;
+}
+
+/* data-slot="input-group-control" in InputGroupInput */
+:where(.jn-combobox-input .jn-input-group-input) {
+  @apply flex-1;
+}

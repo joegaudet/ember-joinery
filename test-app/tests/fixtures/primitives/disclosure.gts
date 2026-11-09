@@ -1,6 +1,6 @@
 // A disclosure built the way Joinery's components are built on the primitives: controllable
-// state, ids, and part modifiers with `@as`. The primitives' tests drive it; it is not a
-// component Joinery ships.
+// state, ids, part modifiers with `@as`, and Presence for the exit animation. The primitives'
+// tests drive it; it is not a component Joinery ships.
 import Component from '@glimmer/component'
 import { hash } from '@ember/helper'
 import { click } from '@ember/test-helpers'
@@ -10,6 +10,7 @@ import { As, type TagName } from '@ember-joinery/primitives/as'
 import { controllable, type ControllableArgs } from '@ember-joinery/primitives/controllable-state'
 import { idFor } from '@ember-joinery/primitives/id'
 import { part, type PartModifier } from '@ember-joinery/primitives/part'
+import { Presence } from '@ember-joinery/primitives/presence'
 import { Harness } from '@ember-joinery/test-support'
 
 interface TriggerSignature {
@@ -30,9 +31,9 @@ interface ContentSignature {
 }
 
 const Content: TOC<ContentSignature> = <template>
-  {{#if @open}}
-    <As @as={{@as}} @tag="div" ...attributes {{@part}}>{{yield}}</As>
-  {{/if}}
+  <Presence @present={{@open}} as |presence|>
+    <As @as={{@as}} @tag="div" ...attributes {{@part}} {{presence.ref}}>{{yield}}</As>
+  </Presence>
 </template>
 
 export interface FxPrimitiveDisclosureSignature {

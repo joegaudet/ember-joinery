@@ -1,0 +1,35 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/pagination.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="pagination" in Pagination */
+:where(.jn-pagination) {
+  @apply mx-auto flex w-full justify-center;
+}
+
+/* data-slot="pagination-content" in PaginationContent */
+:where(.jn-pagination-content) {
+  @apply flex items-center;
+}
+
+/* in PaginationPrevious */
+:where(.jn-pagination-previous-text) {
+  @apply hidden sm:block;
+}
+
+/* in PaginationNext */
+:where(.jn-pagination-next-text) {
+  @apply hidden sm:block;
+}
+
+/* data-slot="pagination-ellipsis" in PaginationEllipsis */
+:where(.jn-pagination-ellipsis) {
+  @apply flex items-center justify-center;
+}
+
+/* in PaginationEllipsis, no slot to attach it to: sr-only */

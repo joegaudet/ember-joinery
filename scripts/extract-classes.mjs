@@ -41,7 +41,8 @@
 //   a cn() argument that isn't a plain string (`open && "cn-x"`, a ternary), in a cn() call that
 //   isn't a `className` (Calendar's `classNames={{ dropdown_root: cn(…) }}`, Input OTP's
 //   `containerClassName`), in a cva compound variant, and any a cva string of the same file has
-//   already resolved. transformStyle also keeps five classes on the element for its other
+//   already resolved. A rule for a `<part>ClassName` prop's cn() goes on `jn-<data-slot>-<part>`
+//   (`jn-input-otp-container`), which the element carries instead of the unresolved class. transformStyle also keeps five classes on the element for its other
 //   transforms (`cn-font-heading`, `cn-menu-target`, `cn-menu-translucent`, `cn-logical-sides`,
 //   `cn-rtl-flip`); those aren't flagged.
 //
@@ -558,7 +559,22 @@ export function findOverrides(entries, sheets) {
  * without one, the call's (every string of a call styles the same element); or else the
  * element's `data-slot`.
  */
+/**
+ * The class for a part upstream styles through a `<part>ClassName` prop of the element (Input
+ * OTP's `containerClassName`), when that cn() call's semantic classes are never resolved:
+ * `jn-<data-slot>-<part>` (`jn-input-otp-container`). Joinery's element carries it instead of
+ * the semantic class, so the style sheets' rule for that class styles nothing there, as on
+ * ui.shadcn.com, and the inline utilities still have an element to go on.
+ */
+export function partClassFor(entry) {
+  const part = /^([a-z][A-Za-z0-9]*)ClassName$/.exec(entry.prop ?? '')?.[1]
+  if (!part || !entry.slot || !entry.unresolved) return undefined
+  return `jn-${entry.slot}-${part.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`
+}
+
 function subjectFor(entry, entries) {
+  const part = partClassFor(entry)
+  if (part) return `.${part}`
   if (entry.semantic.length) return `.${entry.semantic[0]}`
   if (entry.origin === 'cn') {
     const named = entries.find(other => other.call === entry.call && other.semantic.length)
@@ -591,8 +607,12 @@ function transformNotes(entry, sheets) {
   const notes = []
   if (entry.unresolved) {
     const { classes, why } = entry.unresolved
+    const part = partClassFor(entry)
+    const remedy = part
+      ? `this rule is on .${part} instead, so give the element that class, and not ${classList(classes)}`
+      : `to match, keep ${plural(classes.length, 'that class', 'those classes')} off this element, or ${plural(classes.length, 'its rule', 'their rules')} from reaching it`
     notes.push(
-      `/* NOTE: upstream's registry build never resolves ${classList(classes)} here (${why}), so on ui.shadcn.com ${plural(classes.length, 'its style rule applies', 'their style rules apply')} nowhere; to match, keep ${plural(classes.length, 'that class', 'those classes')} off this element, or ${plural(classes.length, 'its rule', 'their rules')} from reaching it. */`,
+      `/* NOTE: upstream's registry build never resolves ${classList(classes)} here (${why}), so on ui.shadcn.com ${plural(classes.length, 'its style rule applies', 'their style rules apply')} nowhere; ${remedy}. */`,
     )
   }
   if (entry.ahead) {

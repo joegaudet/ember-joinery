@@ -185,7 +185,9 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    - Some semantic classes are never swapped, so ui.shadcn.com never styles them: those behind a
      condition (`open && "cn-x"`), in a `cn()` call that isn't a `className` (Calendar's
      `classNames={{…}}`, Input OTP's `containerClassName`), and in a cva compound variant. A
-     `NOTE` marks each one; to match upstream, keep that class off the element.
+     `NOTE` marks each one; to match upstream, keep that class off the element. A
+     `<part>ClassName` prop's rule goes on `jn-<data-slot>-<part>` instead
+     (`jn-input-otp-container`), the class to give that element.
 
    The output also lists the `group/*` markers the element must keep, and leaves conditional
    classes as comments.

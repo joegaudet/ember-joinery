@@ -8,15 +8,10 @@
  */
 
 /* data-slot="input-otp" OTPInput containerClassName in InputOTP */
-/* NOTE: upstream's registry build never resolves .jn-input-otp here (its cn() call is in containerClassName, not a className), so on ui.shadcn.com its style rule applies nowhere; to match, keep that class off this element, or its rule from reaching it. */
-/*
- * Joinery keeps it off: the container is `jn-input-otp-container` (after input-otp's
- * `data-input-otp-container`), so the style sheets' `.jn-input-otp` rule (Nova's `gap-2`) styles
- * nothing, as on ui.shadcn.com, and this rule, the script's for `.jn-input-otp`, styles it.
- */
 :where(.jn-input-otp-container) {
   @apply flex items-center has-disabled:opacity-50;
 }
+/* NOTE: upstream's registry build never resolves .jn-input-otp here (its cn() call is in containerClassName, not a className), so on ui.shadcn.com its style rule applies nowhere; this rule is on .jn-input-otp-container instead, so give the element that class, and not .jn-input-otp. */
 
 /* data-slot="input-otp" in InputOTP */
 :where(.jn-input-otp-input) {

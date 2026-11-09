@@ -5,6 +5,7 @@ import {
   extractClasses,
   findOverrides,
   overrides,
+  partClassFor,
   renderCss,
   sheetRules,
   sizeMarker,
@@ -405,6 +406,30 @@ function Calendar({ open, className }) {
   )
   assert.equal(nested[0].unresolved, undefined)
   assert.equal(nested[1].unresolved.why, 'its cn() call is in containerClassName, not a className')
+})
+
+test("a <part>ClassName prop's rule goes on the part's own class, as Input OTP's container", () => {
+  const entries = extractClasses(`
+function InputOTP({ className, containerClassName, ...props }) {
+  return (
+    <OTPInput
+      data-slot="input-otp"
+      containerClassName={cn("cn-input-otp flex items-center", containerClassName)}
+      className={cn("cn-input-otp-input disabled:cursor-not-allowed", className)}
+    />
+  )
+}
+`)
+  assert.equal(partClassFor(entries[0]), 'jn-input-otp-container')
+  assert.equal(partClassFor(entries[1]), undefined, 'a className is resolved')
+  const css = renderCss(entries, { name: 'input-otp' })
+  assert.match(css, /:where\(\.jn-input-otp-container\) \{\n {2}@apply flex items-center;\n\}/)
+  assert.doesNotMatch(css, /:where\(\.jn-input-otp\)/)
+  assert.match(
+    css,
+    /NOTE: upstream's registry build never resolves \.jn-input-otp here \(its cn\(\) call is in containerClassName, not a className\), so on ui\.shadcn\.com its style rule applies nowhere; this rule is on \.jn-input-otp-container instead, so give the element that class, and not \.jn-input-otp\./,
+  )
+  assert.match(css, /:where\(\.jn-input-otp-input\) \{/)
 })
 
 test("a NOTE marks a cn() string whose rule moves ahead of an earlier argument that isn't a string", () => {

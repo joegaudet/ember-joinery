@@ -24,12 +24,22 @@
 }
 
 /*
+ * An icon that points along the line, mirrored right to left, where upstream's components mark
+ * one (`cn-rtl-flip`, which upstream's right-to-left build turns into `rtl:rotate-180`, as
+ * scripts/rtl.mjs does): a breadcrumb's chevron, pagination's arrows.
+ */
+:where(.jn-rtl-flip) {
+  @apply rtl:rotate-180;
+}
+
+/*
  * What Tailwind's preflight, and the base layer of a shadcn app's CSS, give upstream's parts,
  * for apps without Tailwind: every element sizes from its border edge, starts with no margin,
  * padding or border, and takes its border colour and focus outline from the theme; form
- * controls take the page's font and colour; links, its colour and decoration; and an SVG is a
- * block. Scoped to Joinery's parts (each has a `data-slot`) and what they contain, so the rest
- * of the page is left alone, and first in the layer, so every style's rules win over it.
+ * controls take the page's font and colour; links, its colour and decoration; lists, no
+ * markers; tables, collapsed borders; and an SVG is a block. Scoped to Joinery's parts (each
+ * has a `data-slot`) and what they contain, so the rest of the page is left alone, and first in
+ * the layer, so every style's rules win over it.
  */
 :where([data-slot], [data-slot] *),
 :where([data-slot], [data-slot] *)::before,
@@ -56,6 +66,16 @@
 :where(a):where([data-slot], [data-slot] *) {
   color: inherit;
   text-decoration: inherit;
+}
+
+:where(ol, ul, menu):where([data-slot], [data-slot] *) {
+  list-style: none;
+}
+
+:where(table):where([data-slot], [data-slot] *) {
+  text-indent: 0;
+  border-color: inherit;
+  border-collapse: collapse;
 }
 
 :where(svg, img, video, canvas):where([data-slot], [data-slot] *) {

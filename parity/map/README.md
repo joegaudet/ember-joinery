@@ -19,7 +19,8 @@ blocks). Each maps upstream example ids to the Joinery guide examples that port 
 ```
 
 - A string is the Joinery example's name (`docs-app/app/examples/<name>.gts`).
-- `threshold` overrides the default (1% of pixels may differ) and needs a written `reason`.
+- `threshold` overrides the default (1% of the content box's pixels may differ; see "Parity" in
+  CONTRIBUTING.md) and needs a written `reason`.
 - `skip` marks an example that can't be compared, with the reason. It still counts as mapped.
 
 An example shown on two pages is mapped once, in either page's file. `pnpm parity` checks every

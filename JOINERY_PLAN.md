@@ -345,7 +345,8 @@ ember-primitives. `pages.yml` builds the demo and guide, then deploys `docs/site
 - **Joinery side:** docs-app has a `/parity/<id>` route that renders one example with no frame.
 - **Comparison** (`scripts/parity.mjs`, the `parity.yml` workflow): pinned Playwright Chromium,
   fixed viewport, fonts loaded, animations off. Both sides are screenshotted in light and dark and
-  diffed with pixelmatch. The check fails over a threshold (1% of pixels by default; an override
+  diffed with pixelmatch, over the content's bounding box rather than the whole page. The check
+  fails over a threshold (1% of the box's pixels by default; an override
   for an example needs a written reason in `parity/map/<component>.json`), and a side-by-side report is
   uploaded. With `--require-complete`, an upstream example missing from the map also fails, which
   keeps coverage complete. CI turns that flag on for the final unit; until then, the check covers

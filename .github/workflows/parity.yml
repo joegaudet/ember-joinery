@@ -42,6 +42,11 @@ jobs:
       - run: pnpm --dir parity install --frozen-lockfile
       # The Chromium build that matches playwright-core's version, and its system libraries.
       - run: pnpm exec playwright-core install --with-deps chromium
+      # The comparison itself, run on two fixture sites in that Chromium (ci.yml runs it too, in
+      # whichever Chrome the runner has); here a missing browser fails instead of skipping.
+      - run: node --test scripts/parity-browser.test.mjs
+        env:
+          PARITY_REQUIRE_BROWSER: '1'
       - run: pnpm build
       - run: pnpm guide:build
       - run: pnpm parity

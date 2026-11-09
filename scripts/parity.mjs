@@ -5,7 +5,8 @@
 // dark, and compares them pixel by pixel. See "Parity" in CONTRIBUTING.md.
 //
 //   pnpm parity                           every example mapped in parity/map/*.json
-//   pnpm parity --only button,card-demo   just these components or upstream example ids
+//   pnpm parity --only button,card-demo   just these components or upstream example ids (each must
+//                                         name something mapped)
 //   pnpm parity --require-complete        also fail when an upstream example isn't mapped
 //
 // Before a run: `node scripts/upstream.mjs fetch`, `pnpm --dir parity install`, `pnpm build` and
@@ -17,9 +18,11 @@
 // Each comparison loads both pages at the same fixed viewport, with the same fonts (the parity
 // app's @fontsource packages, served by a server of this script's own on every run, so they load
 // whichever servers the pages come from, and injected into both pages; a font that doesn't load
-// is an error, not a fallback), animations and transitions off, and `prefers-reduced-motion`. A
-// diff over the example's threshold (1% of pixels unless its map entry sets one, with a reason)
-// fails. The HTML report, with the three images side by side, goes to parity-report/.
+// is an error, not a fallback), animations and transitions off, and `prefers-reduced-motion`.
+// The diff is measured over the content's bounding box (everything on either page that isn't
+// the background; see "Comparing screenshots" below), and a diff over the example's threshold
+// (1% of the box's pixels unless its map entry sets one, with a reason) fails. The HTML report,
+// with the compared areas and their diff side by side, goes to parity-report/.
 //
 // The browser is playwright-core's own Chromium build (`pnpm exec playwright-core install
 // chromium`, as CI does, or one preinstalled under PLAYWRIGHT_BROWSERS_PATH for the same
@@ -44,8 +47,14 @@ export const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 export const MAP_DIR = 'parity/map'
 export const REPORT_DIR = 'parity-report'
 export const DEFAULT_THRESHOLD = 0.01
-/** pixelmatch's per-pixel colour tolerance (its default), so anti-aliasing noise isn't a diff. */
-export const PIXEL_TOLERANCE = 0.1
+/**
+ * pixelmatch's per-pixel colour tolerance (its default is 0.1). At 0.03 two colours match when
+ * they are within about 8 levels of grey of each other, so the smallest step in shadcn's
+ * neutral theme still registers: white against `--muted` (#f5f5f5, 10 levels) or `--border`
+ * (#e5e5e5), and the dark background against its 10%-white border. pixelmatch at 0.1 treats
+ * all of those as equal, which hides every border, separator, input outline and muted fill.
+ */
+export const PIXEL_TOLERANCE = 0.03
 export const VIEWPORT = { width: 1280, height: 800 }
 export const THEMES = ['light', 'dark']
 /** Where the Joinery guide is served from, as `pnpm guide:build` builds it. */
@@ -211,20 +220,48 @@ export function unmapped(inventory, entries) {
   return missing
 }
 
-/** `--only a,b`: the entries whose id or component is listed. */
-export function selectEntries(entries, only) {
-  if (!only) return entries
-  const wanted = new Set(
-    only
-      .split(',')
-      .map(value => value.trim())
-      .filter(Boolean),
-  )
-  return entries.filter(entry => wanted.has(entry.id) || wanted.has(entry.component))
+/**
+ * `--only a,b`: the entries whose id or component is listed. A value that names nothing mapped
+ * throws, saying whether it is unmapped or unknown, so a typo can't pass by comparing nothing.
+ */
+export function selectEntries(entries, only, inventory) {
+  if (only === undefined) return entries
+  const wanted = [
+    ...new Set(
+      only
+        .split(',')
+        .map(value => value.trim())
+        .filter(Boolean),
+    ),
+  ]
+  if (!wanted.length) throw new Error('--only names no component or upstream example')
+  const named = value => entries.some(entry => entry.id === value || entry.component === value)
+  const unmatched = wanted.filter(value => !named(value))
+  if (unmatched.length) {
+    const known = value =>
+      Boolean(inventory?.pages?.[value]) ||
+      value === 'chart' ||
+      value === 'blocks' ||
+      (inventory ? componentsFor(value, inventory) !== null : false)
+    const reasons = unmatched.map(value =>
+      known(value)
+        ? `"${value}" has nothing mapped in ${MAP_DIR}/ yet`
+        : `there is no upstream example or docs page named "${value}"`,
+    )
+    throw new Error(`--only: ${reasons.join('; ')}`)
+  }
+  return entries.filter(entry => wanted.includes(entry.id) || wanted.includes(entry.component))
 }
 
 // ---------------------------------------------------------------------------------------------
 // Comparing screenshots
+//
+// Most of a parity page is the stage's background, the same on both sides, so a ratio over the
+// whole page says nothing: an empty stage would score well under 1% against most examples.
+// The ratio is taken over the content's bounding box instead: the smallest box holding every
+// pixel, on either side, that isn't the page's background. The per-pixel tolerance is low
+// enough that a 1px `--border` line and a `--muted` fill register (both are a few per cent off
+// the background), while pixelmatch's anti-aliasing check still keeps text edges out of the count.
 
 /** A copy of `png` on a `width`×`height` canvas; the added area is magenta, so it always differs. */
 export function padPng(PNG, png, width, height) {
@@ -235,10 +272,94 @@ export function padPng(PNG, png, width, height) {
   return out
 }
 
+/** The colour most of an image's edge pixels have, as RGBA: the page's background. */
+export function backgroundOf(png) {
+  const { width, height, data } = png
+  const counts = new Map()
+  const count = (x, y) => {
+    const value = data.readUInt32BE((y * width + x) * 4)
+    counts.set(value, (counts.get(value) ?? 0) + 1)
+  }
+  for (let x = 0; x < width; x++) {
+    count(x, 0)
+    count(x, height - 1)
+  }
+  for (let y = 1; y < height - 1; y++) {
+    count(0, y)
+    count(width - 1, y)
+  }
+  let best = 0
+  let most = -1
+  for (const [value, n] of counts) {
+    if (n > most) [best, most] = [value, n]
+  }
+  return [best >>> 24, (best >>> 16) & 255, (best >>> 8) & 255, best & 255]
+}
+
+const hex = rgba =>
+  `#${rgba
+    .slice(0, 3)
+    .map(c => c.toString(16).padStart(2, '0'))
+    .join('')}`
+
+/** A `width`×`height` image of one colour. */
+function solid(PNG, width, height, rgba) {
+  const png = new PNG({ width, height })
+  for (let i = 0; i < png.data.length; i += 4) png.data.set(rgba, i)
+  return png
+}
+
 /**
- * Compares two PNG buffers. Different sizes are compared on the larger canvas, so the extra
- * area counts as different. Returns the diff ratio (differing pixels over all pixels) and the
- * diff image.
+ * The smallest box holding every pixel of `png` that differs from `background` by more than
+ * `tolerance` (pixelmatch's colour distance, anti-aliased pixels included), or null if none does.
+ */
+function contentBox(PNG, pixelmatch, png, background, tolerance) {
+  const { width, height } = png
+  const mask = new PNG({ width, height })
+  const plain = solid(PNG, width, height, background)
+  pixelmatch(png.data, plain.data, mask.data, width, height, {
+    threshold: tolerance,
+    includeAA: true,
+    diffMask: true,
+  })
+  let [left, top, right, bottom] = [width, height, -1, -1]
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (!mask.data[(y * width + x) * 4 + 3]) continue
+      if (x < left) left = x
+      if (x > right) right = x
+      if (y < top) top = y
+      bottom = y
+    }
+  }
+  return right < 0 ? null : { x: left, y: top, width: right - left + 1, height: bottom - top + 1 }
+}
+
+function unionBox(a, b) {
+  if (!a || !b) return a ?? b
+  const x = Math.min(a.x, b.x)
+  const y = Math.min(a.y, b.y)
+  return {
+    x,
+    y,
+    width: Math.max(a.x + a.width, b.x + b.width) - x,
+    height: Math.max(a.y + a.height, b.y + b.height) - y,
+  }
+}
+
+function crop(PNG, png, box) {
+  const out = new PNG({ width: box.width, height: box.height })
+  PNG.bitblt(png, out, box.x, box.y, box.width, box.height, 0, 0)
+  return out
+}
+
+/**
+ * Compares two PNG buffers over the content's bounding box: the union of the boxes holding each
+ * side's non-background pixels. Different sizes are compared on the larger canvas, and the
+ * extra area counts as content that differs. When the two backgrounds differ, the whole canvas
+ * is compared instead, so a wrong page colour fails. Returns the diff ratio (differing pixels
+ * over the box's), the box, and the box's three images (upstream, joinery, diff). With nothing
+ * but background on either side, `blank` is true and there is nothing to compare.
  */
 export async function comparePngs(upstream, joinery, { tolerance = PIXEL_TOLERANCE } = {}) {
   const { PNG } = await import('pngjs')
@@ -247,21 +368,44 @@ export async function comparePngs(upstream, joinery, { tolerance = PIXEL_TOLERAN
   const b = PNG.sync.read(joinery)
   const width = Math.max(a.width, b.width)
   const height = Math.max(a.height, b.height)
-  const diff = new PNG({ width, height })
-  const diffPixels = pixelmatch(
-    padPng(PNG, a, width, height).data,
-    padPng(PNG, b, width, height).data,
-    diff.data,
-    width,
-    height,
-    { threshold: tolerance },
-  )
-  return {
+  const paddedA = padPng(PNG, a, width, height)
+  const paddedB = padPng(PNG, b, width, height)
+  const backgrounds = { upstream: backgroundOf(a), joinery: backgroundOf(b) }
+  const sameBackground =
+    pixelmatch(
+      solid(PNG, 1, 1, backgrounds.upstream).data,
+      solid(PNG, 1, 1, backgrounds.joinery).data,
+      null,
+      1,
+      1,
+      { threshold: tolerance, includeAA: true },
+    ) === 0
+  const box = sameBackground
+    ? unionBox(
+        contentBox(PNG, pixelmatch, paddedA, backgrounds.upstream, tolerance),
+        contentBox(PNG, pixelmatch, paddedB, backgrounds.joinery, tolerance),
+      )
+    : { x: 0, y: 0, width, height }
+  const result = {
     width,
     height,
     sizes: { upstream: [a.width, a.height], joinery: [b.width, b.height] },
+    backgrounds: { upstream: hex(backgrounds.upstream), joinery: hex(backgrounds.joinery) },
+    box,
+  }
+  if (!box) return { ...result, blank: true, diffPixels: 0, ratio: 0 }
+  const areaA = crop(PNG, paddedA, box)
+  const areaB = crop(PNG, paddedB, box)
+  const diff = new PNG({ width: box.width, height: box.height })
+  const diffPixels = pixelmatch(areaA.data, areaB.data, diff.data, box.width, box.height, {
+    threshold: tolerance,
+  })
+  return {
+    ...result,
+    blank: false,
     diffPixels,
-    ratio: diffPixels / (width * height),
+    ratio: diffPixels / (box.width * box.height),
+    areas: { upstream: PNG.sync.write(areaA), joinery: PNG.sync.write(areaB) },
     diff: PNG.sync.write(diff),
   }
 }
@@ -278,24 +422,43 @@ const ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&
 const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ESCAPES[char])
 const percent = ratio => `${(ratio * 100).toFixed(2)}%`
 
+const boxSize = box => `${box.width}×${box.height}`
+
+function figure(src, caption, full) {
+  if (!src) return `<figure><figcaption>${caption}: none</figcaption></figure>`
+  const link = full ? ` (<a href="${escapeHtml(full)}">full page</a>)` : ''
+  return `<figure><img src="${escapeHtml(src)}" alt="${caption}" loading="lazy"><figcaption>${caption}${link}</figcaption></figure>`
+}
+
 function reportRow(result) {
-  const images = ['upstream', 'joinery', 'diff']
-    .map(kind =>
-      result.images?.[kind]
-        ? `<figure><img src="${escapeHtml(result.images[kind])}" alt="${kind}" loading="lazy"><figcaption>${kind}</figcaption></figure>`
-        : `<figure><figcaption>${kind}: none</figcaption></figure>`,
-    )
-    .join('')
+  const images = result.images ?? {}
+  // A comparison shows the area it compared, each linking to its whole page; an error shows
+  // whichever whole pages it got.
+  const figures = result.box
+    ? [
+        figure(images.upstreamBox, 'upstream', images.upstream),
+        figure(images.joineryBox, 'joinery', images.joinery),
+        figure(images.diff, 'diff'),
+      ]
+    : [
+        figure(images.upstream, 'upstream'),
+        figure(images.joinery, 'joinery'),
+        figure(undefined, 'diff'),
+      ]
+  const backgrounds =
+    result.backgrounds && result.backgrounds.upstream !== result.backgrounds.joinery
+      ? ` The backgrounds differ (upstream ${escapeHtml(result.backgrounds.upstream)}, Joinery ${escapeHtml(result.backgrounds.joinery)}).`
+      : ''
   const detail = result.error
     ? `<p class="error">${escapeHtml(result.error)}</p>`
-    : `<p>${percent(result.ratio)} of pixels differ; threshold ${percent(result.threshold)}${
+    : `<p>${percent(result.ratio)} of the ${boxSize(result.box)} content box differs (at ${result.box.x}, ${result.box.y}); threshold ${percent(result.threshold)}${
         result.reason ? ` (${escapeHtml(result.reason)})` : ''
-      }</p>`
+      }.${backgrounds}</p>`
   const title = `${escapeHtml(result.id)} <small>${escapeHtml(result.theme)} · ${escapeHtml(result.component)} → ${escapeHtml(result.example)}</small>`
   return `<section class="${result.status}" id="${escapeHtml(`${result.id}-${result.theme}`)}">
   <h2><span class="status">${result.status}</span> ${title}</h2>
   ${detail}
-  <div class="images">${images}</div>
+  <div class="images">${figures.join('')}</div>
 </section>`
 }
 
@@ -328,7 +491,7 @@ export function renderReport(results, { commit, skipped = [], missing = {} } = {
   .fail .status, .error .status { background: #cf222e; color: white; }
   .images { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
   figure { margin: 0; }
-  img { width: 100%; border: 1px solid #8884; }
+  img { max-width: 100%; border: 1px solid #8884; }
   p.error { color: #cf222e; white-space: pre-wrap; }
 </style>
 </head>
@@ -360,9 +523,9 @@ export const FONTS = [
  * The CSS both pages get before a screenshot: the same fonts (from the font server at
  * `fontsUrl`), no motion, a fixed scheme.
  */
-export function injectedCss(theme, fontsUrl = '') {
+export function injectedCss(theme, fontsUrl = '', fonts = FONTS) {
   const origin = fontsUrl.replace(/\/$/, '')
-  return `${FONTS.map(font => `@import url('${origin}/__parity/fonts/${font.name}/index.css');`).join('\n')}
+  return `${fonts.map(font => `@import url('${origin}/__parity/fonts/${font.name}/index.css');`).join('\n')}
 :root {
   --font-sans: 'Geist Variable', sans-serif !important;
   --font-heading: 'Geist Variable', sans-serif !important;
@@ -451,11 +614,11 @@ export function staticServer(mounts) {
 const urlOf = (server, path = '/') => `http://127.0.0.1:${server.address().port}${path}`
 
 /** The fonts both pages load, from the parity app's @fontsource packages. */
-export function fontMounts(root = repoRoot) {
-  const fonts = join(root, 'parity', 'node_modules', '@fontsource-variable')
-  const mounts = FONTS.map(font => ({
+export function fontMounts(root = repoRoot, fonts = FONTS) {
+  const packages = join(root, 'parity', 'node_modules', '@fontsource-variable')
+  const mounts = fonts.map(font => ({
     prefix: `/__parity/fonts/${font.name}/`,
-    dir: join(fonts, font.name),
+    dir: join(packages, font.name),
   }))
   const missing = mounts.filter(mount => !existsSync(join(mount.dir, 'index.css')))
   if (missing.length) {
@@ -476,7 +639,7 @@ const referenceReady = () => document.documentElement.dataset.parityReady !== un
 const joineryReady = () => Boolean(document.querySelector('[data-parity], [data-parity-missing]'))
 
 /** Opens a page, waits until it has rendered, and screenshots it. */
-async function screenshot(context, url, { theme, ready, fontsUrl }) {
+async function screenshot(context, url, { theme, ready, fontsUrl, fonts }) {
   const page = await context.newPage()
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
@@ -486,16 +649,19 @@ async function screenshot(context, url, { theme, ready, fontsUrl }) {
     const failed = await page.$('[data-parity-missing], [data-parity-error]')
     if (failed)
       throw new Error((await failed.textContent())?.trim() || 'the page reported an error')
-    await page.addStyleTag({ content: injectedCss(theme, fontsUrl) })
+    await page.addStyleTag({ content: injectedCss(theme, fontsUrl, fonts) })
     const unloaded = await page.evaluate(async fonts => {
       // The injected faces load on use; load them now so the screenshot never catches a fallback.
+      // A face that fails to load rejects without saying which, so each is caught on its own.
       const faces = await Promise.all(
-        fonts.map(font => document.fonts.load(`400 16px "${font.family}"`, font.text)),
+        fonts.map(font =>
+          document.fonts.load(`400 16px "${font.family}"`, font.text).catch(() => []),
+        ),
       )
       await document.fonts.ready
       await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)))
       return fonts.filter((_font, index) => !faces[index].length).map(font => font.family)
-    }, FONTS)
+    }, fonts)
     if (unloaded.length) throw new Error(`these fonts didn't load: ${unloaded.join(', ')}`)
     return await page.screenshot({ fullPage: true, animations: 'disabled', caret: 'hide' })
   } catch (error) {
@@ -564,8 +730,11 @@ async function startJoinery(root) {
   ])
 }
 
-/** The whole run. Returns the process exit code. */
-export async function parity(options, { log = console.log, root = repoRoot } = {}) {
+/**
+ * The whole run. Returns the process exit code. `fonts` replaces the faces both pages load
+ * (the script's own tests use it; a real run loads FONTS).
+ */
+export async function parity(options, { log = console.log, root = repoRoot, fonts = FONTS } = {}) {
   const inventory = JSON.parse(readFileSync(join(root, 'upstream', 'inventory.json'), 'utf8'))
   const { entries, errors } = loadMaps(inventory, { root })
   if (errors.length) {
@@ -581,7 +750,13 @@ export async function parity(options, { log = console.log, root = repoRoot } = {
     code = 1
   }
 
-  const selected = selectEntries(entries, options.only)
+  let selected
+  try {
+    selected = selectEntries(entries, options.only, inventory)
+  } catch (error) {
+    log(`parity: ${error.message}`)
+    return 1
+  }
   const skipped = selected.filter(entry => entry.skip)
   const compared = selected.filter(entry => !entry.skip)
   if (!compared.length) {
@@ -596,7 +771,7 @@ export async function parity(options, { log = console.log, root = repoRoot } = {
   let browser
   try {
     // The fonts come from a server of their own, whichever servers the pages come from.
-    const fontServer = await staticServer(fontMounts(root))
+    const fontServer = await staticServer(fontMounts(root, fonts))
     servers.push(fontServer)
     const fontsUrl = urlOf(fontServer, '')
     let referenceUrl = options.referenceUrl
@@ -653,26 +828,43 @@ export async function parity(options, { log = console.log, root = repoRoot } = {
             theme,
             ready: referenceReady,
             fontsUrl,
+            fonts,
           })
           writeFileSync(join(reportDir, file('upstream')), upstream)
           const joinery = await screenshot(context, urls.joinery, {
             theme,
             ready: joineryReady,
             fontsUrl,
+            fonts,
           })
           writeFileSync(join(reportDir, file('joinery')), joinery)
           const comparison = await comparePngs(upstream, joinery)
+          if (comparison.blank) {
+            throw new Error(
+              `neither page shows anything but its background (${comparison.backgrounds.upstream}), so there is nothing to compare`,
+            )
+          }
+          writeFileSync(join(reportDir, file('upstream-box')), comparison.areas.upstream)
+          writeFileSync(join(reportDir, file('joinery-box')), comparison.areas.joinery)
           writeFileSync(join(reportDir, file('diff')), comparison.diff)
           const status = passes(comparison.ratio, entry.threshold) ? 'pass' : 'fail'
           results.push({
             ...base,
             status,
             ratio: comparison.ratio,
+            box: comparison.box,
             sizes: comparison.sizes,
-            images: { upstream: file('upstream'), joinery: file('joinery'), diff: file('diff') },
+            backgrounds: comparison.backgrounds,
+            images: {
+              upstream: file('upstream'),
+              joinery: file('joinery'),
+              upstreamBox: file('upstream-box'),
+              joineryBox: file('joinery-box'),
+              diff: file('diff'),
+            },
           })
           log(
-            `  ${status === 'pass' ? 'ok  ' : 'FAIL'} ${entry.id} (${theme}): ${percent(comparison.ratio)}`,
+            `  ${status === 'pass' ? 'ok  ' : 'FAIL'} ${entry.id} (${theme}): ${percent(comparison.ratio)} of ${boxSize(comparison.box)}`,
           )
         } catch (error) {
           const images = Object.fromEntries(

@@ -150,9 +150,15 @@ reference, and `test-app/tests/fixtures/harness/` has small examples.
 `pnpm parity` renders each mapped upstream example in the React reference app (`parity/`) and
 the matching Ember example in the guide's `/parity/<name>` route, then compares screenshots in
 light and dark: the same fixed viewport, fonts and Chromium on both sides, with animations off.
-A diff over the threshold (1% of the pixels) fails, unless the map gives that example its own
-threshold along with a written reason. The report, with the images side by side, is written to
-`parity-report/index.html` (CI uploads it from `parity.yml`).
+The diff is measured over the content's bounding box, the smallest box holding everything on
+either page that isn't the background (the whole page, if the two backgrounds differ), so an
+empty stage or a missing part fails however small the example is. Two pixels count as different
+when they are more than about 8 levels of grey apart, so a 1px `--border` line or a `--muted`
+fill registers; pixelmatch still leaves anti-aliased edges out. A diff over the threshold (1% of
+the box's pixels) fails, unless the map gives that example its own threshold along with a
+written reason. Both pages showing nothing but the background is an error. The report, with the
+compared areas and their diff side by side, is written to `parity-report/index.html` (CI uploads
+it from `parity.yml`).
 
 `parity/map/<component>.json`, one file per docs page, maps upstream example ids to Joinery
 examples (the format is in `parity/map/README.md`). With `--require-complete`, an upstream example

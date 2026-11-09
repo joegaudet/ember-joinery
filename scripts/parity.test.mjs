@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path'
 import { PNG } from 'pngjs'
 import {
   DEFAULT_THRESHOLD,
+  PIXEL_TOLERANCE,
   comparePngs,
   fontMounts,
   injectedCss,
@@ -54,6 +55,71 @@ function png(width, height, marked = 0) {
     image.data.set(i < marked ? [0, 0, 0, 255] : [255, 255, 255, 255], i * 4)
   }
   return PNG.sync.write(image)
+}
+
+const WHITE = [255, 255, 255, 255]
+const BLACK = [10, 10, 10, 255] // shadcn's --foreground (light) and --background (dark)
+const BORDER = [229, 229, 229, 255] // --border, oklch(0.922 0 0)
+const MUTED = [245, 245, 245, 255] // --muted, --secondary and --accent, oklch(0.97 0 0)
+const DARK_CARD = [23, 23, 23, 255] // --card (dark), oklch(0.205 0 0)
+const DARK_BORDER = [35, 35, 35, 255] // --border (dark), 10% white over the dark background
+
+/** A page to draw on: `width`×`height` of one colour. */
+function page(width = 1280, height = 800, background = WHITE) {
+  const image = new PNG({ width, height })
+  for (let i = 0; i < image.data.length; i += 4) image.data.set(background, i)
+  return image
+}
+
+function fill(image, x, y, width, height, rgba) {
+  for (let row = y; row < y + height; row++) {
+    for (let col = x; col < x + width; col++) image.data.set(rgba, (row * image.width + col) * 4)
+  }
+  return image
+}
+
+/** A 1px outline, like a CSS border. */
+function outline(image, x, y, width, height, rgba) {
+  fill(image, x, y, width, 1, rgba)
+  fill(image, x, y + height - 1, width, 1, rgba)
+  fill(image, x, y, 1, height, rgba)
+  fill(image, x + width - 1, y, 1, height, rgba)
+  return image
+}
+
+/** Lines of "text": short runs of solid pixels, as glyph stems are. */
+function text(image, x, y, width, rgba, lines = 1) {
+  for (let line = 0; line < lines; line++) {
+    for (let col = x; col < x + width; col += 6) fill(image, col, y + line * 20, 3, 10, rgba)
+  }
+  return image
+}
+
+/** shadcn's card on a page: a bordered box with a title, a line of copy and a muted input. */
+function card({
+  background = WHITE,
+  surface = WHITE,
+  line = BORDER,
+  muted = MUTED,
+  ink = BLACK,
+  bordered = true,
+} = {}) {
+  const image = page(1280, 800, background)
+  fill(image, 460, 290, 360, 220, surface)
+  if (bordered) outline(image, 460, 290, 360, 220, line)
+  text(image, 484, 314, 140, ink)
+  text(image, 484, 344, 280, ink, 2)
+  fill(image, 484, 400, 312, 36, muted)
+  outline(image, 484, 400, 312, 36, line)
+  return PNG.sync.write(image)
+}
+
+const DARK = {
+  background: BLACK,
+  surface: DARK_CARD,
+  line: DARK_BORDER,
+  muted: [38, 38, 38, 255],
+  ink: WHITE,
 }
 
 test('requiredIds lists every docs page example and every chart, not blocks', () => {
@@ -186,9 +252,19 @@ test('unmapped and selectEntries', () => {
     button: ['button-rtl'],
     'button-group': ['button-group-demo'],
   })
-  assert.deepEqual(selectEntries(entries, 'chart'), [entries[1]])
-  assert.deepEqual(selectEntries(entries, 'button-demo, nothing'), [entries[0]])
-  assert.equal(selectEntries(entries, undefined), entries)
+  assert.deepEqual(selectEntries(entries, 'chart', INVENTORY), [entries[1]])
+  assert.deepEqual(selectEntries(entries, 'button-demo, button-demo', INVENTORY), [entries[0]])
+  assert.equal(selectEntries(entries, undefined, INVENTORY), entries)
+  // A value that matches nothing mapped fails, so a typo can't pass by comparing nothing.
+  assert.throws(
+    () => selectEntries(entries, 'button-demo, buton', INVENTORY),
+    /^Error: --only: there is no upstream example or docs page named "buton"$/,
+  )
+  assert.throws(
+    () => selectEntries(entries, 'button-rtl,button-group', INVENTORY),
+    /"button-rtl" has nothing mapped in parity\/map\/ yet; "button-group" has nothing mapped/,
+  )
+  assert.throws(() => selectEntries(entries, ' , ', INVENTORY), /names no component/)
 })
 
 test('layoutFor and pageUrls carry the docs page layout to both pages', () => {
@@ -212,24 +288,90 @@ test('layoutFor and pageUrls carry the docs page layout to both pages', () => {
   )
 })
 
-test('comparePngs counts differing pixels, and a size difference counts too', async () => {
-  const same = await comparePngs(png(10, 10), png(10, 10))
+test('comparePngs counts differing pixels over the content box, and a size difference counts too', async () => {
+  const same = await comparePngs(card(), card())
   assert.equal(same.diffPixels, 0)
   assert.equal(same.ratio, 0)
+  assert.deepEqual(same.box, { x: 460, y: 290, width: 360, height: 220 })
+  assert.deepEqual(same.backgrounds, { upstream: '#ffffff', joinery: '#ffffff' })
+  assert.equal(same.blank, false)
+  assert.equal(PNG.sync.read(same.diff).width, 360, 'the diff covers the box')
+  assert.equal(PNG.sync.read(same.areas.upstream).height, 220)
 
   const some = await comparePngs(png(10, 10), png(10, 10, 5))
   assert.equal(some.diffPixels, 5)
-  assert.equal(some.ratio, 0.05)
-  assert.equal(PNG.sync.read(some.diff).width, 10)
+  assert.deepEqual(some.box, { x: 0, y: 0, width: 5, height: 1 })
+  assert.equal(some.ratio, 1)
 
-  const taller = await comparePngs(png(10, 10), png(10, 12))
+  const taller = await comparePngs(png(10, 10, 1), png(10, 12, 1))
   assert.deepEqual([taller.width, taller.height], [10, 12])
   assert.deepEqual(taller.sizes, { upstream: [10, 10], joinery: [10, 12] })
+  assert.deepEqual(taller.box, { x: 0, y: 0, width: 10, height: 12 }, 'the extra rows are content')
   assert.equal(taller.diffPixels, 20, 'the two extra rows')
+
+  const blank = await comparePngs(png(10, 10), png(10, 10))
+  assert.equal(blank.blank, true)
+  assert.equal(blank.box, null)
 
   assert.ok(passes(0.01))
   assert.ok(!passes(0.0101))
   assert.ok(passes(0.03, 0.05))
+})
+
+test('an example against an empty stage fails', async () => {
+  // button-demo: an outline button and an icon button, small in the middle of the page.
+  const example = page()
+  outline(example, 560, 382, 100, 36, BORDER)
+  text(example, 580, 395, 60, BLACK)
+  fill(example, 672, 382, 36, 36, BLACK)
+  fill(example, 682, 392, 16, 16, WHITE)
+  const empty = PNG.sync.write(page())
+  const result = await comparePngs(PNG.sync.write(example), empty)
+  assert.deepEqual(result.box, { x: 560, y: 382, width: 148, height: 36 })
+  assert.ok(!passes(result.ratio), `${result.ratio} of the box differs`)
+  assert.ok(
+    result.diffPixels / (1280 * 800) < DEFAULT_THRESHOLD,
+    'over the whole page it would have passed, which is why the box is what counts',
+  )
+  // The other way round too, and in dark.
+  assert.ok(!passes((await comparePngs(empty, PNG.sync.write(example))).ratio))
+  const dark = await comparePngs(card(DARK), PNG.sync.write(page(1280, 800, BLACK)))
+  assert.ok(!passes(dark.ratio), `${dark.ratio} of the box differs (dark)`)
+})
+
+test('a border-only change fails, light and dark', async () => {
+  const light = await comparePngs(card(), card({ bordered: false }))
+  assert.deepEqual(light.box, { x: 460, y: 290, width: 360, height: 220 })
+  assert.equal(light.diffPixels, 2 * (360 + 220) - 4, 'every pixel of the border, and nothing else')
+  assert.ok(!passes(light.ratio), `${light.ratio} of the box differs`)
+
+  const dark = await comparePngs(card(DARK), card({ ...DARK, bordered: false }))
+  assert.equal(dark.diffPixels, 2 * (360 + 220) - 4)
+  assert.ok(!passes(dark.ratio), `${dark.ratio} of the box differs (dark)`)
+})
+
+test("each of shadcn's token steps registers as a difference, and rounding noise doesn't", async () => {
+  const swatch = (background, colour) =>
+    PNG.sync.write(fill(page(40, 40, background), 10, 10, 20, 20, colour))
+  for (const [background, a, b, what] of [
+    [WHITE, WHITE, BORDER, 'white and --border'],
+    [WHITE, WHITE, MUTED, 'white and --muted'],
+    [BLACK, BLACK, DARK_BORDER, 'the dark background and its border'],
+    [BLACK, BLACK, DARK_CARD, 'the dark background and --card'],
+  ]) {
+    const result = await comparePngs(swatch(background, a), swatch(background, b))
+    assert.ok(result.diffPixels > 0, what)
+  }
+  const nearly = await comparePngs(swatch(WHITE, MUTED), swatch(WHITE, [243, 243, 243, 255]))
+  assert.equal(nearly.diffPixels, 0, 'two levels of grey apart is the same colour')
+  assert.ok(PIXEL_TOLERANCE < 0.1, "tighter than pixelmatch's default, which misses all of them")
+})
+
+test('comparePngs compares the whole page when the backgrounds differ', async () => {
+  const result = await comparePngs(card(), card({ background: MUTED }))
+  assert.deepEqual(result.box, { x: 0, y: 0, width: 1280, height: 800 })
+  assert.deepEqual(result.backgrounds, { upstream: '#ffffff', joinery: '#f5f5f5' })
+  assert.ok(!passes(result.ratio))
 })
 
 test('renderReport shows each comparison side by side', () => {
@@ -243,7 +385,27 @@ test('renderReport shows each comparison side by side', () => {
         status: 'pass',
         ratio: 0.001,
         threshold: 0.01,
-        images: { upstream: 'images/a.png', joinery: 'images/b.png', diff: 'images/c.png' },
+        box: { x: 560, y: 382, width: 148, height: 36 },
+        backgrounds: { upstream: '#ffffff', joinery: '#ffffff' },
+        images: {
+          upstream: 'images/a.png',
+          joinery: 'images/b.png',
+          upstreamBox: 'images/a-box.png',
+          joineryBox: 'images/b-box.png',
+          diff: 'images/c.png',
+        },
+      },
+      {
+        id: 'card-demo',
+        component: 'card',
+        example: 'card-demo',
+        theme: 'dark',
+        status: 'fail',
+        ratio: 0.5,
+        threshold: 0.01,
+        box: { x: 0, y: 0, width: 1280, height: 800 },
+        backgrounds: { upstream: '#0a0a0a', joinery: '#ffffff' },
+        images: {},
       },
       {
         id: 'button-rtl',
@@ -252,7 +414,7 @@ test('renderReport shows each comparison side by side', () => {
         theme: 'dark',
         status: 'error',
         error: 'No example named <x>',
-        images: {},
+        images: { upstream: 'images/d.png' },
       },
     ],
     {
@@ -263,11 +425,16 @@ test('renderReport shows each comparison side by side', () => {
   )
   assert.match(
     html,
-    /shadcn-ui\/ui 8ab2771: 1 of 2 comparisons pass; 1 mapped examples are skipped\./,
+    /shadcn-ui\/ui 8ab2771: 1 of 3 comparisons pass; 1 mapped examples are skipped\./,
   )
-  assert.match(html, /<img src="images\/b.png" alt="joinery"/)
-  assert.match(html, /0\.10% of pixels differ; threshold 1\.00%/)
+  assert.match(
+    html,
+    /<img src="images\/b-box.png" alt="joinery" loading="lazy"><figcaption>joinery \(<a href="images\/b.png">full page<\/a>\)/,
+  )
+  assert.match(html, /0\.10% of the 148×36 content box differs \(at 560, 382\); threshold 1\.00%\./)
+  assert.match(html, /The backgrounds differ \(upstream #0a0a0a, Joinery #ffffff\)/)
   assert.match(html, /No example named &lt;x&gt;/)
+  assert.match(html, /<img src="images\/d.png" alt="upstream"/, 'an error shows the pages it got')
   assert.match(html, /<li>button-group-demo: why<\/li>/)
   assert.match(html, /<strong>chart<\/strong>: chart-area-default/)
 })

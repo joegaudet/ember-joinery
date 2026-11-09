@@ -79,7 +79,7 @@ Avatar.
 ## InputGroup
 
 You can add an `InputGroup` component to `e.Content`. Upstream's example, a search field with a
-`Kbd` hint, comes with Input Group and Kbd.
+[`Kbd`](/components/kbd.md) hint, comes with Input Group.
 
 ## RTL
 

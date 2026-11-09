@@ -1,7 +1,8 @@
 {
-  "$comment": "Waiting for components that haven't landed: card-demo and card-rtl (Input and Label), card-spacing (Toggle Group, Input and Label), card-image (Badge). The unit that lands the last of each one's components ports it onto the Card page and maps it here. card-rtl is shown on the Direction page too, and mapped here, the inventory's page for it.",
+  "$comment": "Waiting for components that haven't landed: card-demo and card-rtl (Input), card-spacing (Toggle Group and Input). The unit that lands the last of each one's components ports it onto the Card page and maps it here. card-rtl is shown on the Direction page too, and mapped here, the inventory's page for it.",
   "examples": {
     "card-small": "card-small",
-    "card-edge-to-edge": "card-edge-to-edge"
+    "card-edge-to-edge": "card-edge-to-edge",
+    "card-image": "card-image"
   }
 }

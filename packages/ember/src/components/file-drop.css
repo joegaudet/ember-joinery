@@ -1,0 +1,23 @@
+/*
+ * Joinery's own: shadcn/ui has no file drop zone, so nothing here is ported from upstream's
+ * style sheets, and it is the same in every style. A dashed box in --input, in the type and
+ * radius of shadcn's Empty, that turns --primary while files are dragged over it, with Nova's
+ * focus ring while its hidden input has focus; and, for DocumentFileDrop, an overlay over the
+ * page while files are dragged over it.
+ */
+
+:where(.jn-file-drop) {
+  @apply flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-input p-6 text-center text-sm text-balance text-muted-foreground transition-colors outline-none hover:bg-muted/50 has-[:focus-visible]:border-ring has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50 data-dragging:border-primary data-dragging:bg-primary/5 data-dragging:text-foreground dark:bg-input/30 [&_svg:not([class*='size-'])]:size-6;
+}
+
+:where(.jn-file-drop[data-disabled]) {
+  @apply cursor-not-allowed opacity-50 hover:bg-transparent;
+}
+
+:where(.jn-document-file-drop) {
+  @apply pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-6 backdrop-blur-sm;
+}
+
+:where(.jn-document-file-drop-content) {
+  @apply flex w-full max-w-md flex-col items-center gap-2 rounded-xl border-2 border-dashed border-primary bg-background p-10 text-center text-sm font-medium text-foreground [&_svg:not([class*='size-'])]:size-8;
+}

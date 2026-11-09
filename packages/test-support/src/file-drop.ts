@@ -117,3 +117,43 @@ export class FileDropHarness extends Harness {
     return dropFiles(this.element, files)
   }
 }
+
+/**
+ * Drives the overlay of a `<DocumentFileDrop>` from `@ember-joinery/ember`, which shows only
+ * while files are dragged over the page: it drags and drops files on the page, as a user does.
+ * (The headless one from `@ember-joinery/primitives/file-drop` renders nothing of its own; use
+ * `dragFilesOver` and `dropFiles` on `document.body`.)
+ *
+ *   const page = new DocumentFileDropHarness()
+ *   await page.drag([file])
+ *   assert.true(page.isShown)
+ *   await page.drop([file])
+ */
+export class DocumentFileDropHarness extends Harness {
+  static override component = 'document-file-drop'
+
+  /** Whether its overlay shows: files are dragged over the page. */
+  get isShown(): boolean {
+    return this.exists
+  }
+
+  /** What its overlay says, or `''` while it is hidden. */
+  get text(): string {
+    return this.exists ? textOf(this.element) : ''
+  }
+
+  /** Drags `files` over the page. Returns whether the page allows the drop. */
+  async drag(files: File[]): Promise<boolean> {
+    return dragFilesOver(document.body, files)
+  }
+
+  /** Drags the files away from the page again. */
+  async leave(): Promise<void> {
+    await dragFilesAway(document.body)
+  }
+
+  /** Drops `files` on the page. Returns whether the page took the drop. */
+  async drop(files: File[]): Promise<boolean> {
+    return dropFiles(document.body, files)
+  }
+}

@@ -1,0 +1,96 @@
+/*
+ * Joinery's own: shadcn/ui has no Rating, so nothing here is ported from upstream's style
+ * sheets, and it is the same in every style. It draws ember-primitives' Rating in shadcn's
+ * terms: lucide's Star, outlined in --muted-foreground and filled with --primary up to the
+ * rating, a focus ring in --ring as Nova's controls have, and a disabled rating at half
+ * opacity. Each star is a native radio inside a label; the radio is visually hidden.
+ */
+
+:where(.jn-rating) {
+  --jn-rating-size: 1.25rem;
+  @apply m-0 flex w-fit min-w-0 flex-col gap-2 border-0 p-0;
+}
+
+:where(.jn-rating[data-size='sm']) {
+  --jn-rating-size: 1rem;
+}
+
+:where(.jn-rating[data-size='lg']) {
+  --jn-rating-size: 1.5rem;
+}
+
+:where(.jn-rating[data-disabled]) {
+  @apply cursor-not-allowed opacity-50;
+}
+
+:where(.jn-rating-label) {
+  @apply mb-2 p-0 text-sm leading-none font-medium;
+}
+
+:where(.jn-rating-items) {
+  @apply flex w-fit items-center gap-1 rounded-sm outline-none has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50;
+}
+
+/* A half rating's items are each half a star: no gap inside a star, the usual one between. */
+:where(.jn-rating-items:has(> [data-half])) {
+  @apply gap-0;
+}
+
+:where(.jn-rating-item[data-half='end']:not(:last-child)) {
+  @apply me-1;
+}
+
+:where(.jn-rating-item) {
+  @apply relative flex shrink-0;
+}
+
+:where(.jn-rating-item > label) {
+  @apply flex cursor-pointer overflow-hidden;
+}
+
+:where(.jn-rating[data-readonly] .jn-rating-item > label) {
+  @apply cursor-default;
+}
+
+:where(.jn-rating[data-disabled] .jn-rating-item > label) {
+  @apply cursor-not-allowed;
+}
+
+:where(.jn-rating-item > label > [aria-hidden='true']) {
+  @apply flex shrink-0;
+}
+
+/* Half a star: the item shows the half of the icon on its own side (flipped right to left). */
+:where(.jn-rating-item[data-half] > label) {
+  @apply w-[calc(var(--jn-rating-size)/2)];
+}
+
+:where(.jn-rating-item[data-half='end'] > label) {
+  @apply justify-end;
+}
+
+:where(.jn-rating-item > input) {
+  @apply sr-only;
+}
+
+:where(.jn-rating-icon) {
+  @apply size-(--jn-rating-size) shrink-0 fill-transparent text-muted-foreground transition-colors;
+}
+
+:where(.jn-rating-item[data-selected] .jn-rating-icon) {
+  @apply fill-primary text-primary;
+}
+
+/* Hovering a star previews the rating it would pick: it and the stars before it. */
+:where(.jn-rating:not([data-readonly], [data-disabled]) .jn-rating-items:hover .jn-rating-icon) {
+  @apply fill-transparent text-muted-foreground;
+}
+
+:where(
+  .jn-rating:not([data-readonly], [data-disabled]) .jn-rating-item:hover .jn-rating-icon,
+  .jn-rating:not([data-readonly], [data-disabled])
+    .jn-rating-item:has(~ .jn-rating-item:hover)
+    .jn-rating-icon
+) {
+  @apply fill-primary/60 text-primary/60;
+}

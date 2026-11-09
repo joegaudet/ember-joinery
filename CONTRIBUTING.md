@@ -189,6 +189,13 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    The output also lists the `group/*` markers the element must keep, and leaves conditional
    classes as comments.
 
+   The script reads one file, so where a part renders another upstream component
+   (ItemSeparator and ButtonGroupSeparator render Separator), that component's inline
+   utilities go after the output by hand, under a comment that says so. They come first in its
+   `cn()` call, so the part's own classes beat them: leave out each one the part's rule or
+   inline utilities override in any style (ButtonGroupSeparator's `bg-input` beats Separator's
+   `bg-border`), since after the sheet it would win instead.
+
 A component is done when it has everything listed under "Definition of done for every
 component" in the plan: its primitive, the styled component, its harness, tests written with the
 harness (including the keyboard pattern, controlled and uncontrolled state, RTL and an axe audit),
@@ -320,9 +327,9 @@ and a line saying what it comes with, and stays out of the parity map (so
 `--require-complete` still counts it). The page's map names it, and what it waits for, in its
 `$comment`. When you land a component, look for its name there (`grep -l 'Badge'
 parity/map/*.json`), port the examples that waited for it onto their pages, map them, and take
-them out of the `$comment`. So Spinner's page waits for Item and Input Group, and
-Button's for Button Group: its `button-group-demo` (mapped on Button Group's page) goes back in
-Button's Button Group section, with a link to Button Group's page.
+them out of the `$comment`. So Spinner's page waits only for Input Group, and Button's for
+Dropdown Menu: its `button-group-demo` (mapped on Button Group's page) goes back in Button's
+Button Group section, which links to Button Group's page.
 
 **The parity map** lists every example on the page. One shown on two pages
 (`button-group-demo` is on Button's and Button Group's) is mapped on the page the inventory

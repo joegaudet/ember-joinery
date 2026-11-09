@@ -1,0 +1,44 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/input-otp.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="input-otp" OTPInput containerClassName in InputOTP */
+/* NOTE: upstream's registry build never resolves .jn-input-otp here (its cn() call is in containerClassName, not a className), so on ui.shadcn.com its style rule applies nowhere; to match, keep that class off this element, or its rule from reaching it. */
+/*
+ * Joinery keeps it off: the container is `jn-input-otp-container` (after input-otp's
+ * `data-input-otp-container`), so the style sheets' `.jn-input-otp` rule (Nova's `gap-2`) styles
+ * nothing, as on ui.shadcn.com, and this rule, the script's for `.jn-input-otp`, styles it.
+ */
+:where(.jn-input-otp-container) {
+  @apply flex items-center has-disabled:opacity-50;
+}
+
+/* data-slot="input-otp" in InputOTP */
+:where(.jn-input-otp-input) {
+  @apply disabled:cursor-not-allowed;
+}
+
+/* data-slot="input-otp-group" in InputOTPGroup */
+:where(.jn-input-otp-group) {
+  @apply flex items-center;
+}
+
+/* data-slot="input-otp-slot" in InputOTPSlot */
+:where(.jn-input-otp-slot) {
+  @apply relative flex items-center justify-center data-[active=true]:z-10;
+}
+
+/* in InputOTPSlot */
+:where(.jn-input-otp-caret) {
+  @apply pointer-events-none absolute inset-0 flex items-center justify-center;
+}
+
+/* data-slot="input-otp-separator" in InputOTPSeparator */
+:where(.jn-input-otp-separator) {
+  @apply flex items-center;
+}

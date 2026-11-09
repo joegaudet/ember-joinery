@@ -1,0 +1,7 @@
+{
+  "$comment": "Waiting for Field: textarea-field, textarea-disabled, textarea-invalid and textarea-rtl. The Field unit ports them onto the Textarea page and maps them here. The page also shows Joinery's own textarea-controlled, which has no upstream counterpart, so it isn't mapped.",
+  "examples": {
+    "textarea-demo": "textarea-demo",
+    "textarea-button": "textarea-button"
+  }
+}

@@ -5,9 +5,11 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import {
   OUTPUT_DIR,
+  checkPorted,
   portStyle,
   portStyles,
   renameClasses,
+  splitSelectorList,
   unwrapStyleScope,
   whereSelectors,
 } from './port-styles.mjs'
@@ -47,7 +49,24 @@ test('unwrapStyleScope drops the .style-<name> block and dedents it', () => {
 }
 `,
   )
-  assert.equal(unwrapStyleScope('.cn-a {}\n', 'nova'), '.cn-a {}\n', 'no wrapper, no change')
+  assert.equal(
+    unwrapStyleScope('/* A comment,\n   two lines. */\n\n.style-nova {\n  .cn-a {}\n}\n', 'nova'),
+    '.cn-a {}\n',
+    'comments before the wrapper are fine',
+  )
+  assert.throws(
+    () => unwrapStyleScope('.cn-a {}\n', 'nova'),
+    /expected its rules inside one \.style-nova \{ … \} block, found: \.cn-a \{\}/,
+  )
+  assert.throws(
+    () => unwrapStyleScope('/* x */\n.style-lyra {\n  .cn-a {}\n}\n', 'nova'),
+    /found: \.style-lyra \{/,
+  )
+  assert.throws(
+    () => unwrapStyleScope('.style-nova {\n  .cn-a {}\n}\n.cn-b {\n}\n', 'nova'),
+    /unexpected indentation: \}/,
+    'a rule after the wrapper',
+  )
   assert.throws(
     () => unwrapStyleScope('.style-nova {\n.cn-a {}\n}\n', 'nova'),
     /unexpected indentation/,
@@ -58,6 +77,41 @@ test('whereSelectors puts top-level selectors in :where()', () => {
   assert.equal(
     whereSelectors('.jn-a {\n  @apply p-1;\n}\n.jn-b:has(> [x]) {\n}\n.jn-c, .jn-d {\n}\n'),
     ':where(.jn-a) {\n  @apply p-1;\n}\n:where(.jn-b:has(> [x])) {\n}\n:where(.jn-c), :where(.jn-d) {\n}\n',
+  )
+})
+
+test('splitSelectorList splits at top-level commas only', () => {
+  assert.deepEqual(splitSelectorList('.a:is(.b, .c), .d[data-x="1,2"] ,.e'), [
+    '.a:is(.b, .c)',
+    '.d[data-x="1,2"]',
+    '.e',
+  ])
+  assert.equal(
+    whereSelectors('.jn-x:is(.a, .b), .jn-y {\n}\n'),
+    ':where(.jn-x:is(.a, .b)), :where(.jn-y) {\n}\n',
+  )
+})
+
+test('checkPorted fails on anything the port would let through', () => {
+  assert.equal(
+    checkPorted(':where(.jn-a) {\n  @apply p-1;\n}\n/* .cn-old {\n}*/\n', 'nova').length > 0,
+    true,
+  )
+  assert.throws(
+    () => checkPorted(':where(.jn-a) {\n  .jn-b {\n    @apply p-1;\n  }\n}\n', 'nova'),
+    /line 2: a nested rule or block: \.jn-b \{/,
+  )
+  assert.throws(
+    () => checkPorted('@media (width >= 40rem) {\n}\n', 'nova'),
+    /line 1: not in :where\(\): @media/,
+  )
+  assert.throws(
+    () => checkPorted(':where(.jn-a) {\n  @apply [&_.cn-b]:p-1;\n}\n', 'nova'),
+    /a cn- class is left/,
+  )
+  assert.throws(
+    () => portStyle('.cn-a {\n}\n', { style: 'nova', commit: 'a'.repeat(40) }),
+    /expected its rules/,
   )
 })
 

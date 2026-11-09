@@ -14,6 +14,9 @@
 // - each rule's selector goes inside `:where()`, so the rules add no specificity and app CSS can
 //   override any part;
 // - the `@apply` lists and comments are kept verbatim.
+//
+// It relies on upstream's sheets being flat rules inside the wrapper. Anything else (no wrapper,
+// a rule outside it, a nested rule or an at-rule) fails the port instead of slipping through.
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
@@ -28,13 +31,27 @@ export function renameClasses(css) {
 }
 
 /**
- * Removes the sheet's `.style-<name> { … }` wrapper and dedents what was inside it. A sheet
- * without one is returned as it is.
+ * Removes the sheet's `.style-<name> { … }` wrapper and dedents what was inside it. Blank lines
+ * and comments before the wrapper are allowed (and dropped). Anything else fails: the port
+ * relies on upstream's shape, so a sheet without the wrapper, or with rules outside it, is an
+ * error rather than a silent half-port.
  */
 export function unwrapStyleScope(css, style) {
   const lines = css.replace(/\r\n/g, '\n').split('\n')
-  const open = lines.findIndex(line => line.trim() !== '')
-  if (lines[open]?.trim() !== `.style-${style} {`) return css
+  let open = 0
+  for (let inComment = false; open < lines.length; open++) {
+    const line = lines[open].trim()
+    if (inComment || line.startsWith('/*')) {
+      inComment = !line.includes('*/')
+      continue
+    }
+    if (line !== '') break
+  }
+  if (lines[open]?.trim() !== `.style-${style} {`) {
+    throw new Error(
+      `style-${style}.css: expected its rules inside one .style-${style} { … } block, found: ${lines[open]?.trim() ?? 'nothing'}`,
+    )
+  }
   let close = lines.length - 1
   while (close > open && lines[close].trim() === '') close--
   if (lines[close] !== '}')
@@ -48,17 +65,63 @@ export function unwrapStyleScope(css, style) {
   return `${body.join('\n').replace(/^\n+/, '')}\n`
 }
 
-/** Puts every top-level rule's selector inside `:where()`. */
-export function whereSelectors(css) {
-  return css.replace(/^(\.[^\s{][^{\n]*?)\s*\{$/gm, (_match, selector) => {
-    if (selector.includes(',')) {
-      return `${selector
-        .split(',')
-        .map(part => `:where(${part.trim()})`)
-        .join(', ')} {`
+/**
+ * A selector list split at its top-level commas, leaving those inside `()`, `[]` and quotes
+ * (`.a:is(.b, .c), .d` is two selectors).
+ */
+export function splitSelectorList(selector) {
+  const parts = []
+  let depth = 0
+  let quote
+  let start = 0
+  for (let index = 0; index < selector.length; index++) {
+    const char = selector[index]
+    if (quote) {
+      if (char === '\\') index++
+      else if (char === quote) quote = undefined
+    } else if (char === '"' || char === "'") quote = char
+    else if (char === '(' || char === '[') depth++
+    else if (char === ')' || char === ']') depth--
+    else if (char === ',' && depth === 0) {
+      parts.push(selector.slice(start, index))
+      start = index + 1
     }
-    return `:where(${selector}) {`
+  }
+  parts.push(selector.slice(start))
+  return parts.map(part => part.trim())
+}
+
+/** Puts every top-level rule's selector inside `:where()`, each selector of a list on its own. */
+export function whereSelectors(css) {
+  return css.replace(
+    /^(\.[^\s{][^{\n]*?)\s*\{$/gm,
+    (_match, selector) =>
+      `${splitSelectorList(selector)
+        .map(part => `:where(${part})`)
+        .join(', ')} {`,
+  )
+}
+
+/**
+ * Fails unless a ported sheet is what the port promises: no `cn-` class or `.style-` scope left,
+ * every rule at the top level with its selector in `:where()`, and no nested rules or at-rules
+ * (which would keep their specificity, or need a decision the port can't make).
+ */
+export function checkPorted(css, style) {
+  const problems = []
+  const text = css.replace(/\/\*[\s\S]*?\*\//g, comment => comment.replace(/[^\n]/g, ' '))
+  text.split('\n').forEach((line, index) => {
+    const where = `line ${index + 1}`
+    if (/(?<![\w-])cn-[a-z0-9]/.test(line)) problems.push(`${where}: a cn- class is left`)
+    if (/\.style-[a-z]/.test(line)) problems.push(`${where}: the .style-${style} scope is left`)
+    if (!line.trimEnd().endsWith('{')) return
+    if (/^\s/.test(line)) problems.push(`${where}: a nested rule or block: ${line.trim()}`)
+    else if (!/^:where\(/.test(line)) problems.push(`${where}: not in :where(): ${line.trim()}`)
   })
+  if (problems.length) {
+    throw new Error(`style-${style}.css didn't port cleanly:\n  ${problems.join('\n  ')}`)
+  }
+  return css
 }
 
 /** The header every ported sheet starts with. */
@@ -76,7 +139,8 @@ export function header(style, commit) {
 
 /** One upstream sheet, ported. */
 export function portStyle(css, { style, commit }) {
-  return header(style, commit) + whereSelectors(renameClasses(unwrapStyleScope(css, style)))
+  const ported = whereSelectors(renameClasses(unwrapStyleScope(css, style)))
+  return header(style, commit) + checkPorted(ported, style)
 }
 
 /** The upstream sheets, as `{ style, path }`, in name order. */

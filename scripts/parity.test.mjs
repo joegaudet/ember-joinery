@@ -267,6 +267,40 @@ test('unmapped and selectEntries', () => {
   assert.throws(() => selectEntries(entries, ' , ', INVENTORY), /names no component/)
 })
 
+test('an example its page shows in another style gets that style on the guide route', () => {
+  const inventory = {
+    ...INVENTORY,
+    examples: {
+      ...INVENTORY.examples,
+      'code-block-basic': { page: 'code-block', pages: ['code-block'], style: 'rhea' },
+      'code-block-rtl': {
+        page: 'code-block',
+        pages: ['code-block'],
+        style: 'nova',
+        direction: 'rtl',
+      },
+    },
+  }
+  const layout = layoutFor('code-block-basic', inventory)
+  assert.deepEqual(layout, { dir: 'ltr', align: 'center', style: 'rhea' })
+  assert.deepEqual(layoutFor('code-block-rtl', inventory), { dir: 'rtl', align: 'center' })
+  assert.deepEqual(
+    pageUrls({
+      referenceUrl: 'http://127.0.0.1:1',
+      joineryUrl: 'http://127.0.0.1:2',
+      entry: { id: 'code-block-basic', example: 'code-block-basic' },
+      theme: 'light',
+      layout,
+    }),
+    {
+      upstream: 'http://127.0.0.1:1/code-block-basic?theme=light&dir=ltr&align=center',
+      joinery:
+        'http://127.0.0.1:2/parity/code-block-basic?theme=light&dir=ltr&align=center&style=rhea',
+    },
+    'the reference app picks the style itself',
+  )
+})
+
 test('layoutFor and pageUrls carry the docs page layout to both pages', () => {
   assert.deepEqual(layoutFor('button-rtl', INVENTORY), { dir: 'rtl', align: 'center' })
   assert.deepEqual(layoutFor('button-group-demo', INVENTORY), { dir: 'ltr', align: 'start' })

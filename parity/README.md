@@ -27,8 +27,9 @@ pnpm --dir parity start            # Vite prints its URL; / lists every example
 
 The ids are the docs pages' examples, the charts gallery and the blocks, as listed in
 `upstream/inventory.json`. Each renders in the style its docs page uses (Nova for most, Rhea for
-the chat set, Base UI's Nova for Combobox), inside a stage that matches the guide's
-`/parity/<name>` route. When it has rendered and its fonts have loaded, `<html>` gets
+the chat set and Code Block, Base UI's Nova for Combobox), inside a stage that matches the
+guide's `/parity/<name>` route. `pnpm parity` asks that route for the same style (`?style=rhea`)
+whenever it isn't Nova, the route's default. When it has rendered and its fonts have loaded, `<html>` gets
 `data-parity-ready`.
 
 The stage is not the docs page's preview box. On ui.shadcn.com, a `<ComponentPreview>` can also

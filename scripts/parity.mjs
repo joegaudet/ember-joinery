@@ -86,10 +86,18 @@ function componentsFor(id, inventory) {
   return null
 }
 
-/** The direction and alignment an upstream id is shown with on its docs page. */
+/**
+ * The direction and alignment an upstream id is shown with on its docs page, and its style when
+ * that isn't Nova (the Code Block and chat pages show theirs in Rhea). The reference app renders
+ * each example in its page's style already; the guide's route needs `?style=` to match.
+ */
 export function layoutFor(id, inventory) {
   const example = inventory.examples[id]
-  if (example) return { dir: example.direction ?? 'ltr', align: example.align ?? 'center' }
+  if (example) {
+    const layout = { dir: example.direction ?? 'ltr', align: example.align ?? 'center' }
+    if (example.style && example.style !== 'nova') layout.style = example.style
+    return layout
+  }
   return {
     dir: 'ltr',
     align: inventory.blocks.some(block => block.name === id) ? 'start' : 'center',
@@ -550,9 +558,10 @@ export function injectedCss(theme, fontsUrl = '', fonts = FONTS) {
 /** The two URLs one comparison screenshots. */
 export function pageUrls({ referenceUrl, joineryUrl, entry, theme, layout }) {
   const query = new URLSearchParams({ theme, dir: layout.dir, align: layout.align }).toString()
+  const style = layout.style ? `&${new URLSearchParams({ style: layout.style })}` : ''
   return {
     upstream: `${referenceUrl.replace(/\/$/, '')}/${encodeURIComponent(entry.id)}?${query}`,
-    joinery: `${joineryUrl.replace(/\/$/, '')}/parity/${encodeURIComponent(entry.example)}?${query}`,
+    joinery: `${joineryUrl.replace(/\/$/, '')}/parity/${encodeURIComponent(entry.example)}?${query}${style}`,
   }
 }
 

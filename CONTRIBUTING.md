@@ -92,7 +92,9 @@ same name (`anchor.ts` and `anchor/`) fail the build.
 compiles each style with the Tailwind v4 CLI, Nova into `dist/joinery.css` and the other seven
 into `dist/styles/<style>.css`, and copies `dist/tokens.css` (the Neutral base colour),
 `dist/themes/<colour>.css` and `dist/tailwind.css`. A style is `src/css/setup.css` (Tailwind's
-theme, inlined, tw-animate-css, shadcn's own variants and the token mapping, none of it emitted),
+theme, inlined, but for `font-sans` and `font-mono`, which read the page's `--font-sans` and
+`--font-mono` first, as upstream's globals.css maps them; tw-animate-css, shadcn's own variants
+and the token mapping, none of it emitted),
 then, in `@layer joinery`, `src/css/base.css` (the radius scale, and the share of Tailwind's
 preflight upstream's parts rely on, scoped to `[data-slot]`), the ported sheet, and every
 component's own CSS (`src/components/**/*.css`, A–Z). The script writes that entry itself, so a
@@ -242,6 +244,14 @@ controlled and uncontrolled state where it has any, the APG keyboard pattern and
 and the modifier, RTL (in a `DirectionProvider`, checking that logical sides flip), and the
 harness's own members. Every test ends in `a11yAudit()`.
 
+**Upstream's colours and AA.** Where upstream's own colours fall short of WCAG AA's 4.5:1 for
+small text in its light themes (Kbd's keys, `--muted-foreground` on `--muted`; the destructive
+Badge, `--destructive` on its own tint), Joinery keeps them: the component's page says so in its
+Accessibility notes, with the CSS that meets AA, and the audits leave out only those elements
+(`a11yAudit({ include: [['#ember-testing-container']], exclude: [[selector]] })` in a test that
+needs it, and `UPSTREAM_CONTRAST` in the guide's pages test), so everything around them is still
+checked.
+
 **The guide page** follows its ui.shadcn.com page: the title and description, the first example,
 Installation, Usage, then each of upstream's sections in upstream's order, with its `<Example>`
 and upstream's text (in Joinery's terms: `@variant` for `variant`), then API Reference
@@ -259,7 +269,7 @@ and a line saying what it comes with, and stays out of the parity map (so
 `--require-complete` still counts it). The page's map names it, and what it waits for, in its
 `$comment`. When you land a component, look for its name there (`grep -l 'Badge'
 parity/map/*.json`), port the examples that waited for it onto their pages, map them, and take
-them out of the `$comment`. So Spinner's page waits for Item, Badge and Input Group, and
+them out of the `$comment`. So Spinner's page waits for Item and Input Group, and
 Button's for Button Group: its `button-group-demo` (mapped on Button Group's page) goes back in
 Button's Button Group section, with a link to Button Group's page.
 
@@ -442,8 +452,10 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   and the parity route are a `guide-stage`, and the guide's rules stop there: its prose and
   link rules are `@scope`d to stop at an example, its `box-sizing: border-box` reset covers the
   stage but not what's inside, and the text styles the page would pass down (font, size, line
-  height, colour) start over, as in upstream's preview. The stage adds no reset of its own, so
-  the guide and the parity comparison see Joinery as an app without Tailwind does. That
+  height, colour) start over, as in upstream's preview, with `--font-sans` and `--font-mono` set
+  to Geist's, as ui.shadcn.com sets them, for a part that sets its own font (Kbd's keys). The
+  stage adds no reset of its own, so the guide and the parity comparison see Joinery as an app
+  without Tailwind does. That
   includes box sizing: upstream's parts get `border-box` from Tailwind's preflight, and
   joinery.css gives Joinery's parts the same (`src/css/base.css`, scoped to `[data-slot]`), so
   the parity comparison catches a part that misses it. Keep new guide rules inside the layer, and scope any that select bare elements or

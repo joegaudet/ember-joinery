@@ -535,6 +535,13 @@ workspace.
 
 ## Risks and open items
 
+- **Upstream's colours and WCAG AA.** In shadcn's light themes, two of upstream's parts fall
+  short of the 4.5:1 AA asks of small text: Kbd's keys (`--muted-foreground` on `--muted`, 3.9:1
+  to 4.5:1 across the base colours) and the destructive Badge (`--destructive` on its own 10%
+  tint, about 4:1). Joinery keeps upstream's colours, documents the CSS that meets AA on each
+  page, and audits everything around those elements (see "Upstream's colours and AA" in
+  CONTRIBUTING.md). Whether Joinery should darken them instead, at a cost in fidelity, is Joe's
+  call.
 - **An unattended build at this scale.** About 150–200 agent runs over several days. On a 4-CPU
   machine, two agents run at a time. The workflow journal lets a restarted session resume where
   it stopped.

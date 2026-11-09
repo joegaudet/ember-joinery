@@ -1,0 +1,69 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/command.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="command" in Command */
+:where(.jn-command) {
+  @apply flex size-full flex-col overflow-hidden;
+}
+
+/* in CommandDialog, no slot to attach it to: sr-only */
+
+/* in CommandDialog */
+:where(.jn-command-dialog) {
+  @apply top-1/3 translate-y-0 overflow-hidden p-0;
+}
+
+/* data-slot="command-input" in CommandInput */
+:where(.jn-command-input) {
+  @apply outline-hidden disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+/* data-slot="command-list" in CommandList */
+:where(.jn-command-list) {
+  @apply overflow-x-hidden overflow-y-auto;
+}
+
+/* data-slot="command-item" in CommandItem; keep on the element: group/command-item */
+:where(.jn-command-item) {
+  @apply data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0;
+}
+
+/* in CommandItem */
+:where(.jn-command-item-indicator) {
+  @apply ms-auto opacity-0 group-has-data-[slot=command-shortcut]/command-item:hidden group-data-[checked=true]/command-item:opacity-100;
+}
+
+/*
+ * CommandDialog's content is Dialog's, and upstream passes its classes to DialogContent's cn(),
+ * after the dialog's own, so `top-1/3` and `translate-y-0` above win over dialog.tsx's
+ * `top-1/2` and `-translate-y-1/2`. dialog.css comes after this file (A–Z), so here the rule
+ * names both classes to win. It is still in @layer joinery, under an app's own CSS.
+ */
+.jn-command-dialog:where(.jn-dialog-content) {
+  @apply top-1/3 translate-y-0;
+}
+
+/*
+ * CommandInput renders upstream's InputGroup and InputGroupAddon around the input: these are
+ * their inline utilities, from apps/v4/registry/bases/radix/ui/input-group.tsx (the output of
+ * `node scripts/extract-classes.mjs input-group` for the two parts and the one alignment
+ * Command uses), scoped to the command's group. Its `group/input-group` marker stays on the
+ * element.
+ */
+:where(.jn-command-input-group) {
+  @apply relative flex w-full min-w-0 items-center outline-none has-[>textarea]:h-auto;
+}
+
+:where(.jn-command-input-group > .jn-input-group-addon) {
+  @apply flex cursor-text items-center justify-center select-none;
+}
+
+:where(.jn-command-input-group > .jn-input-group-addon-align-inline-start) {
+  @apply order-first;
+}

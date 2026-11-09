@@ -9,6 +9,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { chromium } from 'playwright-core'
@@ -235,3 +236,45 @@ test(
     assert.match(results[0].error, /: these fonts didn't load: Broken Face$/)
   },
 )
+
+test('a screenshot waits for the images on the page', { skip, timeout: 60_000 }, async () => {
+  // The reference page shows a dark 120×34 image that arrives 700ms after the page asks for it,
+  // well after the page says it is ready; the guide draws the same box with CSS. Caught before
+  // the image, the reference page would show nothing, and the comparison would fail.
+  const svg =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="34"><rect width="120" height="34" fill="#0a0a0a"/></svg>'
+  const slow = createServer((_request, response) => {
+    setTimeout(() => {
+      response.writeHead(200, { 'content-type': 'image/svg+xml', 'cache-control': 'no-store' })
+      response.end(svg)
+    }, 700)
+  })
+  await new Promise(done => slow.listen(0, '127.0.0.1', done))
+  const src = `http://127.0.0.1:${slow.address().port}/photo.svg`
+  try {
+    const { code, results } = await run(['--themes', 'light'], {
+      map: { 'button-demo': 'same' },
+      files: {
+        'reference/index.html': PAGE(`
+          setTimeout(() => {
+            document.body.innerHTML = stage(name, '<img src="${src}" width="120" height="34" alt="">')
+            document.documentElement.dataset.parityReady = 'true'
+          }, 50)
+        `),
+        'guide/index.html': PAGE(`
+          setTimeout(() => {
+            const box = '<span style="display: block; width: 120px; height: 34px; background: #0a0a0a"></span>'
+            document.body.innerHTML = stage(name, box)
+          }, 50)
+        `),
+      },
+    })
+    assert.deepEqual(
+      results.map(result => [result.id, result.status, result.ratio]),
+      [['button-demo', 'pass', 0]],
+    )
+    assert.equal(code, 0)
+  } finally {
+    slow.close()
+  }
+})

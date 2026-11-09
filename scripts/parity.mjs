@@ -18,7 +18,8 @@
 // Each comparison loads both pages at the same fixed viewport, with the same fonts (the parity
 // app's @fontsource packages, served by a server of this script's own on every run, so they load
 // whichever servers the pages come from, and injected into both pages; a font that doesn't load
-// is an error, not a fallback), animations and transitions off, and `prefers-reduced-motion`.
+// is an error, not a fallback), every image on the page loaded (or failed) first, animations and
+// transitions off, and `prefers-reduced-motion`.
 // The diff is measured over the content's bounding box (everything on either page that isn't
 // the background; see "Comparing screenshots" below), and a diff over the example's threshold
 // (1% of the box's pixels unless its map entry sets one, with a reason) fails. The HTML report,
@@ -638,6 +639,34 @@ function run(command, args, options = {}) {
 const referenceReady = () => document.documentElement.dataset.parityReady !== undefined
 const joineryReady = () => Boolean(document.querySelector('[data-parity], [data-parity-missing]'))
 
+/** How long a page's images may take to load, in milliseconds. */
+export const IMAGE_TIMEOUT = 30_000
+
+/**
+ * Runs in the page: waits until every `<img>` has loaded (or failed) and been decoded, and
+ * returns those still loading after `timeout`. An example's images start loading only when the
+ * app renders it, after the page's load event, and neither app waits for them before it says
+ * it's ready, so without this a screenshot could catch one side with its image and the other
+ * without. A lazy image is made eager, since a full-page screenshot shows it. One that fails to
+ * load counts as settled: the browser draws it broken on both sides alike.
+ */
+function settleImages(timeout) {
+  const images = [...document.images]
+  for (const image of images) if (image.loading === 'lazy') image.loading = 'eager'
+  const settled = image =>
+    (image.complete
+      ? Promise.resolve()
+      : new Promise(done => {
+          image.addEventListener('load', done, { once: true })
+          image.addEventListener('error', done, { once: true })
+        })
+    ).then(() => image.decode().catch(() => {}))
+  const late = new Promise(done => setTimeout(done, timeout))
+  return Promise.race([Promise.all(images.map(settled)), late]).then(() =>
+    images.filter(image => !image.complete).map(image => image.currentSrc || image.src),
+  )
+}
+
 /** Opens a page, waits until it has rendered, and screenshots it. */
 async function screenshot(context, url, { theme, ready, fontsUrl, fonts }) {
   const page = await context.newPage()
@@ -650,6 +679,8 @@ async function screenshot(context, url, { theme, ready, fontsUrl, fonts }) {
     if (failed)
       throw new Error((await failed.textContent())?.trim() || 'the page reported an error')
     await page.addStyleTag({ content: injectedCss(theme, fontsUrl, fonts) })
+    const loading = await page.evaluate(settleImages, IMAGE_TIMEOUT)
+    if (loading.length) throw new Error(`these images didn't finish loading: ${loading.join(', ')}`)
     const unloaded = await page.evaluate(async fonts => {
       // The injected faces load on use; load them now so the screenshot never catches a fallback.
       // A face that fails to load rejects without saying which, so each is caught on its own.

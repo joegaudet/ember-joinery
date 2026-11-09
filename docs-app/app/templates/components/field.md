@@ -431,10 +431,6 @@ press anywhere on a choice card chooses it.
 - In a choice card, the control's label holds the whole field. Browsers name the control from
   it, but axe can't see a name through the field's `role="group"`, so Joinery's choice-card
   examples also give each control `aria-labelledby`, pointing at its card's `FieldTitle`.
-- Sera's field labels come out `leading-snug`, where upstream's are `leading-relaxed`: a field
-  label is a Label too, and Joinery's style sheets put the label's line height after the field
-  label's, so Joinery restores the field label's, which is `leading-snug` in the other seven
-  styles.
 
 ## Testing
 
@@ -494,4 +490,13 @@ A `FieldLabel` is a Label, so `LabelHarness` drives it.
 ## Upstream
 
 shadcn/ui's [Field](https://ui.shadcn.com/docs/components/radix/field), from
-`apps/v4/registry/bases/radix/ui/field.tsx` at shadcn-ui/ui@8ab2771, in the Nova style.
+`apps/v4/registry/bases/radix/ui/field.tsx` at shadcn-ui/ui@8ab2771, in the Nova style. Two
+line heights differ from upstream's:
+
+- A `FieldTitle` is 19.25px tall where upstream's is 20px (in Nova, Luma, Maia, Rhea, Vega and
+  Sera): upstream's `cn()` drops the title rule's `leading-*` class for the `text-*` class after
+  it, and Joinery's ported style sheets keep a rule's classes as written.
+- Sera's field labels come out `leading-snug`, where upstream's are `leading-relaxed`: a field
+  label is a Label too, and Joinery's style sheets put the label's line height after the field
+  label's, so Joinery restores the field label's, which is `leading-snug` in the other seven
+  styles.

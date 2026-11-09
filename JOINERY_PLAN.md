@@ -30,6 +30,9 @@ Deviations from the intake, and why:
   not only Components. The Guide section now says what "Autonomous execution" already did: the
   acceptance test builds `PAGES` from the templates directory. And setting the repository's
   Pages source to GitHub Actions, which `pages.yml` needs, is listed among what stays with Joe.
+  The naming proposal under "Risks and open items" is settled as the inventory already had it:
+  ember-primitives' FormData `Form` is `NativeForm` (`@ember-joinery/primitives/native-form`),
+  and Formwright supplies `Form`.
 
 **What we're copying:** [ui.shadcn.com](https://ui.shadcn.com/): every component, every example
 on its component pages, a subset of its blocks, and its theming. The source of truth is the code

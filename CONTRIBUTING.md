@@ -219,6 +219,14 @@ Never name it after the component in lower case: a binding named `button` (or `i
 modifier and the template take their classes and attributes from the same functions
 (`buttonClasses`, `buttonAttributes`), so both render the same thing, and a test checks it.
 
+**Parts.** A compound component yields its parts in one object, each as a component and as its
+modifier: Card yields `Header`, `Title`… and `header`, `title`… (`<c.Title @as="h3">`,
+`<LinkTo {{c.title}}>`). A part with nothing of its own to track, which always renders the same
+classes, `data-slot` and `data-test-jn-part`, comes from `staticPart()` and
+`staticPartModifier()` in `packages/ember/src/-private/static-part.gts`, both made from the
+one spec, as Alert's, Card's and Empty's are; a part that takes arguments, such as Empty's
+`Media` (`@variant`), has its own template and `part()`, from shared functions as Button's.
+
 **Icons and strings.** Upstream's `lucide-react` icons are `lucide`'s, drawn by `<Icon>`
 (`ArrowUpIcon` is `<Icon @icon={{ArrowUp}} />`). An icon a component draws itself can be
 replaced, and every string it shows is an argument with upstream's English as the default
@@ -251,7 +259,7 @@ and a line saying what it comes with, and stays out of the parity map (so
 `--require-complete` still counts it). The page's map names it, and what it waits for, in its
 `$comment`. When you land a component, look for its name there (`grep -l 'Badge'
 parity/map/*.json`), port the examples that waited for it onto their pages, map them, and take
-them out of the `$comment`. So Spinner's page waits for Item, Badge, Input Group and Empty, and
+them out of the `$comment`. So Spinner's page waits for Item, Badge and Input Group, and
 Button's for Button Group: its `button-group-demo` (mapped on Button Group's page) goes back in
 Button's Button Group section, with a link to Button Group's page.
 
@@ -413,7 +421,11 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
 - An example lays itself out with upstream's Tailwind classes. `docs-app/app/styles/examples.css`
   compiles Tailwind's utilities from `docs-app/app/examples` only, with no preflight, into
   `@layer utilities` above Joinery's, so a class on a component overrides its style as on
-  ui.shadcn.com.
+  ui.shadcn.com. Typography's examples are the one exception: bare headings, paragraphs,
+  lists and tables styled with nothing but utilities, which rely on preflight, as any Tailwind
+  app gives it. examples.css gives those examples alone the share of preflight
+  they need, keyed on the stage's `data-example` (the frame's) or `data-parity` (the parity
+  route's), so every other example still shows Joinery as an app without Tailwind sees it.
 - Upstream's right-to-left examples (`<name>-rtl`, whose `<ComponentPreview>` has
   `direction="rtl"`) are shown with `<Example @name="<name>-rtl" @dir="rtl" />`. `@dir` puts
   `dir` on the preview, as the parity route's `?dir=rtl` does, and Joinery's components take

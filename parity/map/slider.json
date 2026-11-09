@@ -1,0 +1,11 @@
+{
+  "$comment": "Waiting for components that haven't landed: slider-controlled (Label). The unit that lands Label ports it onto the Slider page (its Controlled section) and maps it here.",
+  "examples": {
+    "slider-demo": "slider-demo",
+    "slider-range": "slider-range",
+    "slider-multiple": "slider-multiple",
+    "slider-vertical": "slider-vertical",
+    "slider-disabled": "slider-disabled",
+    "slider-rtl": "slider-rtl"
+  }
+}

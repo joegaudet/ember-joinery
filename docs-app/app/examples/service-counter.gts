@@ -15,14 +15,21 @@ class AddToCart extends Component<{ Args: { item: string } }> {
   }
 
   <template>
-    <button type="button" {{on "click" this.cart.add}}>Add {{@item}}</button>
+    <button
+      type="button"
+      data-test-jn-part="add"
+      data-test-jn-value={{@item}}
+      {{on "click" this.cart.add}}
+    >Add {{@item}}</button>
   </template>
 }
 
 <template>
-  <AddToCart @item="a lamp" />
-  <AddToCart @item="a chair" />
-  {{#let (service Cart) as |cart|}}
-    <p>Items in the cart: <output>{{cart.count}}</output></p>
-  {{/let}}
+  <div data-test-jn="shop">
+    <AddToCart @item="a lamp" />
+    <AddToCart @item="a chair" />
+    {{#let (service Cart) as |cart|}}
+      <p>Items in the cart: <output data-test-jn-part="count">{{cart.count}}</output></p>
+    {{/let}}
+  </div>
 </template>

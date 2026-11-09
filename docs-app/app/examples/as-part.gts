@@ -41,19 +41,22 @@ class Collapsible extends Component<CollapsibleSignature> {
       'aria-expanded': String(this.open.value),
       'aria-controls': idFor(this, 'content'),
       'data-state': this.open.value ? 'open' : 'closed',
+      'data-test-jn-part': 'trigger',
     },
     on: { click: () => this.open.set(open => !open) },
   }))
 
   <template>
-    {{yield
-      (hash
-        Trigger=(component Trigger part=this.trigger)
-        trigger=this.trigger
-        isOpen=this.open.value
-        contentId=(idFor this "content")
-      )
-    }}
+    <div data-test-jn="collapsible">
+      {{yield
+        (hash
+          Trigger=(component Trigger part=this.trigger)
+          trigger=this.trigger
+          isOpen=this.open.value
+          contentId=(idFor this "content")
+        )
+      }}
+    </div>
   </template>
 }
 
@@ -63,6 +66,8 @@ class Collapsible extends Component<CollapsibleSignature> {
     <c.Trigger type="button">Show the details</c.Trigger>
     {{! The same part on an element of your own }}
     <a href="#details" {{c.trigger}}>or this link</a>
-    <p id={{c.contentId}} hidden={{if c.isOpen false true}}>The details.</p>
+    <p id={{c.contentId}} hidden={{if c.isOpen false true}} data-test-jn-part="content">
+      The details.
+    </p>
   </Collapsible>
 </template>

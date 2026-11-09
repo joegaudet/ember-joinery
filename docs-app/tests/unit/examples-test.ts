@@ -23,7 +23,12 @@ module('Unit | examples', function () {
     const unaudited: string[] = []
     for (const name of exampleTestNames()) {
       const example = await loadExample(name)
-      if (example?.test && !example.test.includes('a11yAudit(')) unaudited.push(name)
+      if (!example?.test) continue
+      // Each test( … ) in the file, up to the next one, calls a11yAudit().
+      const tests = example.test.split(/^\s*test\(/m).slice(1)
+      tests.forEach((body, index) => {
+        if (!body.includes('a11yAudit(')) unaudited.push(`${name}, test ${index + 1}`)
+      })
     }
     assert.deepEqual(unaudited, [], 'call a11yAudit() at the end of these tests')
   })

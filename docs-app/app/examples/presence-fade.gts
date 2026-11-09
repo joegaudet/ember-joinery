@@ -9,14 +9,26 @@ export default class PresenceFade extends Component {
   toggle = () => (this.open = !this.open)
 
   <template>
-    <button type="button" aria-expanded={{if this.open "true" "false"}} {{on "click" this.toggle}}>
-      {{if this.open "Hide" "Show"}}
-    </button>
-    <Presence @present={{this.open}} as |presence|>
-      <div class="presence-panel" data-state={{if this.open "open" "closed"}} {{presence.ref}}>
-        It fades out before it goes.
-      </div>
-    </Presence>
+    <div data-test-jn="fading-panel">
+      <button
+        type="button"
+        aria-expanded={{if this.open "true" "false"}}
+        data-test-jn-part="toggle"
+        {{on "click" this.toggle}}
+      >
+        {{if this.open "Hide" "Show"}}
+      </button>
+      <Presence @present={{this.open}} as |presence|>
+        <div
+          class="presence-panel"
+          data-state={{if this.open "open" "closed"}}
+          data-test-jn-part="panel"
+          {{presence.ref}}
+        >
+          It fades out before it goes.
+        </div>
+      </Presence>
+    </div>
     <style>
       @keyframes presence-in {
         from {

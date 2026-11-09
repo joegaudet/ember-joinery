@@ -7,9 +7,28 @@ import {
   type Direction,
 } from '@ember-joinery/primitives/direction'
 
+/** Content that reads the direction where it is, as a component does on a key press. */
+class DirectionCard extends Component<{ Args: { dir: Direction } }> {
+  @tracked read: Direction | undefined
+
+  readDirection = (event: Event) => (this.read = getDirection(event.currentTarget as Element))
+
+  <template>
+    <div class="direction-card" data-test-jn="direction-card">
+      <p>مرحبا بالعالم · Hello, world</p>
+      <p>The provider says <code>{{@dir}}</code>.</p>
+      <button type="button" data-test-jn-part="read" {{on "click" this.readDirection}}>
+        Read it from here
+      </button>
+      {{#if this.read}}
+        <output data-test-jn-part="result">getDirection() → {{this.read}}</output>
+      {{/if}}
+    </div>
+  </template>
+}
+
 export default class DirectionProviderExample extends Component {
   @tracked dir: Direction = 'rtl'
-  @tracked read: Direction | undefined
 
   get other(): Direction {
     return this.dir === 'rtl' ? 'ltr' : 'rtl'
@@ -17,18 +36,15 @@ export default class DirectionProviderExample extends Component {
 
   flip = () => (this.dir = this.other)
 
-  /** What a component inside would see when it needs the direction, as on a key press. */
-  readDirection = (event: Event) => (this.read = getDirection(event.currentTarget as Element))
-
   <template>
-    <button type="button" {{on "click" this.flip}}>Switch to {{this.other}}</button>
-    <DirectionProvider @dir={{this.dir}} as |dir|>
-      <div class="direction-card">
-        <p>مرحبا بالعالم · Hello, world</p>
-        <p>The provider says <code>{{dir}}</code>.</p>
-        <button type="button" {{on "click" this.readDirection}}>Read it from here</button>
-        {{#if this.read}}<output>getDirection() → {{this.read}}</output>{{/if}}
-      </div>
-    </DirectionProvider>
+    <div data-test-jn="direction-example">
+      <button type="button" data-test-jn-part="switch" {{on "click" this.flip}}>
+        Switch to
+        {{this.other}}
+      </button>
+      <DirectionProvider @dir={{this.dir}} as |dir|>
+        <DirectionCard @dir={{dir}} />
+      </DirectionProvider>
+    </div>
   </template>
 }

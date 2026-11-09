@@ -1,0 +1,12 @@
+{
+  "$comment": "Waiting for components that haven't landed. For Field: input-group-inline-start, input-group-inline-end, input-group-block-start, input-group-block-end and input-group-rtl. For Popover: input-group-button. For Dropdown Menu: input-group-dropdown. The unit that lands each ports its examples onto the Input Group page and maps them here.",
+  "examples": {
+    "input-group-demo": "input-group-demo",
+    "input-group-icon": "input-group-icon",
+    "input-group-text": "input-group-text",
+    "input-group-kbd": "input-group-kbd",
+    "input-group-spinner": "input-group-spinner",
+    "input-group-textarea": "input-group-textarea",
+    "input-group-custom": "input-group-custom"
+  }
+}

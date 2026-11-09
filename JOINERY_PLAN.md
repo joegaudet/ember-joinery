@@ -542,6 +542,12 @@ workspace.
   page, and audits everything around those elements (see "Upstream's colours and AA" in
   CONTRIBUTING.md). Whether Joinery should darken them instead, at a cost in fidelity, is Joe's
   call.
+- **Where Table and Progress part from upstream, for WCAG.** Upstream's Progress
+  leaves its value off the Radix root, so it always reads as indeterminate; Joinery's announces
+  it. Upstream's Table container scrolls a wide table with no way in from the keyboard; Joinery's
+  joins the tab order while it scrolls and has nothing focusable. The pixels are upstream's.
+  Like upstream's right-to-left copy, Progress fills from the left in both directions (its
+  example adds `rtl:rotate-180`); filling from the inline start instead is Joe's call.
 - **An unattended build at this scale.** About 150–200 agent runs over several days. On a 4-CPU
   machine, two agents run at a time. The workflow journal lets a restarted session resume where
   it stopped.

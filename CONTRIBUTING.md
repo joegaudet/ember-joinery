@@ -232,7 +232,15 @@ one spec, as Alert's, Card's and Empty's are; a part that takes arguments, such 
 **Icons and strings.** Upstream's `lucide-react` icons are `lucide`'s, drawn by `<Icon>`
 (`ArrowUpIcon` is `<Icon @icon={{ArrowUp}} />`). An icon a component draws itself can be
 replaced, and every string it shows is an argument with upstream's English as the default
-(Spinner's `@label`, `Loading`).
+(Spinner's `@label`, `Loading`). An icon upstream marks `cn-rtl-flip` (a breadcrumb's chevron,
+pagination's arrows) keeps `jn-rtl-flip`, which `src/css/base.css` mirrors right to left, as
+upstream's right-to-left build does.
+
+**Parts with a tag of their own.** A part with nothing of its own to track whose element isn't
+a `div` (a table's `tr`, a breadcrumb's `ol`) comes from `taggedPart()` and
+`taggedPartModifier()` in `packages/ember/src/-private/tagged-part.gts`, both made from one spec
+of its tag, classes, `data-slot`, `data-test-jn-part` and any ARIA upstream gives it, as
+Table's, Breadcrumb's and Pagination's are.
 
 **The harness** extends `Harness`, names `static component`, reads state through the DOM and
 ARIA (`label`, `isDisabled`, `isPressed`), and acts with `@ember/test-helpers` (`click()`,
@@ -415,7 +423,9 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   its ui.shadcn.com page. Primitives, charts, blocks and the Formwright bridge have sections of
   their own. The A–Z sections' `meta.json` files are generated (see "Generated files"), and
   `docs-app/tests/acceptance/pages-test.ts` renders every page and audits it with axe, so a new
-  page needs no list edited.
+  page needs no list edited. A page's examples may repeat a landmark, as upstream's do (every
+  Breadcrumb is a nav called `breadcrumb`), so its `landmark-unique` check covers the guide's
+  own landmarks and leaves the previews out; each example's own test audits it alone.
 - Examples are `.gts` files in `docs-app/app/examples/`, one per upstream example, named
   `<component>-<example>`, each exporting the example as its default export. Show one in a page
   with `<Example @name="…" />` (add `@title`, and `@align="start"` where upstream's preview

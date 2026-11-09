@@ -1,0 +1,8 @@
+{
+  "examples": {
+    "resizable-demo": "resizable-demo",
+    "resizable-vertical": "resizable-vertical",
+    "resizable-handle": "resizable-handle",
+    "resizable-rtl": "resizable-rtl"
+  }
+}

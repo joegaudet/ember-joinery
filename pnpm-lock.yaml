@@ -201,6 +201,9 @@ importers:
       '@ember-joinery/ember':
         specifier: workspace:*
         version: link:../../packages/ember
+      '@ember-joinery/primitives':
+        specifier: workspace:*
+        version: link:../../packages/primitives
       '@ember-joinery/test-support':
         specifier: workspace:*
         version: link:../../packages/test-support

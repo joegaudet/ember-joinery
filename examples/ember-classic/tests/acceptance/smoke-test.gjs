@@ -1,9 +1,27 @@
 import { module, test } from 'qunit'
-import { visit } from '@ember/test-helpers'
+import { click, visit } from '@ember/test-helpers'
 import { setupApplicationTest } from 'ember-qunit'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import * as ember from '@ember-joinery/ember'
 import * as testSupport from '@ember-joinery/test-support'
+import { Harness, KeyComboHarness } from '@ember-joinery/test-support'
+
+/** The app's disclosure, built on the primitives. */
+class DisclosureHarness extends Harness {
+  static component = 'disclosure'
+
+  get trigger() {
+    return this.part('trigger')
+  }
+
+  get content() {
+    return this.queryPart('content')
+  }
+
+  async toggle() {
+    await click(this.trigger)
+  }
+}
 
 /** Every cascade layer the page's style sheets declare, in order. */
 function declaredLayers() {
@@ -41,6 +59,24 @@ module('Acceptance | smoke', function (hooks) {
     assert.strictEqual(typeof testSupport, 'object', '@ember-joinery/test-support imports')
     assert.true(declaredLayers().includes('joinery'), 'joinery.css is bundled and loaded')
 
+    await a11yAudit()
+  })
+
+  test('the primitives work in a classic ember-cli build', async function (assert) {
+    await visit('/')
+    assert.deepEqual(new KeyComboHarness('search').keys, ['Ctrl', 'K'])
+
+    const disclosure = new DisclosureHarness()
+    assert.dom(disclosure.trigger).hasTagName('button').hasAria('expanded', 'false')
+    assert.strictEqual(disclosure.content, null)
+
+    await disclosure.toggle()
+    assert.dom(disclosure.trigger).hasAria('expanded', 'true')
+    assert.dom(disclosure.content).hasText('The primitives work here too.')
+    assert.dom(disclosure.trigger).hasAria('controls', disclosure.content.id)
+
+    await disclosure.toggle()
+    assert.strictEqual(disclosure.content, null, 'Presence let it go')
     await a11yAudit()
   })
 })

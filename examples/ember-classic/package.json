@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ember-joinery/ember": "^1.0.0",
+    "@ember-joinery/primitives": "^1.0.0",
     "@ember-joinery/test-support": "^1.0.0"
   },
   "devDependencies": {

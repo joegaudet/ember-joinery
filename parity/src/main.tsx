@@ -97,7 +97,18 @@ function Ready({ children }: { children: React.ReactNode }) {
 function Stage({ entry, Component }: { entry: Entry; Component: React.ComponentType }) {
   const dir = (params.get('dir') ?? entry.direction) as 'ltr' | 'rtl'
   const align = params.get('align') ?? entry.align
-  const Direction = entry.base === 'base' ? BaseDirectionProvider : RadixDirectionProvider
+  // As upstream's DirectionProviderWrapper does: Base UI's provider takes `direction`, and
+  // Radix's (upstream's wrapper of it) `dir`.
+  const example =
+    entry.base === 'base' ? (
+      <BaseDirectionProvider direction={dir}>
+        <Component />
+      </BaseDirectionProvider>
+    ) : (
+      <RadixDirectionProvider dir={dir}>
+        <Component />
+      </RadixDirectionProvider>
+    )
   const stage = (
     <div
       className="parity-stage"
@@ -106,9 +117,7 @@ function Stage({ entry, Component }: { entry: Entry; Component: React.ComponentT
       dir={dir}
       data-lang={dir === 'rtl' ? 'ar' : undefined}
     >
-      <Direction dir={dir}>
-        <Component />
-      </Direction>
+      {example}
     </div>
   )
   return dir === 'rtl' ? <LanguageProvider defaultLanguage="ar">{stage}</LanguageProvider> : stage

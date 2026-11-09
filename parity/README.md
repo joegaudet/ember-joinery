@@ -68,7 +68,9 @@ look at a comparison, never to set a threshold. Dependabot opens playwright-core
 their own PR, outside the weekly group, because a new Chromium can move every screenshot.
 
 Both pages get the same fonts, Geist, Geist Mono and Noto Sans Arabic and Hebrew, from this
-app's `@fontsource-variable` packages. `scripts/parity.mjs` serves them from a server of its own
+app's `@fontsource-variable` packages. Both pages' bodies also take the stage's font and a line height
+of 1.5 (the reference app's own, from Tailwind's preflight): charts measure their grid's tick
+labels in a span on `<body>`, as recharts does, and both must measure alike. `scripts/parity.mjs` serves them from a server of its own
 on every run, so they load even when `--reference-url` or `--joinery-url` points at other servers.
 A font that doesn't load is an error, never a silent fallback. This app also loads them before
 it renders an example, as ui.shadcn.com preloads Geist: a Radix part that measures itself on

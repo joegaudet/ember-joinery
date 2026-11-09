@@ -105,7 +105,8 @@ ember-joinery/
   docs/site/       hand-written marketing page (index.html, site.css, logo.svg, favicon.svg, social-card.png)
   docs/social-card.html
   scripts/         publish.mjs, publish-plan.mjs (from Formwright), upstream.mjs, parity.mjs,
-                   extract-classes.mjs, site-screenshots.mjs, gen-barrels.mjs, *.test.mjs
+                   extract-classes.mjs, site-screenshots.mjs, gen-barrels.mjs, entrypoints.mjs,
+                   *.test.mjs
   upstream.json    the shadcn-ui/ui and ember-primitives commits last synced
   CLAUDE.md  CONTRIBUTING.md  README.md  LICENSE.md  NOTICE  JOINERY_PLAN.md
   .changeset/  .github/workflows/{ci,parity,upstream,pages,release,bootstrap-publish}.yml

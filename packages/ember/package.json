@@ -54,7 +54,8 @@
   "dependencies": {
     "@ember-joinery/primitives": "workspace:*",
     "@embroider/addon-shim": "^1.10.3",
-    "decorator-transforms": "^2.4.0"
+    "decorator-transforms": "^2.4.0",
+    "lucide": "^0.474.0"
   },
   "peerDependencies": {
     "@glimmer/component": ">= 2.0.0",
@@ -76,6 +77,7 @@
     "ember-source": "~7.3.0",
     "rollup": "^4.64.6",
     "tailwindcss": "^4.3.5",
+    "tw-animate-css": "^1.4.0",
     "typescript": "~6.0.3"
   },
   "publishConfig": {

@@ -138,6 +138,9 @@ importers:
       '@shikijs/rehype':
         specifier: ^3.20.0
         version: 3.23.0
+      '@tailwindcss/vite':
+        specifier: ^4.3.5
+        version: 4.3.5(vite@8.3.6(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))
       '@types/qunit':
         specifier: ^2.19.14
         version: 2.19.14
@@ -177,6 +180,9 @@ importers:
       kolay:
         specifier: 5.4.0
         version: 5.4.0(@babel/core@7.29.13)(@codemirror/lang-css@6.3.1)(@ember/test-helpers@5.8.0(@babel/core@7.29.13))(@lezer/javascript@1.5.6)(@lezer/lr@1.4.12)(rolldown@1.2.16)(rollup@4.68.0)(typescript@6.0.3)(vite@8.3.6(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(webpack@5.112.2)
+      lucide:
+        specifier: ^0.474.0
+        version: 0.474.0
       qunit:
         specifier: ^2.26.0
         version: 2.26.0
@@ -186,6 +192,9 @@ importers:
       shiki:
         specifier: ^3.20.0
         version: 3.23.0
+      tailwindcss:
+        specifier: ^4.3.5
+        version: 4.3.5
       testem:
         specifier: ^3.21.0
         version: 3.21.5(@babel/core@7.29.13)(ejs@3.1.10)(handlebars@4.7.10)(underscore@1.13.8)
@@ -207,6 +216,9 @@ importers:
       '@ember-joinery/test-support':
         specifier: workspace:*
         version: link:../../packages/test-support
+      lucide:
+        specifier: ^0.474.0
+        version: 0.474.0
     devDependencies:
       '@babel/core':
         specifier: ^7.29.7
@@ -313,6 +325,9 @@ importers:
       '@ember-joinery/test-support':
         specifier: workspace:*
         version: link:../../packages/test-support
+      lucide:
+        specifier: ^0.474.0
+        version: 0.474.0
     devDependencies:
       '@babel/core':
         specifier: ^7.29.7
@@ -416,6 +431,9 @@ importers:
       '@ember-joinery/test-support':
         specifier: workspace:*
         version: link:../../packages/test-support
+      lucide:
+        specifier: ^0.474.0
+        version: 0.474.0
     devDependencies:
       '@babel/core':
         specifier: ^7.29.7
@@ -516,6 +534,9 @@ importers:
       decorator-transforms:
         specifier: ^2.4.0
         version: 2.4.0(@babel/core@7.29.13)
+      lucide:
+        specifier: ^0.474.0
+        version: 0.474.0
     devDependencies:
       '@babel/core':
         specifier: ^7.29.7
@@ -562,6 +583,9 @@ importers:
       tailwindcss:
         specifier: ^4.3.5
         version: 4.3.5
+      tw-animate-css:
+        specifier: ^1.4.0
+        version: 1.4.0
       typescript:
         specifier: ~6.0.3
         version: 6.0.3
@@ -759,6 +783,9 @@ importers:
       ember-source:
         specifier: ~7.3.0
         version: 7.3.1(@glimmer/component@2.2.1)
+      lucide:
+        specifier: ^0.474.0
+        version: 0.474.0
       qunit:
         specifier: ^2.26.0
         version: 2.26.0
@@ -5547,6 +5574,9 @@ packages:
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
+  lucide@0.474.0:
+    resolution: {integrity: sha512-2rfORNh9fzhCUKu0ciE48ogR1Zg7hleABLO5MBF06vOb4esTtE8FbfQJiC+wveiNFoeojWKz6zXheUToRR5uIg==}
+
   lunr@2.3.9:
     resolution: {integrity: sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==}
 
@@ -7110,6 +7140,9 @@ packages:
 
   tslib@2.9.1:
     resolution: {integrity: sha512-a4Ux9VKuIMHsOS7ENbEq6hK2ZGYIT27Rtl0E4eD9KqwxhKiQeMZE/9xb3IdYwWaSOyIBQLExhQgXDTYoiCxnWA==}
+
+  tw-animate-css@1.4.0:
+    resolution: {integrity: sha512-7bziOlRqH0hJx80h/3mbicLW7o8qLsH5+RaLR2t+OHM3D0JlWGODQKQ4cxbK7WlvmUxpcj6Kgu6EKqjrGFe3QQ==}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -13721,6 +13754,8 @@ snapshots:
     dependencies:
       yallist: 3.1.1
 
+  lucide@0.474.0: {}
+
   lunr@2.3.9: {}
 
   magic-string@0.25.9:
@@ -15774,6 +15809,8 @@ snapshots:
   tslib@1.14.1: {}
 
   tslib@2.9.1: {}
+
+  tw-animate-css@1.4.0: {}
 
   type-check@0.4.0:
     dependencies:

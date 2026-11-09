@@ -27,11 +27,7 @@
   @apply flex cursor-default items-center outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0;
 }
 
-/*
- * in ContextMenuSubTrigger: its chevron, which upstream marks only `cn-rtl-flip` (a class transformStyle keeps,
- * and Joinery's base.css mirrors right to left). The rule is the sub-trigger's, so it moves no
- * other `jn-rtl-flip` icon.
- */
+/* in ContextMenuSubTrigger; inside .jn-context-menu-sub-trigger only, since other parts share .jn-rtl-flip */
 :where(.jn-context-menu-sub-trigger) > :where(.jn-rtl-flip) {
   @apply ms-auto;
 }

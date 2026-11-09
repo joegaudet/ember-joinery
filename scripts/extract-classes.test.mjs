@@ -448,3 +448,79 @@ function Next({ size, className }) {
   const bare = extractClasses(source.replace('cn-badge-variant-outline', 'cn-next'))
   assert.doesNotMatch(renderCss(bare, { name: 'next', sheets: SHEETS }), /NOTE/)
 })
+
+test('an element whose only semantic classes are kept ones gets its rule inside the nearest enclosing part', () => {
+  // transformStyle keeps cn-rtl-flip on every icon it marks (Breadcrumb's separators, Pagination's
+  // arrows, a sub-trigger's chevron), so a rule on .jn-rtl-flip alone would move all of them.
+  const source = `
+function SubTrigger({ className, children }) {
+  return (
+    <Primitive.SubTrigger data-slot="menu-sub-trigger" className={cn("cn-menu-sub-trigger flex", className)}>
+      {children}
+      <ChevronRightIcon className="cn-rtl-flip ml-auto size-4" />
+    </Primitive.SubTrigger>
+  )
+}
+function Nested() {
+  return (
+    <div data-slot="nested">
+      <Wrapper>
+        <ChevronRightIcon className={cn("cn-rtl-flip pl-1", open && "cn-rtl-flip pr-1")} />
+      </Wrapper>
+    </div>
+  )
+}
+function Alone() {
+  return <ChevronRightIcon className={cn("cn-rtl-flip size-4")} />
+}
+function Separator() {
+  return (
+    <li data-slot="separator" className="cn-separator">
+      <ChevronRightIcon className="cn-rtl-flip" />
+    </li>
+  )
+}
+function Title() {
+  return <h2 className="cn-font-heading cn-title text-pretty" />
+}
+`
+  const entries = extractClasses(source)
+  const kept = entries.filter(entry => entry.semantic[0] === 'jn-rtl-flip')
+  assert.deepEqual(
+    kept.map(entry => entry.within),
+    [
+      { class: 'jn-menu-sub-trigger', child: true },
+      { class: 'jn-nested', child: false },
+      { class: 'jn-nested', child: false },
+      undefined,
+      { class: 'jn-separator', child: true },
+    ],
+  )
+  assert.equal(
+    entries.find(entry => entry.semantic.includes('jn-title')).within,
+    undefined,
+    'an element with a class of its own needs no scope',
+  )
+
+  const css = renderCss(entries, { name: 'menu' })
+  assert.match(
+    css,
+    /\/\* in SubTrigger; keep on the element: jn-size-4; inside \.jn-menu-sub-trigger only, since other parts share \.jn-rtl-flip \*\/\n:where\(\.jn-menu-sub-trigger\) > :where\(\.jn-rtl-flip\) \{\n {2}@apply ms-auto size-4;\n\}/,
+    'a direct child, with its physical side made logical',
+  )
+  assert.match(css, /\n:where\(\.jn-nested\) :where\(\.jn-rtl-flip\) \{\n {2}@apply ps-1;\n\}/)
+  assert.match(css, /only when open: pr-1/)
+  assert.match(
+    css,
+    /in Alone, no slot to attach it to: size-4; keep on the element: jn-size-4 \*\//,
+    'with no enclosing part, nothing to attach it to',
+  )
+  assert.match(
+    css,
+    /:where\(\.jn-title\) \{\n {2}@apply text-pretty;\n\}/,
+    'the own class is the subject',
+  )
+  assert.match(css, /in Title; also: jn-font-heading \*\//)
+  assert.doesNotMatch(css, /^:where\(\.jn-rtl-flip\)/m, 'no rule moves every jn-rtl-flip icon')
+  assert.doesNotMatch(css, /jn-separator\)/, 'an icon with no utilities needs no rule')
+})

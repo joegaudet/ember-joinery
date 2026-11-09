@@ -42,9 +42,14 @@
 //   isn't a `className` (Calendar's `classNames={{ dropdown_root: cn(…) }}`, Input OTP's
 //   `containerClassName`), in a cva compound variant, and any a cva string of the same file has
 //   already resolved. A rule for a `<part>ClassName` prop's cn() goes on `jn-<data-slot>-<part>`
-//   (`jn-input-otp-container`), which the element carries instead of the unresolved class. transformStyle also keeps five classes on the element for its other
-//   transforms (`cn-font-heading`, `cn-menu-target`, `cn-menu-translucent`, `cn-logical-sides`,
-//   `cn-rtl-flip`); those aren't flagged.
+//   (`jn-input-otp-container`), which the element carries instead of the unresolved class.
+//   transformStyle also keeps five classes on the element for its other transforms
+//   (`cn-font-heading`, `cn-menu-target`, `cn-menu-translucent`, `cn-logical-sides`,
+//   `cn-rtl-flip`); those aren't flagged. Other parts share them, so they never name a rule's
+//   subject: an element whose only semantic classes are kept ones (a sub-trigger's chevron,
+//   `cn-rtl-flip ml-auto`) gets its rule only inside the nearest enclosing element with a class
+//   of its own (`:where(.jn-dropdown-menu-sub-trigger) > :where(.jn-rtl-flip)`), so it moves no
+//   other part's icon.
 //
 // Joinery's rules are all `:where()`, so source order decides between them. The extracted rules
 // go after the ported style sheet, which gets the inline-beats-own-rule case right, and every
@@ -207,6 +212,65 @@ function enclosingElement(node, source) {
   return {}
 }
 
+/** A class that is the element's own: a semantic class transformStyle doesn't keep for others. */
+const ownClass = names => names.find(name => !KEPT.has(name))
+
+/**
+ * The class an opening JSX element is styled by, as the rules name it: the first semantic class
+ * of its own in its plain `className` strings (those of a `cn()` call included), or else
+ * `jn-<data-slot>`. Undefined when it has neither.
+ */
+function elementClass(opening, source) {
+  let slot
+  let name
+  for (const property of opening.attributes.properties) {
+    if (!ts.isJsxAttribute(property) || !property.initializer) continue
+    const attribute = property.name.getText(source)
+    const init = property.initializer
+    const expression = ts.isJsxExpression(init) ? init.expression : init
+    if (!expression) continue
+    if (attribute === 'data-slot') slot = stringValue(expression)
+    if (attribute !== 'className') continue
+    const strings = isCnCall(expression)
+      ? expression.arguments.map(stringValue).filter(value => value !== undefined)
+      : [stringValue(expression)].filter(value => value !== undefined)
+    name = ownClass(strings.flatMap(value => splitClasses(value).semantic))
+  }
+  return name ?? (slot && `jn-${slot}`)
+}
+
+/**
+ * For a node in the class list of an element whose only semantic classes are ones
+ * transformStyle keeps (a chevron that is only `cn-rtl-flip`): the nearest JSX element around
+ * that element with a class of its own (see `elementClass`), as `{ class, child }`, where `child`
+ * says the element is its direct child. Other parts share a kept class (Breadcrumb's separators
+ * and Pagination's arrows are `cn-rtl-flip` too), so the element's rule is scoped under it.
+ */
+function enclosingScope(node, source) {
+  let own
+  let child = true
+  for (let current = node.parent; current; current = current.parent) {
+    if (
+      ts.isFunctionDeclaration(current) ||
+      ts.isArrowFunction(current) ||
+      ts.isFunctionExpression(current)
+    )
+      break
+    if (!own) {
+      if (ts.isJsxSelfClosingElement(current)) own = current
+      else if (ts.isJsxOpeningElement(current)) own = current = current.parent
+      continue
+    }
+    // An element passed in another element's attribute is rendered somewhere inside it.
+    if (ts.isJsxAttribute(current)) child = false
+    if (!ts.isJsxElement(current)) continue
+    const name = elementClass(current.openingElement, source)
+    if (name) return { class: name, child }
+    child = false
+  }
+  return undefined
+}
+
 /** The function a node is in (`CardHeader`), for context in the report. */
 function enclosingFunction(node) {
   for (let current = node.parent; current; current = current.parent) {
@@ -281,11 +345,16 @@ export function extractClasses(code, fileName = 'component.tsx') {
       if (!classes.semantic.length && !classes.utilities.length && !classes.markers.length) continue
       const why = condition ? 'it is behind a condition' : resolution
       const unresolved = why === true ? [] : classes.semantic.filter(name => !KEPT.has(name))
+      const within =
+        classes.semantic.length && !ownClass(classes.semantic)
+          ? enclosingScope(node, source)
+          : undefined
       entries.push({
         origin,
         call,
         function: enclosingFunction(node),
         ...enclosingElement(node, source),
+        ...(within && { within }),
         ...extra,
         ...(condition && { condition }),
         ...classes,
@@ -555,11 +624,6 @@ export function findOverrides(entries, sheets) {
 // The CSS
 
 /**
- * The rule's subject: the string's first semantic class; for a later string of a cn() call
- * without one, the call's (every string of a call styles the same element); or else the
- * element's `data-slot`.
- */
-/**
  * The class for a part upstream styles through a `<part>ClassName` prop of the element (Input
  * OTP's `containerClassName`), when that cn() call's semantic classes are never resolved:
  * `jn-<data-slot>-<part>` (`jn-input-otp-container`). Joinery's element carries it instead of
@@ -572,16 +636,32 @@ export function partClassFor(entry) {
   return `jn-${entry.slot}-${part.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`
 }
 
+/**
+ * The rule's subject: the string's first semantic class of its own (one transformStyle doesn't
+ * keep); for a later string of a cn() call without one, the call's (every string of a call
+ * styles the same element); or else the element's `data-slot`. An element whose only semantic
+ * classes are kept ones shares them with other parts, so its first is the subject only inside
+ * the nearest enclosing element with a class of its own, `scope` (`.jn-x > ` for a direct
+ * child). A `<part>ClassName` prop's part class comes first, flagged `part`. Undefined, with no
+ * scope, when there is nothing to attach the rule to.
+ */
 function subjectFor(entry, entries) {
   const part = partClassFor(entry)
-  if (part) return `.${part}`
-  if (entry.semantic.length) return `.${entry.semantic[0]}`
+  if (part) return { subject: `.${part}`, part: true }
+  const own = ownClass(entry.semantic)
+  if (own) return { subject: `.${own}` }
   if (entry.origin === 'cn') {
-    const named = entries.find(other => other.call === entry.call && other.semantic.length)
-    if (named && entries.indexOf(named) < entries.indexOf(entry)) return `.${named.semantic[0]}`
+    const named = entries.find(other => other.call === entry.call && ownClass(other.semantic))
+    if (named && entries.indexOf(named) < entries.indexOf(entry)) {
+      return { subject: `.${ownClass(named.semantic)}` }
+    }
   }
-  if (entry.slot) return `.jn-${entry.slot}`
-  return undefined
+  if (entry.slot) return { subject: `.jn-${entry.slot}` }
+  if (entry.semantic.length && entry.within) {
+    const { class: name, child } = entry.within
+    return { subject: `.${entry.semantic[0]}`, scope: `:where(.${name})${child ? ' >' : ''} ` }
+  }
+  return {}
 }
 
 function describe(entry) {
@@ -652,17 +732,26 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
     ' */',
   ]
   for (const entry of entries) {
-    const subject = subjectFor(entry, entries)
+    const { subject, scope = '', part } = subjectFor(entry, entries)
     const notes = []
     const keep = [...entry.markers, sizeMarker(entry, entries)].filter(Boolean)
     if (keep.length) notes.push(`keep on the element: ${keep.join(' ')}`)
-    if (entry.semantic.length > 1) notes.push(`also: ${entry.semantic.slice(1).join(' ')}`)
+    const also =
+      subject && !part
+        ? entry.semantic.filter(name => `.${name}` !== subject)
+        : entry.semantic.slice(1)
+    if (also.length) notes.push(`also: ${also.join(' ')}`)
+    if (scope && entry.utilities.length) {
+      notes.push(
+        `inside .${entry.within.class} only, since other parts share ${classList(entry.semantic)}`,
+      )
+    }
     const warnings = transformNotes(entry, sheets)
     if (!entry.utilities.length) {
       if (notes.length || warnings.length) {
         lines.push(
           '',
-          `/* ${subject ? `:where(${subject})` : describe(entry)}${notes.length ? `: ${notes.join('; ')}` : ''} */`,
+          `/* ${subject ? `${scope}:where(${subject})` : describe(entry)}${notes.length ? `: ${notes.join('; ')}` : ''} */`,
           ...warnings,
         )
       }
@@ -676,7 +765,7 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
         o => `.${o.by} overrides ${o.utility} (${o.every ? 'every style' : o.styles.join(', ')})`,
       )
       lines.push(
-        `/* ${describe(entry)}, ${why}: ${entry.utilities.join(' ')}${later.length ? `; later in the call, ${later.join(', ')}` : ''} */`,
+        `/* ${describe(entry)}, ${why}: ${entry.utilities.join(' ')}${later.length ? `; later in the call, ${later.join(', ')}` : ''}${keep.length ? `; keep on the element: ${keep.join(' ')}` : ''} */`,
         ...warnings,
       )
       continue
@@ -690,7 +779,7 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
     const kept = entry.utilities.filter(utility => !moved.has(utility))
     lines.push(`/* ${describe(entry)}${notes.length ? `; ${notes.join('; ')}` : ''} */`)
     if (kept.length)
-      lines.push(`:where(${subject}) {`, `  @apply ${logicalClasses(kept.join(' '))};`, '}')
+      lines.push(`${scope}:where(${subject}) {`, `  @apply ${logicalClasses(kept.join(' '))};`, '}')
     lines.push(...warnings)
     for (const { utility, by, styles } of overridden.filter(o => !o.every)) {
       lines.push(
@@ -707,7 +796,7 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
       lines.push(
         '',
         `/* ${describe(entry)}: upstream's later ${classes.map(c => `.${c}`).join(', ')} ${plural(classes.length, 'overrides', 'override')} ${plural(utilities.length, 'this', 'these')} in every style */`,
-        `:where(${subject}${classes.map(c => `:not(.${c})`).join('')}) {`,
+        `${scope}:where(${subject}${classes.map(c => `:not(.${c})`).join('')}) {`,
         `  @apply ${logicalClasses(utilities.join(' '))};`,
         '}',
       )

@@ -189,6 +189,13 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
      `<part>ClassName` prop's rule goes on `jn-<data-slot>-<part>` instead
      (`jn-input-otp-container`), the class to give that element.
 
+   - transformStyle keeps five semantic classes on the element for its other transforms
+     (`cn-rtl-flip`, `cn-font-heading`…), and other parts share them, so a rule never has one as
+     its subject on its own. An element whose only semantic classes are kept ones (a
+     sub-trigger's chevron, `cn-rtl-flip ml-auto`) gets its rule inside the nearest enclosing
+     element with a class of its own (`:where(.jn-dropdown-menu-sub-trigger) > :where(.jn-rtl-flip)`),
+     so it moves no Breadcrumb separator or Pagination arrow.
+
    The output also lists the `group/*` markers the element must keep, and leaves conditional
    classes as comments.
 

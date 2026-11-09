@@ -2,11 +2,20 @@ import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
 import { render, rerender, settled } from '@ember/test-helpers'
 import { on } from '@ember/modifier'
+import { LinkTo } from '@ember/routing'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { ArrowRight, Plus } from 'lucide'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
-import { Button, Icon, button, type ButtonSize, type ButtonVariant } from '@ember-joinery/ember'
+import {
+  Button,
+  Icon,
+  asButton,
+  buttonAttributes,
+  buttonClasses,
+  type ButtonSize,
+  type ButtonVariant,
+} from '@ember-joinery/ember'
 import { ButtonHarness } from '@ember-joinery/test-support'
 
 const VARIANTS: ButtonVariant[] = [
@@ -21,6 +30,15 @@ const SIZES: ButtonSize[] = ['default', 'xs', 'sm', 'lg', 'icon', 'icon-xs', 'ic
 
 /** A rendered length in pixels. */
 const px = (value: string) => Number.parseFloat(value)
+
+/** An element's classes and attributes (but the test's own `data-case`), to compare two. */
+function rendering(element: Element): { classes: string[]; attributes: Record<string, string> } {
+  const attributes: Record<string, string> = {}
+  for (const { name, value } of element.attributes) {
+    if (name !== 'class' && name !== 'data-case') attributes[name] = value
+  }
+  return { classes: [...element.classList].sort(), attributes }
+}
 
 module('Integration | components | button', function (hooks) {
   setupRenderingTest(hooks)
@@ -185,14 +203,14 @@ module('Integration | components | button', function (hooks) {
     await a11yAudit()
   })
 
-  test('the button modifier makes any element a button, and follows its arguments', async function (assert) {
+  test('the asButton modifier makes any element a button, and follows its arguments', async function (assert) {
     class State {
       @tracked variant: ButtonVariant = 'default'
     }
     const state = new State()
     await render(
       <template>
-        <a href="/docs" {{button variant=state.variant size="sm" name="docs"}}>Docs</a>
+        <a href="/docs" {{asButton variant=state.variant size="sm" name="docs"}}>Docs</a>
       </template>,
     )
     const docs = new ButtonHarness('docs')
@@ -209,6 +227,82 @@ module('Integration | components | button', function (hooks) {
       .hasClass('jn-button-variant-outline')
       .doesNotHaveClass('jn-button-variant-default')
     await rerender()
+    await a11yAudit()
+  })
+
+  test('the component and the modifier render the same classes and attributes', async function (assert) {
+    const cases = VARIANTS.flatMap(variant => SIZES.map(size => ({ variant, size })))
+    await render(
+      <template>
+        {{#each cases as |c|}}
+          <Button
+            @variant={{c.variant}}
+            @size={{c.size}}
+            @name="x"
+            aria-label="x"
+            data-case="component"
+          />
+          <button
+            type="button"
+            aria-label="x"
+            data-case="modifier"
+            {{asButton variant=c.variant size=c.size name="x"}}
+          ></button>
+        {{/each}}
+        <Button aria-label="x" data-case="component" />
+        <button type="button" aria-label="x" data-case="modifier" {{asButton}}></button>
+      </template>,
+    )
+    const components = [...document.querySelectorAll('[data-case="component"]')]
+    const modifiers = [...document.querySelectorAll('[data-case="modifier"]')]
+    assert.strictEqual(components.length, cases.length + 1)
+    components.forEach((component, index) => {
+      const modified = rendering(modifiers[index]!)
+      // The component leaves type to the caller; this button sets its own.
+      delete modified.attributes['type']
+      assert.deepEqual(rendering(component), modified, `${index}: the same`)
+    })
+
+    // And both are what the functions say, for code of your own.
+    const [first] = components
+    assert.deepEqual(
+      [...first!.classList].sort(),
+      buttonClasses({ variant: 'default', size: 'default' }).split(' ').sort(),
+    )
+    for (const [name, value] of Object.entries(
+      buttonAttributes({ variant: 'default', size: 'default', name: 'x' }),
+    )) {
+      assert.strictEqual(first!.getAttribute(name), value ?? null, name)
+    }
+    assert.dom(components.at(-1)).doesNotHaveAttribute('data-test-jn-name', 'none without a name')
+    await a11yAudit()
+  })
+
+  test('<LinkTo {{asButton}}> is a link that looks like a button', async function (assert) {
+    ;(this.owner as unknown as { setupRouter(): void }).setupRouter()
+    await render(
+      <template>
+        <LinkTo @route="index" class="mine" {{asButton variant="outline" size="sm" name="home"}}>
+          Home
+        </LinkTo>
+      </template>,
+    )
+    const home = new ButtonHarness('home')
+    assert.dom(home.element).hasTagName('a').hasAttribute('href', '/').hasText('Home')
+    assert
+      .dom(home.element)
+      .hasClass('jn-button')
+      .hasClass('jn-button-variant-outline')
+      .hasClass('jn-button-size-sm')
+      .hasClass('mine', "the element's own classes stay")
+      .hasAttribute('data-slot', 'button')
+    assert.strictEqual(home.variant, 'outline')
+    assert.strictEqual(home.size, 'sm')
+    assert.strictEqual(home.label, 'Home')
+    const style = getComputedStyle(home.element)
+    assert.strictEqual(style.height, '28px', 'h-7')
+    assert.strictEqual(style.display, 'inline-flex')
+    assert.strictEqual(style.textDecorationLine, 'none')
     await a11yAudit()
   })
 

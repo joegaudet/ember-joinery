@@ -7,7 +7,7 @@ function text(element: Element): string {
 
 /**
  * Drives a `<Button>` from `@ember-joinery/ember`, or an element made a button with its
- * `button` modifier (`<LinkTo {{button}}>`). State comes from the element and its ARIA.
+ * `asButton` modifier (`<LinkTo {{asButton}}>`). State comes from the element and its ARIA.
  *
  *   const save = new ButtonHarness('save') // <Button @name="save">
  *   await save.click()

@@ -103,28 +103,30 @@ which wins too (Joinery's rules are in the `joinery` layer, below your own).
 
 ## Spinner
 
-Render a `<Spinner />` inside the button to show a loading state. Remember to add
-`data-icon="inline-start"` or `data-icon="inline-end"` to the spinner for the correct spacing.
+Render a [`<Spinner />`](/components/spinner.md) inside the button to show a loading state.
+Remember to add `data-icon="inline-start"` or `data-icon="inline-end"` to the spinner for the
+correct spacing.
 
 <Example @name="button-spinner" @title="Spinner" />
 
 ## Button Group
 
-To create a button group, use the `ButtonGroup` component. See the
-[Button Group](/components/button-group.md) documentation for more details.
+To create a button group, use the `ButtonGroup` component. Button Group hasn't landed in
+Joinery yet; its page, and upstream's example here (`button-group-demo`, which needs Dropdown
+Menu too), come with it.
 
 ## As Child
 
 Upstream's `asChild` makes another component look like a button. In Joinery, give `@as` a tag,
-or put the `button` modifier on your own element or component, such as `LinkTo`:
+or put the `asButton` modifier on your own element or component, such as `LinkTo`:
 
 ```gts
-import { Button, button } from '@ember-joinery/ember'
+import { Button, asButton } from '@ember-joinery/ember'
 
 <template>
   <Button @as="a" href="/login">Login</Button>
-  <LinkTo @route="login" {{button}}>Login</LinkTo>
-  <LinkTo @route="docs" {{button variant="outline" size="sm"}}>Docs</LinkTo>
+  <LinkTo @route="login" {{asButton}}>Login</LinkTo>
+  <LinkTo @route="docs" {{asButton variant="outline" size="sm"}}>Docs</LinkTo>
 </template>
 ```
 
@@ -155,9 +157,9 @@ arrow with `rtl:rotate-180` in a Tailwind app, or your own `[dir="rtl"]` rule.
 
 It yields nothing but its block, and takes attributes on its element.
 
-### The `button` modifier
+### The `asButton` modifier
 
-`{{button variant=… size=… name=…}}` makes any element or component a button: it adds the
+`{{asButton variant=… size=… name=…}}` makes any element or component a button: it adds the
 classes and attributes below, and keeps them current as its arguments change.
 `buttonClasses(options)` and `buttonAttributes(options)` return the same, for code of your own.
 
@@ -197,7 +199,7 @@ the tab order.
 ## Testing
 
 `ButtonHarness` from `@ember-joinery/test-support` drives a `<Button>`, or any element with the
-`button` modifier:
+`asButton` modifier:
 
 ```ts
 import { ButtonHarness } from '@ember-joinery/test-support'

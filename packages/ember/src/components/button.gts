@@ -1,4 +1,5 @@
 import Component from '@glimmer/component'
+import { get } from '@ember/helper'
 import { As, type TagName } from '@ember-joinery/primitives/as'
 import { part, type PartModifier } from '@ember-joinery/primitives/part'
 
@@ -8,7 +9,7 @@ export type ButtonVariant = 'default' | 'outline' | 'secondary' | 'ghost' | 'des
 /** How big a button is. The `icon` sizes are square, for a button with only an icon. */
 export type ButtonSize = 'default' | 'xs' | 'sm' | 'lg' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg'
 
-/** A button's look: what both `<Button>` and the `button` modifier take. */
+/** A button's look: what both `<Button>` and the `asButton` modifier take. */
 export interface ButtonOptions {
   /** Default `default`. */
   variant?: ButtonVariant
@@ -30,12 +31,23 @@ export function buttonClasses({
   return `jn-button group/button jn-button-variant-${variant} jn-button-size-${size}`
 }
 
+/** The data attributes a button renders: upstream's, and its harness's. */
+export interface ButtonAttributes {
+  'data-slot': 'button'
+  'data-variant': ButtonVariant
+  'data-size': ButtonSize
+  'data-test-jn': 'button'
+  /** Left off when there is no `name`. */
+  'data-test-jn-name': string | undefined
+  [attribute: string]: string | undefined
+}
+
 /** The data attributes a button renders, as upstream's and for its harness. */
 export function buttonAttributes({
   variant = 'default',
   size = 'default',
   name,
-}: ButtonOptions = {}): Record<string, string | undefined> {
+}: ButtonOptions = {}): ButtonAttributes {
   return {
     'data-slot': 'button',
     'data-variant': variant,
@@ -49,10 +61,13 @@ export function buttonAttributes({
  * Makes any element or component a button, as upstream's `asChild` (and `buttonVariants`) do:
  * it adds the button's classes and attributes, and keeps them current.
  *
- *   <LinkTo @route="login" {{button}}>Login</LinkTo>
- *   <a href="/docs" {{button variant="outline" size="sm"}}>Docs</a>
+ *   <LinkTo @route="login" {{asButton}}>Login</LinkTo>
+ *   <a href="/docs" {{asButton variant="outline" size="sm"}}>Docs</a>
+ *
+ * It isn't named `button`: in a template, a binding by that name would turn every `<button>`
+ * element into a call to it.
  */
-export const button: PartModifier<HTMLElement, ButtonOptions> = part<HTMLElement, ButtonOptions>(
+export const asButton: PartModifier<HTMLElement, ButtonOptions> = part<HTMLElement, ButtonOptions>(
   options => ({ class: buttonClasses(options), attributes: buttonAttributes(options) }),
 )
 
@@ -60,8 +75,8 @@ export interface ButtonSignature {
   Args: ButtonOptions & {
     /**
      * The tag to render instead of `button`, such as `a` for a link that looks like a button
-     * (`<Button @as="a" href="/login">`). For a component, such as `LinkTo`, use the `button`
-     * modifier.
+     * (`<Button @as="a" href="/login">`). For a component, such as `LinkTo`, use the
+     * `asButton` modifier.
      */
     as?: TagName
   }
@@ -82,28 +97,31 @@ export interface ButtonSignature {
  * Like upstream's (and the native element), it doesn't set `type`, so in a form it submits.
  */
 export default class Button extends Component<ButtonSignature> {
-  get variant(): ButtonVariant {
-    return this.args.variant ?? 'default'
+  get options(): ButtonOptions {
+    return { variant: this.args.variant, size: this.args.size, name: this.args.name }
   }
 
-  get size(): ButtonSize {
-    return this.args.size ?? 'default'
-  }
-
+  /** What `asButton` adds too, from the same functions, so both render the same. */
   get classes(): string {
-    return buttonClasses({ variant: this.variant, size: this.size })
+    return buttonClasses(this.options)
   }
 
+  get attributes(): ButtonAttributes {
+    return buttonAttributes(this.options)
+  }
+
+  // Rendered in the template, not by the modifier, so a server-rendered page is styled; a test
+  // checks the two render the same attributes.
   <template>
     <As
       @as={{@as}}
       @tag="button"
       class={{this.classes}}
-      data-slot="button"
-      data-variant={{this.variant}}
-      data-size={{this.size}}
-      data-test-jn="button"
-      data-test-jn-name={{@name}}
+      data-slot={{get this.attributes "data-slot"}}
+      data-variant={{get this.attributes "data-variant"}}
+      data-size={{get this.attributes "data-size"}}
+      data-test-jn={{get this.attributes "data-test-jn"}}
+      data-test-jn-name={{get this.attributes "data-test-jn-name"}}
       ...attributes
     >{{yield}}</As>
   </template>

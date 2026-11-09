@@ -6,8 +6,15 @@ import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { CircleX } from 'lucide'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
-import { Button, Dialog } from '@ember-joinery/ember'
-import { ButtonHarness, DialogHarness, IconHarness, child, tab } from '@ember-joinery/test-support'
+import { Button, Dialog, Input } from '@ember-joinery/ember'
+import {
+  ButtonHarness,
+  DialogHarness,
+  IconHarness,
+  InputHarness,
+  child,
+  tab,
+} from '@ember-joinery/test-support'
 
 /** Ends the content's entrance animation, so it is measured where it rests. */
 function settle(element: Element | null): void {
@@ -17,6 +24,7 @@ function settle(element: Element | null): void {
 /** The page object a reader would write for this dialog. */
 class EditProfile extends DialogHarness {
   static override named = 'edit-profile'
+  @child(InputHarness, 'name') declare name: InputHarness
   @child(ButtonHarness, 'save') declare save: ButtonHarness
 }
 
@@ -89,6 +97,11 @@ module('Integration | components | dialog', function (hooks) {
   })
 
   test("the site's example: a Save that saves and closes, driven by a page object", async function (assert) {
+    class Profile {
+      @tracked name = ''
+      setName = (value: string) => (this.name = value)
+    }
+    const profile = new Profile()
     let saved = 0
     const save = () => saved++
     await render(
@@ -100,6 +113,13 @@ module('Integration | components | dialog', function (hooks) {
               <d.Title>Edit profile</d.Title>
               <d.Description>Make changes to your profile here.</d.Description>
             </d.Header>
+            {{! The site's snippet leaves the input's label out, for brevity; the audit asks for one. }}
+            <Input
+              @name="name"
+              @value={{profile.name}}
+              @onValueChange={{profile.setName}}
+              aria-label="Name"
+            />
             <d.Footer>
               <Button @variant="outline" {{d.close}}>Cancel</Button>
               <Button @name="save" {{d.close}} {{on "click" save}}>Save changes</Button>
@@ -110,6 +130,8 @@ module('Integration | components | dialog', function (hooks) {
     )
     const dialog = new EditProfile()
     await dialog.open()
+    await dialog.name.fillIn('Ada')
+    assert.strictEqual(profile.name, 'Ada', "the input's value goes to @onValueChange")
     await dialog.save.click()
     assert.false(dialog.isOpen)
     assert.strictEqual(saved, 1)

@@ -2,9 +2,7 @@
 
 Displays a card with header, content, and footer.
 
-Upstream's first example is a login form in a card, which needs Input; it hasn't landed in
-Joinery yet, so the example comes with it. The examples below show cards with text, buttons, a
-badge and an image.
+<Example @name="card-demo" @title="Card" />
 
 ## Installation
 
@@ -71,7 +69,7 @@ property class, as upstream does; without Tailwind, set it in your own CSS or a 
 ```
 
 Upstream's example switches the spacing with a Toggle Group around the login form; it comes
-with Toggle Group and Input.
+with Toggle Group.
 
 Use negative margins with `-mx-(--card-spacing)` to make content go edge to edge while keeping
 it aligned with the card inset. When the edge-to-edge content sits above a footer, use
@@ -93,8 +91,9 @@ padding, and the image takes the card's top corners.
 
 Joinery's styles use logical properties, so a card lays itself out right to left inside any
 element with `dir="rtl"` (see [Direction](/primitives/direction.md)): the header's action moves
-to the left. Upstream's right-to-left example is the login form in Arabic; it comes with
-Input.
+to the left.
+
+<Example @name="card-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 

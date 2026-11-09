@@ -139,7 +139,10 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    `FloatingUI`) to place it against its trigger, `{{dismissable}}` to close it on Escape or a
    press or focus outside (with its trigger in `inside`), and `Portal` only where a part must
    render somewhere else. Test them with `press()`, `pressOutside()` and `pressEscape()`:
-   `click()` sends no `pointerdown`, which the dismiss stack listens for. A modal part also
+   `click()` sends no `pointerdown`, which the dismiss stack listens for. For a drag (a
+   Resizable handle, a Scroll Area thumb), `sendPointer()` sends real `PointerEvent`s, which
+   `triggerEvent()` doesn't; a harness that drags takes distances in CSS pixels, since the test
+   container's scale makes the pointer's pixels differ. A modal part also
    makes the rest of the page inert (`inertOthers()`) and locks its scroll (`{{scrollLock}}`);
    a part that is a dialog (a Drawer, Command's dialog) builds on
    `@ember-joinery/primitives/dialog`, which does all of this.

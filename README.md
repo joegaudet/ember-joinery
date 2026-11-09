@@ -73,9 +73,10 @@ examples are ported from [shadcn/ui](https://ui.shadcn.com/) (MIT, © shadcn), a
 layer covers the features of [ember-primitives](https://github.com/universal-ember/ember-primitives)
 (MIT). Its toasts port [sonner](https://github.com/emilkowalski/sonner) (MIT, © Emil Kowalski),
 which shadcn/ui's Sonner wraps, its charts port [recharts](https://github.com/recharts/recharts)
-(MIT, © recharts), which shadcn/ui's charts are built on, and its Drawer ports
+(MIT, © recharts), which shadcn/ui's charts are built on, its Drawer ports
 [vaul](https://github.com/emilkowalski/vaul) (MIT, © Emil Kowalski), which shadcn/ui's Drawer is
-built on. See [NOTICE](NOTICE).
+built on, and its Command follows [cmdk](https://github.com/dip/cmdk) (MIT, © Paco Coursey),
+which shadcn/ui's Command is built on, and ports its command score. See [NOTICE](NOTICE).
 
 ## License
 

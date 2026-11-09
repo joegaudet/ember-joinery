@@ -96,8 +96,11 @@ theme, inlined, tw-animate-css, shadcn's own variants and the token mapping, non
 then, in `@layer joinery`, `src/css/base.css` (the radius scale, and the share of Tailwind's
 preflight upstream's parts rely on, scoped to `[data-slot]`), the ported sheet, and every
 component's own CSS (`src/components/**/*.css`, A–Z). The script writes that entry itself, so a
-component's CSS file needs no list edited. In watch mode (`pnpm start` in the package), editing
-any CSS file under `src/` rebuilds them.
+component's CSS file needs no list edited. Everything it ships is in that layer, but for what
+Tailwind emits for the rules to use (`@property` registrations, keyframes, `@layer
+properties`): the build fails on any other unlayered rule, which would beat an app's own
+layered CSS (it drops the one shadcn's `tailwind.css` keeps for a bare `.shimmer` class). In
+watch mode (`pnpm start` in the package), editing any CSS file under `src/` rebuilds them.
 
 ## Porting a component
 
@@ -194,7 +197,10 @@ files, each its own, so components land side by side without touching each other
 - the classes upstream's source gives it: its semantic classes renamed (`jn-button
 jn-button-variant-outline jn-button-size-sm`) and the markers `extract-classes.mjs` lists
   (`group/button`). A part upstream gives no semantic class gets `jn-<data-slot>`, the class
-  the script's rules use (`jn-spinner`);
+  the script's rules use (`jn-spinner`). An icon upstream sizes with a class (Spinner's
+  `size-4`) keeps the marker the script names for it (`jn-size-4`): no rule styles it, but the
+  style sheets' `svg:not([class*='size-'])` rules look for a `size-` class to leave an icon
+  with its own size alone, as they do upstream's;
 - `data-slot`, and Radix's `data-state` (`open`, `checked`…), as upstream's;
 - typed `@variant` and `@size` arguments, rendered as `data-variant` and `data-size`, with
   upstream's defaults;
@@ -207,9 +213,11 @@ so a caller's `class` adds to the component's and their attributes win.
 **Your own element.** Every part takes `@as`, a tag (`<Button @as="a" href="/login">`), through
 `As`. For a component of the caller's own, such as `LinkTo`, there is a part modifier made with
 `part()`: a compound component yields one per part (`<LinkTo {{d.trigger}}>`), and a component
-that is one part exports one (`<LinkTo {{button variant="outline"}}>`). The modifier and the
-template take their classes and attributes from the same functions (`buttonClasses`,
-`buttonAttributes`), so both render the same thing.
+that is one part exports one, named `as<Name>` (`<LinkTo {{asButton variant="outline"}}>`).
+Never name it after the component in lower case: a binding named `button` (or `input`, `label`,
+`table`…) turns every `<button>` in the importing file's templates into a call to it. The
+modifier and the template take their classes and attributes from the same functions
+(`buttonClasses`, `buttonAttributes`), so both render the same thing, and a test checks it.
 
 **Icons and strings.** Upstream's `lucide-react` icons are `lucide`'s, drawn by `<Icon>`
 (`ArrowUpIcon` is `<Icon @icon={{ArrowUp}} />`). An icon a component draws itself can be
@@ -237,6 +245,15 @@ guide compiles Tailwind's utilities for them, see "The guide") and the same icon
 to differ, a comment in it says why: an icon-only button upstream leaves unnamed gets
 `aria-label`, so the audit passes, and an icon from another set is lucide's. An example that
 needs a component that hasn't landed waits for it, and the gap is listed in the PR.
+
+**Waiting examples.** A waiting example keeps its section on the page, with upstream's text
+and a line saying what it comes with, and stays out of the parity map (so
+`--require-complete` still counts it). The page's map names it, and what it waits for, in its
+`$comment`. When you land a component, look for its name there (`grep -l 'Badge'
+parity/map/*.json`), port the examples that waited for it onto their pages, map them, and take
+them out of the `$comment`. So Spinner's page waits for Item, Badge, Input Group and Empty, and
+Button's for Button Group: its `button-group-demo` (mapped on Button Group's page) goes back in
+Button's Button Group section, with a link to Button Group's page.
 
 **The parity map** lists every example on the page. One shown on two pages
 (`button-group-demo` is on Button's and Button Group's) is mapped on the page the inventory
@@ -388,8 +405,11 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   preview, switchers show it in any of the eight styles, base colours and radii, light or dark,
   right to left, and in a 375, 768 or 1440px viewport (an `<iframe>` that wide, so the
   breakpoints respond). The guide loads every style, each scoped to the previews that pick it
-  (`docs-app/joinery-css.mjs` builds that from the package's `dist/`), and the base colour and
-  radius are tokens on the preview itself.
+  (`docs-app/joinery-css.mjs` builds that from the package's `dist/`, and what an app's sheet
+  sets on `:root`, the radius scale, it sets on the preview), and the base colour and radius
+  are tokens on the preview itself. A preview, like the parity route's stage, is rendered anew
+  when its style changes: a browser doesn't restyle what's inside an `@scope` root when its
+  `data-style` changes in place.
 - An example lays itself out with upstream's Tailwind classes. `docs-app/app/styles/examples.css`
   compiles Tailwind's utilities from `docs-app/app/examples` only, with no preflight, into
   `@layer utilities` above Joinery's, so a class on a component overrides its style as on

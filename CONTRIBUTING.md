@@ -242,6 +242,17 @@ a `div` (a table's `tr`, a breadcrumb's `ol`) comes from `taggedPart()` and
 of its tag, classes, `data-slot`, `data-test-jn-part` and any ARIA upstream gives it, as
 Table's, Breadcrumb's and Pagination's are.
 
+**Controls in a form.** A control that is a button, as Radix's Checkbox, Switch and radios are,
+takes part in a native form as Radix's does, through a hidden native input beside it (Radix's
+"bubble input"): `FormControl` and `BubbleInput` in
+`packages/primitives/src/-private/form-control.ts` (imported by relative path) find the
+control's form once it has rendered, repeat its `name`, `value` and `form` attributes on the
+input, keep the input checked with it, and fire `input` and `change` at the form. As on a native
+input, the form field's name is the `name` attribute and `@name` stays the harness's; where the
+root can't take a `name` (a radio group's `<div>`), it is an argument, `@formName`. In a test of
+one, call the form element anything but `form`: a local by that name turns the template's
+`<form>` into a call to it.
+
 **The harness** extends `Harness`, names `static component`, reads state through the DOM and
 ARIA (`label`, `isDisabled`, `isPressed`), and acts with `@ember/test-helpers` (`click()`,
 `focus()`). The guide page's Testing section lists its members.

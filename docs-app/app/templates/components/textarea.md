@@ -35,27 +35,23 @@ attributes. Its value is yours to control, or its own:
 ## Field
 
 Use `Field`, `FieldLabel`, and `FieldDescription` to create a textarea with a label and
-description. Upstream's example comes with Field.
+description (see [Field](/components/field.md)).
+
+<Example @name="textarea-field" @title="Field" />
 
 ## Disabled
 
-Use the `disabled` attribute to disable the textarea. To style the disabled state, add the
-`data-disabled` attribute to the `Field` component. Upstream's example, in a Field, comes with
-Field.
+Use the `disabled` attribute to disable the textarea. To style the disabled state, give the
+`Field` component `@disabled={{true}}` (upstream's `data-disabled`).
 
-```gts
-<Textarea placeholder="Type your message here." disabled />
-```
+<Example @name="textarea-disabled" @title="Disabled" />
 
 ## Invalid
 
 Use the `aria-invalid` attribute to mark the textarea as invalid. To style the invalid state,
-add the `data-invalid` attribute to the `Field` component. Upstream's example, in a Field,
-comes with Field.
+give the `Field` component `@invalid={{true}}` (upstream's `data-invalid`).
 
-```gts
-<Textarea placeholder="Type your message here." aria-invalid="true" />
-```
+<Example @name="textarea-invalid" @title="Invalid" />
 
 Give it the value `"true"`: React renders upstream's bare `aria-invalid` as `"true"`, but in a
 template a bare `aria-invalid` is empty, which ARIA reads as false.
@@ -69,8 +65,9 @@ Pair with [`Button`](/components/button.md) to create a textarea with a submit b
 ## RTL
 
 Joinery's styles use logical properties, so a textarea lays itself out right to left inside
-any element with `dir="rtl"` (see [Direction](/primitives/direction.md)). Upstream's
-right-to-left example, in a Field, comes with Field.
+any element with `dir="rtl"` (see [Direction](/primitives/direction.md)).
+
+<Example @name="textarea-rtl" @title="RTL" @dir="rtl" />
 
 ## Controlled
 

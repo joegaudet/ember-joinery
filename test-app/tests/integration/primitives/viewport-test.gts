@@ -5,18 +5,7 @@ import { destroy } from '@ember/destroyable'
 import type { TOC } from '@ember/component/template-only'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { InViewport, viewport, type InViewportMode } from '@ember-joinery/primitives/viewport'
-
-/** Two frames, by when the browser has delivered what scrolling changed. */
-async function nextFrames() {
-  await new Promise(requestAnimationFrame)
-  await new Promise(requestAnimationFrame)
-  await settled()
-}
-
-async function scrollTo(selector: string) {
-  find(selector)!.scrollIntoView({ block: 'center' })
-  await nextFrames()
-}
+import { scrollIntoView, waitForObservers } from '@ember-joinery/test-support'
 
 /** A scrolling box, with the slot below the fold and a marker at each end. */
 const Scroller: TOC<{ Blocks: { default: [] } }> = <template>
@@ -46,10 +35,10 @@ module('Integration | primitives | viewport', function (hooks) {
       assert.dom('div.slot[data-test-slot]').exists('a div, with the attributes')
       assert.dom('.content').doesNotExist('not rendered below the fold')
 
-      await scrollTo('#bottom')
+      await scrollIntoView('#bottom')
       assert.dom('.slot .content').hasText('Expensive content', 'rendered inside it')
 
-      await scrollTo('#top')
+      await scrollIntoView('#top')
       assert.dom('.content').exists('and it stays')
       await a11yAudit()
     })
@@ -66,7 +55,7 @@ module('Integration | primitives | viewport', function (hooks) {
         </template>,
       )
       assert.dom('.slot').exists()
-      await scrollTo('#bottom')
+      await scrollIntoView('#bottom')
       assert.dom('.slot').doesNotExist('the placeholder went')
       assert.dom('#scroller > .content').hasText('Replaced')
       await a11yAudit()
@@ -97,7 +86,7 @@ module('Integration | primitives | viewport', function (hooks) {
           </div>
         </template>,
       )
-      await scrollTo('#first')
+      await scrollIntoView('#first')
       assert.dom('.content').exists('within the margin counts')
       await a11yAudit()
     })
@@ -136,7 +125,7 @@ module('Integration | primitives | viewport', function (hooks) {
       observers.unobserve(target, recordOther)
       const before = entries.length
       target.style.marginTop = '5000px'
-      await nextFrames()
+      await waitForObservers()
       assert.strictEqual(entries.length, before, 'nothing after unobserve')
       target.style.marginTop = ''
       await a11yAudit()
@@ -161,9 +150,9 @@ module('Integration | primitives | viewport', function (hooks) {
       )
       await settled()
       find('#box')!.scrollTop = 50
-      await nextFrames()
+      await waitForObservers()
       find('#box')!.scrollTop = 100
-      await nextFrames()
+      await waitForObservers()
       assert.deepEqual(ratios, [0, 0.5, 1])
       await a11yAudit()
     })
@@ -185,7 +174,7 @@ module('Integration | primitives | viewport', function (hooks) {
       destroy(owner)
       await settled()
       target.style.marginTop = '5000px'
-      await nextFrames()
+      await waitForObservers()
       assert.strictEqual(calls, 1, 'nothing once the owner is gone')
       target.style.marginTop = ''
       await a11yAudit()

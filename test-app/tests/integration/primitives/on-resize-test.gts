@@ -4,14 +4,7 @@ import { find, render, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { ignoreROError, onResize, resizeObserver } from '@ember-joinery/primitives/on-resize'
-
-/** Two frames: by then the browser has delivered the resize a change caused. */
-async function nextFrames() {
-  await settled()
-  await new Promise(requestAnimationFrame)
-  await new Promise(requestAnimationFrame)
-  await settled()
-}
+import { waitForObservers } from '@ember-joinery/test-support'
 
 class Sizes {
   @tracked last = ''
@@ -39,7 +32,7 @@ module('Integration | primitives | on-resize', function (hooks) {
 
     const box = find('#box') as HTMLElement
     box.style.width = '150px'
-    await nextFrames()
+    await waitForObservers()
     assert.dom('output').hasText('150 × 50')
     assert.strictEqual(sizes.calls, 2)
     await a11yAudit()
@@ -64,13 +57,13 @@ module('Integration | primitives | on-resize', function (hooks) {
       </template>,
     )
     state.callback = second.record
-    await nextFrames()
+    await waitForObservers()
     assert.strictEqual(first.calls, 1)
     assert.strictEqual(second.calls, 1, 'the new callback hears the current size')
 
     const box = find('#box') as HTMLElement
     box.style.width = '120px'
-    await nextFrames()
+    await waitForObservers()
     assert.strictEqual(first.calls, 1, 'the old one no longer')
     assert.strictEqual(second.calls, 2)
 
@@ -78,7 +71,7 @@ module('Integration | primitives | on-resize', function (hooks) {
     await settled()
     box.style.width = '200px'
     document.body.append(box) // back in a document, where it could be measured
-    await nextFrames()
+    await waitForObservers()
     box.remove()
     assert.strictEqual(second.calls, 2, 'nothing after teardown')
     await a11yAudit()

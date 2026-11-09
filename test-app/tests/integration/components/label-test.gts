@@ -1,25 +1,12 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
 import { find, render, rerender, triggerEvent } from '@ember/test-helpers'
 import { on } from '@ember/modifier'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
 import { Label, asLabel, labelAttributes, labelClasses } from '@ember-joinery/ember'
 import { LabelHarness } from '@ember-joinery/test-support'
-
-/**
- * An element's classes and attributes, to compare two: but the test's own `data-case`, and the
- * `id` and `ember-view` class Ember 6.12 gives an element whose tag `@as` picks.
- */
-function rendering(element: Element): { classes: string[]; attributes: Record<string, string> } {
-  const attributes: Record<string, string> = {}
-  for (const { name, value } of element.attributes) {
-    if (name !== 'class' && name !== 'data-case' && name !== 'for') attributes[name] = value
-  }
-  delete attributes['id']
-  const classes = [...element.classList].filter(name => name !== 'ember-view').sort()
-  return { classes, attributes }
-}
 
 module('Integration | components | label', function (hooks) {
   setupRenderingTest(hooks)

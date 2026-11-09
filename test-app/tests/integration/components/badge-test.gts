@@ -1,5 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
 import { getRootElement, render, rerender, settled } from '@ember/test-helpers'
 import { LinkTo } from '@ember/routing'
 import { tracked } from '@glimmer/tracking'
@@ -21,20 +22,6 @@ const VARIANTS: BadgeVariant[] = ['default', 'secondary', 'destructive', 'outlin
 
 /** A rendered length in pixels. */
 const px = (value: string) => Number.parseFloat(value)
-
-/**
- * An element's classes and attributes, to compare two: but the test's own `data-case`, and the
- * `id` and `ember-view` class Ember 6.12 gives an element whose tag `@as` picks.
- */
-function rendering(element: Element): { classes: string[]; attributes: Record<string, string> } {
-  const attributes: Record<string, string> = {}
-  for (const { name, value } of element.attributes) {
-    if (name !== 'class' && name !== 'data-case') attributes[name] = value
-  }
-  delete attributes['id']
-  const classes = [...element.classList].filter(name => name !== 'ember-view').sort()
-  return { classes, attributes }
-}
 
 /** What a CSS colour (`var(--primary)`) computes to here, to compare with a rendered one. */
 function color(value: string, property: 'color' | 'backgroundColor' = 'backgroundColor'): string {

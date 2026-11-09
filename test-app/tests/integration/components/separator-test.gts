@@ -1,5 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
 import { find, getRootElement, render, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
@@ -12,19 +13,6 @@ import {
   type SeparatorOrientation,
 } from '@ember-joinery/ember'
 import { SeparatorHarness } from '@ember-joinery/test-support'
-
-/**
- * An element's classes and attributes, to compare two: but the test's own `data-case`, and the
- * `id` and `ember-view` class Ember 6.12 gives an element whose tag `@as` picks.
- */
-function rendering(element: Element): { classes: string[]; attributes: Record<string, string> } {
-  const attributes: Record<string, string> = {}
-  for (const { name, value } of element.attributes) {
-    if (name !== 'class' && name !== 'data-case' && name !== 'id') attributes[name] = value
-  }
-  const classes = [...element.classList].filter(name => name !== 'ember-view').sort()
-  return { classes, attributes }
-}
 
 /** What a CSS colour (`var(--border)`) computes to here, to compare with a rendered one. */
 function color(value: string): string {

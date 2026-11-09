@@ -1,6 +1,9 @@
 /*
  * The SVG paths a chart draws: curves (d3-shape, as recharts' Curve draws them) and bars with
  * rounded corners (recharts' Rectangle).
+ *
+ * recharts is MIT licensed; its notice is in NOTICE, and the build keeps it in the module that
+ * ships this (see rollup.config.mjs).
  */
 import {
   area as d3Area,

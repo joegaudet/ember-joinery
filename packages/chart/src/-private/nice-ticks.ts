@@ -4,6 +4,9 @@
  * to read, which may reach past the data's own range. recharts does the arithmetic with
  * decimal.js-light; here every result is rounded to 12 significant digits, which gives the same
  * numbers for any axis a chart draws.
+ *
+ * recharts is MIT licensed; its notice is in NOTICE, and the build keeps it in the module that
+ * ships this (see rollup.config.mjs).
  */
 
 /** Rounds away floating-point noise: 0.1 + 0.2 becomes 0.3. */

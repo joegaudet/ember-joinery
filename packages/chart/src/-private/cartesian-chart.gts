@@ -3,6 +3,9 @@
  * Glimmer SVG. It measures its box (as recharts' ResponsiveContainer does), collects the parts
  * its block registers, lays them out with ./cartesian.ts, and draws them in recharts' layers and
  * with recharts' class names, so shadcn's chart CSS styles them as it styles recharts.
+ *
+ * recharts is MIT licensed; its notice is in NOTICE, and the build keeps it in the module that
+ * ships this (see rollup.config.mjs).
  */
 import Component from '@glimmer/component'
 import type { TOC } from '@ember/component/template-only'

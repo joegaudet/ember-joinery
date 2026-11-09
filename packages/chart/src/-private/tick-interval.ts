@@ -1,6 +1,9 @@
 /*
  * Which of an axis's ticks to show, so their labels don't overlap: recharts' `interval`
  * (recharts/src/cartesian/getTicks.ts and getEquidistantTicks.ts), ported as is.
+ *
+ * recharts is MIT licensed; its notice is in NOTICE, and the build keeps it in the module that
+ * ships this (see rollup.config.mjs).
  */
 import { getStringSize, type TextStyle } from './text-size.ts'
 

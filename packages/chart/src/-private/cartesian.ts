@@ -6,6 +6,9 @@
  *
  * Everything here is a pure function of the chart's settings and size, except text
  * measurement (./text-size.ts), which the axes use to drop overlapping ticks.
+ *
+ * recharts is MIT licensed; its notice is in NOTICE, and the build keeps it in the module that
+ * ships this (see rollup.config.mjs).
  */
 import { scaleBand, scaleLinear, scalePoint } from 'd3-scale'
 import {

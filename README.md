@@ -72,7 +72,8 @@ Joinery is an independent project, not affiliated with shadcn/ui. Its design, co
 examples are ported from [shadcn/ui](https://ui.shadcn.com/) (MIT, © shadcn), and its headless
 layer covers the features of [ember-primitives](https://github.com/universal-ember/ember-primitives)
 (MIT). Its toasts port [sonner](https://github.com/emilkowalski/sonner) (MIT, © Emil Kowalski),
-which shadcn/ui's Sonner wraps. See [NOTICE](NOTICE).
+which shadcn/ui's Sonner wraps, and its charts port [recharts](https://github.com/recharts/recharts)
+(MIT, © recharts), which shadcn/ui's charts are built on. See [NOTICE](NOTICE).
 
 ## License
 

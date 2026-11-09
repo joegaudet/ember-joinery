@@ -3,6 +3,9 @@
  * (recharts/src/util/DOMUtils.ts): in a hidden span appended to <body>, with the font size and
  * letter spacing given. The axes use it to drop ticks whose labels would overlap, so measuring
  * the same way keeps the same ticks.
+ *
+ * recharts is MIT licensed; its notice is in NOTICE, and the build keeps it in the module that
+ * ships this (see rollup.config.mjs).
  */
 
 export interface TextStyle {

@@ -12,15 +12,13 @@
 @import '@ember-joinery/ember/tailwind.css';
 @import 'tailwindcss/utilities.css' layer(utilities) source(none);
 
-/* ui.shadcn.com's own utilities that upstream's examples use, from apps/v4/app/globals.css. */
-@utility no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
+/*
+ * shadcn's own utilities and variants (no-scrollbar, scroll-fade, shimmer, data-open…), which
+ * upstream's examples use as ui.shadcn.com imports `shadcn/tailwind.css`: the copy Joinery's
+ * build compiles its styles with. Code Block's examples cap their content with
+ * `max-h-48 scroll-fade-y`; the Dialog and Sheet examples hide a scrollbar with `no-scrollbar`.
+ */
+@import '../../node_modules/@ember-joinery/ember/src/css/shadcn.css';
 
 /*
  * ui.shadcn.com's style variants (`style-lyra:ml-4` on collapsible-file-tree's content), as its

@@ -1,0 +1,26 @@
+{
+  "$comment": "Waiting for components that haven't landed: code-block-trace (Trace), code-block-tabs (Tabs), code-block-chat (Message and Bubble), code-block-markdown (Message, Bubble and a Markdown renderer for Ember, upstream's Streamdown). The unit that lands each one ports its examples onto the Code Block page and maps them here.",
+  "examples": {
+    "code-block-demo": "code-block-demo",
+    "code-block-basic": "code-block-basic",
+    "code-block-header": "code-block-header",
+    "code-block-actions": "code-block-actions",
+    "code-block-floating-actions": "code-block-floating-actions",
+    "code-block-line-numbers": "code-block-line-numbers",
+    "code-block-start-line": "code-block-start-line",
+    "code-block-wrap": "code-block-wrap",
+    "code-block-highlighted-lines": "code-block-highlighted-lines",
+    "code-block-diff": "code-block-diff",
+    "code-block-height": "code-block-height",
+    "code-block-show-more": "code-block-show-more",
+    "code-block-show-more-scroll": "code-block-show-more-scroll",
+    "code-block-size": "code-block-size",
+    "code-block-destructive": "code-block-destructive",
+    "code-block-typeset": "code-block-typeset",
+    "code-block-rtl": "code-block-rtl",
+    "code-block-highlighting": "code-block-highlighting",
+    "code-block-languages": "code-block-languages",
+    "code-block-ansi": "code-block-ansi",
+    "code-block-streaming": "code-block-streaming"
+  }
+}

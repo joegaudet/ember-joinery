@@ -3,10 +3,12 @@
  *
  * Cascade layers: the first declared loses. Every rule here is in `guide`, below Joinery's own
  * `joinery` layer, so wherever a Joinery component renders, its rules win over the guide's,
- * whatever their specificity. app.ts imports this file before joinery.css, so this statement
- * is the first layer declaration on the page and fixes the order.
+ * whatever their specificity. Above Joinery's are Tailwind's `theme` and `utilities`, for the
+ * examples' layout classes (examples.css), and below everything Tailwind's `properties`
+ * fallbacks. app.ts imports this file first, so this statement is the first layer declaration
+ * on the page and fixes the order.
  */
-@layer guide, joinery;
+@layer properties, guide, joinery, theme, utilities;
 
 @layer guide {
   :root {
@@ -485,6 +487,68 @@
   .example-copy:focus-visible {
     outline: 2px solid var(--g-accent);
     outline-offset: 2px;
+  }
+
+  /* The preview's switchers: style, base colour, radius, dark, RTL and width. */
+  .example-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.75rem;
+    padding: 0.45rem 0.9rem;
+    border-bottom: 1px solid var(--g-border);
+    background: var(--g-bg);
+    font-size: 0.8rem;
+    color: var(--g-muted);
+  }
+
+  .example-tools label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .example-tools select,
+  .example-tools button {
+    font: 500 0.8rem var(--g-font);
+    color: var(--g-fg);
+    background: var(--g-surface);
+    border: 1px solid var(--g-border);
+    border-radius: 7px;
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+  }
+
+  .example-tools [aria-pressed='true'] {
+    background: var(--g-accent-soft);
+    border-color: var(--g-accent);
+    color: var(--g-accent);
+  }
+
+  .example-tools :focus-visible {
+    outline: 2px solid var(--g-accent);
+    outline-offset: 2px;
+  }
+
+  .example-widths {
+    display: inline-flex;
+    gap: 0.25rem;
+  }
+
+  /* A preview at a set width: a frame that wide, scrolled sideways when the page is narrower. */
+  .example-viewport {
+    overflow-x: auto;
+    padding: 1rem;
+  }
+
+  .preview-frame {
+    display: block;
+    box-sizing: content-box;
+    margin: 0 auto;
+    border: 1px solid var(--g-border);
+    border-radius: 10px;
+    background: var(--g-bg);
+    height: 18rem;
   }
 
   /* As upstream's preview: the example centred in a fixed-height stage, or placed by @align. */

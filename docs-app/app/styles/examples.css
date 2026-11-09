@@ -1,0 +1,14 @@
+/*
+ * The utility classes the examples lay themselves out with. Upstream's examples are written
+ * with Tailwind's (`flex flex-wrap items-center gap-2`, a Button's `rounded-full`), and the
+ * guide's keep them as written, so this compiles those utilities, and only from the examples
+ * (`source(none)` turns the scan of everything else off). There is no preflight: Joinery's
+ * components still render as they do in an app without Tailwind (see app.css). The utilities
+ * sit in `@layer utilities`, above Joinery's, so a class on a component overrides its style, as
+ * tailwind-merge lets it on ui.shadcn.com. `tailwind.css` maps the theme's tokens, as in a
+ * Tailwind app.
+ */
+@import 'tailwindcss/theme.css' layer(theme);
+@import '@ember-joinery/ember/tailwind.css';
+@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+@source '../examples';

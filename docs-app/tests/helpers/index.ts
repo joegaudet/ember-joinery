@@ -1,3 +1,4 @@
+import { getRootElement } from '@ember/test-helpers'
 import {
   setupApplicationTest as upstreamSetupApplicationTest,
   setupRenderingTest as upstreamSetupRenderingTest,
@@ -31,7 +32,14 @@ function setupApplicationTest(hooks: NestedHooks, options?: SetupTestOptions) {
 function setupRenderingTest(hooks: NestedHooks, options?: SetupTestOptions) {
   upstreamSetupRenderingTest(hooks, options)
 
-  // Additional setup for rendering tests can be done here.
+  // The guide scopes each style to the previews that pick it (joinery-css.mjs), so a test
+  // renders its example in Nova, the style a preview starts in, as an app's joinery.css does.
+  hooks.beforeEach(function () {
+    ;(getRootElement() as Element).setAttribute('data-style', 'nova')
+  })
+  hooks.afterEach(function () {
+    ;(getRootElement() as Element).removeAttribute('data-style')
+  })
 }
 
 function setupTest(hooks: NestedHooks, options?: SetupTestOptions) {

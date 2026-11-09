@@ -20,13 +20,17 @@ const scheme = modifier((_element: Element, [theme]: [string]) => {
   }
 })
 
+const isDark = (theme: string) => theme === 'dark'
+
 const Parity: TOC<{ Args: { model: ParityModel; controller: ParityController } }> = <template>
   {{#if @model.example}}
     <div
-      class="parity-stage guide-stage"
+      class="parity-stage guide-stage {{if (isDark @controller.theme) 'dark'}}"
       data-parity={{@model.name}}
       data-align={{@controller.align}}
       dir={{@controller.dir}}
+      data-style={{@controller.style}}
+      style={{@controller.tokens}}
       {{scheme @controller.theme}}
     >
       <@model.example.component />

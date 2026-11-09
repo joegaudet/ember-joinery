@@ -2,6 +2,8 @@ import { defineConfig } from 'vite'
 import { extensions, classicEmberSupport, ember } from '@embroider/vite'
 import { babel } from '@rollup/plugin-babel'
 import { kolay } from 'kolay/vite'
+import tailwindcss from '@tailwindcss/vite'
+import { joineryCss } from './joinery-css.mjs'
 import { writeGuideMeta } from '../scripts/gen-guide-meta.mjs'
 
 // The A–Z sections' meta.json files come from the pages present, so they're written before
@@ -23,6 +25,10 @@ export default defineConfig({
         '@ember-joinery/test-support',
       ],
     }),
+    // The examples' utility classes (app/styles/examples.css).
+    tailwindcss(),
+    // Every style, scoped to the previews that pick it, and the base colours' tokens.
+    joineryCss(),
     babel({ babelHelpers: 'runtime', extensions }),
   ],
   build: {

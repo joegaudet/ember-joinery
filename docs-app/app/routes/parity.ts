@@ -15,13 +15,17 @@ export interface ParityModel {
  * - `theme=dark` puts the `.dark` class on `<html>`, and `theme=light` (the default) the
  *   `.light` one; either also sets `color-scheme`, so the browser's preference can't change it;
  * - `dir=rtl` lays the example out right to left;
- * - `align=start|end` places it as upstream's preview does (centred otherwise).
+ * - `align=start|end` places it as upstream's preview does (centred otherwise);
+ * - `style=<style>` and `base=<base colour>` show it in another style or base colour (Nova and
+ *   Neutral by default), as the parity app's `base` does.
  */
 export default class ParityRoute extends Route {
   queryParams = {
     theme: { refreshModel: false },
     dir: { refreshModel: false },
     align: { refreshModel: false },
+    style: { refreshModel: false },
+    base: { refreshModel: false },
   }
 
   async model({ name }: { name: string }): Promise<ParityModel> {

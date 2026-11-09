@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'docs-app/tests/helpers'
-import { click, find, render, triggerKeyEvent, waitUntil } from '@ember/test-helpers'
+import { click, find, render, select, triggerKeyEvent, waitUntil } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { Example } from 'docs-app/components/example'
 
@@ -184,6 +184,83 @@ module('Integration | <Example>', function (hooks) {
 
     await render(<template><Example @name="introduction" /></template>)
     assert.dom('.example-preview').doesNotHaveAttribute('dir', 'without it, the page decides')
+  })
+
+  test('the switchers show the preview in another style, base colour, radius and mode', async function (assert) {
+    await render(<template><Example @name="button-default" /></template>)
+    const stage = () => find('.example-preview') as HTMLElement
+    const button = () => find('.example-preview [data-slot="button"]') as HTMLElement
+
+    assert.dom(stage()).hasAttribute('data-style', 'nova').doesNotHaveClass('dark')
+    assert.strictEqual(stage().style.getPropertyValue('--radius'), '0.625rem')
+    assert.strictEqual(getComputedStyle(button()).height, '32px', "Nova's h-8")
+
+    await select('[data-test-example-style]', 'lyra')
+    assert.dom(stage()).hasAttribute('data-style', 'lyra')
+    assert.notStrictEqual(
+      getComputedStyle(button()).borderTopLeftRadius,
+      '10px',
+      "Lyra's own radius, and none of Nova's rules",
+    )
+
+    const primary = getComputedStyle(button()).backgroundColor
+    await select('[data-test-example-base-color]', 'mauve')
+    assert.notStrictEqual(getComputedStyle(button()).backgroundColor, primary, 'mauve tokens')
+
+    await select('[data-test-example-style]', 'nova')
+    await select('[data-test-example-radius]', '0')
+    assert.strictEqual(stage().style.getPropertyValue('--radius'), '0rem')
+    assert.strictEqual(getComputedStyle(button()).borderTopLeftRadius, '0px')
+
+    const light = getComputedStyle(stage()).backgroundColor
+    await click('[data-test-example-dark]')
+    assert.dom('[data-test-example-dark]').hasAria('pressed', 'true')
+    assert.dom(stage()).hasClass('dark')
+    assert.notStrictEqual(getComputedStyle(stage()).backgroundColor, light, 'dark tokens')
+    await a11yAudit()
+  })
+
+  test('the RTL switch lays the preview out right to left, and back', async function (assert) {
+    await render(<template><Example @name="button-default" /></template>)
+    assert.dom('.example-preview').doesNotHaveAttribute('dir')
+    assert.dom('[data-test-example-rtl]').hasAria('pressed', 'false')
+
+    await click('[data-test-example-rtl]')
+    assert.dom('.example-preview').hasAttribute('dir', 'rtl')
+    assert.dom('[data-test-example-rtl]').hasAria('pressed', 'true')
+
+    await click('[data-test-example-rtl]')
+    assert.dom('.example-preview').doesNotHaveAttribute('dir')
+
+    await render(<template><Example @name="button-rtl" @dir="rtl" /></template>)
+    assert.dom('[data-test-example-rtl]').hasAria('pressed', 'true', 'an RTL example starts on')
+    await click('[data-test-example-rtl]')
+    assert.dom('.example-preview').hasAttribute('dir', 'ltr')
+  })
+
+  test('a width preset shows the preview in a viewport that wide', async function (assert) {
+    await render(<template><Example @name="button-demo" @title="Button" /></template>)
+    assert.dom('[data-test-example-width="fit"]').hasAria('pressed', 'true')
+    assert.dom('iframe').doesNotExist()
+
+    await click('[data-test-example-width="375"]')
+    await waitUntil(() => find('iframe')?.contentDocument?.querySelector('[data-slot="button"]'))
+    const frame = find('iframe') as HTMLIFrameElement
+    assert.dom(frame).hasAttribute('width', '375').hasAttribute('title', 'Button, 375px wide')
+    const doc = frame.contentDocument!
+    assert.strictEqual(doc.documentElement.clientWidth, 375)
+    const button = doc.querySelector('[data-slot="button"]') as HTMLElement
+    assert.strictEqual(
+      frame.contentWindow!.getComputedStyle(button).height,
+      '32px',
+      'the style sheets are there',
+    )
+    assert.dom('[data-test-example-width="375"]').hasAria('pressed', 'true')
+
+    await click('[data-test-example-width="fit"]')
+    assert.dom('iframe').doesNotExist()
+    assert.dom('.example-preview [data-slot="button"]').exists('back in the page')
+    await a11yAudit()
   })
 
   test('a missing example says so instead of failing the page', async function (assert) {

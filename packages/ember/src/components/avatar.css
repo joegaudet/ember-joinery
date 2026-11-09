@@ -1,0 +1,53 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/avatar.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="avatar" in Avatar; keep on the element: group/avatar */
+:where(.jn-avatar) {
+  @apply relative flex shrink-0 select-none after:absolute after:inset-0 after:border after:border-border after:mix-blend-darken dark:after:mix-blend-lighten;
+}
+
+/* data-slot="avatar-image" in AvatarImage */
+:where(.jn-avatar-image) {
+  @apply aspect-square size-full object-cover;
+}
+
+/* data-slot="avatar-fallback" in AvatarFallback */
+:where(.jn-avatar-fallback) {
+  @apply flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs;
+}
+
+/* data-slot="avatar-badge" in AvatarBadge */
+:where(.jn-avatar-badge) {
+  @apply absolute end-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full bg-blend-color ring-2 select-none;
+}
+
+/* data-slot="avatar-badge" in AvatarBadge */
+:where(.jn-avatar-badge) {
+  @apply group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&>svg]:hidden;
+}
+
+/* data-slot="avatar-badge" in AvatarBadge */
+:where(.jn-avatar-badge) {
+  @apply group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&>svg]:size-2;
+}
+
+/* data-slot="avatar-badge" in AvatarBadge */
+:where(.jn-avatar-badge) {
+  @apply group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&>svg]:size-2;
+}
+
+/* data-slot="avatar-group" in AvatarGroup; keep on the element: group/avatar-group */
+:where(.jn-avatar-group) {
+  @apply flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background;
+}
+
+/* data-slot="avatar-group-count" in AvatarGroupCount */
+:where(.jn-avatar-group-count) {
+  @apply relative flex shrink-0 items-center justify-center ring-2 ring-background;
+}

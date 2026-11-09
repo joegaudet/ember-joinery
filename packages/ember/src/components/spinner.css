@@ -7,7 +7,7 @@
  * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
  */
 
-/* data-slot="spinner" in Spinner */
+/* data-slot="spinner" in Spinner; keep on the element: jn-size-4 */
 :where(.jn-spinner) {
   @apply size-4 animate-spin;
 }

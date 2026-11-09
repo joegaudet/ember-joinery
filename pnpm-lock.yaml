@@ -182,6 +182,9 @@ importers:
       '@babel/core':
         specifier: ^7.29.7
         version: 7.29.13
+      '@babel/plugin-proposal-decorators':
+        specifier: ^7.29.7
+        version: 7.29.7(@babel/core@7.29.13)
       '@babel/plugin-transform-runtime':
         specifier: ^7.29.7
         version: 7.29.7(@babel/core@7.29.13)

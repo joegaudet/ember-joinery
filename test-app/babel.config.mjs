@@ -42,6 +42,18 @@ export default {
     ...babelCompatSupport(),
   ],
 
+  overrides: [
+    {
+      // The harness tests check that `@child` works as a standard decorator too, so this one
+      // fixture compiles with standard decorators in place of the legacy ones above.
+      test: /[\\/]tests[\\/]fixtures[\\/]harness[\\/]standard-decorators\.ts$/,
+      plugins: [
+        ['module:decorator-transforms', false],
+        ['@babel/plugin-proposal-decorators', { version: '2023-11' }],
+      ],
+    },
+  ],
+
   generatorOpts: {
     compact: false,
   },

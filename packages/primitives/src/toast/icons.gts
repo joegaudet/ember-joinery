@@ -2,8 +2,9 @@ import type { TOC } from '@ember/component/template-only'
 import type { ComponentLike } from '@glint/template'
 import type { ToastType } from './state.ts'
 
-// sonner 2.0.7's own icons and loader, drawn as sonner draws them. A Toaster shows these unless
-// its `@icons` replaces them (Joinery's styled Toaster does, with lucide's, as shadcn's does).
+// sonner 2.0.7's own icons and loader (MIT, (c) 2023 Emil Kowalski; the notice is in state.ts),
+// drawn as sonner draws them. A Toaster shows these unless its `@icons` replaces them
+// (Joinery's styled Toaster does, with lucide's, as shadcn's does).
 
 export const SuccessIcon: TOC<{ Element: SVGSVGElement }> = <template>
   <svg

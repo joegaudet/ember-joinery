@@ -21,8 +21,9 @@ import {
   type Toasts,
 } from './state.ts'
 
-// sonner 2.0.7's `Toaster`: the live region, one list per position in use, and the stack's
-// expanding on hover, its hotkey and its focus handling.
+// sonner 2.0.7's `Toaster` (MIT, (c) 2023 Emil Kowalski; the notice is in state.ts): the live
+// region, one list per position in use, and the stack's expanding on hover, its hotkey and its
+// focus handling.
 
 /** How many toasts show at once in a collapsed stack (sonner's `VISIBLE_TOASTS_AMOUNT`). */
 const VISIBLE_TOASTS_AMOUNT = 3
@@ -134,6 +135,19 @@ function offsetStyles(offset: ToastOffset | undefined, mobile: ToastOffset | und
 const prefersDark = () =>
   typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches
 
+/**
+ * Whether focus on an element shows as the keyboard's (`:focus-visible`): tabbing or the hotkey,
+ * not a click or a tap on a toast.
+ */
+const focusVisible = (element: EventTarget | null): boolean => {
+  if (!(element instanceof Element)) return false
+  try {
+    return element.matches(':focus-visible')
+  } catch {
+    return true
+  }
+}
+
 const yOf = (position: string) => position.split('-')[0]
 const xOf = (position: string) => position.split('-')[1]
 
@@ -169,6 +183,10 @@ export class Toaster extends Component<ToasterSignature> implements ToastHost {
   #lists = new Set<HTMLElement>()
   #lastFocused: HTMLElement | null = null
   #focusWithin = false
+  /** Focus in a list came from the keyboard, which holds the stack open until it leaves. */
+  #keyboardFocus = false
+  /** A pointer went down on a list since the last key press: the focus that follows is its. */
+  #pressed = false
   #hovered = false
   /** Toasts already shown, so a new one can raise its list above layers opened since. */
   #seen = new Set<ToastT['id']>()
@@ -176,6 +194,8 @@ export class Toaster extends Component<ToasterSignature> implements ToastHost {
   constructor(owner: Owner, args: ToasterSignature['Args']) {
     super(owner, args)
     registerDestructor(this, bindToasts(owner))
+    // Rendered on the server (FastBoot), there is no document to listen to.
+    if (typeof document === 'undefined') return
 
     const onKeyDown = (event: KeyboardEvent) => this.#onKeyDown(event)
     const onVisibility = () => (this.documentHidden = document.hidden)
@@ -290,6 +310,7 @@ export class Toaster extends Component<ToasterSignature> implements ToastHost {
   }
 
   #onKeyDown(event: KeyboardEvent): void {
+    this.#pressed = false
     const pressed = this.hotkey.every(
       key => (event as unknown as Record<string, unknown>)[key] || event.code === key,
     )
@@ -335,6 +356,7 @@ export class Toaster extends Component<ToasterSignature> implements ToastHost {
       const last = this.#lastFocused
       this.#lastFocused = null
       this.#focusWithin = false
+      this.#keyboardFocus = false
       last?.focus({ preventScroll: true })
     }
   })
@@ -366,14 +388,19 @@ export class Toaster extends Component<ToasterSignature> implements ToastHost {
       this.#focusWithin = true
       this.#lastFocused = event.relatedTarget as HTMLElement | null
     }
-    // Joinery: a keyboard user's focus expands the stack and pauses the timers, as hovering does.
-    this.expanded = true
+    // Joinery: focus from the keyboard (tabbing, the hotkey) expands the stack and pauses the
+    // timers, as hovering does, until it leaves the list. sonner's doesn't. A click or a tap on
+    // a toast also focuses it, but that focus holds nothing: the pointer leaving collapses the
+    // stack and the timers run again, as in sonner.
+    this.#keyboardFocus = !this.#pressed && focusVisible(target)
+    if (this.#keyboardFocus) this.expanded = true
   }
 
   onFocusOut = (event: FocusEvent): void => {
     const list = event.currentTarget as HTMLElement
     if (this.#focusWithin && !list.contains(event.relatedTarget as Node | null)) {
       this.#focusWithin = false
+      this.#keyboardFocus = false
       if (!this.#hovered && !this.interacting) this.expanded = false
       const last = this.#lastFocused
       this.#lastFocused = null
@@ -392,8 +419,8 @@ export class Toaster extends Component<ToasterSignature> implements ToastHost {
 
   onMouseLeave = (): void => {
     this.#hovered = false
-    // Not while a toast is being pressed or swiped.
-    if (!this.interacting && !this.#focusWithin) this.expanded = false
+    // Not while a toast is being pressed or swiped, or the keyboard's focus is in the list.
+    if (!this.interacting && !this.#keyboardFocus) this.expanded = false
   }
 
   onDragEnd = (): void => {
@@ -401,6 +428,7 @@ export class Toaster extends Component<ToasterSignature> implements ToastHost {
   }
 
   onPointerDown = (event: PointerEvent): void => {
+    this.#pressed = true
     const target = event.target
     if (target instanceof HTMLElement && target.dataset['dismissible'] === 'false') return
     this.interacting = true

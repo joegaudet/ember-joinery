@@ -20,8 +20,8 @@ import type {
   ToastT,
 } from './state.ts'
 
-// sonner 2.0.7's `Toast`: one toast in a Toaster's list, with its timer, its place in the stack
-// and its swipe to dismiss.
+// sonner 2.0.7's `Toast` (MIT, (c) 2023 Emil Kowalski; the notice is in state.ts): one toast in
+// a Toaster's list, with its timer, its place in the stack and its swipe to dismiss.
 
 const waiter = buildWaiter('@ember-joinery/primitives:toast')
 

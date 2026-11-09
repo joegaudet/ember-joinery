@@ -3,7 +3,9 @@ import { setupRenderingTest } from 'test-app/tests/helpers'
 import { click, focus, render, settled, triggerEvent, waitUntil } from '@ember/test-helpers'
 import { on } from '@ember/modifier'
 import { fn } from '@ember/helper'
+import Component from '@glimmer/component'
 import { tracked } from '@glimmer/tracking'
+import type Owner from '@ember/owner'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import type { TOC } from '@ember/component/template-only'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
@@ -292,6 +294,28 @@ module('Integration | primitives | toast', function (hooks) {
     await a11yAudit()
   })
 
+  test('toast.dismiss() takes what toast.promise() returns, and closes nothing for a non-id', async function (assert) {
+    await render(<template><Toaster /></template>)
+    const pending = toast.promise(new Promise(() => {}), { loading: 'Waiting' })
+    toast('Stays')
+    await settled()
+    const toaster = new ToasterHarness()
+    assert.strictEqual(toaster.count, 2)
+
+    // sonner code that keeps toast.promise()'s result as the id.
+    const id = toast.dismiss(pending)
+    await settled()
+    assert.strictEqual(id, pending.id)
+    assert.deepEqual(toaster.titles, ['Stays'], 'the promise toast closed')
+
+    // Not an id: it closes nothing (not every toast, as no id would), and Ember's debug build
+    // warns (joinery.toast.dismiss-id). The test app runs Ember's production build, without it.
+    toast.dismiss({ id: 1 } as never)
+    await settled()
+    assert.deepEqual(toaster.titles, ['Stays'], 'a value that is not an id closes nothing')
+    await a11yAudit()
+  })
+
   test('a promise with nothing to show for its outcome takes the loading toast away', async function (assert) {
     await render(<template><Toaster /></template>)
     toast.promise(Promise.resolve('done'), { loading: 'Working' })
@@ -501,6 +525,37 @@ module('Integration | primitives | toast', function (hooks) {
     await a11yAudit()
   })
 
+  test('keyboard focus holds the stack open when the pointer leaves', async function (assert) {
+    await render(<template><Toaster /></template>)
+    toast('One')
+    toast('Two')
+    await settled()
+    const toaster = new ToasterHarness()
+    await toaster.hover()
+    await toaster.toast().focus()
+    await toaster.unhover()
+    assert.true(toaster.isExpanded, 'a keyboard user still sees the whole stack')
+    await a11yAudit()
+  })
+
+  test('a press focuses a toast but holds nothing: the pointer leaving collapses it, as in sonner', async function (assert) {
+    await render(<template><Toaster @duration={{150}} /></template>)
+    toast('One')
+    toast('Two')
+    await settled()
+    const toaster = new ToasterHarness()
+    await toaster.hover()
+    await press(toaster.toast().element)
+    assert.dom(toaster.toast().element).isFocused('pressing the toast focused it')
+    assert.true(toaster.isExpanded, 'still expanded under the pointer')
+
+    await toaster.unhover()
+    assert.false(toaster.isExpanded, 'the pointer leaving collapses it, focus or not')
+    await waitUntil(() => toaster.count === 0, { timeout: 2000 })
+    assert.strictEqual(toaster.count, 0, 'and the timers ran again')
+    await a11yAudit()
+  })
+
   test('positions: the Toaster’s, and a list for each position a toast asks for', async function (assert) {
     await render(<template><Toaster @position="top-center" /></template>)
     toast('Default')
@@ -695,6 +750,13 @@ module('Integration | primitives | toast', function (hooks) {
     assert.strictEqual(toastOwner(), this.owner, 'setupToaster points toast() at the test')
     toast('Made early')
     assert.deepEqual(
+      toast.getToasts().map(t => t.title),
+      ['Made early'],
+      'getToasts() has it at once',
+    )
+    assert.deepEqual(toastsFor(this.owner).toasts, [], 'the Toasters get it a microtask later')
+    await settled()
+    assert.deepEqual(
       toastsFor(this.owner).toasts.map(t => t.title),
       ['Made early'],
     )
@@ -703,6 +765,32 @@ module('Integration | primitives | toast', function (hooks) {
     toastsFor(this.owner).info('From the owner')
     await settled()
     assert.deepEqual(new ToasterHarness().titles, ['From the owner', 'Made early'])
+    await a11yAudit()
+  })
+
+  test('toast() can be called while rendering, after the Toaster has read its toasts', async function (assert) {
+    // As upstream's manual install puts <Toaster /> before the page: the Toaster renders first,
+    // then a component further down makes a toast as it is created.
+    class Welcome extends Component {
+      constructor(owner: Owner, args: object) {
+        super(owner, args)
+        toast('Welcome back')
+      }
+      get greeting() {
+        toast.info('From a getter')
+        return 'Hello'
+      }
+      <template>
+        <p>{{this.greeting}}</p>
+      </template>
+    }
+    await render(
+      <template>
+        <Toaster />
+        <Welcome />
+      </template>,
+    )
+    assert.deepEqual(new ToasterHarness().titles, ['From a getter', 'Welcome back'])
     await a11yAudit()
   })
 

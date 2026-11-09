@@ -1,6 +1,28 @@
+/*!
+ * @ember-joinery/primitives/toast ports sonner 2.0.7 (https://github.com/emilkowalski/sonner):
+ * its toast state, Toaster, Toast, icons and loader.
+ *
+ * MIT License. Copyright (c) 2023 Emil Kowalski
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 import { tracked } from '@glimmer/tracking'
 import { warn } from '@ember/debug'
 import { isDestroyed, isDestroying, registerDestructor } from '@ember/destroyable'
+import { buildWaiter } from '@ember/test-waiters'
 import type Owner from '@ember/owner'
 import type { ComponentLike } from '@glint/template'
 import { service } from '../service.ts'
@@ -169,12 +191,26 @@ export type PromiseData<Data = unknown> = Omit<ExternalToast, 'description'> & {
   finally?: () => void | Promise<void>
 }
 
-/** What `toast.promise()` returns: the toast's id (when it showed one) and `unwrap()`. */
+/**
+ * What `toast.promise()` returns: the toast's id (when it showed one) and `unwrap()`. sonner's
+ * returns the id itself with `unwrap` on it; `toast.dismiss()` takes this too, so
+ * `toast.dismiss(toast.promise(…))` closes the toast as it does with sonner's.
+ */
 export interface PromiseToast<Data> {
   /** The loading toast's id, which the outcome replaces. `undefined` without `loading`. */
   id: ToastId | undefined
   /** The promise's own result, or its rejection. */
   unwrap: () => Promise<Data>
+}
+
+/** Whether a value is what `toast.promise()` returns. */
+function isPromiseToast(value: unknown): value is PromiseToast<unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'unwrap' in value &&
+    typeof value.unwrap === 'function'
+  )
 }
 
 /** What `create` takes: a toast's options plus its message (its title). */
@@ -216,6 +252,9 @@ function isComponentClass(value: unknown): boolean {
   return typeof value === 'function' && /^class[\s{]/.test(Function.prototype.toString.call(value))
 }
 
+/** Tests wait for a change to reach the Toasters (see `Toasts.toasts`). */
+const publishing = buildWaiter('@ember-joinery/primitives:toast-state')
+
 /**
  * The toasts of one app (one owner): what is shown, what has been, and sonner's `toast` methods
  * to make and close them. Each app instance has one, through `service`, so tests don't share
@@ -226,8 +265,18 @@ function isComponentClass(value: unknown): boolean {
  *   toastsFor(this).toasts // what the Toasters show, newest first
  */
 export class Toasts {
-  /** The toasts the Toasters show (or are taking away), newest first. */
+  /**
+   * The toasts the Toasters show (or are taking away), newest first. A change reaches it a
+   * microtask later, as sonner's Toaster takes its toasts a task later: so `toast()` can be
+   * called while a page renders (in a constructor or a getter), even after a Toaster has read
+   * this, and the Toaster shows it on the next render. `getToasts()` has a new toast at once,
+   * and `await settled()` waits for it here.
+   */
   @tracked toasts: readonly ToastT[] = []
+
+  /** The toasts as they are now, which `toasts` takes on its next publish. */
+  #list: readonly ToastT[] = []
+  #publishing: unknown
 
   /** Every toast made, oldest first, each as last updated (sonner's `getHistory()`). */
   readonly history: ToastT[] = []
@@ -262,13 +311,13 @@ export class Toasts {
       this.history.push({ title: message, ...rest, dismissible, id })
     }
 
-    const shown = this.toasts.findIndex(toast => toast.id === id)
+    const shown = this.#list.findIndex(toast => toast.id === id)
     if (shown !== -1) {
-      const toasts = [...this.toasts]
+      const toasts = [...this.#list]
       toasts[shown] = { ...toasts[shown]!, ...rest, id, dismissible, title: message }
-      this.toasts = toasts
+      this.#publish(toasts)
     } else {
-      this.toasts = [{ title: message, ...rest, dismissible, id }, ...this.toasts]
+      this.#publish([{ title: message, ...rest, dismissible, id }, ...this.#list])
     }
     return id
   }
@@ -385,15 +434,35 @@ export class Toasts {
 
   /**
    * Closes the toast with this id, or every toast without one. It animates out, and its
-   * `onDismiss` is called.
+   * `onDismiss` is called. It takes what `toast.promise()` returns as well as an id.
    */
-  dismiss = (id?: ToastId): ToastId | undefined => {
+  dismiss = (toastOrId?: ToastId | PromiseToast<unknown>): ToastId | undefined => {
+    let id: ToastId | undefined
+    if (isPromiseToast(toastOrId)) {
+      // A promise toast made without `loading` shows nothing until it settles, and has no id.
+      if (toastOrId.id === undefined) return undefined
+      id = toastOrId.id
+    } else if (
+      toastOrId === undefined ||
+      typeof toastOrId === 'number' ||
+      typeof toastOrId === 'string'
+    ) {
+      id = toastOrId
+    } else {
+      warn(
+        `Joinery: toast.dismiss() was given ${String(toastOrId)}, which is not a toast's id, so ` +
+          'it closed nothing. Give it the id toast() returned (or what toast.promise() returned).',
+        false,
+        { id: 'joinery.toast.dismiss-id' },
+      )
+      return undefined
+    }
     if (this.#destroyed) return id
     if (id !== undefined) {
       this.#dismissed.add(id)
       this.#markDeleted(toast => toast.id === id)
     } else {
-      for (const toast of this.toasts) this.#dismissed.add(toast.id)
+      for (const toast of this.#list) this.#dismissed.add(toast.id)
       this.#markDeleted(() => true)
     }
     return id
@@ -411,14 +480,30 @@ export class Toasts {
    */
   remove(toast: ToastT): void {
     if (this.#destroyed) return
-    const shown = this.toasts.find(each => each.id === toast.id)
+    const shown = this.#list.find(each => each.id === toast.id)
     if (!shown?.delete) this.#dismissed.add(toast.id)
-    this.toasts = this.toasts.filter(each => each.id !== toast.id)
+    this.#publish(this.#list.filter(each => each.id !== toast.id))
   }
 
   #markDeleted(matches: (toast: ToastT) => boolean): void {
-    if (!this.toasts.some(matches)) return
-    this.toasts = this.toasts.map(toast => (matches(toast) ? { ...toast, delete: true } : toast))
+    if (!this.#list.some(matches)) return
+    this.#publish(this.#list.map(toast => (matches(toast) ? { ...toast, delete: true } : toast)))
+  }
+
+  /**
+   * Takes the toasts as they now are, and hands them to the Toasters (`toasts`) in a microtask:
+   * never during the render that made them, which may already have read `toasts`.
+   */
+  #publish(list: readonly ToastT[]): void {
+    this.#list = list
+    if (this.#publishing !== undefined) return
+    this.#publishing = publishing.beginAsync()
+    queueMicrotask(() => {
+      const token = this.#publishing
+      this.#publishing = undefined
+      if (!this.#destroyed) this.toasts = this.#list
+      publishing.endAsync(token)
+    })
   }
 }
 
@@ -498,7 +583,7 @@ export interface ToastFunction {
   loading: Shorthand
   custom: (component: ComponentLike<CustomToastSignature>, data?: ExternalToast) => ToastId
   promise: <Data>(promise: PromiseT<Data>, data?: PromiseData<Data>) => PromiseToast<Data>
-  dismiss: (id?: ToastId) => ToastId | undefined
+  dismiss: (toastOrId?: ToastId | PromiseToast<unknown>) => ToastId | undefined
   getHistory: () => ToastT[]
   getToasts: () => ToastT[]
 }
@@ -537,7 +622,8 @@ export const toast: ToastFunction = Object.assign(
       current('toast.custom()').custom(component, data),
     promise: <Data>(promise: PromiseT<Data>, data?: PromiseData<Data>) =>
       current('toast.promise()').promise(promise, data),
-    dismiss: (id?: ToastId) => current('toast.dismiss()').dismiss(id),
+    dismiss: (toastOrId?: ToastId | PromiseToast<unknown>) =>
+      current('toast.dismiss()').dismiss(toastOrId),
     getHistory: () => current('toast.getHistory()').getHistory(),
     getToasts: () => current('toast.getToasts()').getToasts(),
   },

@@ -75,7 +75,7 @@ export class ToastHarness extends Harness {
     return this.#flag('data-visible')
   }
 
-  /** Whether its stack is expanded (hovered, focused, or `@expand`). */
+  /** Whether its stack is expanded (hovered, focused from the keyboard, or `@expand`). */
   get isExpanded(): boolean {
     return this.#flag('data-expanded')
   }

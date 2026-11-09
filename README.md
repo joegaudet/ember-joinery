@@ -71,7 +71,8 @@ These will support Ember 6.12 LTS and 7.x, in Vite (Embroider) apps and classic 
 Joinery is an independent project, not affiliated with shadcn/ui. Its design, component APIs and
 examples are ported from [shadcn/ui](https://ui.shadcn.com/) (MIT, © shadcn), and its headless
 layer covers the features of [ember-primitives](https://github.com/universal-ember/ember-primitives)
-(MIT). See [NOTICE](NOTICE).
+(MIT). Its toasts port [sonner](https://github.com/emilkowalski/sonner) (MIT, © Emil Kowalski),
+which shadcn/ui's Sonner wraps. See [NOTICE](NOTICE).
 
 ## License
 

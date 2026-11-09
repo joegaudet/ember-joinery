@@ -3,17 +3,24 @@ export function textOf(element: Element): string {
   return (element.textContent ?? '').replace(/\s+/g, ' ').trim()
 }
 
-/** A label's text, without the text of the control it wraps (a choice card's own mark). */
+/**
+ * A label's text as assistive technology reads it: without the text of the control it wraps (a
+ * choice card's own mark), or of anything in it hidden with `aria-hidden="true"` (an icon).
+ */
 function labelText(label: HTMLLabelElement, control: Element): string {
-  if (!label.contains(control)) return textOf(label)
+  const hidden = label.querySelector('[aria-hidden="true"]')
+  if (!label.contains(control) && !hidden) return textOf(label)
   const copy = label.cloneNode(true) as HTMLLabelElement
-  const path: number[] = []
-  for (let node: Element | null = control; node && node !== label; node = node.parentElement) {
-    path.unshift([...node.parentElement!.children].indexOf(node))
+  if (label.contains(control)) {
+    const path: number[] = []
+    for (let node: Element | null = control; node && node !== label; node = node.parentElement) {
+      path.unshift([...node.parentElement!.children].indexOf(node))
+    }
+    let inCopy: Element = copy
+    for (const index of path) inCopy = inCopy.children[index]!
+    inCopy.remove()
   }
-  let inCopy: Element = copy
-  for (const index of path) inCopy = inCopy.children[index]!
-  inCopy.remove()
+  for (const element of copy.querySelectorAll('[aria-hidden="true"]')) element.remove()
   return textOf(copy)
 }
 

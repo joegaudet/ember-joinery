@@ -567,8 +567,9 @@ workspace.
   Menu motion, the menus' pointer grace areas, Message Scroller anchoring, chart tooltips and
   animation.
 - **Naming.** shadcn's `Form` (react-hook-form), ember-primitives' FormData `Form` and
-  Formwright's `<Form>` collide. Proposal: Formwright supplies `Form`, and the FormData helper
-  becomes `NativeForm`.
+  Formwright's `<Form>` collide. Formwright supplies `Form`, and the FormData helper is
+  `NativeForm` (`@ember-joinery/primitives/native-form`), whose `dataFromEvent` is ported from
+  form-data-utils so Joinery's button controls take part through their hidden inputs.
 - **Toasts outside components.** sonner's module-level `toast()` needs owner-scoped state for test
   isolation: `toast` resolves the app's Toaster through the owner, and test-support provides a
   `setupToaster(hooks)` helper. Built so: the toasts are a per-owner service, `toast()` uses the

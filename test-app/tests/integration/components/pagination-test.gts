@@ -1,5 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering as partRendering } from 'test-app/tests/helpers/rendering'
 import { render } from '@ember/test-helpers'
 import { on } from '@ember/modifier'
 import { LinkTo } from '@ember/routing'
@@ -287,9 +288,10 @@ module('Integration | components | pagination', function (hooks) {
     assert.dom(pagination.pageElements[0]).hasAttribute('href', '/')
     assert.strictEqual(pagination.current, '2')
 
-    // And both are what the functions say, for code of your own.
+    // And both are what the functions say, for code of your own (less the `ember-view` class
+    // Ember 6.12 gives a part, which the shared helper leaves out).
     assert.deepEqual(
-      [...components[0]!.classList].sort(),
+      partRendering(components[0]!).classes,
       paginationLinkClasses('link', { isActive: true }).split(' ').sort(),
     )
     for (const [name, value] of Object.entries(paginationLinkAttributes('next', { size: 'sm' }))) {

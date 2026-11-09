@@ -262,7 +262,8 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
 `docs/site/` is hand-written HTML, not generated. For now `site.css` is a placeholder that uses
 shadcn's token names; the finished site is styled with Joinery's own CSS. The live demo is
 `test-app/app`, built into `docs/site/demo/` by `pnpm demo:build`, and `pages.yml` builds the
-demo and the guide into `docs/site/` and deploys it from `main`. The deploy needs the
+demo and the guide into `docs/site/` and deploys it from `main` (CI's `site` job runs the same
+builds on every PR, so a break shows before the merge). The deploy needs the
 repository's Pages source set to "GitHub Actions" (Settings, Pages), a repository setting only
 the maintainer can change. When a change touches anything
 the site shows (packages, components, arguments, an API used in a snippet), update `docs/site/`

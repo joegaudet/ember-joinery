@@ -83,6 +83,29 @@ jobs:
       - run: pnpm --filter docs-app typecheck
       - run: pnpm --filter docs-app test
 
+  # The site as pages.yml builds it: the demo and the guide in production mode, under
+  # /ember-joinery/, so a break in either (or in a base path) shows on the PR, not only after
+  # a merge to main.
+  site:
+    name: site (the Pages build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm demo:build
+      - run: pnpm guide:build
+      - name: Check the base paths and the 404 page
+        run: |
+          grep -q 'src="/ember-joinery/demo/assets/' docs/site/demo/index.html
+          grep -q 'src="/ember-joinery/guide/assets/' docs/site/guide/index.html
+          cmp docs/site/guide/index.html docs/site/404.html
+
   # Each example app's smoke test. ember-formwright passes with nothing to do until its app
   # exists under examples/.
   examples:

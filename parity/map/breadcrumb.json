@@ -1,9 +1,11 @@
 {
-  "$comment": "Waiting for components that haven't landed: breadcrumb-demo, breadcrumb-dropdown and breadcrumb-rtl (Dropdown Menu). The unit that lands it ports those examples onto the Breadcrumb page and maps them here.",
   "examples": {
+    "breadcrumb-demo": "breadcrumb-demo",
     "breadcrumb-basic": "breadcrumb-basic",
     "breadcrumb-separator": "breadcrumb-separator",
+    "breadcrumb-dropdown": "breadcrumb-dropdown",
     "breadcrumb-ellipsis": "breadcrumb-ellipsis",
-    "breadcrumb-link": "breadcrumb-link"
+    "breadcrumb-link": "breadcrumb-link",
+    "breadcrumb-rtl": "breadcrumb-rtl"
   }
 }

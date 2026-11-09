@@ -79,8 +79,10 @@ Use `<t.Footer>` to add a footer to the table.
 
 ## Actions
 
-A table showing actions for each row using a `<DropdownMenu />` component. Upstream's example
-comes with Dropdown Menu.
+A table showing actions for each row using a [`<DropdownMenu />`](/components/dropdown-menu.md)
+component.
+
+<Example @name="table-actions" @title="Actions" />
 
 ## Data Table
 

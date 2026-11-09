@@ -2,8 +2,7 @@
 
 Displays the path to the current resource using a hierarchy of links.
 
-Upstream's first example collapses some crumbs into a menu, a Dropdown Menu, which hasn't
-landed in Joinery yet; it comes with Dropdown Menu. The examples below show every other part.
+<Example @name="breadcrumb-demo" @title="Breadcrumb" />
 
 ## Installation
 
@@ -70,8 +69,10 @@ lucide's `Dot`. To swap only the icon, pass it as `@icon`.
 
 ## Dropdown
 
-You can compose `<b.Item>` with a `<DropdownMenu />` to create a dropdown in the breadcrumb.
-Upstream's example comes with Dropdown Menu.
+You can compose `<b.Item>` with a [`<DropdownMenu />`](/components/dropdown-menu.md) to create
+a dropdown in the breadcrumb.
+
+<Example @name="breadcrumb-dropdown" @title="Dropdown" />
 
 ## Collapsed
 
@@ -96,8 +97,9 @@ Upstream's `asChild` makes a routing library's link a crumb's link. In Joinery, 
 
 Joinery's styles use logical properties, so a breadcrumb lays itself out right to left inside
 any element with `dir="rtl"` (see [Direction](/primitives/direction.md)), and its chevrons
-point left. Upstream's right-to-left example has a Dropdown Menu, so it comes with Dropdown
-Menu.
+point left.
+
+<Example @name="breadcrumb-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 

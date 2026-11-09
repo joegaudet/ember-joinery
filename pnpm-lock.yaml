@@ -577,6 +577,9 @@ importers:
       '@embroider/macros':
         specifier: ^1.21.4
         version: 1.21.4(@babel/core@7.29.13)(@glint/template@1.11.1)
+      '@floating-ui/dom':
+        specifier: ^1.8.0
+        version: 1.8.0
       decorator-transforms:
         specifier: ^2.4.0
         version: 2.4.0(@babel/core@7.29.13)

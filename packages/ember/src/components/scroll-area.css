@@ -1,0 +1,28 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/scroll-area.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="scroll-area" in ScrollArea */
+:where(.jn-scroll-area) {
+  @apply relative;
+}
+
+/* data-slot="scroll-area-viewport" in ScrollArea */
+:where(.jn-scroll-area-viewport) {
+  @apply size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1;
+}
+
+/* data-slot="scroll-area-scrollbar" in ScrollBar */
+:where(.jn-scroll-area-scrollbar) {
+  @apply flex touch-none p-px transition-colors select-none;
+}
+
+/* data-slot="scroll-area-thumb" in ScrollBar */
+:where(.jn-scroll-area-thumb) {
+  @apply relative flex-1 bg-border;
+}

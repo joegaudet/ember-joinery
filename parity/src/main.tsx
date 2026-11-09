@@ -35,6 +35,25 @@ const id = decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g, '').replac
 const theme = params.get('theme') === 'dark' ? 'dark' : 'light'
 const baseColor = params.get('base') ?? 'neutral'
 
+/**
+ * The page's fonts, each with a character to load it for (scripts/parity.mjs's FONTS). They load
+ * before the example renders: a part that measures itself on mount keeps what it measured, as
+ * Radix's collapsible and accordion content pin their height, so an example rendered while
+ * Geist was still loading would keep the fallback font's line breaks after Geist arrived (a
+ * runner whose fallback is DejaVu Sans wraps an accordion's answer onto one more line).
+ * ui.shadcn.com preloads Geist with next/font for the same reason.
+ */
+const FONTS: [font: string, text: string][] = [
+  ['400 16px "Geist Variable"', 'a'],
+  ['400 16px "Geist Mono Variable"', 'a'],
+  ['400 16px "Noto Sans Arabic Variable"', 'ع'],
+  ['400 16px "Noto Sans Hebrew Variable"', 'א'],
+]
+
+/** Loads the page's fonts; one that fails is left for scripts/parity.mjs's check to report. */
+const fontsLoaded = () =>
+  Promise.all(FONTS.map(([font, text]) => document.fonts.load(font, text).catch(() => [])))
+
 const ready = (state: 'true' | 'error') => {
   document.fonts.ready.then(() => {
     requestAnimationFrame(() =>
@@ -169,7 +188,8 @@ async function main() {
   }
   let Component: React.ComponentType
   try {
-    Component = pickComponent((await entry.load()) as Module, id)
+    const [module] = await Promise.all([entry.load(), fontsLoaded()])
+    Component = pickComponent(module as Module, id)
   } catch (error) {
     root.render(
       <p role="alert" data-parity-error={id}>

@@ -1,5 +1,5 @@
 {
-  "$comment": "Waiting for components that haven't landed. For Field: input-demo, input-field, input-fieldgroup, input-disabled, input-invalid, input-file, input-inline, input-grid, input-required, input-rtl and input-badge (Badge has landed); input-input-group also needs Input Group, and input-form Select (input-button-group's Button Group has landed). The unit that lands each ports its examples onto the Input page and maps them here. The page also shows Joinery's own input-controlled, which has no upstream counterpart, so it isn't mapped.",
+  "$comment": "Waiting for components that haven't landed. For Field: input-demo, input-field, input-fieldgroup, input-disabled, input-invalid, input-file, input-inline, input-grid, input-required, input-rtl, input-badge (Badge has landed), input-input-group (Input Group has landed) and input-button-group (Button Group has landed); input-form also needs Select. The unit that lands each ports its examples onto the Input page and maps them here. The page also shows Joinery's own input-controlled, which has no upstream counterpart, so it isn't mapped.",
   "examples": {
     "input-basic": "input-basic"
   }

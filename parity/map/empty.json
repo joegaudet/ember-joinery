@@ -1,11 +1,11 @@
 {
-  "$comment": "Waiting for components that haven't landed: empty-input-group (Input Group). The unit that lands it ports it onto the Empty page and maps it here.",
   "examples": {
     "empty-demo": "empty-demo",
     "empty-outline": "empty-outline",
     "empty-background": "empty-background",
     "empty-avatar": "empty-avatar",
     "empty-avatar-group": "empty-avatar-group",
+    "empty-input-group": "empty-input-group",
     "empty-rtl": "empty-rtl"
   }
 }

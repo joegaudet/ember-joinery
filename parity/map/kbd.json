@@ -1,5 +1,5 @@
 {
-  "$comment": "Waiting: kbd-input-group (Input Group), and kbd-tooltip, whose components have all landed (Button Group, Tooltip) but whose two tooltips' buttons sit in a Button Group: a Tooltip's root, an element with display: contents where Radix's renders none, is the group's child, so the group's rules miss the buttons and they don't join (see button-group.json). The unit that lands Input Group, or fixes that, ports the example onto the Kbd page and maps it here.",
+  "$comment": "Waiting: kbd-tooltip, whose components have all landed (Button Group, Tooltip) but whose two tooltips' buttons sit in a Button Group: a Tooltip's root, an element with display: contents where Radix's renders none, is the group's child, so the group's rules miss the buttons and they don't join (see button-group.json). The unit that fixes that ports the example onto the Kbd page and maps it here.",
   "examples": {
     "kbd-demo": {
       "example": "kbd-demo",
@@ -8,6 +8,7 @@
     },
     "kbd-group": "kbd-group",
     "kbd-button": "kbd-button",
+    "kbd-input-group": "kbd-input-group",
     "kbd-rtl": {
       "example": "kbd-rtl",
       "threshold": 0.02,

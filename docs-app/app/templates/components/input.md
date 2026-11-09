@@ -109,8 +109,9 @@ example comes with Field.
 
 ## Input Group
 
-To add icons, text, or buttons inside an input, use the `InputGroup` component. See the Input
-Group component for more examples. Upstream's example comes with Field and Input Group.
+To add icons, text, or buttons inside an input, use the `InputGroup` component. See the
+[Input Group](/components/input-group.md) component for more examples. Upstream's example, in a
+Field, comes with Field.
 
 ## Button Group
 

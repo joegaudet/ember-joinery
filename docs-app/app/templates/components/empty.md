@@ -81,8 +81,9 @@ Use `e.Media` to display an avatar group in the empty state.
 
 ## InputGroup
 
-You can add an `InputGroup` component to `e.Content`. Upstream's example, a search field with a
-[`Kbd`](/components/kbd.md) hint, comes with Input Group.
+You can add an [`InputGroup`](/components/input-group.md) component to `e.Content`.
+
+<Example @name="empty-input-group" @title="Input Group" />
 
 ## RTL
 

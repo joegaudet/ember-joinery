@@ -56,8 +56,10 @@ keyboard key. Upstream's example (`kbd-tooltip`) puts its two tooltips' buttons 
 
 ## Input Group
 
-You can use the `Kbd` component inside an `InputGroupAddon` component to display a keyboard key
-inside an input group. Upstream's example (`kbd-input-group`) comes with Input Group.
+You can use the `Kbd` component inside an [Input Group](/components/input-group.md)'s addon
+(`g.Addon`) to display a keyboard key inside an input group.
+
+<Example @name="kbd-input-group" @title="Input Group" />
 
 ## Shortcuts from a string
 

@@ -64,7 +64,9 @@ the badge's icon size (`size-3`), as upstream's.
 
 ## Input Group
 
-A spinner in an input group's addon. Upstream's example comes with Input Group.
+A spinner in an [input group](/components/input-group.md)'s addon.
+
+<Example @name="spinner-input-group" @title="Input Group" />
 
 ## Empty
 

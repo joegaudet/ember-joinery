@@ -11,6 +11,7 @@ import {
   supportsAnchorPositioning,
 } from '@ember-joinery/primitives/anchor'
 import { Popover } from '@ember-joinery/primitives/popover'
+import { isScrollLocked } from '@ember-joinery/primitives/scroll-lock'
 import {
   PopoverHarness,
   placementOf,
@@ -414,6 +415,10 @@ module('Integration | primitives | popover', function (hooks) {
     assert.dom('#inside').isFocused()
     assert.strictEqual(document.body.style.pointerEvents, 'none', 'the page ignores the pointer')
     assert.strictEqual(popover.content!.style.pointerEvents, 'auto', 'but the content takes it')
+    assert.dom('#outside').hasAttribute('aria-hidden', 'true', 'the page is hidden, as Radix’s')
+    assert.dom(popover.trigger).hasAttribute('aria-hidden', 'true', 'the trigger too')
+    assert.dom(popover.content).doesNotHaveAttribute('aria-hidden', 'but not the content')
+    assert.true(isScrollLocked(), 'and the page doesn’t scroll')
 
     await focus('#outside')
     assert.dom('#inside').isFocused('focus that leaves is brought back')
@@ -422,6 +427,8 @@ module('Integration | primitives | popover', function (hooks) {
     await popover.pressEscape()
     assert.false(popover.isOpen)
     assert.strictEqual(document.body.style.pointerEvents, '', 'the pointer is back')
+    assert.dom('#outside').doesNotHaveAttribute('aria-hidden', 'the page is heard again')
+    assert.false(isScrollLocked(), 'and scrolls again')
     assert.dom(popover.trigger).isFocused()
     await a11yAudit()
   })
@@ -438,6 +445,8 @@ module('Integration | primitives | popover', function (hooks) {
     )
     const popover = new PopoverHarness()
     await popover.open()
+    assert.dom('#outside').doesNotHaveAttribute('aria-hidden', 'the page is still heard')
+    assert.false(isScrollLocked(), 'and still scrolls')
     await focus('#outside')
     assert.false(popover.isOpen)
     assert.dom('#outside').isFocused('focus stays where it went')

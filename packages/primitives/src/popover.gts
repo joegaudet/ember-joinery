@@ -14,10 +14,12 @@ import {
   type PointerDownOutsideEvent,
 } from './dismiss.ts'
 import { addFocusGuards, createFocusScope, type FocusScopeHandle } from './focus-scope.gts'
+import { hideOthers, type Undo } from './hide-others.ts'
 import { idFor } from './id.ts'
 import { topLayer } from './layer.ts'
 import { part, type PartModifier } from './part.ts'
 import { Presence } from './presence.gts'
+import { scrollLock } from './scroll-lock.ts'
 import {
   ElementRef,
   PlacedData,
@@ -41,8 +43,8 @@ type PopoverPositionArgs = Pick<
 export type PopoverArgs = ControllableArgs<'open', boolean> &
   PopoverPositionArgs & {
     /**
-     * Whether it is modal: focus stays inside, and the rest of the page ignores the pointer
-     * until it closes. Default `false`.
+     * Whether it is modal: focus stays inside, and until it closes the rest of the page ignores
+     * the pointer, is hidden from assistive technology and doesn't scroll. Default `false`.
      */
     modal?: boolean
     /** Its name, for `PopoverHarness` (`data-test-jn-name`). */
@@ -166,6 +168,35 @@ class ContentFocus extends Modifier<ContentFocusSignature> {
   }
 }
 
+interface HideOutsideSignature {
+  Element: HTMLElement
+  Args: { Named: { enabled: boolean } }
+}
+
+/**
+ * While a modal popover is open, hides everything but its content from assistive technology,
+ * as Radix's modal content does with `hideOthers(content)` (`aria-hidden`, not `inert`: the
+ * pointer is already off the page, and focus is kept inside).
+ */
+class HideOutside extends Modifier<HideOutsideSignature> {
+  #undo: Undo | undefined
+  #installed = false
+
+  override modify(element: HTMLElement, _: [], { enabled }: { enabled: boolean }): void {
+    if (!this.#installed) {
+      this.#installed = true
+      registerDestructor(this, () => this.#release())
+    }
+    if (!enabled) return this.#release()
+    this.#undo ??= hideOthers(element)
+  }
+
+  #release(): void {
+    this.#undo?.()
+    this.#undo = undefined
+  }
+}
+
 // ----- The parts ---------------------------------------------------------------------------
 
 export interface PopoverPartSignature<E extends Element> {
@@ -216,7 +247,9 @@ export interface PopoverContentSignature {
 /**
  * The popover itself: in the top layer while it is open (and while it animates out), placed
  * against its trigger (or Anchor), flipping to stay in view, with Escape and presses outside
- * closing it and focus moving in when it opens and back when it closes.
+ * closing it and focus moving in when it opens and back when it closes. While a modal one is
+ * open, the rest of the page is hidden from assistive technology and its scroll is locked (the
+ * content still scrolls, and a pinch still zooms), as Radix's `RemoveScroll` does.
  */
 class PopoverContent extends Component<PopoverContentSignature> {
   get popover(): Popover {
@@ -274,6 +307,8 @@ class PopoverContent extends Component<PopoverContentSignature> {
           onMountAutoFocus=this.onOpenAutoFocus
           onUnmountAutoFocus=this.onCloseAutoFocus
         }}
+        {{HideOutside enabled=@popover.trapsFocus}}
+        {{scrollLock enabled=@popover.trapsFocus}}
       >{{yield}}</As>
     </Presence>
   </template>
@@ -415,7 +450,10 @@ export class Popover extends Component<PopoverSignature> {
     return this.isOpen ? 'open' : 'closed'
   }
 
-  /** Whether focus is kept inside: while a modal popover is open (not while it animates out). */
+  /**
+   * Whether focus is kept inside, and the rest of the page hidden and kept from scrolling: while
+   * a modal popover is open (not while it animates out).
+   */
   get trapsFocus(): boolean {
     return this.isModal && this.isOpen
   }

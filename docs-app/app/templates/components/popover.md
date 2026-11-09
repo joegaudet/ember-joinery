@@ -153,8 +153,9 @@ Trigger part renders `data-slot="popover-trigger"`.
 - Opening it moves focus to its first focusable element that isn't a link (or to the content),
   and closing it brings focus back to the trigger, unless the user pressed elsewhere.
 - It is in the browser's top layer while open, so no ancestor's `overflow` clips it.
-- A modal one (`@modal`) keeps focus in and the pointer off the rest of the page. Radix also
-  hides the rest of the page from screen readers and stops it scrolling; Joinery's doesn't yet.
+- A modal one (`@modal`) keeps focus in and the pointer off the rest of the page, and, as
+  Radix's does, hides the rest of the page from screen readers and stops it scrolling until it
+  closes.
 
 ## Testing
 

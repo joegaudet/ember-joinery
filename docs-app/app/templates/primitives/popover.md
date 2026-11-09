@@ -36,8 +36,10 @@ import { Popover } from '@ember-joinery/primitives/popover'
   and Floating UI otherwise (see [Anchor](/primitives/anchor.md)).
 - **Focus.** Opening it moves focus to its first focusable element that isn't a link (or the
   content itself), Tab goes round inside it, and closing it brings focus back to the trigger,
-  unless the user pressed elsewhere. `@modal` keeps focus inside and the pointer off the rest
-  of the page.
+  unless the user pressed elsewhere. `@modal` keeps focus inside and, until it closes, the
+  pointer off the rest of the page, which is also hidden from assistive technology
+  ([`hideOthers`](/primitives/hide-others.md)) and kept from scrolling
+  ([`scrollLock`](/primitives/scroll-lock.md)), as Radix's is.
 - **Its name.** The content has the `dialog` role, and is named by its Title, or else its
   trigger, and described by its Description.
 - **Styles.** The content is a popover in the top layer, so the browser's own popover styles
@@ -70,7 +72,7 @@ ember-primitives' (Floating UI positions it then).
 | `@open`                                                                                     | `boolean`                 |         | Whether it is open, controlled                       |
 | `@defaultOpen`                                                                              | `boolean`                 | `false` | Whether it starts open                               |
 | `@onOpenChange`                                                                             | `(open: boolean) => void` |         | Called with each state the user asks for             |
-| `@modal`                                                                                    | `boolean`                 | `false` | Keep focus inside, and the pointer off the page      |
+| `@modal`                                                                                    | `boolean`                 | `false` | Keep focus inside; hide and lock the page behind     |
 | `@placement`, `@offsetOptions`, `@flipOptions`, `@shiftOptions`, `@middleware`, `@strategy` |                           |         | ember-primitives' positioning, for its Content       |
 | `@name`                                                                                     | `string`                  |         | Its name, for `PopoverHarness` (`data-test-jn-name`) |
 

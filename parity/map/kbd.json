@@ -1,0 +1,17 @@
+{
+  "$comment": "Waiting for components that haven't landed: kbd-tooltip (Tooltip and Button Group), kbd-input-group (Input Group). The unit that lands the last of each one's components ports it onto the Kbd page and maps it here.",
+  "examples": {
+    "kbd-demo": {
+      "example": "kbd-demo",
+      "threshold": 0.02,
+      "reason": "The modifier symbols (⌘ ⇧ ⌥ ⌃) and the plus between Ctrl and B are drawn a few pixels differently on the two pages, whose font stacks differ after Geist (the guide's stage names system-ui next, the reference page ui-sans-serif): 1.0–1.1% in light and dark. The keys, their text (Ctrl, B) and the layout match."
+    },
+    "kbd-group": "kbd-group",
+    "kbd-button": "kbd-button",
+    "kbd-rtl": {
+      "example": "kbd-rtl",
+      "threshold": 0.02,
+      "reason": "The same keys as kbd-demo, right to left: the modifier symbols and the plus are drawn a few pixels differently on the two pages' font stacks (1.0–1.1%). The keys, their text and the layout match."
+    }
+  }
+}

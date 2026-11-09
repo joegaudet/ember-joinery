@@ -96,7 +96,8 @@ module('Integration | <Example>', function (hooks) {
       'beforeend',
       `<table data-test-stage><tbody><tr><th>Stage</th><td><code>stage</code></td></tr></tbody></table>
        <h2 data-test-stage>A heading</h2>
-       <a href="#stage" data-test-stage>a link</a>`,
+       <a href="#stage" data-test-stage>a link</a>
+       <div data-test-stage-box style="width: 100px; padding: 10px"></div>`,
     )
     const style = (selector: string) => getComputedStyle(find(selector)!)
 
@@ -116,6 +117,14 @@ module('Integration | <Example>', function (hooks) {
       style('a[data-test-prose]').color,
       "the guide's link colour stays out",
     )
+
+    // The guide's box-sizing reset covers the guide, the frame and the stage itself, and stops
+    // there: inside, a box sizes as Joinery's CSS says, as in an app without Tailwind.
+    assert.strictEqual(style('.guide-prose').boxSizing, 'border-box')
+    assert.strictEqual(style('.example-bar').boxSizing, 'border-box')
+    assert.strictEqual(style('.example-preview').boxSizing, 'border-box')
+    assert.strictEqual(style('[data-test-stage-box]').boxSizing, 'content-box')
+    assert.strictEqual((find('[data-test-stage-box]') as HTMLElement).offsetWidth, 120)
 
     // The text styles the page passes down start over, as in upstream's preview.
     const stage = style('.example-preview')

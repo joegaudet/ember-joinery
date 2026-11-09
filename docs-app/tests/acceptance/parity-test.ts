@@ -21,6 +21,13 @@ module('Acceptance | parity route', function (hooks) {
     assert.strictEqual(getComputedStyle(document.documentElement).colorScheme, 'light')
     // The stage starts the text styles over, as upstream's preview does.
     assert.strictEqual(getComputedStyle(find('[data-parity]')!).lineHeight, '24px')
+    // The guide's box-sizing reset stops at the stage, so the example sizes as in an app
+    // without Tailwind; the stage itself fits the viewport.
+    const box = document.createElement('div')
+    find('[data-parity]')!.append(box)
+    assert.strictEqual(getComputedStyle(box).boxSizing, 'content-box')
+    box.remove()
+    assert.strictEqual(getComputedStyle(find('[data-parity]')!).boxSizing, 'border-box')
     // Parity pages are screenshots, not documents: the audit skips the page-level rules.
     await a11yAudit({ rules: { region: { enabled: false } } })
   })

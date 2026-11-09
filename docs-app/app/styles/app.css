@@ -61,8 +61,15 @@
     color-scheme: dark;
   }
 
-  /* As Tailwind's preflight does, so examples size the way upstream's do. */
-  * {
+  /*
+   * The guide's own boxes size from their border edge. The reset stops at a stage (see
+   * .guide-stage): the stage itself is the guide's, but what an example renders inside it gets
+   * no box-sizing from the guide, so it sizes the way Joinery's own CSS says, as in an app
+   * without Tailwind.
+   */
+  :where(:not(.guide-stage *)),
+  :where(:not(.guide-stage *))::before,
+  :where(:not(.guide-stage *))::after {
     box-sizing: border-box;
   }
 
@@ -397,10 +404,13 @@
 
   /*
    * The frame's preview and the parity route. Nothing the guide sets reaches in: the prose
-   * and link rules stop at it (the `@scope` limits above), and the text styles the page would
-   * pass down start over here, as upstream's preview gets them from its body and Tailwind's
-   * preflight. Joinery's CSS does the rest; the stage adds no reset of its own, so the guide
-   * and the parity comparison show Joinery as an app without Tailwind sees it.
+   * and link rules stop at it (the `@scope` limits above), so does the box-sizing reset (its
+   * `:not(.guide-stage *)`), and the text styles the page would pass down start over here, as
+   * upstream's preview gets them from its body and Tailwind's preflight. Joinery's CSS does
+   * the rest; the stage adds no reset of its own, so the guide and the parity comparison show
+   * Joinery as an app without Tailwind sees it. Where upstream relies on preflight (its
+   * `box-sizing: border-box` on every element, say), joinery.css sets the same on its parts,
+   * and the parity comparison shows a part that doesn't.
    */
   .guide-stage {
     background: var(--background, var(--g-bg));

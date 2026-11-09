@@ -236,12 +236,16 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   (The Introduction's test still uses raw selectors; it moves to a harness once the guide can
   import the harness base.)
 - The guide's own CSS (`docs-app/app/styles/app.css`) sits in `@layer guide`, below
-  `@layer joinery`, so Joinery's rules win wherever a component renders. Its prose and link
-  rules are `@scope`d to stop at an example, and the example's preview and the parity route
-  are a `guide-stage`: the text styles the page would pass down (font, size, line height,
-  colour) start over there, as in upstream's preview. The stage adds no reset of its own, so
-  the guide and the parity comparison see Joinery as an app without Tailwind does. Keep new
-  guide rules inside the layer, and scope any that select bare elements.
+  `@layer joinery`, so Joinery's rules win wherever a component renders. The example's preview
+  and the parity route are a `guide-stage`, and the guide's rules stop there: its prose and
+  link rules are `@scope`d to stop at an example, its `box-sizing: border-box` reset covers the
+  stage but not what's inside, and the text styles the page would pass down (font, size, line
+  height, colour) start over, as in upstream's preview. The stage adds no reset of its own, so
+  the guide and the parity comparison see Joinery as an app without Tailwind does. That
+  includes box sizing: upstream's parts get `border-box` from Tailwind's preflight, so a part
+  whose size depends on it sets it in joinery.css, and the parity comparison catches one that
+  doesn't. Keep new guide rules inside the layer, and scope any that select bare elements or
+  every element.
 - `/parity/<name>` renders one example with no frame and no guide around it, centred as
   upstream's preview is, for the screenshot comparison. `?theme=dark` puts `.dark` on `<html>`
   and `?theme=light` (the default) puts `.light` there; either also pins `color-scheme`, so the

@@ -163,3 +163,30 @@ selectors.part() // '[data-test-jn-part]', any part
 
 attributes.owner // 'data-test-jn-owner'
 ```
+
+## The color scheme
+
+Each test gets its own `ColorScheme` (from `@ember-joinery/primitives/color-scheme`), but not
+its own operating system or `localStorage`. `setupColorScheme(hooks)` isolates both: before
+each test it clears the saved choice and makes `matchMedia('(prefers-color-scheme: …)')`
+answer from an emulated system preference; after each, it puts both back.
+
+```ts
+import { setupColorScheme } from '@ember-joinery/test-support'
+
+module('dark mode', function (hooks) {
+  setupRenderingTest(hooks)
+  const system = setupColorScheme(hooks, { system: 'light' })
+
+  test('it follows the system', async function (assert) {
+    await render(<template><ModeToggle /></template>)
+    system.setSystem('dark') // as switching the OS to dark mode would
+    await settled()
+    assert.dom(document.documentElement).hasClass('dark')
+  })
+})
+```
+
+`system.fromAnotherTab('dark')` saves a choice and sends the `storage` event, as another tab
+would (`null` clears it), and `system.stored` is the saved choice. Pass `storageKey` when the
+app configures its own.

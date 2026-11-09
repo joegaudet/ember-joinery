@@ -112,7 +112,12 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    upstream renders it, run the parity app (`parity/README.md`).
 
 2. Put the behaviour in `@ember-joinery/primitives`, the styled component in
-   `@ember-joinery/ember`, and the harness in `@ember-joinery/test-support`.
+   `@ember-joinery/ember`, and the harness in `@ember-joinery/test-support`. Build the
+   behaviour from the primitives' foundations: `controllable()` for state the caller may
+   control (`@open`, `@defaultOpen`, `@onOpenChange`), `idFor()` for the ids ARIA ties
+   together, `part()` and `As` for each part a caller may render as their own element (`@as`,
+   `<LinkTo {{d.trigger}}>`), `Presence` for a part that animates out, and `getDirection()`
+   wherever the text direction matters. The guide's Primitives section shows each.
 3. Its styles come from the ported style sheets, `packages/ember/src/styles/<style>.css`, which
    `node scripts/port-styles.mjs` writes from upstream's (it renames `cn-` to `jn-`, drops the
    `.style-<name>` wrapper and puts each selector in `:where()`; don't edit them by hand).

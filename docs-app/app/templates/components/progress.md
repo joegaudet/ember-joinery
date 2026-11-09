@@ -29,8 +29,11 @@ that labels it.
 
 ## Label
 
-Use a `Field` component to add a label to the progress bar. Upstream's example comes with
-Field.
+Use a [Field](/components/field.md) component to add a label to the progress bar. A
+`FieldLabel`'s `for` doesn't name a progress bar, which isn't a labelable element, so the bar
+names itself by the label with `aria-labelledby`, as upstream's leaves off.
+
+<Example @name="progress-label" @title="Label" />
 
 ## Controlled
 
@@ -46,7 +49,9 @@ A progress bar that can be controlled by a slider.
 Like upstream's, the bar fills from the left in both directions: upstream's right-to-left
 copy of the component moves its indicator the same way, and its example mirrors it with
 `rtl:rotate-180`. Do the same in a Tailwind app, or with `rotate: 180deg` in a `[dir="rtl"]`
-rule of your own. Upstream's right-to-left example has a Field, so it comes with Field.
+rule of your own.
+
+<Example @name="progress-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 

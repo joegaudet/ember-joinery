@@ -4,8 +4,8 @@ Renders an accessible label associated with controls.
 
 <Example @name="label-demo" @title="Label" />
 
-For form fields, use the Field component, which includes a built-in label, description and
-error handling. Field comes with the inputs.
+For form fields, use the [Field](/components/field.md) component, which includes a built-in
+label, description and error handling.
 
 ## Installation
 
@@ -31,9 +31,10 @@ the control inside it. A click on the label then focuses or toggles the control.
 
 ## Label in Field
 
-For form fields, use the Field component, which includes built-in `FieldLabel`,
-`FieldDescription` and `FieldError` components. Field hasn't landed in Joinery yet; its page,
-and upstream's example here (`field-demo`, which is mapped on Field's page), come with it.
+For form fields, use the [Field](/components/field.md) component, which includes built-in
+`FieldLabel`, `FieldDescription` and `FieldError` components. Upstream's example here,
+`field-demo` (mapped on Field's page), is a payment form whose month and year are Selects; it
+comes with Select.
 
 ## Disabled
 

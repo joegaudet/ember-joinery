@@ -1,8 +1,8 @@
 {
-  "$comment": "Waiting for a component that hasn't landed: sheet-rtl (Field). The unit that lands it ports it onto the Sheet page and maps it here.",
   "examples": {
     "sheet-demo": "sheet-demo",
     "sheet-side": "sheet-side",
-    "sheet-no-close-button": "sheet-no-close-button"
+    "sheet-no-close-button": "sheet-no-close-button",
+    "sheet-rtl": "sheet-rtl"
   }
 }

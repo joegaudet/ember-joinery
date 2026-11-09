@@ -26,15 +26,19 @@ export class FieldHarness extends Harness {
 
   /**
    * Its label: the `<FieldLabel>` or `<FieldTitle>` in it (both are `data-slot="field-label"`),
-   * not one in a field inside it, or else the `<FieldLabel>` around it, as in a choice card.
-   * `null` when it has neither.
+   * not one in a field inside it; else a plain `<Label>` or `<label>` in it; else the
+   * `<FieldLabel>` around it, as in a choice card. `null` when it has none.
    */
   get labelElement(): HTMLElement | null {
     const root = this.element
-    const inside = [...root.querySelectorAll<HTMLElement>('[data-slot="field-label"]')].find(
-      element => fieldOf(element) === root,
+    const own = (selector: string) =>
+      [...root.querySelectorAll<HTMLElement>(selector)].find(element => fieldOf(element) === root)
+    return (
+      own('[data-slot="field-label"]') ??
+      own('label') ??
+      root.parentElement?.closest<HTMLElement>('[data-slot="field-label"]') ??
+      null
     )
-    return inside ?? root.parentElement?.closest<HTMLElement>('[data-slot="field-label"]') ?? null
   }
 
   /** Its label's text, or `''` without one. */

@@ -3,9 +3,7 @@
 A window overlaid on either the primary window or another dialog window, rendering the content
 underneath inert.
 
-Upstream's first example edits a profile in a form laid out with Field, which hasn't landed in
-Joinery yet, and the example comes with it. The examples below show the dialog with Buttons,
-text and a read-only Input.
+<Example @name="dialog-demo" @title="Dialog" />
 
 ## Installation
 
@@ -117,8 +115,9 @@ Long content can scroll while the header stays in view.
 
 Joinery's styles use logical properties, so a dialog lays itself out right to left inside any
 element with `dir="rtl"` (see [Direction](/primitives/direction.md)): the close button moves to
-the top left, and the dialog stays centred. Upstream's right-to-left example is its profile
-form in Arabic, laid out with Field; it comes with it.
+the top left, and the dialog stays centred.
+
+<Example @name="dialog-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 

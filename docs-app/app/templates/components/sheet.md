@@ -72,8 +72,9 @@ Use `@showCloseButton={{false}}` on the Content to hide the close button.
 Joinery's styles use logical properties, so a sheet lays itself out right to left inside any
 element with `dir="rtl"` (see [Direction](/primitives/direction.md)): its text starts on the
 right, and its close button sits in the top left. `@side` stays physical, as upstream's does,
-so a right-to-left page opens its sheet from the left with `@side="left"`. Upstream's example
-is its profile form in Arabic, laid out with Field; it comes with it.
+so a right-to-left page opens its sheet from the left with `@side="left"`.
+
+<Example @name="sheet-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 

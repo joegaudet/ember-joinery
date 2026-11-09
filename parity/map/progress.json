@@ -1,9 +1,11 @@
 {
-  "$comment": "Waiting for components that haven't landed: progress-label and progress-rtl (Field). The unit that lands it ports them onto the Progress page and maps them here. progress-label and progress-rtl name the bar with <FieldLabel htmlFor>, which doesn't name a progressbar; their ports need aria-labelledby to pass the audit.",
+  "$comment": "Every Progress example is ported. progress-label and progress-rtl name the bar with aria-labelledby, which upstream's leave off: a FieldLabel's for doesn't name a progressbar.",
   "examples": {
     "progress-demo": {
-      "skip": "It moves from 13% to 66% half a second after it renders, on each side, so a screenshot catches whichever the clock gives. Joinery's example is progress-demo; progress-controlled compares the bar."
+      "skip": "It moves from 13% to 66% half a second after it renders, on each side, so a screenshot catches whichever the clock gives. Joinery's example is progress-demo; the bar is compared in progress-label, progress-controlled and progress-rtl."
     },
-    "progress-controlled": "progress-controlled"
+    "progress-controlled": "progress-controlled",
+    "progress-label": "progress-label",
+    "progress-rtl": "progress-rtl"
   }
 }

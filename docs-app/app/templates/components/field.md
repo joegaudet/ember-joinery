@@ -455,22 +455,22 @@ A `FieldLabel` is a Label, so `LabelHarness` drives it.
 
 ### FieldHarness
 
-| Member         | What it is                                                                        |
-| -------------- | --------------------------------------------------------------------------------- |
-| `label`        | Its label's text: its `FieldLabel` or `FieldTitle`, or the `FieldLabel` around it |
-| `labelElement` | That label's element, or `null`                                                   |
-| `control`      | The control its `FieldLabel` labels, or `null`                                    |
-| `description`  | Its descriptions' text, joined                                                    |
-| `descriptions` | Each description's text                                                           |
-| `error`        | The error it shows, or `''`                                                       |
-| `errors`       | Each error it shows (one, or each item of a list)                                 |
-| `errorElement` | Its `FieldError`, while one shows, or `null`                                      |
-| `isInvalid`    | `data-invalid="true"`                                                             |
-| `isDisabled`   | `data-disabled="true"`                                                            |
-| `orientation`  | `vertical`, `horizontal` or `responsive`                                          |
-| `content`      | Its `FieldContent`, or `null`                                                     |
-| `title`        | Its `FieldTitle`'s text, or `''`                                                  |
-| `text`         | All the text it shows                                                             |
+| Member         | What it is                                                                                   |
+| -------------- | -------------------------------------------------------------------------------------------- |
+| `label`        | Its label's text: its `FieldLabel`, `FieldTitle` or `<label>`, or the `FieldLabel` around it |
+| `labelElement` | That label's element, or `null`                                                              |
+| `control`      | The control its `FieldLabel` labels, or `null`                                               |
+| `description`  | Its descriptions' text, joined                                                               |
+| `descriptions` | Each description's text                                                                      |
+| `error`        | The error it shows, or `''`                                                                  |
+| `errors`       | Each error it shows (one, or each item of a list)                                            |
+| `errorElement` | Its `FieldError`, while one shows, or `null`                                                 |
+| `isInvalid`    | `data-invalid="true"`                                                                        |
+| `isDisabled`   | `data-disabled="true"`                                                                       |
+| `orientation`  | `vertical`, `horizontal` or `responsive`                                                     |
+| `content`      | Its `FieldContent`, or `null`                                                                |
+| `title`        | Its `FieldTitle`'s text, or `''`                                                             |
+| `text`         | All the text it shows                                                                        |
 
 ### FieldSetHarness
 

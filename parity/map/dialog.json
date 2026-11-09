@@ -1,9 +1,10 @@
 {
-  "$comment": "Waiting for a component that hasn't landed: dialog-demo and dialog-rtl (Field). The unit that lands it ports them onto the Dialog page and maps them here.",
   "examples": {
+    "dialog-demo": "dialog-demo",
     "dialog-close-button": "dialog-close-button",
     "dialog-no-close-button": "dialog-no-close-button",
     "dialog-sticky-footer": "dialog-sticky-footer",
-    "dialog-scrollable-content": "dialog-scrollable-content"
+    "dialog-scrollable-content": "dialog-scrollable-content",
+    "dialog-rtl": "dialog-rtl"
   }
 }

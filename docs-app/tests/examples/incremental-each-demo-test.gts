@@ -1,44 +1,81 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'docs-app/tests/helpers'
-import { click, getRootElement, render, settled } from '@ember/test-helpers'
+import { click, render, settled } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
+import { Harness } from '@ember-joinery/test-support'
 import IncrementalEachDemo from 'docs-app/examples/incremental-each-demo'
 
-/** The demo's buttons, by their text. */
-function button(text: string): HTMLButtonElement {
-  const buttons = [...getRootElement().querySelectorAll('.incremental-controls button')]
-  const label = (b: Element) => b.textContent!.replace(/\s+/g, ' ').trim()
-  const found = buttons.find(b => label(b).includes(text))
-  if (!found) {
-    const shown = buttons.map(label).join(', ')
-    throw new Error(`no button "${text}" (there are: ${shown})`)
-  }
-  return found as HTMLButtonElement
-}
+/** The text of an element, whitespace collapsed. */
+const textOf = (element: Element) => element.textContent!.replace(/\s+/g, ' ').trim()
 
-/** How many rows are in the document. */
-const rowCount = () => getRootElement().querySelectorAll('.incremental-demo li').length
+/**
+ * The demo, in a root of the test's own. An `IncrementalEach` renders no element, so its rows
+ * are the items of the list around it.
+ */
+class DemoHarness extends Harness {
+  static override component = 'demo'
+
+  /** How many rows are in the document. */
+  get rowCount(): number {
+    return this.element.querySelectorAll('[aria-label="Rows"] > li').length
+  }
+
+  /** What the demo says about the rows: how many, in how many batches, and whether it's done. */
+  get status(): string {
+    const status = this.element.querySelector('.incremental-count')
+    return status ? textOf(status) : ''
+  }
+
+  /** The mode the list renders its first batch in, from the button that switches it. */
+  get mode(): string {
+    return textOf(this.#button('Mode:')).replace('Mode: ', '')
+  }
+
+  /** Hides the rows, or shows them again. */
+  async toggle(): Promise<void> {
+    await click(this.#button('rows'))
+  }
+
+  /** Switches the mode; the demo takes a frame to empty the list and start again. */
+  async switchMode(): Promise<void> {
+    await click(this.#button('Mode:'))
+    await new Promise(requestAnimationFrame)
+    await settled()
+  }
+
+  #button(text: string): HTMLButtonElement {
+    const buttons = [...this.element.querySelectorAll('button')]
+    const found = buttons.find(button => textOf(button).includes(text))
+    if (!found)
+      throw new Error(`no button "${text}" (there are: ${buttons.map(textOf).join(', ')})`)
+    return found
+  }
+}
 
 module('Example | incremental-each-demo', function (hooks) {
   setupRenderingTest(hooks)
 
   test('every one of the 20,000 rows ends up in the document', async function (assert) {
     // The list's test waiter holds `render` until the last batch is in.
-    await render(<template><IncrementalEachDemo /></template>)
-    assert.strictEqual(rowCount(), 20_000)
-    assert.dom('.incremental-count').containsText('20000 rows · 50 batches', 'and it’s done')
-    assert.dom('.incremental-count').containsText('(done)')
+    await render(
+      <template>
+        <div data-test-jn="demo"><IncrementalEachDemo /></div>
+      </template>,
+    )
+    const demo = new DemoHarness()
+    assert.strictEqual(demo.rowCount, 20_000)
+    assert.true(demo.status.includes('20000 rows · 50 batches'), demo.status)
+    assert.true(demo.status.endsWith('(done)'), 'and it’s done')
 
-    await click(button('Hide'))
-    assert.strictEqual(rowCount(), 0, 'hidden')
-    await click(button('Show'))
-    assert.strictEqual(rowCount(), 20_000, 'shown again, in full')
+    await demo.toggle()
+    assert.strictEqual(demo.rowCount, 0, 'hidden')
+    await demo.toggle()
+    assert.strictEqual(demo.rowCount, 20_000, 'shown again, in full')
 
-    await click(button('Mode: lazy'))
-    await new Promise(requestAnimationFrame)
-    await settled()
-    assert.dom(button('Mode: sync')).exists('the mode switched')
-    assert.strictEqual(rowCount(), 20_000)
+    assert.strictEqual(demo.mode, 'lazy')
+    await demo.switchMode()
+    assert.strictEqual(demo.mode, 'sync', 'the mode switched')
+    assert.strictEqual(demo.rowCount, 20_000)
     await a11yAudit()
   })
 })

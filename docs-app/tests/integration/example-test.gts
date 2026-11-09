@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'docs-app/tests/helpers'
-import { click, render, triggerKeyEvent, waitUntil } from '@ember/test-helpers'
+import { click, find, render, triggerKeyEvent, waitUntil } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { Example } from 'docs-app/components/example'
 
@@ -77,6 +77,69 @@ module('Integration | <Example>', function (hooks) {
     } finally {
       // Back to the browser's own, on Navigator.prototype.
       delete (navigator as { clipboard?: unknown }).clipboard
+    }
+  })
+
+  test("the guide's own styles stop at the preview", async function (assert) {
+    await render(
+      <template>
+        <article class="guide-prose">
+          <table data-test-prose><tbody><tr><th>Prose</th><td><code
+                  >prose</code></td></tr></tbody></table>
+          <a href="#prose" data-test-prose>a link</a>
+          <Example @name="introduction" />
+        </article>
+      </template>,
+    )
+    // The kinds of element a Table, Typography or Breadcrumb example renders.
+    find('.example-preview')!.insertAdjacentHTML(
+      'beforeend',
+      `<table data-test-stage><tbody><tr><th>Stage</th><td><code>stage</code></td></tr></tbody></table>
+       <h2 data-test-stage>A heading</h2>
+       <a href="#stage" data-test-stage>a link</a>`,
+    )
+    const style = (selector: string) => getComputedStyle(find(selector)!)
+
+    // The prose rules apply to the page's own elements…
+    assert.strictEqual(style('table[data-test-prose]').display, 'block')
+    assert.strictEqual(style('[data-test-prose] th').textTransform, 'uppercase')
+    assert.notStrictEqual(style('[data-test-prose] code').backgroundColor, 'rgba(0, 0, 0, 0)')
+
+    // …and not to an example's.
+    assert.strictEqual(style('table[data-test-stage]').display, 'table')
+    assert.strictEqual(style('[data-test-stage] th').textTransform, 'none')
+    assert.strictEqual(style('[data-test-stage] td').paddingTop, '1px', "the browser's own")
+    assert.strictEqual(style('[data-test-stage] code').backgroundColor, 'rgba(0, 0, 0, 0)')
+    assert.strictEqual(style('h2[data-test-stage]').borderTopWidth, '0px')
+    assert.notStrictEqual(
+      style('a[data-test-stage]').color,
+      style('a[data-test-prose]').color,
+      "the guide's link colour stays out",
+    )
+
+    // The text styles the page passes down start over, as in upstream's preview.
+    const stage = style('.example-preview')
+    assert.strictEqual(stage.lineHeight, '24px', 'line-height 1.5')
+    assert.strictEqual(stage.fontSize, '16px')
+    assert.true(stage.fontFamily.startsWith('Geist'), stage.fontFamily)
+  })
+
+  test("Joinery's layer wins over the guide's rules, whatever their specificity", async function (assert) {
+    // A rule as joinery.css writes them: zero specificity, in Joinery's layer.
+    const sheet = document.createElement('style')
+    sheet.textContent = '@layer joinery { :where(.probe) { color: rgb(1, 2, 3); } }'
+    document.head.append(sheet)
+    try {
+      await render(
+        <template>
+          <article class="guide-prose"><a href="#probe" class="probe">a link</a></article>
+          <button type="button" class="intro-toggle probe">a guide class</button>
+        </template>,
+      )
+      assert.strictEqual(getComputedStyle(find('a.probe')!).color, 'rgb(1, 2, 3)')
+      assert.strictEqual(getComputedStyle(find('button.probe')!).color, 'rgb(1, 2, 3)')
+    } finally {
+      sheet.remove()
     }
   })
 

@@ -3,17 +3,27 @@ import type { TOC } from '@ember/component/template-only'
 import type ParityController from '../controllers/parity.ts'
 import type { ParityModel } from '../routes/parity.ts'
 
-/** `theme=dark` darkens the whole page, as shadcn's `.dark` class does, until the route exits. */
+/**
+ * Pins the page to the scheme the comparison asks for, until the route exits: `.dark` (as
+ * shadcn's class darkens everything) or `.light`, plus `color-scheme`, so neither the guide's
+ * own colours nor native controls follow the browser's or the OS's preference instead.
+ */
 const scheme = modifier((_element: Element, [theme]: [string]) => {
   const root = document.documentElement
-  root.classList.toggle('dark', theme === 'dark')
-  return () => root.classList.remove('dark')
+  const dark = theme === 'dark'
+  root.classList.toggle('dark', dark)
+  root.classList.toggle('light', !dark)
+  root.style.colorScheme = dark ? 'dark' : 'light'
+  return () => {
+    root.classList.remove('dark', 'light')
+    root.style.removeProperty('color-scheme')
+  }
 })
 
 const Parity: TOC<{ Args: { model: ParityModel; controller: ParityController } }> = <template>
   {{#if @model.example}}
     <div
-      class="parity-stage"
+      class="parity-stage guide-stage"
       data-parity={{@model.name}}
       data-align={{@controller.align}}
       dir={{@controller.dir}}

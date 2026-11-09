@@ -19,6 +19,17 @@ module('Unit | linkHeadings', function () {
     assert.dom('#setup a.heading-anchor', element).hasAttribute('aria-label', 'Link to “Setup”')
   })
 
+  test("leaves an example's own headings alone", function (assert) {
+    const element = prose()
+    element.insertAdjacentHTML(
+      'beforeend',
+      '<figure class="example"><div><h2 id="typography">Typography</h2></div></figure>',
+    )
+    linkHeadings(element, '')
+    assert.dom('#typography a', element).doesNotExist()
+    assert.strictEqual(element.querySelectorAll('a.heading-anchor').length, 2)
+  })
+
   test('scrolls to the heading the hash names', function (assert) {
     const element = prose()
     const scrolled: string[] = []

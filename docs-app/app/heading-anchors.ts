@@ -8,7 +8,8 @@ import { modifier } from 'ember-modifier'
  */
 export function linkHeadings(element: HTMLElement, hash: string): boolean {
   for (const heading of element.querySelectorAll<HTMLElement>('h2[id], h3[id]')) {
-    if (heading.querySelector('a.heading-anchor')) continue
+    // An example's own headings belong to the example, not to the page's outline.
+    if (heading.closest('.example') || heading.querySelector('a.heading-anchor')) continue
     const link = document.createElement('a')
     link.className = 'heading-anchor'
     link.href = `#${heading.id}`

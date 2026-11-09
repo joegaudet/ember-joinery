@@ -45,7 +45,7 @@ module('Acceptance | guide pages', function (hooks) {
             .slice(0, 600),
         )
       // Every section heading links to itself, so it can be shared.
-      for (const heading of document.querySelectorAll('.guide-prose h2[id]')) {
+      for (const heading of document.querySelectorAll('.guide-prose h2[id]:not(.example h2)')) {
         assert.dom(heading.querySelector('a.heading-anchor')).hasAttribute('href', `#${heading.id}`)
       }
       // Every <Example> on the page found its file and rendered it.

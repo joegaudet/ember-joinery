@@ -12,7 +12,8 @@ export interface ParityModel {
  * with shadcn/ui's own (`pnpm parity`; see "Parity" in CONTRIBUTING.md). Query parameters set
  * up the page the way the comparison asks for:
  *
- * - `theme=dark` puts the `.dark` class on `<html>` (light otherwise);
+ * - `theme=dark` puts the `.dark` class on `<html>`, and `theme=light` (the default) the
+ *   `.light` one; either also sets `color-scheme`, so the browser's preference can't change it;
  * - `dir=rtl` lays the example out right to left;
  * - `align=start|end` places it as upstream's preview does (centred otherwise).
  */

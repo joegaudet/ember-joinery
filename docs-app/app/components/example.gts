@@ -133,7 +133,7 @@ export class Example extends Component<ExampleSignature> {
           </p>
         {{else if this.example}}
           {{#if (this.isTab "preview")}}
-            <div class="example-preview" data-align={{if @align @align "center"}}>
+            <div class="example-preview guide-stage" data-align={{if @align @align "center"}}>
               <this.example.component />
             </div>
           {{else}}

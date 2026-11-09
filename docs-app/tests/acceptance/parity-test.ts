@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupApplicationTest } from 'docs-app/tests/helpers'
-import { currentRouteName, visit } from '@ember/test-helpers'
+import { currentRouteName, find, visit } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { exampleNames } from 'docs-app/examples/index'
 
@@ -16,18 +16,35 @@ module('Acceptance | parity route', function (hooks) {
     assert.dom('.guide-header').doesNotExist('no guide header')
     assert.dom('.guide-sidebar').doesNotExist('no sidebar')
     assert.dom('[data-parity]').hasAttribute('data-align', 'center').hasAttribute('dir', 'ltr')
-    assert.dom(document.documentElement).doesNotHaveClass('dark')
+    // Light unless asked otherwise, whatever the browser prefers.
+    assert.dom(document.documentElement).hasClass('light').doesNotHaveClass('dark')
+    assert.strictEqual(getComputedStyle(document.documentElement).colorScheme, 'light')
+    // The stage starts the text styles over, as upstream's preview does.
+    assert.strictEqual(getComputedStyle(find('[data-parity]')!).lineHeight, '24px')
     // Parity pages are screenshots, not documents: the audit skips the page-level rules.
     await a11yAudit({ rules: { region: { enabled: false } } })
   })
 
   test('theme, dir and align set the page up as the comparison asks', async function (assert) {
     await visit('/parity/introduction?theme=dark&dir=rtl&align=start')
-    assert.dom(document.documentElement).hasClass('dark')
+    assert.dom(document.documentElement).hasClass('dark').doesNotHaveClass('light')
+    assert.strictEqual(getComputedStyle(document.documentElement).colorScheme, 'dark')
     assert.dom('[data-parity]').hasAttribute('dir', 'rtl').hasAttribute('data-align', 'start')
 
+    await visit('/parity/introduction?theme=light')
+    assert.dom(document.documentElement).hasClass('light').doesNotHaveClass('dark')
+    assert.strictEqual(getComputedStyle(document.documentElement).colorScheme, 'light')
+
     await visit('/getting-started/introduction.md')
-    assert.dom(document.documentElement).doesNotHaveClass('dark', 'leaving the route undoes it')
+    assert
+      .dom(document.documentElement)
+      .doesNotHaveClass('dark', 'leaving the route undoes it')
+      .doesNotHaveClass('light')
+    assert.strictEqual(
+      getComputedStyle(document.documentElement).colorScheme,
+      'light dark',
+      'the guide follows the browser again',
+    )
   })
 
   test('an unknown example says so', async function (assert) {

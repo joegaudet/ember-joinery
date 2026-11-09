@@ -1,0 +1,32 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/sheet.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="sheet-overlay" in SheetOverlay */
+:where(.jn-sheet-overlay) {
+  @apply fixed inset-0 z-50 duration-100 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0;
+}
+
+/* data-slot="sheet-content" in SheetContent */
+:where(.jn-sheet-content) {
+  @apply data-open:animate-in data-open:fade-in-0 data-[side=bottom]:data-open:slide-in-from-bottom-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:animate-out data-closed:fade-out-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=right]:data-closed:slide-out-to-right-10 data-[side=top]:data-closed:slide-out-to-top-10;
+}
+
+/* in SheetContent, no slot to attach it to: sr-only */
+
+/* data-slot="sheet-header" in SheetHeader */
+:where(.jn-sheet-header) {
+  @apply flex flex-col;
+}
+
+/* data-slot="sheet-footer" in SheetFooter */
+:where(.jn-sheet-footer) {
+  @apply mt-auto flex flex-col;
+}
+
+/* :where(.jn-sheet-title): also: jn-font-heading */

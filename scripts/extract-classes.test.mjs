@@ -1,6 +1,14 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { extractClasses, renderCss, splitClasses } from './extract-classes.mjs'
+import {
+  exclusive,
+  extractClasses,
+  findOverrides,
+  overrides,
+  renderCss,
+  sheetRules,
+  splitClasses,
+} from './extract-classes.mjs'
 
 const BUTTON = `
 import { cva } from "class-variance-authority"
@@ -131,4 +139,161 @@ test('renderCss writes a rule per slot and comments for the rest', () => {
   )
   assert.match(css, /only when size === "sm": gap-1 \*\//)
   assert.match(css, /in Card, no slot to attach it to: sr-only/)
+})
+
+const BADGE = `
+const badgeVariants = cva(
+  "cn-badge group/badge inline-flex min-w-0 focus-visible:ring-[3px] focus-visible:ring-ring/50",
+  {
+    variants: {
+      variant: {
+        default: "cn-badge-variant-default",
+        destructive: "cn-badge-variant-destructive",
+        outline: "cn-badge-variant-outline border-border",
+      },
+      size: { lg: "cn-badge-size-lg" },
+    },
+    compoundVariants: [{ variant: "outline", size: "lg", className: "border-2" }],
+  }
+)
+`
+
+/** Two styles' sheets, as upstream writes them (wrapped in `.style-<name>`). */
+const SHEETS = {
+  nova: sheetRules(`.style-nova {
+  .cn-badge {
+    @apply h-5 min-w-4 rounded-4xl;
+  }
+
+  .cn-badge-variant-default {
+    @apply bg-primary border-transparent;
+  }
+
+  .cn-badge-variant-destructive {
+    @apply bg-destructive/10 focus-visible:ring-destructive/20;
+  }
+
+  .cn-badge-variant-outline {
+    @apply border-input min-w-8;
+  }
+
+  .cn-badge-size-lg:has(> svg) {
+    @apply min-w-10;
+  }
+}
+`),
+  lyra: sheetRules(`.style-lyra {
+  .cn-badge-variant-destructive {
+    @apply focus-visible:ring-destructive/40;
+  }
+
+  .cn-badge-variant-outline {
+    @apply border-input;
+  }
+}
+`),
+}
+
+test('sheetRules maps each plain rule to its utilities, renamed jn-', () => {
+  assert.deepEqual(
+    [...SHEETS.nova.keys()],
+    [
+      'jn-badge',
+      'jn-badge-variant-default',
+      'jn-badge-variant-destructive',
+      'jn-badge-variant-outline',
+    ],
+  )
+  assert.deepEqual(SHEETS.nova.get('jn-badge'), ['h-5', 'min-w-4', 'rounded-4xl'])
+})
+
+test("overrides asks tailwind-merge, as upstream's cn, which of two classes survives", () => {
+  assert.equal(overrides('focus-visible:ring-ring/50', 'focus-visible:ring-destructive/20'), true)
+  assert.equal(overrides('focus-visible:ring-[3px]', 'focus-visible:ring-destructive/20'), false)
+  assert.equal(overrides('min-w-0', 'min-w-40'), true)
+  assert.equal(overrides('min-w-0', 'min-w-0'), false)
+  assert.equal(overrides('ring-ring/50', 'focus-visible:ring-destructive/20'), false)
+})
+
+test('exclusive tells strings that never apply together', () => {
+  const entries = extractClasses(BADGE)
+  const [base, , destructive, outline, lg, compound] = entries
+  assert.equal(exclusive(destructive, outline), true, 'two options of one variant')
+  assert.equal(exclusive(base, destructive), false)
+  assert.equal(exclusive(outline, lg), false, 'options of two variants')
+  assert.equal(exclusive(destructive, compound), true, 'the compound wants variant="outline"')
+  assert.equal(exclusive(outline, compound), false)
+  assert.equal(exclusive({ condition: 'a && open' }, { condition: '!(open)' }), true)
+  assert.equal(exclusive({ condition: 'open' }, { condition: 'size === "sm"' }), false)
+})
+
+test('findOverrides finds inline utilities a later class of the same call overrides', () => {
+  const entries = findOverrides(extractClasses(BADGE), SHEETS)
+  assert.deepEqual(entries[0].overriddenBy, [
+    {
+      utility: 'focus-visible:ring-ring/50',
+      by: 'jn-badge-variant-destructive',
+      with: ['focus-visible:ring-destructive/20', 'focus-visible:ring-destructive/40'],
+      styles: ['nova', 'lyra'],
+      every: true,
+    },
+    {
+      utility: 'min-w-0',
+      by: 'jn-badge-variant-outline',
+      with: ['min-w-8'],
+      styles: ['nova'],
+      every: false,
+    },
+  ])
+  assert.equal(entries[3].overriddenBy, undefined, 'options of one variant never meet')
+})
+
+test('renderCss keeps an overridden utility off the elements whose later class overrides it', () => {
+  const css = renderCss(findOverrides(extractClasses(BADGE), SHEETS), { name: 'badge' })
+  assert.match(css, /They go after the style sheet's rules/)
+  assert.match(
+    css,
+    /:where\(\.jn-badge\) \{\n {2}@apply inline-flex min-w-0 focus-visible:ring-\[3px\];\n\}/,
+    'the base rule loses the utility that every style overrides',
+  )
+  assert.match(
+    css,
+    /NOTE: upstream's later \.jn-badge-variant-outline overrides min-w-0 in nova, which this rule can't express; handle it in that style\./,
+  )
+  assert.match(
+    css,
+    /upstream's later \.jn-badge-variant-destructive overrides this in every style \*\/\n:where\(\.jn-badge:not\(\.jn-badge-variant-destructive\)\) \{\n {2}@apply focus-visible:ring-ring\/50;\n\}/,
+  )
+  assert.match(
+    renderCss(extractClasses(BADGE), { name: 'badge', sheets: null }),
+    /The style sheets were missing, so later classes were not checked\./,
+  )
+})
+
+test('String.raw strings, cn() strings after the semantic one, and props like classNames', () => {
+  const source = `
+function Calendar({ className }) {
+  return (
+    <DayPicker
+      className={cn("cn-calendar bg-background", String.raw\`rtl:**:[.rdp-button\\_next>svg]:rotate-180\`, className)}
+      classNames={{ months: cn("relative flex", defaultClassNames.months) }}
+    />
+  )
+}
+`
+  const entries = extractClasses(source)
+  assert.deepEqual(entries[1].utilities, ['rtl:**:[.rdp-button\\_next>svg]:rotate-180'])
+  assert.equal(entries[1].call, entries[0].call)
+  assert.equal(entries[2].prop, 'classNames.months')
+  assert.equal(entries[2].element, 'DayPicker')
+  const css = renderCss(entries, { name: 'calendar' })
+  assert.match(
+    css,
+    /:where\(\.jn-calendar\) \{\n {2}@apply rtl:\*\*:\[\.rdp-button\\_next>svg\]:rotate-180;\n\}/,
+    'a later string of the call styles the same element',
+  )
+  assert.match(
+    css,
+    /DayPicker classNames\.months in Calendar, no slot to attach it to: relative flex/,
+  )
 })

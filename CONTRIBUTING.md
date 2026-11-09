@@ -117,10 +117,17 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    `node scripts/port-styles.mjs` writes from upstream's (it renames `cn-` to `jn-`, drops the
    `.style-<name>` wrapper and puts each selector in `:where()`; don't edit them by hand).
    Upstream also writes utility classes inline in the component. For those, run
-   `node scripts/extract-classes.mjs <name>`: it prints them as `@apply` rules for the
-   component's base rule, which goes after the style sheet's (upstream's inline classes win over
-   its style classes), lists the `group/*` markers the element must keep, and leaves conditional
-   classes as comments.
+   `node scripts/extract-classes.mjs <name>`: it prints them as `@apply` rules, which go after
+   the style sheet's rules. Keep its output whole, because the order is upstream's. Upstream's
+   class list runs in call order: a string's semantic class, then its inline utilities, then
+   the next string's (a cva's variant and size classes, a later `cn()` argument). Of two
+   conflicting classes, the later wins. So an inline utility beats its own class's style rule
+   but loses to a later class's: Badge's inline `focus-visible:ring-ring/50` loses to the ring
+   colour in `jn-badge-variant-destructive`. The script checks each inline utility against the
+   later classes' rules in all eight sheets. When a later class overrides it, the script moves it
+   to a rule that skips that class (`:where(.jn-badge:not(.jn-badge-variant-destructive))`), and
+   a `NOTE` marks any case this can't express. The output also lists the `group/*` markers the
+   element must keep, and leaves conditional classes as comments.
 
 A component is done when it has everything listed under "Definition of done for every
 component" in the plan: its primitive, the styled component, its harness, tests written with the

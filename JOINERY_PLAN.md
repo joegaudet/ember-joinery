@@ -187,7 +187,9 @@ render in production, as Formwright's `data-test-fw-*` do.
   attributes.
 - Upstream also puts some utility classes inline in each component (`inline-flex`, `shrink-0`…).
   `scripts/extract-classes.mjs` pulls them out of the upstream `cn(...)` and `cva(...)` calls
-  into each component's base rule.
+  into rules that follow the style sheet's. Where a later class in upstream's class list (a
+  variant, a size) overrides an inline one, the rule skips that class, so the cascade matches
+  upstream's merge order.
 - The build compiles all of that with Tailwind v4 into `dist/joinery.css` (the Nova style, in
   `@layer joinery`), `dist/styles/<style>.css` (the other seven), `dist/tokens.css` (the default
   neutral theme, light and `.dark`), `dist/themes/*.css` (shadcn's base colours: neutral, stone,

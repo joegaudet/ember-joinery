@@ -36,6 +36,7 @@ const Parity: TOC<{ Args: { model: ParityModel; controller: ParityController } }
         class="parity-stage guide-stage {{if (isDark @controller.theme) 'dark'}}"
         data-parity={{@model.name}}
         data-align={{@controller.align}}
+        data-full-width={{if @controller.fullWidth "true"}}
         dir={{@controller.dir}}
         data-style={{@controller.style}}
         style={{@controller.tokens}}

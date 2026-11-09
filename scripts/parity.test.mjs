@@ -196,6 +196,32 @@ test('validateMapFile takes a threshold for each theme', () => {
   assert.strictEqual(thresholdFor(entries[0], 'dark'), 0.04)
 })
 
+test('validateMapFile takes fullWidth: true, and nothing else for it', () => {
+  const { entries, errors } = validateMapFile(
+    'chart',
+    { examples: { 'chart-area-default': { example: 'chart-area-default', fullWidth: true } } },
+    INVENTORY,
+  )
+  assert.deepEqual(errors, [])
+  assert.deepEqual(entries, [
+    {
+      id: 'chart-area-default',
+      component: 'chart',
+      example: 'chart-area-default',
+      threshold: DEFAULT_THRESHOLD,
+      fullWidth: true,
+    },
+  ])
+  assert.deepEqual(
+    validateMapFile(
+      'chart',
+      { examples: { 'chart-area-default': { example: 'a', fullWidth: 'yes' } } },
+      INVENTORY,
+    ).errors,
+    ['parity/map/chart.json: "chart-area-default": "fullWidth" is true, or left out'],
+  )
+})
+
 test('validateMapFile reports what is wrong with an entry', () => {
   const { errors } = validateMapFile(
     'button',
@@ -363,6 +389,21 @@ test('layoutFor and pageUrls carry the docs page layout to both pages', () => {
       joinery:
         'http://127.0.0.1:2/ember-joinery/guide/parity/button-rtl?theme=dark&dir=rtl&align=center',
     },
+  )
+  assert.deepEqual(
+    pageUrls({
+      referenceUrl: 'http://127.0.0.1:1',
+      joineryUrl: 'http://127.0.0.1:2/ember-joinery/guide',
+      entry: { id: 'chart-demo', example: 'chart-demo', fullWidth: true },
+      theme: 'light',
+      layout: { dir: 'ltr', align: 'center' },
+    }),
+    {
+      upstream: 'http://127.0.0.1:1/chart-demo?theme=light&dir=ltr&align=center&fullWidth=true',
+      joinery:
+        'http://127.0.0.1:2/ember-joinery/guide/parity/chart-demo?theme=light&dir=ltr&align=center&fullWidth=true',
+    },
+    'a full-width entry stretches the example on both stages',
   )
 })
 

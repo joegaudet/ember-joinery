@@ -16,6 +16,7 @@ export interface ParityModel {
  *   `.light` one; either also sets `color-scheme`, so the browser's preference can't change it;
  * - `dir=rtl` lays the example out right to left;
  * - `align=start|end` places it as upstream's preview does (centred otherwise);
+ * - `fullWidth=true` stretches it across the stage, as `<Example @fullWidth={{true}}>` does;
  * - `style=<style>` and `base=<base colour>` show it in another style or base colour (Nova and
  *   Neutral by default), as the parity app's `base` does.
  */
@@ -24,6 +25,7 @@ export default class ParityRoute extends Route {
     theme: { refreshModel: false },
     dir: { refreshModel: false },
     align: { refreshModel: false },
+    fullWidth: { refreshModel: false },
     style: { refreshModel: false },
     base: { refreshModel: false },
   }

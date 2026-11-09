@@ -571,6 +571,17 @@
     align-items: flex-end;
   }
 
+  /*
+   * `@fullWidth`: the example fills the preview's width, as upstream's preview widens the chart
+   * demo (`[&_.preview>div]:w-full`) and the charts gallery its interactive charts. Centred in a
+   * flex box, an example with no width of its own shrinks to its content's, and a chart in it
+   * to nothing. The parity stage's `?fullWidth=true` does the same.
+   */
+  .example-preview[data-full-width='true'] > *,
+  .parity-stage[data-full-width='true'] > * {
+    width: 100%;
+  }
+
   .example-loading,
   .example-missing {
     margin: 0;

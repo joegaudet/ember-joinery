@@ -186,6 +186,30 @@ module('Integration | <Example>', function (hooks) {
     assert.dom('.example-preview').doesNotHaveAttribute('dir', 'without it, the page decides')
   })
 
+  test('@fullWidth stretches the example across the preview', async function (assert) {
+    // Upstream widens the chart demo's preview child (`[&_.preview>div]:w-full`). Centred
+    // without it, a card with no width of its own shrinks to its content, and its chart to
+    // nothing.
+    const svg = '.example-preview [data-slot="chart"] svg.recharts-surface'
+    await render(<template><Example @name="chart-demo" /></template>)
+    assert.dom('.example-preview').doesNotHaveAttribute('data-full-width')
+    assert.dom(svg).doesNotExist()
+
+    await render(<template><Example @name="chart-demo" @fullWidth={{true}} /></template>)
+    const preview = find('.example-preview') as HTMLElement
+    assert.dom(preview).hasAttribute('data-full-width', 'true')
+    const card = find('.example-preview > [data-slot="card"]') as HTMLElement
+    const padding = parseFloat(getComputedStyle(preview).paddingLeft) * 2
+    assert.strictEqual(
+      card.offsetWidth,
+      preview.clientWidth - padding,
+      'the preview less its padding',
+    )
+    await waitUntil(() => find(svg))
+    assert.dom(svg).exists('the chart draws')
+    await a11yAudit()
+  })
+
   test('the switchers show the preview in another style, base colour, radius and mode', async function (assert) {
     await render(<template><Example @name="button-default" /></template>)
     const stage = () => find('.example-preview') as HTMLElement

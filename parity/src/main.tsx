@@ -4,6 +4,8 @@
 //
 // - `theme`: `light` (default) or `dark`, as upstream's `.dark` class;
 // - `dir` and `align`: default to what the docs page uses for the example (upstream/inventory.json);
+// - `fullWidth=true`: stretches the example across the stage, as upstream's preview does with
+//   `[&_.preview>div]:w-full` (the chart demo) and the charts gallery with a full-width cell;
 // - `base`: the base colour whose tokens the page uses (shadcn's `neutral` by default, as Joinery).
 //
 // When the example has rendered and the fonts have loaded, `<html data-parity-ready>` is set
@@ -116,6 +118,7 @@ function Ready({ children }: { children: React.ReactNode }) {
 function Stage({ entry, Component }: { entry: Entry; Component: React.ComponentType }) {
   const dir = (params.get('dir') ?? entry.direction) as 'ltr' | 'rtl'
   const align = params.get('align') ?? entry.align
+  const fullWidth = params.get('fullWidth') === 'true'
   // As upstream's DirectionProviderWrapper does: Base UI's provider takes `direction`, and
   // Radix's (upstream's wrapper of it) `dir`.
   const example =
@@ -133,6 +136,7 @@ function Stage({ entry, Component }: { entry: Entry; Component: React.ComponentT
       className="parity-stage"
       data-parity={entry.id}
       data-align={align}
+      data-full-width={fullWidth ? 'true' : undefined}
       dir={dir}
       data-lang={dir === 'rtl' ? 'ar' : undefined}
     >

@@ -90,6 +90,28 @@ module('Acceptance | parity route', function (hooks) {
     await a11yAudit({ rules: { region: { enabled: false } } })
   })
 
+  test('fullWidth stretches the example across the stage, so a chart in it has room', async function (assert) {
+    const svg = '[data-parity] [data-slot="chart"] svg.recharts-surface'
+    await visit('/parity/chart-line-interactive')
+    const stage = () => find('[data-parity]') as HTMLElement
+    assert.dom(stage()).doesNotHaveAttribute('data-full-width')
+    assert
+      .dom(svg)
+      .doesNotExist('centred, the card shrinks to its content and the chart to nothing')
+
+    await visit('/parity/chart-line-interactive?fullWidth=true')
+    assert.dom(stage()).hasAttribute('data-full-width', 'true')
+    const card = find('[data-parity] > [data-slot="card"]') as HTMLElement
+    const padding = parseFloat(getComputedStyle(stage()).paddingLeft) * 2
+    assert.strictEqual(
+      card.offsetWidth,
+      stage().clientWidth - padding,
+      'the stage less its padding',
+    )
+    assert.dom(svg).exists('and the chart draws')
+    await a11yAudit({ rules: { region: { enabled: false } } })
+  })
+
   test('an unknown example says so', async function (assert) {
     await visit('/parity/no-such-example')
     assert.dom('[data-parity-missing="no-such-example"]').exists()

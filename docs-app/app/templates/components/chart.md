@@ -3,7 +3,11 @@
 Beautiful charts. Drawn as Glimmer SVG, with an API shaped like Recharts. Copy and paste into
 your apps.
 
-<Example @name="chart-demo" @title="Chart" />
+<Example @name="chart-demo" @title="Chart" @fullWidth={{true}} />
+
+On ui.shadcn.com this example is shown in the blue theme (its preview's `theme-blue`), so its
+bars are blue there. Here it keeps the default chart colours, `--chart-1` and `--chart-2`; see
+[Theming](#theming) to change them.
 
 Introducing **Charts**. A collection of chart components that you can copy and paste into your
 apps.

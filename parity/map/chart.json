@@ -1,13 +1,14 @@
 {
-  "$comment": "The Chart docs page's examples and the charts gallery (registry/new-york-v4/charts) map here. Waiting: chart-area-interactive (Select). The gallery's bar, pie, radar, radial and tooltip charts come with the chart units that port those charts, and are mapped here when they land. The gallery's thresholds are per theme, so the light comparison, which differs less, keeps no more slack than the dark one. The card still accounts for most of each, so a series that broke inside a gallery card could hide under it; the Chart page's examples, compared at 0%, are what hold the chart itself to recharts'.",
+  "$comment": "The Chart docs page's examples and the charts gallery (registry/new-york-v4/charts) map here. Waiting: chart-area-interactive (Select). The gallery's bar, pie, radar, radial and tooltip charts come with the chart units that port those charts, and are mapped here when they land. The gallery's thresholds are per theme, so the light comparison, which differs less, keeps no more slack than the dark one. The card still accounts for most of each, so a series that broke inside a gallery card could hide under it; the Chart page's examples, compared at 0%, are what hold the chart itself to recharts'. The two interactive examples are shown full width upstream (fullWidth), and compared whole, header and chart.",
   "examples": {
     "chart-demo": {
       "example": "chart-demo",
+      "fullWidth": true,
       "threshold": {
-        "light": 0.04,
-        "dark": 0.13
+        "light": 0.06,
+        "dark": 0.07
       },
-      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is. The parity stage gives this full-width example no width, so the card collapses: Nova's Card clips what overflows it (overflow-hidden), new-york-v4's doesn't. Each theme's threshold is its measurement rounded up, plus a point: 2.30% light, 11.57% dark."
+      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is: Nova's header sits lower, and new-york-v4's 1px border (Nova's Card draws a ring) leaves the chart 2px narrower, so every bar and point is a little off. The chart itself matches recharts' (the Chart page's other examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 4.15% light, 5.24% dark."
     },
     "chart-example": "chart-example",
     "chart-example-grid": "chart-example-grid",
@@ -90,11 +91,12 @@
     },
     "chart-line-interactive": {
       "example": "chart-line-interactive",
+      "fullWidth": true,
       "threshold": {
-        "light": 0.04,
-        "dark": 0.14
+        "light": 0.06,
+        "dark": 0.07
       },
-      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is. The parity stage gives this full-width example no width, so the card collapses: Nova's Card clips what overflows it (overflow-hidden), new-york-v4's doesn't. Each theme's threshold is its measurement rounded up, plus a point: 2.30% light, 12.38% dark."
+      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is: Nova's header sits lower, and new-york-v4's 1px border (Nova's Card draws a ring) leaves the chart 2px narrower, so every bar and point is a little off. The chart itself matches recharts' (the Chart page's other examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 4.57% light, 5.92% dark."
     },
     "chart-line-default": {
       "example": "chart-line-default",

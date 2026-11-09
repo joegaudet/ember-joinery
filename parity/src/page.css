@@ -38,6 +38,11 @@ body {
   align-items: flex-end;
 }
 
+/* As upstream's `[&_.preview>div]:w-full`, or the charts gallery's full-width cell. */
+.parity-stage[data-full-width='true'] > * {
+  width: 100%;
+}
+
 .parity-index {
   margin: 2rem;
   font: 14px/1.6 var(--font-sans);

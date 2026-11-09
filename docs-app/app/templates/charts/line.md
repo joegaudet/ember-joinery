@@ -7,7 +7,7 @@ the parts they use.
 
 ## Line Chart - Interactive
 
-<Example @name="chart-line-interactive" @title="Line Chart - Interactive" />
+<Example @name="chart-line-interactive" @title="Line Chart - Interactive" @fullWidth={{true}} />
 
 ## Line Chart
 

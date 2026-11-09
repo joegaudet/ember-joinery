@@ -105,7 +105,7 @@ export function layoutFor(id, inventory) {
   }
 }
 
-const ENTRY_KEYS = new Set(['example', 'threshold', 'reason', 'skip'])
+const ENTRY_KEYS = new Set(['example', 'threshold', 'reason', 'fullWidth', 'skip'])
 
 const isFraction = value => typeof value === 'number' && value > 0 && value < 1
 
@@ -128,9 +128,10 @@ export function thresholdFor(entry, theme) {
 
 /**
  * Checks one map file's JSON and returns its entries. A value is the Joinery example's name, or
- * `{ example, threshold?, reason? }`, or `{ skip: reason }` for an example that can't be compared
- * (it still counts as mapped). A threshold is one fraction for both themes, or
- * `{ "light": …, "dark": … }`, and needs a reason.
+ * `{ example, threshold?, reason?, fullWidth? }`, or `{ skip: reason }` for an example that can't
+ * be compared (it still counts as mapped). A threshold is one fraction for both themes, or
+ * `{ "light": …, "dark": … }`, and needs a reason. `fullWidth: true` stretches the example across
+ * both stages, as upstream widens it (see parity/map/README.md).
  */
 export function validateMapFile(component, json, inventory) {
   const errors = []
@@ -190,12 +191,16 @@ export function validateMapFile(component, json, inventory) {
     } else if (entry.reason !== undefined) {
       errors.push(`${where}: "${id}": "reason" explains a threshold, and there is none`)
     }
+    if (entry.fullWidth !== undefined && entry.fullWidth !== true) {
+      errors.push(`${where}: "${id}": "fullWidth" is true, or left out`)
+    }
     entries.push({
       id,
       component,
       example: entry.example,
       threshold: entry.threshold ?? DEFAULT_THRESHOLD,
       ...(entry.reason && { reason: entry.reason }),
+      ...(entry.fullWidth === true && { fullWidth: true }),
     })
   }
   return { entries, errors }
@@ -582,9 +587,14 @@ body { font-family: var(--font-sans) !important; line-height: 1.5 !important; }
 `
 }
 
-/** The two URLs one comparison screenshots. */
+/**
+ * The two URLs one comparison screenshots. An entry with `fullWidth` asks both stages to stretch
+ * the example across their width (`fullWidth=true`), as upstream's preview or gallery cell does.
+ */
 export function pageUrls({ referenceUrl, joineryUrl, entry, theme, layout }) {
-  const query = new URLSearchParams({ theme, dir: layout.dir, align: layout.align }).toString()
+  const params = new URLSearchParams({ theme, dir: layout.dir, align: layout.align })
+  if (entry.fullWidth) params.set('fullWidth', 'true')
+  const query = params.toString()
   const style = layout.style ? `&${new URLSearchParams({ style: layout.style })}` : ''
   return {
     upstream: `${referenceUrl.replace(/\/$/, '')}/${encodeURIComponent(entry.id)}?${query}`,

@@ -5,11 +5,12 @@ import { DEFAULT_THEME, stageTokens } from '../preview.ts'
 
 /** The parity route's query parameters; see routes/parity.ts. */
 export default class ParityController extends Controller {
-  queryParams = ['theme', 'dir', 'align', 'style', 'base']
+  queryParams = ['theme', 'dir', 'align', 'fullWidth', 'style', 'base']
 
   @tracked theme: 'light' | 'dark' = 'light'
   @tracked dir: 'ltr' | 'rtl' = 'ltr'
   @tracked align: 'center' | 'start' | 'end' = 'center'
+  @tracked fullWidth = false
   @tracked style = DEFAULT_THEME.style
   @tracked base = DEFAULT_THEME.baseColor
 

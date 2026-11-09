@@ -23,6 +23,11 @@ blocks). Each maps upstream example ids to the Joinery guide examples that port 
   CONTRIBUTING.md) and needs a written `reason`. It is one fraction for both themes, or one for
   each, `{ "light": 0.04, "dark": 0.13 }`, where the two themes differ by more than a point or
   so, so the theme that differs less isn't given the other's slack.
+- `fullWidth: true` stretches the example across both stages (`?fullWidth=true`), for one that
+  upstream shows full width: the chart demo, whose preview has `[&_.preview>div]:w-full`, and
+  the charts gallery's interactive charts, in a cell the gallery's whole width. Centred on a
+  plain stage, an example with no width of its own shrinks to its content, and a chart in it to
+  nothing. The guide's `<Example @fullWidth={{true}}>` does the same in its preview.
 - `skip` marks an example that can't be compared, with the reason. It still counts as mapped.
 
 An example shown on two pages is mapped once, in either page's file. `pnpm parity` checks every

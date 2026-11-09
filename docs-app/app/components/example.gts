@@ -37,6 +37,13 @@ interface ExampleSignature {
      * preview follows the page.
      */
     dir?: 'ltr' | 'rtl'
+    /**
+     * Stretches the example across the preview, for one upstream shows full width: the chart
+     * demo (its preview's `[&_.preview>div]:w-full`) and the charts gallery's interactive
+     * charts. Centred in the preview, an example with no width of its own shrinks to fit its
+     * content. The parity map's `fullWidth` does the same on both parity stages.
+     */
+    fullWidth?: boolean
   }
 }
 
@@ -296,6 +303,7 @@ export class Example extends Component<ExampleSignature> {
                       class="example-preview guide-stage {{if this.dark 'dark'}}"
                       data-example={{@name}}
                       data-align={{if @align @align "center"}}
+                      data-full-width={{if @fullWidth "true"}}
                       data-style={{this.styleName}}
                       dir={{this.dir}}
                       style={{this.tokens}}
@@ -311,6 +319,7 @@ export class Example extends Component<ExampleSignature> {
                   class="example-preview guide-stage {{if this.dark 'dark'}}"
                   data-example={{@name}}
                   data-align={{if @align @align "center"}}
+                  data-full-width={{if @fullWidth "true"}}
                   data-style={{this.styleName}}
                   dir={{this.dir}}
                   style={{this.tokens}}

@@ -373,9 +373,9 @@ empty stage or a missing part fails however small the example is. Two pixels cou
 when they are more than about 8 levels of grey apart, so a 1px `--border` line or a `--muted`
 fill registers; pixelmatch still leaves anti-aliased edges out. A diff over the threshold (1% of
 the box's pixels) fails, unless the map gives that example its own threshold (one for both
-themes, or one for each) along with a written reason. Both pages showing nothing but the background is an error. The report, with the
-compared areas and their diff side by side, is written to `parity-report/index.html` (CI uploads
-it from `parity.yml`).
+themes, or one for each) along with a written reason. Both pages showing nothing but the
+background is an error. The report, with the compared areas and their diff side by side, is
+written to `parity-report/index.html` (CI uploads it from `parity.yml`).
 
 `parity/map/<component>.json`, one file per docs page, maps upstream example ids to Joinery
 examples (the format is in `parity/map/README.md`). With `--require-complete`, an upstream example
@@ -498,16 +498,18 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   of the colour-contrast rule only, and runs every other rule on them.
 - Examples are `.gts` files in `docs-app/app/examples/`, one per upstream example, named
   `<component>-<example>`, each exporting the example as its default export. Show one in a page
-  with `<Example @name="…" />` (add `@title`, and `@align="start"` where upstream's preview
-  aligns it). The frame has Preview, Template and Test tabs and a copy button. Above the
-  preview, switchers show it in any of the eight styles, base colours and radii, light or dark,
-  right to left, and in a 375, 768 or 1440px viewport (an `<iframe>` that wide, so the
-  breakpoints respond). The guide loads every style, each scoped to the previews that pick it
-  (`docs-app/joinery-css.mjs` builds that from the package's `dist/`, and what an app's sheet
-  sets on `:root`, the radius scale, it sets on the preview), and the base colour and radius
-  are tokens on the preview itself. A preview, like the parity route's stage, is rendered anew
-  when its style changes: a browser doesn't restyle what's inside an `@scope` root when its
-  `data-style` changes in place.
+  with `<Example @name="…" />` (add `@title`, `@align="start"` where upstream's preview aligns
+  it, and `@fullWidth={{true}}` where upstream shows it full width: the chart demo's
+  `[&_.preview>div]:w-full`, the charts gallery's interactive charts; map those with
+  `"fullWidth": true` too, so both parity stages widen them). The frame has Preview, Template
+  and Test tabs and a copy button. Above the preview, switchers show it in any of the eight
+  styles, base colours and radii, light or dark, right to left, and in a 375, 768 or 1440px
+  viewport (an `<iframe>` that wide, so the breakpoints respond). The guide loads every style,
+  each scoped to the previews that pick it (`docs-app/joinery-css.mjs` builds that from the
+  package's `dist/`, and what an app's sheet sets on `:root`, the radius scale, it sets on the
+  preview), and the base colour and radius are tokens on the preview itself. A preview, like
+  the parity route's stage, is rendered anew when its style changes: a browser doesn't restyle
+  what's inside an `@scope` root when its `data-style` changes in place.
 - An example lays itself out with upstream's Tailwind classes. `docs-app/app/styles/examples.css`
   compiles Tailwind's utilities from `docs-app/app/examples` only, with no preflight, into
   `@layer utilities` above Joinery's, so a class on a component overrides its style as on
@@ -544,9 +546,9 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   upstream's preview is, for the screenshot comparison. `?theme=dark` puts `.dark` on `<html>`
   and `?theme=light` (the default) puts `.light` there; either also pins `color-scheme`, so the
   browser's or OS's preference can't change the page. `?dir=rtl` lays it out right to left,
-  `?align=start|end` places it, and `?style=` and `?base=` pick a style and a base colour
-  (Nova and Neutral by default). The example's root carries `data-parity="<name>"`; an
-  unknown name renders `data-parity-missing` instead.
+  `?align=start|end` places it, `?fullWidth=true` stretches it across the stage, and `?style=`
+  and `?base=` pick a style and a base colour (Nova and Neutral by default). The example's root
+  carries `data-parity="<name>"`; an unknown name renders `data-parity-missing` instead.
 
 ## The website
 

@@ -1,0 +1,46 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/button-group.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* in buttonGroupVariants; keep on the element: group/button-group */
+:where(.jn-button-group) {
+  @apply flex w-fit items-stretch *:focus-visible:relative *:focus-visible:z-10 [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1;
+}
+
+/* in buttonGroupVariants (cva-variant orientation.horizontal) */
+:where(.jn-button-group-orientation-horizontal) {
+  @apply [&>*:not(:first-child)]:rounded-s-none [&>*:not(:first-child)]:border-s-0 [&>*:not(:last-child)]:rounded-e-none;
+}
+
+/* in buttonGroupVariants (cva-variant orientation.vertical) */
+:where(.jn-button-group-orientation-vertical) {
+  @apply flex-col [&>*:not(:first-child)]:rounded-t-none [&>*:not(:first-child)]:border-t-0 [&>*:not(:last-child)]:rounded-b-none;
+}
+
+/* in ButtonGroupText */
+:where(.jn-button-group-text) {
+  @apply flex items-center [&_svg]:pointer-events-none;
+}
+
+/* data-slot="button-group-separator" in ButtonGroupSeparator */
+:where(.jn-button-group-separator) {
+  @apply relative self-stretch data-horizontal:mx-px data-horizontal:w-auto data-vertical:my-px data-vertical:h-auto;
+}
+
+/*
+ * Written by hand, not by extract-classes.mjs, which reads one file: ButtonGroupSeparator
+ * renders upstream's Separator (apps/v4/registry/bases/radix/ui/separator.tsx), and these are
+ * that component's inline utilities. They come first in Separator's cn() call, so
+ * ButtonGroupSeparator's own classes beat them: the style sheet's `jn-button-group-separator`
+ * rule (`bg-input` in every style) beats `bg-border`, and `data-horizontal:w-auto` above beats
+ * `data-horizontal:w-full`. Those two are left out, so what remains overrides nothing the
+ * sheet's rule sets.
+ */
+:where(.jn-button-group-separator) {
+  @apply shrink-0 data-horizontal:h-px data-vertical:w-px data-vertical:self-stretch;
+}

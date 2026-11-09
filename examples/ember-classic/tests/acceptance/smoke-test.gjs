@@ -4,7 +4,13 @@ import { setupApplicationTest } from 'ember-qunit'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import * as ember from '@ember-joinery/ember'
 import * as testSupport from '@ember-joinery/test-support'
-import { Harness, KeyComboHarness } from '@ember-joinery/test-support'
+import {
+  Harness,
+  KeyComboHarness,
+  isInTopLayer,
+  placementOf,
+  pressEscape,
+} from '@ember-joinery/test-support'
 
 /** The app's disclosure, built on the primitives. */
 class DisclosureHarness extends Harness {
@@ -19,6 +25,23 @@ class DisclosureHarness extends Harness {
   }
 
   async toggle() {
+    await click(this.trigger)
+  }
+}
+
+/** The app's popover, on the layering primitives. */
+class TipHarness extends Harness {
+  static component = 'tip'
+
+  get trigger() {
+    return this.part('trigger')
+  }
+
+  get content() {
+    return this.queryPart('content')
+  }
+
+  async open() {
     await click(this.trigger)
   }
 }
@@ -77,6 +100,18 @@ module('Acceptance | smoke', function (hooks) {
 
     await disclosure.toggle()
     assert.strictEqual(disclosure.content, null, 'Presence let it go')
+    await a11yAudit()
+  })
+
+  test('the layering primitives work in a classic ember-cli build', async function (assert) {
+    await visit('/')
+    const tip = new TipHarness()
+    await tip.open()
+    assert.true(isInTopLayer(tip.content), 'in the top layer')
+    assert.strictEqual(placementOf(tip.content).side, 'bottom', 'anchored below its button')
+
+    await pressEscape()
+    assert.strictEqual(tip.content, null, 'Escape closed it')
     await a11yAudit()
   })
 })

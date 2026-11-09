@@ -1,4 +1,11 @@
 import Component from '@glimmer/component'
+import { tracked } from '@glimmer/tracking'
+import { array } from '@ember/helper'
+import { on } from '@ember/modifier'
+import { modifier } from 'ember-modifier'
+import { anchorTo } from '@ember-joinery/primitives/anchor'
+import { dismissable } from '@ember-joinery/primitives/dismiss'
+import { topLayer } from '@ember-joinery/primitives/layer'
 import { As } from '@ember-joinery/primitives/as'
 import { controllable } from '@ember-joinery/primitives/controllable-state'
 import { idFor } from '@ember-joinery/primitives/id'
@@ -34,6 +41,44 @@ class Disclosure extends Component {
   </template>
 }
 
+/**
+ * A popover on the layering primitives, so this build also covers Floating UI (their one
+ * runtime dependency outside Ember): the top layer, the anchor and the dismiss stack.
+ */
+class Tip extends Component {
+  @tracked open = false
+  button = null
+
+  keepButton = modifier(element => {
+    this.button = element
+  })
+
+  toggle = () => (this.open = !this.open)
+  close = () => (this.open = false)
+
+  <template>
+    <div data-test-jn="tip">
+      <button
+        type="button"
+        aria-expanded={{if this.open "true" "false"}}
+        data-test-jn-part="trigger"
+        {{this.keepButton}}
+        {{on "click" this.toggle}}
+      >{{@label}}</button>
+      {{#if this.open}}
+        <div
+          role="dialog"
+          aria-label={{@label}}
+          data-test-jn-part="content"
+          {{topLayer}}
+          {{anchorTo this.button side="bottom" sideOffset=4}}
+          {{dismissable onDismiss=this.close inside=(array this.button)}}
+        >{{yield}}</div>
+      {{/if}}
+    </div>
+  </template>
+}
+
 <template>
   <main>
     <h1>Joinery in a classic app</h1>
@@ -43,5 +88,6 @@ class Disclosure extends Component {
     </p>
     <p>Search with <KeyCombo @name="search" @keys="Ctrl+K" />.</p>
     <Disclosure @label="Details">The primitives work here too.</Disclosure>
+    <Tip @label="Help">Anchored in the top layer.</Tip>
   </main>
 </template>

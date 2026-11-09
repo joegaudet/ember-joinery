@@ -1,0 +1,16 @@
+{
+  "$comment": "The upstream commits Joinery is ported from. Only a sync PR moves these, and it ports everything that changed in between (see \"Upstream sync\" in CONTRIBUTING.md).",
+  "shadcn-ui": {
+    "repo": "shadcn-ui/ui",
+    "branch": "main",
+    "commit": "8ab27715521cbd4f87ae6886cd989cbb678f6de7",
+    "date": "2026-11-08"
+  },
+  "ember-primitives": {
+    "repo": "universal-ember/ember-primitives",
+    "branch": "main",
+    "commit": "9584c783bae34e6f0b628ec09a1e1f3cbdb4107e",
+    "date": "2026-11-06",
+    "version": "0.64.2"
+  }
+}

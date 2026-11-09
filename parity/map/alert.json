@@ -1,0 +1,10 @@
+{
+  "examples": {
+    "alert-demo": "alert-demo",
+    "alert-basic": "alert-basic",
+    "alert-destructive": "alert-destructive",
+    "alert-action": "alert-action",
+    "alert-colors": "alert-colors",
+    "alert-rtl": "alert-rtl"
+  }
+}

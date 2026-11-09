@@ -90,7 +90,11 @@ function componentsFor(id, inventory) {
 /**
  * The direction and alignment an upstream id is shown with on its docs page, and its style when
  * that isn't Nova (the Code Block and chat pages show theirs in Rhea). The reference app renders
- * each example in its page's style already; the guide's route needs `?style=` to match.
+ * each example in its page's style already; the guide's route needs `?style=` to match. Blocks
+ * and the charts gallery's charts aren't in a centred preview: a block fills its page, and the
+ * gallery stretches each chart's card down its grid cell. So both start at the top, which also
+ * puts each on a whole pixel on both stages (centred, a card of odd height sits half a pixel
+ * down, and every line in it blurs differently).
  */
 export function layoutFor(id, inventory) {
   const example = inventory.examples[id]
@@ -99,13 +103,13 @@ export function layoutFor(id, inventory) {
     if (example.style && example.style !== 'nova') layout.style = example.style
     return layout
   }
-  return {
-    dir: 'ltr',
-    align: inventory.blocks.some(block => block.name === id) ? 'start' : 'center',
-  }
+  const starts =
+    inventory.blocks.some(block => block.name === id) ||
+    inventory.charts.some(chart => chart.name === id)
+  return { dir: 'ltr', align: starts ? 'start' : 'center' }
 }
 
-const ENTRY_KEYS = new Set(['example', 'threshold', 'reason', 'fullWidth', 'skip'])
+const ENTRY_KEYS = new Set(['example', 'threshold', 'reason', 'fullWidth', 'region', 'skip'])
 
 const isFraction = value => typeof value === 'number' && value > 0 && value < 1
 
@@ -131,7 +135,8 @@ export function thresholdFor(entry, theme) {
  * `{ example, threshold?, reason?, fullWidth? }`, or `{ skip: reason }` for an example that can't
  * be compared (it still counts as mapped). A threshold is one fraction for both themes, or
  * `{ "light": …, "dark": … }`, and needs a reason. `fullWidth: true` stretches the example across
- * both stages, as upstream widens it (see parity/map/README.md).
+ * both stages, as upstream widens it, and `region` (a CSS selector) compares only the first
+ * element it matches on each page (see parity/map/README.md).
  */
 export function validateMapFile(component, json, inventory) {
   const errors = []
@@ -194,6 +199,9 @@ export function validateMapFile(component, json, inventory) {
     if (entry.fullWidth !== undefined && entry.fullWidth !== true) {
       errors.push(`${where}: "${id}": "fullWidth" is true, or left out`)
     }
+    if (entry.region !== undefined && (typeof entry.region !== 'string' || !entry.region.trim())) {
+      errors.push(`${where}: "${id}": "region" is a CSS selector for the element to compare`)
+    }
     entries.push({
       id,
       component,
@@ -201,6 +209,7 @@ export function validateMapFile(component, json, inventory) {
       threshold: entry.threshold ?? DEFAULT_THRESHOLD,
       ...(entry.reason && { reason: entry.reason }),
       ...(entry.fullWidth === true && { fullWidth: true }),
+      ...(typeof entry.region === 'string' && entry.region.trim() && { region: entry.region }),
     })
   }
   return { entries, errors }
@@ -488,7 +497,9 @@ function reportRow(result) {
       : ''
   const detail = result.error
     ? `<p class="error">${escapeHtml(result.error)}</p>`
-    : `<p>${percent(result.ratio)} of the ${boxSize(result.box)} content box differs (at ${result.box.x}, ${result.box.y}); threshold ${percent(result.threshold)}${
+    : `<p>${percent(result.ratio)} of the ${boxSize(result.box)} content box differs (at ${result.box.x}, ${result.box.y}${
+        result.region ? ` of each page's <code>${escapeHtml(result.region)}</code>` : ''
+      }); threshold ${percent(result.threshold)}${
         result.reason ? ` (${escapeHtml(result.reason)})` : ''
       }.${backgrounds}</p>`
   const title = `${escapeHtml(result.id)} <small>${escapeHtml(result.theme)} · ${escapeHtml(result.component)} → ${escapeHtml(result.example)}</small>`
@@ -716,6 +727,24 @@ function trackImages() {
 }
 
 /**
+ * Where the first element matching `selector` is on the page, in whole pixels that cover it, or
+ * null when nothing matches.
+ */
+function regionBox(selector) {
+  const element = document.querySelector(selector)
+  if (!element) return null
+  const rect = element.getBoundingClientRect()
+  const x = Math.floor(rect.left + window.scrollX)
+  const y = Math.floor(rect.top + window.scrollY)
+  return {
+    x,
+    y,
+    width: Math.ceil(rect.right + window.scrollX) - x,
+    height: Math.ceil(rect.bottom + window.scrollY) - y,
+  }
+}
+
+/**
  * Runs in the page: waits until every image has loaded (or failed) and been decoded, the
  * page's `<img>`s and those `trackImages()` saw loading off the page, then gives the app a
  * moment to render what loaded (an avatar swaps its fallback for an `<img>`) and looks again,
@@ -752,8 +781,11 @@ async function settleImages(timeout) {
   return [...images].filter(image => !image.complete).map(image => image.currentSrc || image.src)
 }
 
-/** Opens a page, waits until it has rendered, and screenshots it. */
-async function screenshot(context, url, { theme, ready, fontsUrl, fonts }) {
+/**
+ * Opens a page, waits until it has rendered, and screenshots it: the whole page, or with
+ * `region`, only the first element that selector matches.
+ */
+async function screenshot(context, url, { theme, ready, fontsUrl, fonts, region }) {
   const page = await context.newPage()
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
@@ -780,7 +812,13 @@ async function screenshot(context, url, { theme, ready, fontsUrl, fonts }) {
       return fonts.filter((_font, index) => !faces[index].length).map(font => font.family)
     }, fonts)
     if (unloaded.length) throw new Error(`these fonts didn't load: ${unloaded.join(', ')}`)
-    return await page.screenshot({ fullPage: true, animations: 'disabled', caret: 'hide' })
+    const options = { fullPage: true, animations: 'disabled', caret: 'hide' }
+    if (!region) return await page.screenshot(options)
+    const clip = await page.evaluate(regionBox, region)
+    if (!clip || !clip.width || !clip.height) {
+      throw new Error(`nothing on the page matches the region "${region}", or it has no size`)
+    }
+    return await page.screenshot({ ...options, clip })
   } catch (error) {
     throw new Error(`${url}: ${error.message}${errors.length ? `\n${errors.join('\n')}` : ''}`, {
       cause: error,
@@ -939,6 +977,7 @@ export async function parity(options, { log = console.log, root = repoRoot, font
           theme,
           threshold,
           ...(entry.reason && { reason: entry.reason }),
+          ...(entry.region && { region: entry.region }),
         }
         const file = kind => `images/${entry.id}-${theme}-${kind}.png`
         try {
@@ -947,6 +986,7 @@ export async function parity(options, { log = console.log, root = repoRoot, font
             ready: referenceReady,
             fontsUrl,
             fonts,
+            region: entry.region,
           })
           writeFileSync(join(reportDir, file('upstream')), upstream)
           const joinery = await screenshot(context, urls.joinery, {
@@ -954,6 +994,7 @@ export async function parity(options, { log = console.log, root = repoRoot, font
             ready: joineryReady,
             fontsUrl,
             fonts,
+            region: entry.region,
           })
           writeFileSync(join(reportDir, file('joinery')), joinery)
           const comparison = await comparePngs(upstream, joinery)

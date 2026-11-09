@@ -373,8 +373,9 @@ empty stage or a missing part fails however small the example is. Two pixels cou
 when they are more than about 8 levels of grey apart, so a 1px `--border` line or a `--muted`
 fill registers; pixelmatch still leaves anti-aliased edges out. A diff over the threshold (1% of
 the box's pixels) fails, unless the map gives that example its own threshold (one for both
-themes, or one for each) along with a written reason. Both pages showing nothing but the
-background is an error. The report, with the compared areas and their diff side by side, is
+themes, or one for each) along with a written reason, or compares only a `region` of it (a
+CSS selector, such as the chart inside a charts gallery card). Both pages showing nothing but
+the background is an error. The report, with the compared areas and their diff side by side, is
 written to `parity-report/index.html` (CI uploads it from `parity.yml`).
 
 `parity/map/<component>.json`, one file per docs page, maps upstream example ids to Joinery

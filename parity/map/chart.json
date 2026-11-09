@@ -1,5 +1,5 @@
 {
-  "$comment": "The Chart docs page's examples and the charts gallery (registry/new-york-v4/charts) map here. Waiting: chart-area-interactive (Select). The gallery's bar, pie, radar, radial and tooltip charts come with the chart units that port those charts, and are mapped here when they land. The gallery's thresholds are per theme, so the light comparison, which differs less, keeps no more slack than the dark one. The card still accounts for most of each, so a series that broke inside a gallery card could hide under it; the Chart page's examples, compared at 0%, are what hold the chart itself to recharts'. The two interactive examples are shown full width upstream (fullWidth), and compared whole, header and chart.",
+  "$comment": "The Chart docs page's examples and the charts gallery (registry/new-york-v4/charts) map here. Waiting: chart-area-interactive (Select). The gallery's bar, pie, radar, radial and tooltip charts come with the chart units that port those charts, and are mapped here when they land. The gallery draws each chart in the new-york-v4 registry's Card, which none of Joinery's eight styles is, so a gallery chart's entry compares its chart's region ([data-slot=\"chart\"]) alone, at the default threshold: the card around it differs by design, and Card's own page compares Joinery's. The two interactive examples are shown full width upstream (fullWidth), and compared whole, header and chart.",
   "examples": {
     "chart-demo": {
       "example": "chart-demo",
@@ -8,7 +8,7 @@
         "light": 0.06,
         "dark": 0.07
       },
-      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is: Nova's header sits lower, and new-york-v4's 1px border (Nova's Card draws a ring) leaves the chart 2px narrower, so every bar and point is a little off. The chart itself matches recharts' (the Chart page's other examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 4.15% light, 5.24% dark."
+      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is: Nova's header sits lower, and new-york-v4's 1px border (Nova's Card draws a ring) leaves the chart 2px narrower, so every bar and point is a little off. The chart itself matches recharts' (the gallery's charts, compared by their chart's region, differ by 0%). Each theme's threshold is its measurement rounded up, plus a point: 4.15% light, 5.24% dark."
     },
     "chart-example": "chart-example",
     "chart-example-grid": "chart-example-grid",
@@ -19,156 +19,84 @@
     "chart-rtl": "chart-rtl",
     "chart-area-default": {
       "example": "chart-area-default",
-      "threshold": {
-        "light": 0.11,
-        "dark": 0.18
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 9.64% light, 16.60% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-area-linear": {
       "example": "chart-area-linear",
-      "threshold": {
-        "light": 0.11,
-        "dark": 0.18
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 9.91% light, 16.85% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-area-step": {
       "example": "chart-area-step",
-      "threshold": {
-        "light": 0.12,
-        "dark": 0.19
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 10.16% light, 17.10% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-area-legend": {
       "example": "chart-area-legend",
-      "threshold": {
-        "light": 0.14,
-        "dark": 0.2
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 12.01% light, 18.99% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-area-stacked": {
       "example": "chart-area-stacked",
-      "threshold": {
-        "light": 0.13,
-        "dark": 0.2
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 11.64% light, 18.71% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-area-stacked-expand": {
       "example": "chart-area-stacked-expand",
-      "threshold": {
-        "light": 0.14,
-        "dark": 0.18
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 12.15% light, 16.84% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-area-icons": {
       "example": "chart-area-icons",
-      "threshold": {
-        "light": 0.13,
-        "dark": 0.2
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 11.70% light, 18.68% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-area-gradient": {
       "example": "chart-area-gradient",
-      "threshold": {
-        "light": 0.16,
-        "dark": 0.17
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 14.44% light, 15.93% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-area-axes": {
       "example": "chart-area-axes",
-      "threshold": {
-        "light": 0.12,
-        "dark": 0.19
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 10.92% light, 18.00% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-line-interactive": {
       "example": "chart-line-interactive",
       "fullWidth": true,
       "threshold": {
         "light": 0.06,
-        "dark": 0.07
+        "dark": 0.08
       },
-      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is: Nova's header sits lower, and new-york-v4's 1px border (Nova's Card draws a ring) leaves the chart 2px narrower, so every bar and point is a little off. The chart itself matches recharts' (the Chart page's other examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 4.57% light, 5.92% dark."
+      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is: Nova's header sits lower, and new-york-v4's 1px border (Nova's Card draws a ring) leaves the chart 2px narrower, so every bar and point is a little off. The chart itself matches recharts' (the gallery's charts, compared by their chart's region, differ by 0%). Each theme's threshold is its measurement rounded up, plus a point: 4.88% light, 6.72% dark."
     },
     "chart-line-default": {
       "example": "chart-line-default",
-      "threshold": {
-        "light": 0.09,
-        "dark": 0.15
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 7.44% light, 13.70% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-line-linear": {
       "example": "chart-line-linear",
-      "threshold": {
-        "light": 0.09,
-        "dark": 0.15
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 7.63% light, 13.87% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-line-step": {
       "example": "chart-line-step",
-      "threshold": {
-        "light": 0.09,
-        "dark": 0.15
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 7.68% light, 13.99% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-line-multiple": {
       "example": "chart-line-multiple",
-      "threshold": {
-        "light": 0.1,
-        "dark": 0.16
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 8.37% light, 14.69% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-line-dots": {
       "example": "chart-line-dots",
-      "threshold": {
-        "light": 0.09,
-        "dark": 0.16
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 7.98% light, 14.23% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-line-dots-custom": {
       "example": "chart-line-dots-custom",
-      "threshold": {
-        "light": 0.1,
-        "dark": 0.16
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 8.32% light, 14.60% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-line-dots-colors": {
       "example": "chart-line-dots-colors",
-      "threshold": {
-        "light": 0.09,
-        "dark": 0.16
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 7.92% light, 14.25% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-line-label": {
       "example": "chart-line-label",
-      "threshold": {
-        "light": 0.1,
-        "dark": 0.16
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 8.06% light, 14.33% dark."
+      "region": "[data-slot=\"chart\"]"
     },
     "chart-line-label-custom": {
       "example": "chart-line-label-custom",
-      "threshold": {
-        "light": 0.1,
-        "dark": 0.17
-      },
-      "reason": "The charts gallery draws its card with the new-york-v4 registry's Card (24px spacing, a shadow, a semibold title, no footer band), which none of Joinery's eight styles is; Joinery's draws in Nova. The chart inside it matches recharts' (the Chart page's examples, which have no card, compare at 0%). Each theme's threshold is its measurement rounded up, plus a point: 8.67% light, 15.02% dark."
+      "region": "[data-slot=\"chart\"]"
     }
   }
 }

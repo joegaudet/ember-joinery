@@ -18,13 +18,13 @@ pnpm --dir parity start            # Vite prints its URL; / lists every example
 
 `/<id>` renders one example, for instance `/button-demo`. Query parameters:
 
-| Parameter   | Values                                      | Default                      |
-| ----------- | ------------------------------------------- | ---------------------------- |
-| `theme`     | `light`, `dark`                             | `light`                      |
-| `dir`       | `ltr`, `rtl`                                | what the docs page uses      |
-| `align`     | `center`, `start`, `end`                    | what the docs page uses      |
-| `fullWidth` | `true`: the example fills the stage's width | off                          |
-| `base`      | a base colour from `registry/themes.ts`     | `neutral`, Joinery's default |
+| Parameter   | Values                                      | Default                                                             |
+| ----------- | ------------------------------------------- | ------------------------------------------------------------------- |
+| `theme`     | `light`, `dark`                             | `light`                                                             |
+| `dir`       | `ltr`, `rtl`                                | what the docs page uses                                             |
+| `align`     | `center`, `start`, `end`                    | what the docs page uses (`start` for the charts gallery and blocks) |
+| `fullWidth` | `true`: the example fills the stage's width | off                                                                 |
+| `base`      | a base colour from `registry/themes.ts`     | `neutral`, Joinery's default                                        |
 
 The ids are the docs pages' examples, the charts gallery and the blocks, as listed in
 `upstream/inventory.json`. Each renders in the style its docs page uses (Nova for most, Rhea for

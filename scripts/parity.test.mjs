@@ -222,6 +222,27 @@ test('validateMapFile takes fullWidth: true, and nothing else for it', () => {
   )
 })
 
+test('validateMapFile takes a region to compare, as a CSS selector', () => {
+  const region = '[data-slot="chart"]'
+  const { entries, errors } = validateMapFile(
+    'chart',
+    { examples: { 'chart-area-default': { example: 'chart-area-default', region } } },
+    INVENTORY,
+  )
+  assert.deepEqual(errors, [])
+  assert.equal(entries[0].region, region)
+  assert.deepEqual(
+    validateMapFile(
+      'chart',
+      { examples: { 'chart-area-default': { example: 'a', region: ' ' } } },
+      INVENTORY,
+    ).errors,
+    [
+      'parity/map/chart.json: "chart-area-default": "region" is a CSS selector for the element to compare',
+    ],
+  )
+})
+
 test('validateMapFile reports what is wrong with an entry', () => {
   const { errors } = validateMapFile(
     'button',
@@ -374,7 +395,11 @@ test('an example its page shows in another style gets that style on the guide ro
 test('layoutFor and pageUrls carry the docs page layout to both pages', () => {
   assert.deepEqual(layoutFor('button-rtl', INVENTORY), { dir: 'rtl', align: 'center' })
   assert.deepEqual(layoutFor('button-group-demo', INVENTORY), { dir: 'ltr', align: 'start' })
-  assert.deepEqual(layoutFor('chart-area-default', INVENTORY), { dir: 'ltr', align: 'center' })
+  assert.deepEqual(
+    layoutFor('chart-area-default', INVENTORY),
+    { dir: 'ltr', align: 'start' },
+    "the charts gallery's cards start at the top, as blocks do",
+  )
   assert.deepEqual(layoutFor('login-01', INVENTORY), { dir: 'ltr', align: 'start' })
   assert.deepEqual(
     pageUrls({

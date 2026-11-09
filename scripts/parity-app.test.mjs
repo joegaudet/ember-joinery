@@ -74,7 +74,7 @@ test('exampleEntries covers docs examples, charts and blocks with their layout',
       ['button-rtl', 'example', 'radix-nova', 'rtl', 'center'],
       ['bubble-demo', 'example', 'radix-rhea', 'ltr', 'start'],
       ['combobox-basic', 'example', 'base-nova', 'ltr', 'center'],
-      ['chart-area-default', 'chart', 'new-york-v4', 'ltr', 'center'],
+      ['chart-area-default', 'chart', 'new-york-v4', 'ltr', 'start'],
       ['login-01', 'block', 'radix-nova', 'ltr', 'start'],
     ],
   )

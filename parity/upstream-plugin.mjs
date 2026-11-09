@@ -66,7 +66,9 @@ export function exampleEntries(inventory) {
       base: 'radix',
       page: 'chart',
       direction: 'ltr',
-      align: 'center',
+      // The gallery stretches each card down its grid cell, so it starts at the top, as
+      // scripts/parity.mjs's layoutFor() asks.
+      align: 'start',
     })
   }
   for (const block of inventory.blocks) {

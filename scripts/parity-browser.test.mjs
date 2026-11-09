@@ -93,10 +93,18 @@ const REFERENCE = PAGE(`
   }, 50)
 `)
 
-/** The guide's /parity/<name>: the same button, one without its border, an empty stage, or none. */
+/**
+ * The guide's /parity/<name>: the same button, one without its border, one with a second button
+ * beside it, an empty stage, or none.
+ */
 const JOINERY = PAGE(`
   setTimeout(() => {
-    const examples = { same: button(), 'no-border': button('no-border'), empty: '' }
+    const examples = {
+      same: button(),
+      'no-border': button('no-border'),
+      beside: button() + button('extra'),
+      empty: '',
+    }
     document.body.innerHTML =
       name in examples
         ? stage(name, examples[name])
@@ -331,5 +339,39 @@ test(
     } finally {
       slow.close()
     }
+  },
+)
+
+test(
+  'a region compares only the element it selects, on each page',
+  { skip, timeout: 60_000 },
+  async () => {
+    const { code, results } = await run(['--themes', 'light'], {
+      map: {
+        // Joinery's page has a second button beside the first, outside the region.
+        'button-outline': { example: 'beside', region: '.button' },
+        'button-ghost': 'beside',
+        'button-secondary': { example: 'same', region: '.no-such-thing' },
+      },
+    })
+    assert.equal(code, 1)
+    const result = byKey(results)
+    const region = result['button-outline light']
+    assert.equal(
+      region.status,
+      'pass',
+      region.error ?? 'what lies outside the region is not compared',
+    )
+    assert.equal(region.ratio, 0)
+    assert.equal(region.region, '.button')
+    assert.deepEqual(
+      region.box,
+      { x: 0, y: 0, width: 122, height: 36 },
+      'the first button, no more',
+    )
+    assert.equal(result['button-ghost light'].status, 'fail', 'the whole page has the second one')
+    const missing = result['button-secondary light']
+    assert.equal(missing.status, 'error')
+    assert.match(missing.error, /nothing on the page matches the region "\.no-such-thing"/)
   },
 )

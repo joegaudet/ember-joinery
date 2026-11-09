@@ -237,3 +237,48 @@ they don't type into inputs or press buttons, which `typeIn` and `click` do.
 `RovingFocusGroupHarness` drives a `<RovingFocusGroup>` from
 `@ember-joinery/primitives/roving-focus`: `items` and `ids`, `item(id)`, the `focused` item,
 the `tabStop` Tab comes back to, `focus(id)` and `press(key)`.
+
+## Routing
+
+`setupRouting(owner, map, options)` gives a test its own routes, without scaffolding them in
+the app: it replaces the app's router with one that has `map`'s routes (and `rootURL`), starts
+it, and returns the router service. Call it before `visit()` or `render()`. `getRouter(owner)` is
+the router service, typed.
+
+```ts
+import { click, currentURL, visit } from '@ember/test-helpers'
+import { setupProperLinks } from '@ember-joinery/primitives/proper-links'
+import { setupRouting } from '@ember-joinery/test-support'
+
+test('the nav routes', async function (assert) {
+  setupRouting(this.owner, function () {
+    this.route('settings', function () {
+      this.route('profile')
+    })
+  })
+  setupProperLinks(this.owner) // plain <a href> links transition, as with @properLinks
+  this.owner.register('template:application', <template><a href="/settings/profile">Profile</a></template>)
+
+  await visit('/')
+  await click('a')
+  assert.strictEqual(currentURL(), '/settings/profile')
+})
+```
+
+In a rendering test it starts the router too, so what reads the URL (`qp`, `link`) has one once
+you `transitionTo()` it.
+
+## Observers
+
+`settled()` waits for the first report of an element that Joinery's `viewport` or `onResize`
+observes. The reports a scroll or a resize causes come in a later frame, so
+`waitForObservers()` waits two frames and settles, and `scrollIntoView(target)` scrolls an
+element (or a selector) into view as a user would, then waits:
+
+```ts
+import { scrollIntoView, waitForObservers } from '@ember-joinery/test-support'
+
+await scrollIntoView('[data-test-comments]') // what an InViewport holds renders
+box.style.width = '300px'
+await waitForObservers() // and {{onResize}} has heard of it
+```

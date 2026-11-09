@@ -20,6 +20,16 @@ function resolved(color: string): string {
 
 const iconOf = (item: HTMLElement) => item.querySelector<SVGElement>('.jn-rating-icon')!
 
+/**
+ * The space between one element's bottom and the next one's top, in CSS pixels: the test
+ * container is drawn scaled, so its boxes are measured in layout pixels.
+ */
+function spaceBetween(above: HTMLElement, below: HTMLElement): number {
+  const container = document.querySelector<HTMLElement>('#ember-testing')!
+  const scale = container.getBoundingClientRect().width / container.offsetWidth
+  return (below.getBoundingClientRect().top - above.getBoundingClientRect().bottom) / scale
+}
+
 module('Integration | components | rating', function (hooks) {
   setupRenderingTest(hooks)
 
@@ -56,6 +66,11 @@ module('Integration | components | rating', function (hooks) {
     assert.dom(star.element).hasClass('lucide').hasClass('jn-rating-icon')
     assert.strictEqual(rating.stars, '★ ★ ★ ☆ ☆')
     assert.strictEqual(rating.labelOf(3), '3 stars')
+    assert.strictEqual(
+      Math.round(spaceBetween(rating.part('label'), rating.part('items'))),
+      8,
+      'mb-2 under the legend',
+    )
     await a11yAudit()
   })
 
@@ -194,6 +209,11 @@ module('Integration | components | rating', function (hooks) {
     const shown = new RatingHarness('shown')
     assert.dom(shown.part('label')).hasTagName('span').hasText('4 of 5')
     assert.strictEqual(shown.summary, '')
+    assert.strictEqual(
+      Math.round(spaceBetween(shown.part('label'), shown.part('items'))),
+      8,
+      'the gap alone spaces a span label, as a legend’s margin does',
+    )
 
     const disabled = new RatingHarness('disabled')
     assert.true(disabled.isDisabled)

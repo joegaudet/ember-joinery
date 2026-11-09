@@ -24,7 +24,15 @@
 }
 
 :where(.jn-rating-label) {
-  @apply mb-2 p-0 text-sm leading-none font-medium;
+  @apply p-0 text-sm leading-none font-medium;
+}
+
+/*
+ * A legend isn't a flex item, so the root's gap doesn't space it from the stars: its margin
+ * does. A display-only rating's label is a span, which the gap spaces alone: 8px either way.
+ */
+:where(legend.jn-rating-label) {
+  @apply mb-2;
 }
 
 :where(.jn-rating-items) {

@@ -141,35 +141,68 @@ together.
 
 ## Releasing
 
-A release is cut by pushing a tag. Nothing publishes on merge.
+A release is cut by pushing a tag. Nothing publishes on a push or a merge: `release.yml`
+publishes only from a pushed `v*` tag, and `bootstrap-publish.yml` only when someone dispatches
+it by hand. `scripts/release-workflows.test.mjs`, in the gate, checks both.
 
-1. PRs that change a published package carry a changeset. While any are pending on `main`, CI
-   keeps a "chore: version packages" PR open with the next version and the changelogs.
+1. PRs that change a published package carry a changeset (`pnpm changeset`). While any are
+   pending on `main`, CI keeps a "chore: version packages" PR open, on the branch
+   `changeset-release/main`, with the next version and the changelogs.
 2. Merge that PR.
 3. Tag the merge commit with the new version and push the tag:
 
    ```bash
    git switch main && git pull
-   git tag -a v0.1.0 -m v0.1.0
-   git push origin v0.1.0
+   git tag -a v1.0.0 -m v1.0.0
+   git push origin v1.0.0
    ```
 
-`release.yml` checks that the tag is on `main` and matches every public package's version. It
-publishes whatever isn't already on npm through `scripts/publish.mjs` (OIDC trusted publishing
-with provenance; there is no `NPM_TOKEN`), then creates the GitHub release. If a run fails,
-re-run it: it skips what is already published.
+`release.yml` checks that the tag is on `main` and matches every public package's version. Then
+`pnpm release` builds the packages and publishes whatever isn't already on npm through
+`scripts/publish.mjs` (OIDC trusted publishing with provenance; there is no `NPM_TOKEN`), and the
+job creates the GitHub release. If a run fails, re-run it: it skips what is already published.
+The script replaces `changeset publish`, which hands the publish to pnpm, and pnpm supports
+neither OIDC nor provenance; its header explains. `node scripts/publish.mjs --dry-run` packs and
+checks every package without publishing anything (it asks the registry what is already there, so
+it needs the network).
 
 **A brand-new package** can't publish through OIDC, because npm only configures a trusted
 publisher for a name that already exists. Its first release goes out once through
 `bootstrap-publish.yml`, behind the `npm-bootstrap` environment, using a short-lived `NPM_TOKEN`
-environment secret (the file's header has the steps). After that, set
-`joegaudet/ember-joinery` / `release.yml` as the package's trusted publisher on npmjs.com.
+environment secret (the file's header has the steps). Dispatch it on `changeset-release/main`
+while the version PR is open, so each new name's first version is the release itself. After
+that, set `joegaudet/ember-joinery` / `release.yml` as the package's trusted publisher on
+npmjs.com; the tag push then finds nothing left to publish and only creates the GitHub release.
+Once every package has been published, delete the workflow and the environment, and restore the
+file from git history when a new package needs its first publish.
+
+**1.0.0** is that case for every package. The changesets that build up before the first release
+(`.changeset/core-packages.md` is a major bump from 0.0.0) become 1.0.0, and all of it goes out
+through `bootstrap-publish.yml`. The npm org `@ember-joinery` has to exist first; only the npm
+website can create one.
 
 The version PR is opened by a GitHub App, not `GITHUB_TOKEN`: GitHub runs no workflows for
-pushes made with `GITHUB_TOKEN`, so the PR would never get its required checks. The App's client
-ID is the repository variable `RELEASE_APP_CLIENT_ID`, and its private key is the secret
-`RELEASE_APP_PRIVATE_KEY`. Until both are set, the version job is skipped, and the release script
-opens the version PR as the person releasing.
+pushes made with `GITHUB_TOKEN`, so the PR would never get its required checks. One App can serve
+every repository that uses this workflow, Formwright's included. To set it up:
+
+1. Create a GitHub App (Settings → Developer settings → GitHub Apps → New) with webhooks off and
+   repository permissions **Contents: read and write** and **Pull requests: read and write**, or
+   reuse the one you have.
+2. Install it on this repository.
+3. Generate a private key, then in this repository (Settings → Secrets and variables → Actions)
+   add the variable `RELEASE_APP_CLIENT_ID` (the App's client ID) and the secret
+   `RELEASE_APP_PRIVATE_KEY` (the whole `.pem` file).
+
+Until both are set, the version job is skipped instead of failing, and you open the version PR
+yourself, on the same branch so `bootstrap-publish.yml` can run there:
+
+```bash
+git switch -c changeset-release/main origin/main
+pnpm changeset version
+git add -A && git commit -m 'chore: version packages'
+git push -u origin changeset-release/main
+gh pr create --base main --title 'chore: version packages' --body 'Versions and changelogs.'
+```
 
 ## The guide
 

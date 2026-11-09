@@ -226,34 +226,45 @@ export interface AvatarFallbackSignature {
 
 /** What the avatar shows while its image loads, when it fails, and when it has none. */
 class AvatarFallback extends Component<AvatarFallbackSignature> {
-  // Set in the constructor: a tracked field's initializer runs on first read, too late to see
-  // the starting `@delayMs`.
-  @tracked private delayed: boolean
+  /** Whether a `@delayMs` wait has run out: once it has, the fallback may show for good. */
+  @tracked private waited = false
   #timer: ReturnType<typeof setTimeout> | undefined
   #token: unknown
 
   constructor(owner: Owner, args: AvatarFallbackSignature['Args']) {
     super(owner, args)
-    const delay = args.delayMs
-    this.delayed = delay !== undefined
-    if (delay !== undefined) {
-      this.#token = waiter.beginAsync()
-      this.#timer = setTimeout(() => {
-        this.#end()
-        if (!isDestroying(this) && !isDestroyed(this)) this.delayed = false
-      }, delay)
-    }
-    registerDestructor(this, () => {
-      clearTimeout(this.#timer)
-      this.#end()
-    })
+    registerDestructor(this, () => this.#stop())
+  }
+
+  /**
+   * Whether it still waits out `@delayMs`. A new `@delayMs` while it waits starts the wait over,
+   * as Radix's effect does, and taking it away ends the wait; once it has run out, a new one
+   * changes nothing. Cached on `@delayMs`, as a resource.
+   */
+  @cached
+  get isWaiting(): boolean {
+    return this.#wait(this.args.delayMs, this.waited)
+  }
+
+  /** Stops the last wait, and starts one of `delay` unless there is none or it has run out. */
+  #wait(delay: number | undefined, waited: boolean): boolean {
+    this.#stop()
+    if (delay === undefined || waited) return false
+    this.#token = waiter.beginAsync()
+    this.#timer = setTimeout(() => {
+      this.#stop()
+      if (!isDestroying(this) && !isDestroyed(this)) this.waited = true
+    }, delay)
+    return true
   }
 
   get isShown(): boolean {
-    return !this.delayed && this.args.avatar.status !== 'loaded'
+    return !this.isWaiting && this.args.avatar.status !== 'loaded'
   }
 
-  #end(): void {
+  #stop(): void {
+    clearTimeout(this.#timer)
+    this.#timer = undefined
     if (this.#token === undefined) return
     waiter.endAsync(this.#token)
     this.#token = undefined
@@ -321,6 +332,12 @@ export interface AvatarSignature {
 export class Avatar extends Component<AvatarSignature> {
   /** Bumped to tell the template an image connected or went: see `connect`. */
   @tracked private version = 0
+  /**
+   * Whether its first render is over. An image with a `@src` of its own connects while it
+   * renders, after the avatar has read its status; till then, the status doesn't load the
+   * avatar's own `@src`, which would be a request for an image nothing shows.
+   */
+  @tracked private rendered = false
   // Untracked: an image connects while it renders, after the avatar has read its status.
   #connected: { image: object; loader: ImageLoader } | undefined
   #rootLoader: ImageLoader | undefined
@@ -328,6 +345,9 @@ export class Avatar extends Component<AvatarSignature> {
   constructor(owner: Owner, args: AvatarSignature['Args']) {
     super(owner, args)
     registerDestructor(this, () => this.#rootLoader?.destroy())
+    afterRender(() => {
+      if (!isDestroying(this) && !isDestroyed(this)) this.rendered = true
+    })
   }
 
   /** The loader for the avatar's own `@src`, or none without one. Cached, as a resource. */
@@ -343,11 +363,16 @@ export class Avatar extends Component<AvatarSignature> {
     return this.#rootLoader
   }
 
-  /** Where the image is: the connected image's, else the avatar's own `@src`'s, else `idle`. */
+  /**
+   * Where the image is: the connected image's, else the avatar's own `@src`'s, else `idle`. In
+   * the first render it is `idle` until an image showing the avatar's `@src` has loaded it.
+   */
   get status(): ImageLoadingStatus {
     void this.version
-    const loader = this.#connected?.loader ?? this.rootLoader
-    return loader?.status ?? 'idle'
+    const connected = this.#connected?.loader
+    if (connected) return connected.status
+    if (!this.rendered && this.#rootLoader === undefined) return 'idle'
+    return this.rootLoader?.status ?? 'idle'
   }
 
   get isLoading(): boolean {

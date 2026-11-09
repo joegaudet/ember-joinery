@@ -72,10 +72,10 @@ attributes you give it (`alt`, `class`).
 
 A `span` (or `@as`) with `data-test-jn-part="fallback"`, shown while the image isn't loaded.
 
-| Argument   | Type     | What it does                                                         |
-| ---------- | -------- | -------------------------------------------------------------------- |
-| `@delayMs` | `number` | Wait this long before showing it, so a fast connection never sees it |
-| `@as`      | tag name | The tag to render                                                    |
+| Argument   | Type     | What it does                                                                                         |
+| ---------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `@delayMs` | `number` | Wait this long before showing it, so a fast connection never sees it (a new value restarts the wait) |
+| `@as`      | tag name | The tag to render                                                                                    |
 
 ## Accessibility
 

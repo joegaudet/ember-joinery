@@ -172,10 +172,10 @@ takes Radix's `AvatarImage` props as arguments, and attributes (`alt`, `class`) 
 The `Fallback` part displays a fallback while the image loads, when it fails, and when there is
 none.
 
-| Argument   | Type     | Default | What it does                                                         |
-| ---------- | -------- | ------- | -------------------------------------------------------------------- |
-| `@delayMs` | `number` |         | Wait this long before showing it, so a fast connection never sees it |
-| `@as`      | tag name | `span`  | The tag to render                                                    |
+| Argument   | Type     | Default | What it does                                                                                         |
+| ---------- | -------- | ------- | ---------------------------------------------------------------------------------------------------- |
+| `@delayMs` | `number` |         | Wait this long before showing it, so a fast connection never sees it (a new value restarts the wait) |
+| `@as`      | tag name | `span`  | The tag to render                                                                                    |
 
 ### Badge
 

@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { getSettledState, render, settled, waitUntil } from '@ember/test-helpers'
+import { getSettledState, render, rerender, settled, waitUntil } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { Avatar, ImageLoader, type ImageLoadingStatus } from '@ember-joinery/primitives/avatar'
@@ -215,6 +215,91 @@ module('Integration | primitives | avatar', function (hooks) {
     await rendered
     assert.true(avatar.isError)
     assert.strictEqual(avatar.fallbackText, 'AL')
+    await a11yAudit()
+  })
+
+  test('a new @delayMs starts the wait over, as in Radix, and none ends it', async function (assert) {
+    class State {
+      @tracked delay: number | undefined = 60_000
+    }
+    const state = new State()
+    holdImages()
+    const rendered = render(
+      <template>
+        <Avatar @name="redelayed" as |a|>
+          <a.Image @src={{IMAGE}} alt="Ada" />
+          <a.Fallback @delayMs={{state.delay}}>AL</a.Fallback>
+        </Avatar>
+      </template>,
+    )
+    await waitUntil(() => PendingImage.made.length === 1)
+    const avatar = new AvatarHarness('redelayed')
+    assert.strictEqual(avatar.fallback, null, 'waiting out a minute')
+
+    state.delay = 50
+    await waitUntil(() => avatar.fallback !== null, { timeout: 2000 })
+    assert.strictEqual(avatar.fallbackText, 'AL', 'after the new, shorter wait')
+
+    state.delay = 60_000
+    await rerender() // not settled(): that would wait for the image, which the test holds
+    assert.strictEqual(avatar.fallbackText, 'AL', 'once it has shown, a new delay changes nothing')
+
+    PendingImage.made[0]!.fail()
+    await rendered
+    assert.true(avatar.isError)
+    await a11yAudit()
+  })
+
+  test('taking @delayMs away while it waits shows the fallback at once', async function (assert) {
+    class State {
+      @tracked delay: number | undefined = 60_000
+    }
+    const state = new State()
+    holdImages()
+    const rendered = render(
+      <template>
+        <Avatar @name="undelayed" as |a|>
+          <a.Image @src={{IMAGE}} alt="Ada" />
+          <a.Fallback @delayMs={{state.delay}}>AL</a.Fallback>
+        </Avatar>
+      </template>,
+    )
+    await waitUntil(() => PendingImage.made.length === 1)
+    const avatar = new AvatarHarness('undelayed')
+    assert.strictEqual(avatar.fallback, null)
+
+    state.delay = undefined
+    await waitUntil(() => avatar.fallback !== null, { timeout: 2000 })
+    assert.strictEqual(avatar.fallbackText, 'AL', 'at once, without waiting out the minute')
+
+    PendingImage.made[0]!.fail()
+    await rendered
+    assert.strictEqual(avatar.fallbackText, 'AL')
+    await a11yAudit()
+  })
+
+  test("with a @src on both, only the image's loads: the avatar's would show nowhere", async function (assert) {
+    holdImages()
+    const rendered = render(
+      <template>
+        <Avatar @src="https://example.test/avatar.png" @name="both" as |a|>
+          <a.Image @src={{IMAGE}} alt="Ada" />
+          <a.Fallback>AL</a.Fallback>
+        </Avatar>
+      </template>,
+    )
+    const avatar = new AvatarHarness('both')
+    await waitUntil(() => PendingImage.made.length > 0 && avatar.isLoading)
+
+    PendingImage.made[0]!.load()
+    await rendered
+    assert.true(avatar.isLoaded)
+    assert.strictEqual(avatar.src, IMAGE)
+    assert.deepEqual(
+      PendingImage.made.map(image => image.src),
+      [IMAGE],
+      'one request, for the image it shows',
+    )
     await a11yAudit()
   })
 

@@ -26,7 +26,7 @@ module('Example | dialog-demo', function (hooks) {
   setupRenderingTest(hooks)
 
   test('a profile form in a dialog: Save submits it, Cancel closes it', async function (assert) {
-    const submitted: Array<[string, FormDataEntryValue][]> = []
+    const submitted: Array<Array<[string, unknown]>> = []
     const record = (event: SubmitEvent) => {
       event.preventDefault()
       submitted.push([...new FormData(event.target as HTMLFormElement).entries()])

@@ -1,6 +1,12 @@
 {
-  "$comment": "Waiting for components that haven't landed: switch-description, switch-choice-card, switch-disabled, switch-invalid, switch-sizes and switch-rtl (Field). The Switch page also shows Joinery's own switch-thumb, which has no upstream counterpart, so it isn't mapped. The unit that lands Field ports these examples onto the Switch page and maps them here.",
+  "$comment": "The Switch page also shows Joinery's own switch-thumb, which has no upstream counterpart, so it isn't mapped.",
   "examples": {
-    "switch-demo": "switch-demo"
+    "switch-demo": "switch-demo",
+    "switch-description": "switch-description",
+    "switch-choice-card": "switch-choice-card",
+    "switch-disabled": "switch-disabled",
+    "switch-invalid": "switch-invalid",
+    "switch-sizes": "switch-sizes",
+    "switch-rtl": "switch-rtl"
   }
 }

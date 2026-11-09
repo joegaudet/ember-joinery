@@ -29,33 +29,35 @@ with `id` and `for`, or put it inside one. Its state is controlled with `@checke
 
 ## Description
 
-Upstream's example puts a description beside the switch with Field, and comes with it.
+Put a description beside the switch with [Field](/components/field.md).
+
+<Example @name="switch-description" @title="Description" />
 
 ## Choice Card
 
 Card-style selection where `FieldLabel` wraps the entire `Field` for a clickable card pattern.
-Upstream's example comes with Field.
+
+<Example @name="switch-choice-card" @title="Choice Card" />
 
 ## Disabled
 
-Add `@disabled` to the `Switch` component to disable the switch. Add the `data-disabled` prop
-to the `Field` component for styling. Upstream's example comes with Field.
+Add `@disabled` to the `Switch` component to disable the switch. Add `@disabled={{true}}` to the
+`Field` component (upstream's `data-disabled`) for styling.
+
+<Example @name="switch-disabled" @title="Disabled" />
 
 ## Invalid
 
 Add the `aria-invalid` attribute to the `Switch` component to indicate an invalid state. Add
-the `data-invalid` prop to the `Field` component for styling. Upstream's example comes with
-Field.
+`@invalid={{true}}` to the `Field` component (upstream's `data-invalid`) for styling.
+
+<Example @name="switch-invalid" @title="Invalid" />
 
 ## Size
 
-Use `@size` to change the size of the switch: `default` or `sm`. Upstream's example lays its
-two switches out with Field, and comes with it.
+Use `@size` to change the size of the switch: `default` or `sm`.
 
-```gts
-<Switch @size="sm" id="switch-size-sm" />
-<Switch @size="default" id="switch-size-default" />
-```
+<Example @name="switch-sizes" @title="Size" />
 
 ## Thumb
 
@@ -83,7 +85,8 @@ To style the thumb itself, select `[data-slot="switch-thumb"]` in your CSS (or
 
 The switch lays itself out right to left inside any element with `dir="rtl"` (see
 [Direction](/primitives/direction.md)): its thumb starts on the right and slides left.
-Upstream's right-to-left example comes with Field.
+
+<Example @name="switch-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 

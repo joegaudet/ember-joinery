@@ -22,6 +22,20 @@
   }
 }
 
+/*
+ * ui.shadcn.com's style variants (`style-lyra:ml-4` on collapsible-file-tree's content), as its
+ * globals.css defines them, but on the `data-style` the frame's preview and the parity route's
+ * stage carry, where upstream's previews carry a `style-<name>` class.
+ */
+@custom-variant style-vega (&:where([data-style='vega'] *));
+@custom-variant style-nova (&:where([data-style='nova'] *));
+@custom-variant style-lyra (&:where([data-style='lyra'] *));
+@custom-variant style-maia (&:where([data-style='maia'] *));
+@custom-variant style-mira (&:where([data-style='mira'] *));
+@custom-variant style-luma (&:where([data-style='luma'] *));
+@custom-variant style-sera (&:where([data-style='sera'] *));
+@custom-variant style-rhea (&:where([data-style='rhea'] *));
+
 @source '../examples';
 
 /*

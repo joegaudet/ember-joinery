@@ -85,7 +85,13 @@ Input controls; it comes with Field, which hasn't landed in Joinery yet.
 ## File Tree
 
 Use nested collapsibles to build a file tree. In a conversation, this is the File Tree pattern.
-Upstream's example is a Card with Tabs; it comes with Tabs, which hasn't landed in Joinery yet.
+
+<Example @name="collapsible-file-tree" @title="File Tree" />
+
+Upstream's `renderItem` calls itself for a folder's items; in Ember, a small component renders
+itself instead. Each folder's trigger is a [Button](/components/button.md), put on with the
+yielded `c.trigger` modifier, and the [Tabs](/components/tabs.md) in the card's header have no
+panels.
 
 ## RTL
 

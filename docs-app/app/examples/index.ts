@@ -33,6 +33,16 @@ export function exampleNames(): string[] {
     .sort()
 }
 
+/**
+ * The name of every example test in docs-app/tests/examples, A–Z. The guide's tests check that
+ * it matches exampleNames(), since a frame whose example has no test just drops its Test tab.
+ */
+export function exampleTestNames(): string[] {
+  return Object.keys(tests)
+    .map(path => path.slice('../../tests/examples/'.length, -'-test.gts'.length))
+    .sort()
+}
+
 export function hasExample(name: string): boolean {
   return `./${name}.gts` in modules
 }

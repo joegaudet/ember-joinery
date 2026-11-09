@@ -3,7 +3,7 @@
 `{{onResize}}` calls a function each time an element changes size, with its
 `ResizeObserverEntry`. Every `{{onResize}}` in the app shares one `ResizeObserver`, which is
 much cheaper than one each, and the browser's harmless "ResizeObserver loop" message doesn't
-fail tests or reach error trackers. They are ember-primitives' `onResize` and `resizeObserver`.
+fail tests or reach error trackers. It is ember-primitives' `onResize`.
 
 <Example @name="on-resize-measure" @title="A box that shows its size" />
 
@@ -22,17 +22,20 @@ class Panel extends Component {
 }
 ```
 
-The function runs once at the start, once the element has a size, and on each change. In
-JavaScript, `resizeObserver(this)` is the shared observer:
-`resizeObserver(this).observe(element, callback)` and `.unobserve(element, callback)`.
+The function runs once at the start, once the element has a size, and on each change. Pass a
+new function and the old one stops. In JavaScript, use the same shared observer with
+[`resizeObserver(this)`](/primitives/resize-observer.md).
 
 ## API
 
-| Export                    | What it does                                                           |
-| ------------------------- | ---------------------------------------------------------------------- |
-| `{{onResize callback}}`   | Calls `callback(entry)` at the start and on each resize                |
-| `resizeObserver(context)` | The app's shared observer: `observe(element, callback)`, `unobserve`   |
-| `ignoreROError()`         | Silences the "ResizeObserver loop" message (`resizeObserver` calls it) |
+| Export                  | What it does                                            |
+| ----------------------- | ------------------------------------------------------- |
+| `{{onResize callback}}` | Calls `callback(entry)` at the start and on each resize |
+
+### From ember-primitives
+
+The same modifier. ember-primitives' `on-resize` also re-exports `ignoreROError`; import it from
+[`resize-observer`](/primitives/resize-observer.md), where it lives in both.
 
 ## Testing
 

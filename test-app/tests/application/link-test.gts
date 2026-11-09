@@ -5,8 +5,13 @@ import { array } from '@ember/helper'
 import { on } from '@ember/modifier'
 import type { TOC } from '@ember/component/template-only'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
-import { isExternal, link } from '@ember-joinery/primitives/link'
-import { setupRouting } from '@ember-joinery/test-support'
+import {
+  dynamicSegments,
+  isActiveLink,
+  isExternalLink,
+  link,
+} from '@ember-joinery/primitives/link-helper'
+import { getRouter, setupRouting } from '@ember-joinery/test-support'
 
 /**
  * A link as a design system would write one on the helper: active state on `aria-current`
@@ -174,12 +179,36 @@ module('Application | primitives | link', function (hooks) {
     assert.dom('[data-external]').hasText('MDN')
     assert.deepEqual(activeTexts(), ['Home'])
 
-    assert.true(isExternal('https://developer.mozilla.org/en-US/'))
-    assert.false(isExternal(`${location.origin}/foo`), 'the same origin')
-    assert.false(isExternal('/foo'))
-    assert.false(isExternal('#top'))
-    assert.false(isExternal('?tab=2'))
-    assert.false(isExternal(''))
+    assert.true(isExternalLink('https://developer.mozilla.org/en-US/'))
+    assert.false(isExternalLink(`${location.origin}/foo`), 'the same origin')
+    assert.false(isExternalLink('/foo'))
+    assert.false(isExternalLink('#top'))
+    assert.false(isExternalLink('?tab=2'))
+    assert.false(isExternalLink(''))
+    await a11yAudit()
+  })
+
+  test('in JavaScript: isActiveLink and dynamicSegments', async function (assert) {
+    setupRouting(this.owner, function () {
+      this.route('forum', { path: '/forum/:forum_id' }, function () {
+        this.route('post', { path: '/post/:post_id' })
+      })
+    })
+    this.owner.register('template:application', <template>{{outlet}}</template>)
+    await visit('/forum/7/post/42?sort=new')
+    const router = getRouter(this.owner)
+
+    assert.true(isActiveLink(router, '/forum/7/post/42'), 'the path decides, query params aside')
+    assert.false(isActiveLink(router, '/forum/7/post/43'))
+    assert.false(isActiveLink(router, '/forum/7'), 'not a parent route')
+    assert.true(isActiveLink(router, '/forum/7', false, true), 'unless sub-paths count')
+    assert.true(isActiveLink(router, '/forum/7/post/42?sort=new', true))
+    assert.false(isActiveLink(router, '/forum/7/post/42?sort=old', true), 'the params must match')
+    assert.false(isActiveLink(router, 'https://example.com/forum/7/post/42'), 'never external')
+
+    const info = router.recognize('/forum/7/post/42')
+    assert.deepEqual(dynamicSegments(info), ['7', '42'], 'outermost route first')
+    assert.deepEqual(dynamicSegments(null), [])
     await a11yAudit()
   })
 })

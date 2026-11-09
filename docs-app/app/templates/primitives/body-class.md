@@ -28,7 +28,8 @@ ask for the same class; it stays until none of them does.
 
 ### From ember-primitives
 
-Two differences. A class `<body>` already had (from `index.html`, or your own code) is never
+ember-primitives' default export, `BodyClass`, is the named `bodyClass` here. Two other
+differences. A class `<body>` already had (from `index.html`, or your own code) is never
 taken off, even when a helper asked for it too; ember-primitives takes it off. And the classes
 apply as the helper renders, rather than on the next animation frame.
 

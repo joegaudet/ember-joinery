@@ -1,6 +1,6 @@
 import type { TOC } from '@ember/component/template-only'
 import { on } from '@ember/modifier'
-import { link } from '@ember-joinery/primitives/link'
+import { link } from '@ember-joinery/primitives/link-helper'
 import { service } from '@ember-joinery/primitives/service'
 
 /**

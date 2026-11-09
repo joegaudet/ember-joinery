@@ -2,7 +2,13 @@ import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
 import { render } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
-import { isElement, isNewable, isString, type Newable } from '@ember-joinery/primitives/narrowing'
+import {
+  isElement,
+  isNewable,
+  isNonNullableObject,
+  isString,
+  type Newable,
+} from '@ember-joinery/primitives/narrowing'
 
 class Point {
   x = 0
@@ -17,6 +23,20 @@ module('Integration | primitives | narrowing', function (hooks) {
     assert.false(isString(1))
     assert.false(isString(undefined))
     assert.false(isString(new String('boxed')), 'a String object is not a string')
+    await a11yAudit()
+  })
+
+  test('isNonNullableObject', async function (assert) {
+    assert.true(isNonNullableObject({}))
+    assert.true(isNonNullableObject([]))
+    assert.true(isNonNullableObject(new Point()))
+    assert.false(isNonNullableObject(null))
+    assert.false(isNonNullableObject(undefined))
+    assert.false(isNonNullableObject('text'))
+    assert.false(isNonNullableObject(Point), 'a class is a function, not an object')
+
+    const value: unknown = { x: 1 }
+    assert.true(isNonNullableObject(value) && 'x' in value, '`in` type-checks once narrowed')
     await a11yAudit()
   })
 

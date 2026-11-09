@@ -39,9 +39,9 @@ export interface LinkSignature {
 
 /**
  * Whether `href` goes to another origin than the page's. A path (`/about`), a hash (`#top`) or
- * a query (`?tab=2`) never does.
+ * a query (`?tab=2`) never does. It is ember-primitives' `isExternal`, from `helpers/link`.
  */
-export function isExternal(href: string): boolean {
+export function isExternalLink(href: string): boolean {
   if (!href) return false
   if (href.startsWith('#') || href.startsWith('/') || href.startsWith('?')) return false
   try {
@@ -61,7 +61,10 @@ function withoutRoot(path: string, rootURL: string): string | undefined {
 
 type RouteInfo = NonNullable<ReturnType<RouterService['recognize']>>
 
-/** The values of a route's dynamic segments, outermost route first, for `router.isActive`. */
+/**
+ * The values of a route's dynamic segments, outermost route first, for `router.isActive`. It is
+ * ember-primitives' `getParams`.
+ */
 export function dynamicSegments(info: RouteInfo | null): unknown[] {
   const params: Record<string, unknown>[] = []
   let current: RouteInfo | null = info
@@ -77,15 +80,15 @@ export function dynamicSegments(info: RouteInfo | null): unknown[] {
  * `/forum/1` is active on `/forum/1` and `/forum/1?sort=new`. `includeQueryParams` makes query
  * params count (`true` for all, or the names of the ones that count), and `activeOnSubPaths`
  * makes the routes below count too. A link to another origin, or outside the app's `rootURL`,
- * is never active.
+ * is never active. It is ember-primitives' `isActive`, from `helpers/link`.
  */
-export function isActive(
+export function isActiveLink(
   router: RouterService,
   href: string,
   includeQueryParams: boolean | string[] = false,
   activeOnSubPaths = false,
 ): boolean {
-  if (!href || isExternal(href)) return false
+  if (!href || isExternalLink(href)) return false
   const url = new URL(href, location.href)
   const rootURL = router.rootURL ?? '/'
   const path = withoutRoot(url.pathname, rootURL)
@@ -136,7 +139,8 @@ export function isActive(
  *     </a>
  *   {{/let}}
  *
- * It is ember-primitives' `link` helper, which its `Link` component renders with.
+ * It is ember-primitives' `link` helper (`helpers/link`), which its `Link` component renders
+ * with.
  */
 class Link extends Helper<LinkSignature> {
   @service declare router: RouterService
@@ -148,9 +152,9 @@ class Link extends Helper<LinkSignature> {
     if (typeof href !== 'string') throw new Error('Joinery: (link) needs the href')
     const router = this.router
     return {
-      isExternal: isExternal(href),
+      isExternal: isExternalLink(href),
       get isActive() {
-        return isActive(router, href, includeActiveQueryParams, activeOnSubPaths)
+        return isActiveLink(router, href, includeActiveQueryParams, activeOnSubPaths)
       },
       handleClick: (event: MouseEvent) => {
         const anchor = event.currentTarget

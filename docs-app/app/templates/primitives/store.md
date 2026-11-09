@@ -1,7 +1,7 @@
 # Store
 
-One instance of a class per context: per component, per route, or per anything else with an
-owner. Repeat calls return the same instance, and it is destroyed with its context. Ask with
+One instance of a class per context: per component, per route, or per any other object. Repeat
+calls return the same instance, and it is destroyed with its context. Ask with
 the owner itself and the whole app shares one, which is what [`service`](/primitives/service.md)
 does.
 
@@ -27,7 +27,8 @@ class Reply extends Component {
 ```
 
 The class is constructed with the context's owner, and the instance gets that owner, so
-`@service` injections work in it (after its constructor). For cleanup, call
+`@service` injections work in it (after its constructor). A context with no owner (a plain
+class of your own) gets an instance all the same, constructed with nothing. For cleanup, call
 `registerDestructor(this, …)` in the constructor: it runs when the context is destroyed. A
 function in place of the class makes the instance itself, once per context:
 `createStore(this, () => new Draft('Untitled'))`. The class (or function) is the key, so two
@@ -45,10 +46,11 @@ arrow functions that do the same thing make two instances.
 
 ### From ember-primitives
 
-| ember-primitives                 | Joinery                                                                     |
-| -------------------------------- | --------------------------------------------------------------------------- |
-| `createStore(context, Class)`    | The same, except that the class is constructed with the owner and needs one |
-| `findOwner`, `isOwner` (`utils`) | `findOwner`, `isOwner`, from `store`                                        |
+| ember-primitives                 | Joinery                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| `createStore(context, Class)`    | The same, except that the class is constructed with the owner, if there is one |
+| `findOwner`, `isOwner` (`utils`) | `findOwner`, `isOwner`, from `store`                                           |
+| `isNonNullableObject` (`utils`)  | `isNonNullableObject`, from [`narrowing`](/primitives/narrowing.md)            |
 
 ## Testing
 

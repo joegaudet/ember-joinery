@@ -11,7 +11,7 @@ app (`isExternal`), whether it is the current route (`isActive`, for an active s
 
 ```gts
 import { on } from '@ember/modifier'
-import { link } from '@ember-joinery/primitives/link'
+import { link } from '@ember-joinery/primitives/link-helper'
 
 <template>
   {{#let (link "/settings" activeOnSubPaths=true) as |l|}}
@@ -44,14 +44,28 @@ link; with `properLinks` on the router, it isn't needed.
 | `isActive`    | Whether the link is the current route                    |
 | `handleClick` | A click handler that routes a click on a link to the app |
 
-The module also exports `isExternal(href)`, `isActive(router, href, queryParams?, subPaths?)`
-and `dynamicSegments(routeInfo)`, for use in JavaScript.
+The module also exports, for use in JavaScript:
+
+| Export                                                | What it does                                       |
+| ----------------------------------------------------- | -------------------------------------------------- |
+| `isExternalLink(href)`                                | Whether `href` goes to another origin              |
+| `isActiveLink(router, href, queryParams?, subPaths?)` | Whether `href` is the current route, as `isActive` |
+| `dynamicSegments(routeInfo)`                          | A route's dynamic segment values, outermost first  |
 
 ### From ember-primitives
 
-The same helper. Joinery's `isActive` also handles the app's `rootURL` when query params count,
+The same helper, from `@ember-joinery/primitives/link-helper` (ember-primitives'
+`helpers/link`). Joinery's `isActive` also handles the app's `rootURL` when query params count,
 and with `includeActiveQueryParams=true` the link's own params must match too, not only the
-current URL's.
+current URL's. The module's other exports are renamed, so their names say what they are about
+next to everything else `@ember-joinery/primitives` exports:
+
+| ember-primitives (`helpers/link`) | Joinery           |
+| --------------------------------- | ----------------- |
+| `isExternal(href)`                | `isExternalLink`  |
+| `isActive(router, href, …)`       | `isActiveLink`    |
+| `getParams(routeInfo)`            | `dynamicSegments` |
+| `link` (also the default export)  | `link`            |
 
 ## Testing
 

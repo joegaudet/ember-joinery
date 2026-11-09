@@ -245,6 +245,10 @@ the app: it replaces the app's router with one that has `map`'s routes (and `roo
 it, and returns the router service. Call it before `visit()` or `render()`. `getRouter(owner)` is
 the router service, typed.
 
+Unlike ember-primitives' `setupRouting`, it doesn't decorate the test's router with
+`properLinks`, since this package doesn't depend on `@ember-joinery/primitives`. For plain
+`<a href>` links to transition, call `setupProperLinks(this.owner)` too, as below.
+
 ```ts
 import { click, currentURL, visit } from '@ember/test-helpers'
 import { setupProperLinks } from '@ember-joinery/primitives/proper-links'

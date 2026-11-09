@@ -23,12 +23,17 @@ function make<T extends object>(definition: Newable<T> | (() => T)): T {
 
 ## API
 
-| Export              | What it does                                                                   |
-| ------------------- | ------------------------------------------------------------------------------ |
-| `isString(value)`   | Whether `value` is a string (not a `String` object)                            |
-| `isElement(value)`  | Whether `value` is a DOM element, from this window or another (an iframe's)    |
-| `isNewable(value)`  | Whether `value` is a class, to call with `new`, rather than a function to call |
-| `Newable<T>` (type) | Anything `new` makes a `T` with                                                |
+| Export                       | What it does                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------------ |
+| `isString(value)`            | Whether `value` is a string (not a `String` object)                            |
+| `isNonNullableObject(value)` | Whether `value` is an object, not `null` (a function is not one)               |
+| `isElement(value)`           | Whether `value` is a DOM element, from this window or another (an iframe's)    |
+| `isNewable(value)`           | Whether `value` is a class, to call with `new`, rather than a function to call |
+| `Newable<T>` (type)          | Anything `new` makes a `T` with                                                |
 
-`isNewable` is the check ember-primitives keeps private in its `utils`, and `isElement` also
-accepts another window's elements, which `instanceof Element` doesn't.
+### From ember-primitives
+
+`isString`, `isElement` and `Newable` are its `narrowing` and `type-utils`; `isNewable` and
+`isNonNullableObject` are from its `utils`. `isElement` also accepts another window's elements,
+which `instanceof Element` doesn't. Its `utils`' `isOwner` and `findOwner` are in
+[`store`](/primitives/store.md).

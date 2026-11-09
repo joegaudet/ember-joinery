@@ -1,26 +1,70 @@
 {
   "$comment": "Waiting for components that haven't landed: code-block-trace (Trace), code-block-tabs (Tabs), code-block-chat (Message and Bubble), code-block-markdown (Message, Bubble and a Markdown renderer for Ember, upstream's Streamdown). The unit that lands each one ports its examples onto the Code Block page and maps them here.",
   "examples": {
-    "code-block-demo": "code-block-demo",
+    "code-block-demo": {
+      "example": "code-block-demo",
+      "threshold": 0.025,
+      "reason": "Only highlighted tokens differ: the reference app screenshots before Shiki has highlighted (it is ready once its fonts are), and Joinery colours tokens with GitHub's high-contrast themes, which meet WCAG AA where upstream's github-light does not. Upstream's code names a real model, and Joinery's sources name none, so its placeholder (of the same length, so the layout is the same) differs in those characters."
+    },
     "code-block-basic": "code-block-basic",
     "code-block-header": "code-block-header",
     "code-block-actions": "code-block-actions",
     "code-block-floating-actions": "code-block-floating-actions",
     "code-block-line-numbers": "code-block-line-numbers",
-    "code-block-start-line": "code-block-start-line",
-    "code-block-wrap": "code-block-wrap",
+    "code-block-start-line": {
+      "example": "code-block-start-line",
+      "threshold": 0.015,
+      "reason": "Only highlighted tokens differ: the reference app screenshots before Shiki has highlighted (it is ready once its fonts are), and Joinery colours tokens with GitHub's high-contrast themes, which meet WCAG AA where upstream's github-light does not."
+    },
+    "code-block-wrap": {
+      "example": "code-block-wrap",
+      "threshold": 0.02,
+      "reason": "Upstream's code names a real model, and Joinery's sources name none, so its placeholder (of the same length, so the layout is the same) differs in those characters."
+    },
     "code-block-highlighted-lines": "code-block-highlighted-lines",
     "code-block-diff": "code-block-diff",
     "code-block-height": "code-block-height",
-    "code-block-show-more": "code-block-show-more",
-    "code-block-show-more-scroll": "code-block-show-more-scroll",
+    "code-block-show-more": {
+      "example": "code-block-show-more",
+      "threshold": 0.03,
+      "reason": "Only highlighted tokens differ: the reference app screenshots before Shiki has highlighted (it is ready once its fonts are), and Joinery colours tokens with GitHub's high-contrast themes, which meet WCAG AA where upstream's github-light does not."
+    },
+    "code-block-show-more-scroll": {
+      "example": "code-block-show-more-scroll",
+      "threshold": 0.03,
+      "reason": "Only highlighted tokens differ: the reference app screenshots before Shiki has highlighted (it is ready once its fonts are), and Joinery colours tokens with GitHub's high-contrast themes, which meet WCAG AA where upstream's github-light does not."
+    },
     "code-block-size": "code-block-size",
     "code-block-destructive": "code-block-destructive",
-    "code-block-typeset": "code-block-typeset",
-    "code-block-rtl": "code-block-rtl",
-    "code-block-highlighting": "code-block-highlighting",
-    "code-block-languages": "code-block-languages",
-    "code-block-ansi": "code-block-ansi",
-    "code-block-streaming": "code-block-streaming"
+    "code-block-typeset": {
+      "example": "code-block-typeset",
+      "threshold": 0.025,
+      "reason": "Only highlighted tokens differ: the reference app screenshots before Shiki has highlighted (it is ready once its fonts are), and Joinery colours tokens with GitHub's high-contrast themes, which meet WCAG AA where upstream's github-light does not. Upstream's code names a real model, and Joinery's sources name none, so its placeholder (of the same length, so the layout is the same) differs in those characters."
+    },
+    "code-block-rtl": {
+      "example": "code-block-rtl",
+      "threshold": 0.015,
+      "reason": "Only highlighted tokens differ: the reference app screenshots before Shiki has highlighted (it is ready once its fonts are), and Joinery colours tokens with GitHub's high-contrast themes, which meet WCAG AA where upstream's github-light does not."
+    },
+    "code-block-highlighting": {
+      "example": "code-block-highlighting",
+      "threshold": 0.015,
+      "reason": "Only highlighted tokens differ: the reference app screenshots before Shiki has highlighted (it is ready once its fonts are), and Joinery colours tokens with GitHub's high-contrast themes, which meet WCAG AA where upstream's github-light does not."
+    },
+    "code-block-languages": {
+      "example": "code-block-languages",
+      "threshold": 0.015,
+      "reason": "Only highlighted tokens differ: the reference app screenshots before Shiki has highlighted (it is ready once its fonts are), and Joinery colours tokens with GitHub's high-contrast themes, which meet WCAG AA where upstream's github-light does not."
+    },
+    "code-block-ansi": {
+      "example": "code-block-ansi",
+      "threshold": 0.015,
+      "reason": "Only highlighted tokens differ: the reference app screenshots before Shiki has highlighted (it is ready once its fonts are), and Joinery colours tokens with GitHub's high-contrast themes, which meet WCAG AA where upstream's github-light does not."
+    },
+    "code-block-streaming": {
+      "example": "code-block-streaming",
+      "threshold": 0.025,
+      "reason": "Only highlighted tokens differ: the reference app screenshots before Shiki has highlighted (it is ready once its fonts are), and Joinery colours tokens with GitHub's high-contrast themes, which meet WCAG AA where upstream's github-light does not. Upstream's code names a real model, and Joinery's sources name none, so its placeholder (of the same length, so the layout is the same) differs in those characters."
+    }
   }
 }

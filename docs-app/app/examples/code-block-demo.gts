@@ -5,14 +5,15 @@ import { Download, FileCode, WrapText } from 'lucide'
 import { Button, Icon } from '@ember-joinery/ember'
 import { CodeBlock, highlightedCode } from '@ember-joinery/code-block'
 
-// Upstream's route names a real model in `model:`; Joinery's examples use a placeholder.
+// Upstream's route names a real model in `model:`; Joinery's examples use a
+// placeholder of the same length, so the code lays out the same.
 const code = `import { streamText } from "ai"
 
 export async function POST(request: Request) {
   const { messages } = await request.json()
 
   const result = streamText({
-    model: "provider/model",
+    model: "your-provider/your-model-id",
     system: "You are a helpful assistant. Answer in one short paragraph.",
     messages,
   })

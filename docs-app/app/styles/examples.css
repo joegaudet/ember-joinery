@@ -102,3 +102,43 @@
     list-style: none;
   }
 }
+
+/*
+ * Two of Code Block's examples put a bare paragraph (and Typeset's, a heading and inline code)
+ * beside the block, which on ui.shadcn.com sit on Tailwind's preflight: no margin, a heading at
+ * the text's size and weight, code in the theme's monospace font. The stage has no preflight
+ * (see app.css), so these examples alone get that share of it, keyed, as Typography's are, on
+ * the stage's `data-parity` (the parity route's) or `data-example` (the frame's). Typeset's own
+ * prose styles are ui.shadcn.com's typeset.css, which Joinery doesn't ship.
+ */
+@layer guide {
+  :where(
+      [data-parity='code-block-rtl'],
+      [data-parity='code-block-typeset'],
+      [data-example='code-block-rtl'],
+      [data-example='code-block-typeset']
+    )
+    :where(p, h3) {
+    margin: 0;
+  }
+
+  :where([data-parity='code-block-typeset'], [data-example='code-block-typeset']) :where(h3) {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  :where([data-parity='code-block-typeset'], [data-example='code-block-typeset']) :where(p > code) {
+    font-family: var(
+      --font-mono,
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      'Liberation Mono',
+      'Courier New',
+      monospace
+    );
+    font-size: 1em;
+  }
+}

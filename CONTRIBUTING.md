@@ -42,9 +42,10 @@ Overriding only the test app loads two copies of Ember.
 CI also runs the suite once more with CSS anchor positioning turned off, so the Floating UI
 fallback is tested too. Locally that's `pnpm test:anchor-fallback`: it builds the test app with
 `JOINERY_ANCHOR_FALLBACK=1`, which puts `globalThis.JOINERY_ANCHOR_FALLBACK = true` on the page
-before any module runs. Until `@ember-joinery/primitives/anchor` (†) exists, that run repeats
-the first. The contract for it: read that global each time it positions a part (not once at
-import), and use Floating UI whenever it is `true`.
+before any module runs. `@ember-joinery/primitives/anchor` reads that global each time it
+anchors an element (not once at import), and uses Floating UI whenever it is `true`. A test
+module can force the same with `setupAnchorFallback(hooks)` from `@ember-joinery/test-support`,
+so tests that care can cover both ways in one run.
 
 ## Generated files
 

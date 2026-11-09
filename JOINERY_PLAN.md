@@ -202,11 +202,13 @@ render in production, as Formwright's `data-test-fw-*` do.
 
 ### Floating parts and layering
 
-`primitives/anchor`: the Popover API (`popover="auto"` or `"manual"`) for the top layer, with
-no portals needed. CSS anchor positioning (`anchor-name`, `position-try-fallbacks`) where
-`CSS.supports` says so; otherwise `@floating-ui/dom` with offset, flip, shift, size and arrow.
-The same module provides ember-primitives' floating-ui component and modifier. CI runs the
-suite a second time with the fallback forced on.
+`primitives/layer`: the Popover API (`popover="auto"` or `"manual"`) for the top layer, with
+no portals needed. `primitives/anchor`: CSS anchor positioning (`anchor-name`,
+`position-try-fallbacks`) where `CSS.supports` says so; otherwise `@floating-ui/dom` with
+offset, flip, shift, size and arrow. The same module provides ember-primitives' floating-ui
+component, modifier and middleware. `primitives/dismiss`: the dismiss stack (Escape, pointers
+and focus outside, nested layers), and `primitives/portal` for the cases that need a portal. CI
+runs the suite a second time with the fallback forced on.
 
 ### Harnesses
 

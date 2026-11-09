@@ -835,6 +835,8 @@ module('Integration | primitives | command', function (hooks) {
           @onOpenChange={{state.setOpen}}
           @title="Palette"
           @description="Run a command"
+          @overlayClass="backdrop"
+          class="palette"
         >
           <Command as |c|>
             <c.Input aria-label="Search" />
@@ -848,6 +850,8 @@ module('Integration | primitives | command', function (hooks) {
     assert.true(palette.isOpen)
     assert.strictEqual(palette.label, 'Palette')
     assert.strictEqual(palette.descriptionText, 'Run a command')
+    assert.dom(palette.content).hasClass('palette', 'its attributes go on the dialog')
+    assert.dom(palette.overlay).hasClass('backdrop', '@overlayClass on the overlay')
     await palette.pressEscape()
     assert.false(state.open)
     assert.dom('button').isFocused()

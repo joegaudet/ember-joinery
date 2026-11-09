@@ -1221,6 +1221,8 @@ export type CommandDialogArgs = ControllableArgs<'open', boolean> & {
   description?: string
   /** Whether it is modal. Default `true`. */
   modal?: boolean
+  /** Classes for the overlay behind it, as cmdk's `overlayClassName`. */
+  overlayClass?: string
   /** A key combination that opens and closes it from anywhere on the page: `"mod+k"`. */
   hotkey?: string
   /** Its name, for `CommandDialogHarness` (`data-test-jn-name`). */
@@ -1245,7 +1247,8 @@ export interface CommandDialogSignature {
 /**
  * A `<Command>` in a modal dialog, as cmdk's `Command.Dialog`, on the primitives' Dialog: the
  * overlay, focus moving into the input and back, Escape and a press outside closing it. Put a
- * `<Command>` in it; `@hotkey` opens and closes it from anywhere:
+ * `<Command>` in it; `@hotkey` opens and closes it from anywhere. Its attributes, such as
+ * `class`, go on the dialog (cmdk's `contentClassName`), and `@overlayClass` on the overlay:
  *
  *   <CommandDialog @hotkey="mod+k" as |d|>
  *     <Command @onSelect={{fn d.setOpen false}} as |c|>…</Command>
@@ -1267,7 +1270,7 @@ export class CommandDialog extends Component<CommandDialogSignature> {
       {{hotkey @hotkey this.toggle}}
       as |d|
     >
-      <d.Overlay {{cmdk "overlay"}} />
+      <d.Overlay class={{@overlayClass}} {{cmdk "overlay"}} />
       <d.Content ...attributes {{cmdk "dialog"}}>
         <d.Title {{visuallyHidden}}>{{if @title @title "Command Palette"}}</d.Title>
         <d.Description {{visuallyHidden}}>{{if

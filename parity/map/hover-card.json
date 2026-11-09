@@ -1,0 +1,8 @@
+{
+  "$comment": "hover-card-demo is shown twice on the page (at the top and under Basic), and mapped once.",
+  "examples": {
+    "hover-card-demo": "hover-card-demo",
+    "hover-card-sides": "hover-card-sides",
+    "hover-card-rtl": "hover-card-rtl"
+  }
+}

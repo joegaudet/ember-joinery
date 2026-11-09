@@ -1,0 +1,9 @@
+{
+  "$comment": "Waiting for a component that hasn't landed: tooltip-keyboard (Kbd). The unit that lands Kbd ports it onto the Tooltip page and maps it here.",
+  "examples": {
+    "tooltip-demo": "tooltip-demo",
+    "tooltip-sides": "tooltip-sides",
+    "tooltip-disabled": "tooltip-disabled",
+    "tooltip-rtl": "tooltip-rtl"
+  }
+}

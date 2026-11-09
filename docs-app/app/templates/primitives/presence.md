@@ -44,8 +44,11 @@ over, as Radix does after React commits.
 | `@present`    | `boolean` | Whether the content should be shown                 |
 | `@forceMount` | `boolean` | Keep it rendered regardless, to animate it yourself |
 
-It yields `ref` (the modifier for the animated element) and `isPresent` (`@present`, so false
-while the content is on its way out).
+It yields `ref` (the modifier for the animated element), `isPresent` (`@present`, so false
+while the content is on its way out) and `isExiting` (true while it is on its way out: not
+present, and its exit animation hasn't ended). With `@forceMount`, `isExiting` says when to hide
+what stays rendered, as [Collapsible](/primitives/collapsible.md)'s content does: it keeps its
+element, and is `hidden` only once its exit animation ends.
 
 ## Testing
 

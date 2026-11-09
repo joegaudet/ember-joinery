@@ -260,6 +260,63 @@ module('Integration | primitives | presence', function (hooks) {
     await a11yAudit()
   })
 
+  test('isExiting is true while force-mounted content animates out', async function (assert) {
+    const state = new State()
+    await render(
+      <template>
+        <Animations />
+        <Presence @present={{state.open}} @forceMount={{true}} as |presence|>
+          <div
+            id="content"
+            class="animated"
+            hidden={{if state.open false (if presence.isExiting false true)}}
+            data-exiting={{if presence.isExiting "true" "false"}}
+            {{presence.ref}}
+            data-state={{if state.open "open" "closed"}}
+          >Hi</div>
+        </Presence>
+      </template>,
+    )
+    assert.dom('#content').hasAttribute('data-exiting', 'false', 'not while present')
+    await wait(60)
+
+    state.open = false
+    await rerender()
+    assert.dom('#content').hasAttribute('data-exiting', 'true', 'on its way out').isVisible()
+
+    await settled()
+    assert.dom('#content').hasAttribute('data-exiting', 'false', 'once the animation ends')
+    assert.dom('#content').exists('force-mounted, it stays').isNotVisible()
+
+    state.open = true
+    await rerender()
+    assert.dom('#content').hasAttribute('data-exiting', 'false').isVisible()
+    await settled()
+    await a11yAudit()
+  })
+
+  test('isExiting starts false, and without an animation it never turns true', async function (assert) {
+    const state = new State()
+    state.open = false
+    await render(
+      <template>
+        <Presence @present={{state.open}} @forceMount={{true}} as |presence|>
+          <p id="forced" {{presence.ref}} data-exiting={{if presence.isExiting "true" "false"}}>
+            Forced
+          </p>
+        </Presence>
+      </template>,
+    )
+    assert.dom('#forced').hasAttribute('data-exiting', 'false')
+
+    state.open = true
+    await settled()
+    state.open = false
+    await settled()
+    assert.dom('#forced').hasAttribute('data-exiting', 'false', 'it went at once')
+    await a11yAudit()
+  })
+
   test('a component part animates out through Presence', async function (assert) {
     await render(
       <template>

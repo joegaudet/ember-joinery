@@ -48,6 +48,12 @@ export interface PresenceSignature {
         ref: WithBoundArgs<typeof PresenceRef, 'presence'>
         /** `@present`: false while the content is on its way out. */
         isPresent: boolean
+        /**
+         * Whether the content is on its way out: `@present` is false and its exit animation
+         * hasn't ended. With `@forceMount`, which keeps the content rendered, it says when to
+         * hide it, as Radix's Collapsible does with `hidden`.
+         */
+        isExiting: boolean
       },
     ]
   }
@@ -105,6 +111,15 @@ export class Presence extends Component<PresenceSignature> {
 
   get isRendered(): boolean {
     if (this.args.forceMount || this.args.present) return true
+    return !this.exited && this.observed
+  }
+
+  /**
+   * Whether the content is leaving: not present, and not yet exited. While it is present this
+   * reads only `@present`, so the render that makes it present again may reset `exited`.
+   */
+  get isExiting(): boolean {
+    if (this.args.present) return false
     return !this.exited && this.observed
   }
 
@@ -240,7 +255,9 @@ export class Presence extends Component<PresenceSignature> {
 
   <template>
     {{#if this.isRendered}}
-      {{yield (hash ref=(modifier PresenceRef presence=this) isPresent=@present)}}
+      {{yield
+        (hash ref=(modifier PresenceRef presence=this) isPresent=@present isExiting=this.isExiting)
+      }}
     {{/if}}
   </template>
 }

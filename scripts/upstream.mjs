@@ -7,6 +7,7 @@
 //   node scripts/upstream.mjs inventory --check  fails if the committed inventory is stale
 //   node scripts/upstream.mjs changes            what changed upstream since the pins, by component
 //                [--json] [--out <file>]         (Markdown by default, as the tracking issue shows it)
+//                [--issue-body <file>]           also the Markdown cut to fit an issue body
 //
 // Upstream is data: this script reads its files and its git history, and never runs its code.
 
@@ -212,28 +213,65 @@ export function frontMatter(markdown) {
   return fields
 }
 
+// One JSX attribute: a bare name, a quoted string, a string in braces, or any other expression in
+// braces (one level of nested braces), which is kept as its source.
+const ATTRIBUTE =
+  /\s*([A-Za-z_][\w-]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|\{\s*"([^"]*)"\s*\}|\{\s*'([^']*)'\s*\}|(\{(?:[^{}]|\{[^{}]*\})*\})))?/y
+
+/**
+ * A JSX tag's attributes, in order: strings as strings, a bare name as `true`, `{true}` and
+ * `{false}` as booleans, and any other `{…}` as its source. Throws on anything else, rather than
+ * guessing.
+ */
+export function parseAttributes(body) {
+  const attributes = {}
+  let index = 0
+  while (body.slice(index).trim() !== '') {
+    ATTRIBUTE.lastIndex = index
+    const match = ATTRIBUTE.exec(body)
+    if (!match) throw new Error(`can't read the attributes at: ${body.slice(index).trim()}`)
+    const [, key, ...values] = match
+    const string = values.slice(0, 4).find(value => value !== undefined)
+    const expression = values[4]
+    attributes[key] =
+      string ??
+      (expression === undefined
+        ? true
+        : /^\{\s*(true|false)\s*\}$/.test(expression)
+          ? expression.includes('true')
+          : expression)
+    index = ATTRIBUTE.lastIndex
+  }
+  return attributes
+}
+
 /**
  * Every `<ComponentPreview>` on a docs page, in order: its example `name`, its `styleName`, and
- * the attributes that change how upstream lays the preview out.
+ * the attributes that change how upstream lays the preview out. Quoted values and `{…}` may hold
+ * `>` (`className="[&_.preview>div]:w-full"`), so a tag runs to the first `>` outside them. A
+ * preview without a name, or with attributes that can't be read, fails.
  */
 export function parsePreviews(markdown) {
   const previews = []
   const text = stripFences(markdown)
-  for (const match of text.matchAll(/<ComponentPreview\b([\s\S]*?)\/?>/g)) {
-    const body = match[1]
-    const attribute = key => {
-      const found = new RegExp(`(?:^|\\s)${key}=(?:"([^"]*)"|\\{"([^"]*)"\\})`).exec(body)
-      return found ? (found[1] ?? found[2]) : undefined
+  const tags = /<ComponentPreview\b((?:"[^"]*"|'[^']*'|\{(?:[^{}]|\{[^{}]*\})*\}|[^>"'{])*?)\/?>/g
+  for (const match of text.matchAll(tags)) {
+    const line = text.slice(0, match.index).split('\n').length
+    let attributes
+    try {
+      attributes = parseAttributes(match[1])
+    } catch (error) {
+      throw new Error(`<ComponentPreview> on line ${line}: ${error.message}`, { cause: error })
     }
-    const name = attribute('name')
-    if (!name) continue
-    const preview = { name }
+    if (typeof attributes.name !== 'string' || !attributes.name) {
+      throw new Error(`<ComponentPreview> on line ${line} has no name`)
+    }
+    const preview = { name: attributes.name }
     for (const key of PREVIEW_ATTRIBUTES) {
-      const value = attribute(key)
-      if (value !== undefined) preview[key] = value
+      if (typeof attributes[key] === 'string') preview[key] = attributes[key]
     }
-    if (/(?:^|\s)hideCode(?=\s|$|=\{true\})/.test(body)) preview.hideCode = true
-    preview.line = text.slice(0, match.index).split('\n').length
+    if (attributes.hideCode === true) preview.hideCode = true
+    preview.line = line
     previews.push(preview)
   }
   return previews
@@ -289,7 +327,13 @@ export function buildInventory(checkout, pins) {
     const page = basename(file, '.mdx')
     const markdown = readFileSync(at(`${PATHS.docs}/${file}`), 'utf8')
     const meta = frontMatter(markdown)
-    const previews = parsePreviews(markdown).map(preview => {
+    let parsed
+    try {
+      parsed = parsePreviews(markdown)
+    } catch (error) {
+      throw new Error(`${PATHS.docs}/${file}: ${error.message}`, { cause: error })
+    }
+    const previews = parsed.map(preview => {
       // The line is for messages, not the inventory, which shouldn't churn when prose moves.
       const entry = { ...preview }
       delete entry.line
@@ -496,20 +540,104 @@ function componentForExample(name, inventory) {
 }
 
 /**
- * What one changed upstream file means for Joinery: the component it belongs to (or null) and
- * what kind of file it is.
+ * ember-primitives' modules (a file under `src/` by its name, or a folder) and the Joinery
+ * components that cover them, from "ember-primitives parity" in JOINERY_PLAN.md: shadcn's page
+ * name where Joinery's component has one, and otherwise the `@ember-joinery/primitives` subpath.
+ * A module that isn't listed is reported as new.
+ */
+export const EMBER_PRIMITIVES = {
+  // Components: the headless part of the matching shadcn component.
+  accordion: ['accordion'],
+  avatar: ['avatar'],
+  breadcrumb: ['breadcrumb'],
+  dialog: ['dialog', 'alert-dialog', 'sheet'],
+  drawer: ['drawer'],
+  menu: ['dropdown-menu', 'context-menu', 'menubar'],
+  popover: ['popover'],
+  progress: ['progress'],
+  separator: ['separator'],
+  slider: ['slider'],
+  switch: ['switch'],
+  tabs: ['tabs'],
+  toggle: ['toggle'],
+  'toggle-group': ['toggle-group'],
+  'one-time-password': ['input-otp'],
+  otp: ['input-otp'],
+  resizable: ['resizable'],
+  'command-palette': ['command'],
+  // Components only ember-primitives has, and its building blocks.
+  rating: ['rating'],
+  'file-drop': ['file-drop'],
+  form: ['native-form'],
+  'floating-ui': ['anchor'],
+  portal: ['portal'],
+  'portal-targets': ['portal'],
+  'visually-hidden': ['visually-hidden'],
+  keys: ['keys'],
+  'color-scheme': ['color-scheme'],
+  tabster: ['focus'],
+  scroller: ['scroller'],
+  zoetrope: ['zoetrope'],
+  hero: ['hero'],
+  'sticky-footer': ['sticky-footer'],
+  link: ['link'],
+  'external-link': ['external-link'],
+  heading: ['heading'],
+  'incremental-each': ['incremental-each'],
+  shadowed: ['shadowed'],
+  // Utilities, one subpath each.
+  head: ['head'],
+  qp: ['qp'],
+  service: ['service'],
+  store: ['store'],
+  'body-class': ['body-class'],
+  'proper-links': ['proper-links'],
+  iframe: ['iframe'],
+  load: ['load'],
+  viewport: ['viewport'],
+  'in-viewport': ['viewport'],
+  'on-resize': ['on-resize'],
+  'resize-observer': ['on-resize'],
+  'dom-context': ['dom-context'],
+  narrowing: ['narrowing'],
+  'type-utils': ['narrowing'],
+  // Test helpers fold into @ember-joinery/test-support.
+  a11y: ['test-support'],
+  dom: ['test-support'],
+  routing: ['test-support'],
+}
+
+// ember-primitives' own plumbing: barrels, registries, private helpers and dev-only styles.
+const EMBER_PRIMITIVES_INTERNAL =
+  /^(-private|index|helpers|utils|template-registry|styles|violations|test-support|components)$/
+
+/** The ember-primitives module a file under `src/` belongs to (`components/layout/hero.gts` is `hero`). */
+function emberPrimitivesModule(path) {
+  const parts = path.replace(/^ember-primitives\/src\//, '').split('/')
+  const stem = name => name.replace(/(\.css)?\.(gts|ts|js|css)$/, '')
+  if (parts[0] === 'components') {
+    if (parts[1] === 'layout' && parts[2]) return stem(parts[2])
+    return parts[1] ? stem(parts[1]) : 'components'
+  }
+  if (['helpers', 'test-support', 'viewport'].includes(parts[0]) && parts[1]) return stem(parts[1])
+  return stem(parts[0])
+}
+
+/**
+ * What one changed upstream file means for Joinery: the component it belongs to (or null),
+ * every Joinery component it touches (`components`, where there can be several), and what kind
+ * of file it is.
  */
 export function classifyChange(source, path, inventory) {
   const file = basename(path)
   const stem = file.replace(/\.[^.]+$/, '')
   if (source === 'ember-primitives') {
-    const component = path.match(/^ember-primitives\/src\/components\/([^/]+?)(?:\/|\.)/)?.[1]
-    return component
-      ? { kind: 'primitive', component }
-      : {
-          kind: 'primitive-utility',
-          component: path.match(/^ember-primitives\/src\/([^/.]+)/)?.[1] ?? null,
-        }
+    const module = emberPrimitivesModule(path)
+    const kind = path.includes('/src/components/') ? 'primitive' : 'primitive-utility'
+    const components = EMBER_PRIMITIVES[module]
+    if (components) return { kind, component: components[0], components, module }
+    if (EMBER_PRIMITIVES_INTERNAL.test(module)) return { kind, component: null, module }
+    return { kind, component: null, module, unknown: true }
   }
   // Registries (`_registry.ts`) and tests describe upstream's build, not a component.
   if (file.startsWith('_') || /\.test\.[^.]+$/.test(file))
@@ -583,7 +711,7 @@ export function buildChangesReport({ pins: allPins, heads, files, styleChanges =
       // Rule-level changes are attributed below; the file itself is listed once here.
       other.push(entry)
     } else if (change.component) {
-      touch(change.component, entry)
+      for (const component of change.components ?? [change.component]) touch(component, entry)
       if (
         status === 'A' &&
         (change.kind === 'ui' || change.kind === 'docs') &&
@@ -592,6 +720,12 @@ export function buildChangesReport({ pins: allPins, heads, files, styleChanges =
         if (!added.includes(change.component)) added.push(change.component)
       }
     } else {
+      // An ember-primitives module Joinery doesn't map yet is new to Joinery.
+      if (change.unknown) {
+        entry.module = change.module
+        const name = `ember-primitives: ${change.module}`
+        if (status === 'A' && !added.includes(name)) added.push(name)
+      }
       other.push(entry)
     }
   }
@@ -715,6 +849,34 @@ export function renderChangesMarkdown(report) {
   return `${lines.join('\n')}\n`
 }
 
+/** GitHub refuses an issue body over 65,536 characters; this leaves room to spare. */
+export const ISSUE_BODY_LIMIT = 65000
+
+/**
+ * The report cut to fit an issue body: whole lines up to the limit, any open `<details>`
+ * closed, and a last line saying where the whole report is (`link`, the workflow run).
+ */
+export function fitIssueBody(markdown, { limit = ISSUE_BODY_LIMIT, link } = {}) {
+  if (markdown.length <= limit) return markdown
+  const footer = [
+    '',
+    `**Cut short to fit an issue.** The whole report is in ${link ? `[the workflow run's summary](${link})` : "the workflow run's summary"}.`,
+    '',
+  ].join('\n')
+  const kept = []
+  let length = 0
+  let open = 0
+  for (const line of markdown.split('\n')) {
+    const closing = open > 0 ? '\n</details>\n'.length * open : 0
+    if (length + line.length + 1 + closing + footer.length > limit) break
+    kept.push(line)
+    length += line.length + 1
+    open += (line.match(/<details>/g) ?? []).length - (line.match(/<\/details>/g) ?? []).length
+  }
+  for (; open > 0; open--) kept.push('', '</details>')
+  return `${kept.join('\n')}\n${footer}`
+}
+
 /** Fetches the branch head of a source (shallow, blobless) and lists the watched files that differ. */
 async function sourceChanges(name, { root, pins }) {
   const pin = pins[name]
@@ -790,11 +952,22 @@ async function main(argv) {
       const out = option('--out')
       if (out) writeFileSync(resolve(out), output)
       else process.stdout.write(output)
+      // The tracking issue's copy, cut to GitHub's limit, linking to this run when in Actions.
+      const issue = option('--issue-body')
+      if (issue) {
+        const {
+          GITHUB_SERVER_URL: server,
+          GITHUB_REPOSITORY: repo,
+          GITHUB_RUN_ID: run,
+        } = process.env
+        const link = server && repo && run ? `${server}/${repo}/actions/runs/${run}` : undefined
+        writeFileSync(resolve(issue), fitIssueBody(output, { link }))
+      }
       return
     }
     default:
       console.error(
-        'usage: node scripts/upstream.mjs <fetch | inventory [--check] | changes [--json] [--out <file>]>',
+        'usage: node scripts/upstream.mjs <fetch | inventory [--check] | changes [--json] [--out <file>] [--issue-body <file>]>',
       )
       process.exitCode = 1
   }

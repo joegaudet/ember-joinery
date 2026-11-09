@@ -3,19 +3,23 @@ import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { dirname, join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import {
   PATHS,
   SOURCES,
   buildChangesReport,
   buildInventory,
   changedStyleClasses,
+  changes,
   checkoutDir,
   classifyChange,
   componentForClass,
+  fetchAll,
   fetchSource,
+  fitIssueBody,
   frontMatter,
   ownerPage,
+  parseAttributes,
   parseChartRegistry,
   parseNameStatus,
   parsePreviews,
@@ -146,6 +150,53 @@ test('parsePreviews reads every preview, single- or multi-line, and skips code s
     ],
   )
   assert.equal(previews[0].line, 6)
+})
+
+test('parsePreviews reads a tag whose attribute values hold ">", whatever their order', () => {
+  const page = `<ComponentPreview
+  className="theme-blue [&_.preview>div]:w-full"
+  previewClassName={"h-auto"}
+  hideCode
+  styleName="radix-nova"
+  name="chart-demo"
+/>
+
+<ComponentPreview name="chart-rtl" styleName='base-nova' hideCode={false} direction={"rtl"} />
+`
+  assert.deepEqual(
+    parsePreviews(page).map(preview => {
+      const { line, ...rest } = preview
+      assert.equal(typeof line, 'number')
+      return rest
+    }),
+    [
+      {
+        name: 'chart-demo',
+        styleName: 'radix-nova',
+        previewClassName: 'h-auto',
+        className: 'theme-blue [&_.preview>div]:w-full',
+        hideCode: true,
+      },
+      { name: 'chart-rtl', styleName: 'base-nova', direction: 'rtl' },
+    ],
+  )
+  assert.throws(
+    () => parsePreviews('\n<ComponentPreview styleName="radix-nova" />\n'),
+    /line 2 has no name/,
+  )
+  assert.throws(
+    () => parsePreviews('<ComponentPreview name="x" =oops />'),
+    /line 1: can't read the attributes at: =oops/,
+  )
+})
+
+test('parseAttributes reads strings, flags, booleans and expressions', () => {
+  assert.deepEqual(
+    parseAttributes(
+      ' name="a>b" hideCode open={true} closed={false} items={[{ a: 1 }]} /'.slice(0, -1),
+    ),
+    { name: 'a>b', hideCode: true, open: true, closed: false, items: '{[{ a: 1 }]}' },
+  )
 })
 
 test('stripFences blanks fenced code but keeps the line count', () => {
@@ -347,31 +398,39 @@ test('classifyChange maps upstream files to Joinery components', () => {
   ]
   for (const [path, expected] of cases)
     assert.deepEqual(classifyChange('shadcn-ui', path, inventory), expected, path)
-  assert.deepEqual(
-    classifyChange(
-      'ember-primitives',
-      'ember-primitives/src/components/accordion/item.gts',
-      inventory,
-    ),
-    {
-      kind: 'primitive',
-      component: 'accordion',
-    },
-  )
-  assert.deepEqual(
-    classifyChange('ember-primitives', 'ember-primitives/src/components/rating.gts', inventory),
-    {
-      kind: 'primitive',
-      component: 'rating',
-    },
-  )
-  assert.deepEqual(
-    classifyChange('ember-primitives', 'ember-primitives/src/color-scheme.ts', inventory),
-    {
-      kind: 'primitive-utility',
-      component: 'color-scheme',
-    },
-  )
+  const primitive = path => classifyChange('ember-primitives', `ember-primitives/src/${path}`)
+  assert.deepEqual(primitive('components/accordion/item.gts'), {
+    kind: 'primitive',
+    component: 'accordion',
+    components: ['accordion'],
+    module: 'accordion',
+  })
+  assert.deepEqual(primitive('components/menu.gts').components, [
+    'dropdown-menu',
+    'context-menu',
+    'menubar',
+  ])
+  assert.deepEqual(primitive('components/one-time-password/input.gts').components, ['input-otp'])
+  assert.deepEqual(primitive('components/layout/hero.css').components, ['hero'])
+  assert.deepEqual(primitive('floating-ui/modifier.ts').components, ['anchor'])
+  assert.deepEqual(primitive('tabster.ts'), {
+    kind: 'primitive-utility',
+    component: 'focus',
+    components: ['focus'],
+    module: 'tabster',
+  })
+  assert.deepEqual(primitive('test-support/otp.ts').components, ['input-otp'])
+  assert.deepEqual(primitive('index.ts'), {
+    kind: 'primitive-utility',
+    component: null,
+    module: 'index',
+  })
+  assert.deepEqual(primitive('components/gauge.gts'), {
+    kind: 'primitive',
+    component: null,
+    module: 'gauge',
+    unknown: true,
+  })
 })
 
 test('the changes report groups by component and renders the tracking issue', () => {
@@ -441,4 +500,143 @@ test('an unchanged upstream renders as up to date', () => {
     buildChangesReport({ pins: PINS, heads, files: [], inventory: {} }),
   )
   assert.match(markdown, /Nothing Joinery tracks has changed\./)
+})
+
+test('changes fetches each branch head and reports what differs from the pins', async () => {
+  const work = mkdtempSync(join(tmpdir(), 'upstream-changes-'))
+  const commit = (dir, message) => {
+    git(dir, 'add', '-A')
+    git(dir, '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '--quiet', '-m', message)
+    return git(dir, 'rev-parse', 'HEAD')
+  }
+  // A local repository standing in for GitHub, serving partial clones as GitHub does.
+  const remote = (name, files) => {
+    const dir = fixture(files, join(work, name))
+    git(dir, 'init', '--quiet', '--initial-branch=main')
+    git(dir, 'config', 'uploadpack.allowFilter', 'true')
+    git(dir, 'config', 'uploadpack.allowAnySHA1InWant', 'true')
+    return dir
+  }
+  try {
+    const shadcn = remote('shadcn', upstreamFiles())
+    const shadcnPin = commit(shadcn, 'one')
+    // Upstream moves on: a ui source changes, a component arrives, an example goes, a style rule
+    // changes and a block changes.
+    fixture(
+      {
+        [`${PATHS.ui}/button.tsx`]: 'export const changed = true',
+        [`${PATHS.ui}/gauge.tsx`]: 'export {}',
+        [`${PATHS.docs}/gauge.mdx`]: '---\ntitle: Gauge\n---\n',
+        [`${PATHS.styles}/style-nova.css`]:
+          '.style-nova {\n  .cn-button {\n    @apply h-9;\n  }\n}\n',
+        [`${PATHS.blocks}/login-01/page.tsx`]: 'export default function Login() {}',
+      },
+      shadcn,
+    )
+    rmSync(join(shadcn, PATHS.examples('radix'), 'button-rtl.tsx'))
+    const shadcnHead = commit(shadcn, 'two')
+
+    const primitives = remote('primitives', {
+      'ember-primitives/src/components/menu.gts': 'one',
+      'ember-primitives/src/index.ts': 'one',
+      'ember-primitives/package.json': '{}',
+    })
+    const primitivesPin = commit(primitives, 'one')
+    fixture(
+      {
+        'ember-primitives/src/components/menu.gts': 'two',
+        'ember-primitives/src/index.ts': 'two',
+      },
+      primitives,
+    )
+    commit(primitives, 'two')
+
+    const root = join(work, 'joinery')
+    const pins = {
+      'shadcn-ui': {
+        repo: 'shadcn-ui/ui',
+        branch: 'main',
+        commit: shadcnPin,
+        url: `file://${shadcn}`,
+      },
+      'ember-primitives': {
+        repo: 'universal-ember/ember-primitives',
+        branch: 'main',
+        commit: primitivesPin,
+        url: `file://${primitives}`,
+      },
+    }
+    fixture({ 'upstream.json': JSON.stringify(pins) }, root)
+    await fetchAll({ root, log: () => {} })
+    writeInventory({ root, log: () => {} })
+
+    const report = JSON.parse(await changes({ root, json: true }))
+    assert.equal(report.heads['shadcn-ui'].commit, shadcnHead)
+    assert.match(report.heads['shadcn-ui'].date, /^\d{4}-\d{2}-\d{2}$/)
+    assert.equal(
+      git(checkoutDir('shadcn-ui', root), 'rev-parse', 'HEAD'),
+      shadcnPin,
+      'the checkout stays at the pin',
+    )
+    assert.deepEqual(report.added, ['gauge'])
+    const summary = entries =>
+      entries.map(entry =>
+        entry.kind === 'style-rules'
+          ? [entry.kind, entry.styles.join(), entry.classes.join()]
+          : [entry.kind, entry.status, entry.example ?? basename(entry.path)],
+      )
+    assert.deepEqual(summary(report.components.button), [
+      ['example', 'D', 'button-rtl'],
+      ['ui', 'M', 'button.tsx'],
+      ['style-rules', 'nova', 'cn-button'],
+    ])
+    assert.deepEqual(summary(report.components.gauge), [
+      ['docs', 'A', 'gauge.mdx'],
+      ['ui', 'A', 'gauge.tsx'],
+    ])
+    for (const component of ['dropdown-menu', 'context-menu', 'menubar']) {
+      assert.deepEqual(summary(report.components[component]), [['primitive', 'M', 'menu.gts']])
+    }
+    assert.deepEqual(summary(report.blocks['login-01']), [['block', 'M', 'page.tsx']])
+    assert.deepEqual(
+      report.other.map(entry => entry.path),
+      ['apps/v4/registry/styles/style-nova.css', 'ember-primitives/src/index.ts'],
+    )
+
+    const markdown = await changes({ root })
+    assert.match(
+      markdown,
+      /\| button \| example `button-rtl` \(D\)<br>ui `button.tsx` \(M\)<br>style rules in nova: `cn-button` \|/,
+    )
+    assert.match(markdown, /\| menubar \| primitive `menu.gts` \(M\) \|/)
+    assert.match(
+      markdown,
+      /universal-ember\/ember-primitives\*\*: \[`[0-9a-f]{7}`\]\(.*\) \(pinned\) →/,
+    )
+  } finally {
+    rmSync(work, { recursive: true, force: true })
+  }
+})
+
+test('fitIssueBody cuts a long report at a line, closes what it opened, and says so', () => {
+  const report = [
+    '<!-- joinery-upstream-watch -->',
+    '### Examples no docs page shows',
+    '',
+    '<details><summary>4000 examples</summary>',
+    '',
+    ...Array.from({ length: 4000 }, (_, index) => `- \`example-${index}\` (A)`),
+    '',
+    '</details>',
+    '',
+  ].join('\n')
+  assert.equal(fitIssueBody('short\n', { limit: 100 }), 'short\n')
+  const body = fitIssueBody(report, { limit: 2000, link: 'https://github.com/o/r/actions/runs/1' })
+  assert.ok(body.length <= 2000, `${body.length} characters`)
+  assert.ok(body.startsWith('<!-- joinery-upstream-watch -->\n'), 'the marker stays first')
+  assert.match(body, /- `example-\d+` \(A\)\n\n<\/details>\n\n\*\*Cut short to fit an issue\.\*\*/)
+  assert.match(
+    body,
+    /\[the workflow run's summary\]\(https:\/\/github\.com\/o\/r\/actions\/runs\/1\)/,
+  )
 })

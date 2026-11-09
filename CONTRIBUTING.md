@@ -170,11 +170,14 @@ pnpm parity --only button          # components or upstream example ids; all map
 
 `node scripts/upstream.mjs changes` lists what changed upstream since the commits in
 `upstream.json` (ui sources, style rules, examples, docs pages, charts, blocks, and
-ember-primitives' `src`), mapped to Joinery components, plus any new upstream components. A
-weekly workflow (`upstream.yml`) keeps a tracking issue up to date with it. A sync PR ports the
-changes and moves `upstream.json` forward in the same PR, then reruns
-`node scripts/upstream.mjs inventory` and `node scripts/port-styles.mjs`. Nothing else changes
-`upstream.json`; CI checks that the inventory and the ported style sheets match it.
+ember-primitives' `src`), mapped to Joinery components, plus any new upstream components.
+ember-primitives' modules map to Joinery's through `EMBER_PRIMITIVES` in the script, so add a
+module there when Joinery covers a new one. A weekly workflow (`upstream.yml`) keeps a tracking
+issue up to date with it. When the report is longer than an issue can hold, the issue gets the
+first part and links to the run's summary, which has all of it. A sync PR ports the changes and
+moves `upstream.json` forward in the same PR, then reruns `node scripts/upstream.mjs inventory`
+and `node scripts/port-styles.mjs`. Nothing else changes `upstream.json`; CI checks that the
+inventory and the ported style sheets match it.
 
 ## Changesets
 

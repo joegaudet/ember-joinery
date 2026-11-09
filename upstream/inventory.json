@@ -653,7 +653,9 @@
       "examples": [
         {
           "name": "chart-demo",
-          "styleName": "radix-nova"
+          "styleName": "radix-nova",
+          "className": "theme-blue [&_.preview]:h-auto [&_.preview]:p-0 [&_.preview]:lg:min-h-[404px] [&_.preview>div]:w-full [&_.preview>div]:border-none [&_.preview>div]:shadow-none",
+          "hideCode": true
         },
         {
           "name": "chart-example",
@@ -4037,7 +4039,8 @@
       "styleName": "radix-nova",
       "base": "radix",
       "style": "nova",
-      "file": "apps/v4/examples/radix/chart-demo.tsx"
+      "file": "apps/v4/examples/radix/chart-demo.tsx",
+      "className": "theme-blue [&_.preview]:h-auto [&_.preview]:p-0 [&_.preview]:lg:min-h-[404px] [&_.preview>div]:w-full [&_.preview>div]:border-none [&_.preview>div]:shadow-none"
     },
     "chart-example": {
       "page": "chart",

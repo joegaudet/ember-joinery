@@ -27,7 +27,9 @@ jobs:
         with:
           node-version: 24
       # Plain Node and git: the script needs no dependencies.
-      - run: node scripts/upstream.mjs changes --out upstream-changes.md
+      # The whole report goes in the run's summary. The issue gets a copy cut to GitHub's limit
+      # on an issue body (65,536 characters), which links back to this run when it is cut.
+      - run: node scripts/upstream.mjs changes --out upstream-changes.md --issue-body upstream-issue.md
       - run: cat upstream-changes.md >> "$GITHUB_STEP_SUMMARY"
       - name: Update the tracking issue
         env:
@@ -37,9 +39,9 @@ jobs:
           number=$(gh issue list --state open --limit 200 --json number,body \
             --jq 'map(select(.body | startswith("<!-- joinery-upstream-watch -->"))) | .[0].number // empty')
           if [ -n "$number" ]; then
-            gh issue edit "$number" --body-file upstream-changes.md
-          elif grep -q 'Nothing Joinery tracks has changed' upstream-changes.md; then
+            gh issue edit "$number" --body-file upstream-issue.md
+          elif grep -q 'Nothing Joinery tracks has changed' upstream-issue.md; then
             echo 'Upstream has not moved and there is no tracking issue to update.'
           else
-            gh issue create --title 'Upstream changes since the last sync' --body-file upstream-changes.md
+            gh issue create --title 'Upstream changes since the last sync' --body-file upstream-issue.md
           fi

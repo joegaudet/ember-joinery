@@ -12,9 +12,10 @@ Deviations from the intake, and why:
 - **The upstream source, corrected.** ui.shadcn.com no longer renders the `new-york-v4` registry.
   Its component pages render `apps/v4/registry/bases/radix/ui`, styled by one of eight style
   sheets (`apps/v4/registry/styles/style-*.css`, Nova by default), with examples from
-  `apps/v4/examples/radix/`. Joinery ports that, so the scope is the 500 examples the docs pages
-  reference, not new-york-v4's 244. Charts still come from `registry/new-york-v4/charts` (the
-  charts gallery), and blocks from `registry/bases/radix/blocks`.
+  `apps/v4/examples/radix/`. Joinery ports that, so the scope is the 497 examples the docs pages
+  reference (501 previews, as four examples show on two pages), not new-york-v4's 244. Charts
+  still come from `registry/new-york-v4/charts` (the charts gallery), and blocks from
+  `registry/bases/radix/blocks`.
 - **All eight shadcn styles.** Upstream's components now carry semantic classes (`cn-button`,
   `cn-button-variant-outline`) that each style sheet defines with `@apply`. Joinery ports the
   sheets mechanically (`cn-` becomes `jn-`), so it ships Nova as the default and the other seven
@@ -287,9 +288,11 @@ That is 67 docs pages: Toast and Sonner are two pages for one component.
 ### Size
 
 8 packages; ~67 shadcn components, ~15 components only ember-primitives has, ~20 utilities;
-~95 harness classes. The docs pages reference 500 examples, the charts gallery has 71, and we
+~95 harness classes. The docs pages reference 497 examples, the charts gallery has 70, and we
 port 4 of the 27 blocks. Every ported example becomes a guide example with its own harness test
-and axe audit, so about 575 example tests, plus the integration suite.
+and axe audit, so about 570 example tests, plus the integration suite. `--require-complete`
+expects all 567 docs examples and charts in the parity map (`upstream/inventory.json` has the
+current counts).
 
 ## Definition of done for every component
 
@@ -429,7 +432,7 @@ Each in its own package, with its example app in CI.
 ### Phase 10: Charts
 
 `@ember-joinery/chart`: a container with config and `--chart-N` colours, tooltip and legend,
-and area, bar, line, pie, radar and radial charts. All 71 upstream chart examples.
+and area, bar, line, pie, radar and radial charts. All 70 upstream chart examples.
 
 ### Phase 11: Chat components
 
@@ -529,7 +532,7 @@ workspace.
 - **ui.shadcn.com does not resolve from Claude's cloud sessions.** Everything here comes from
   its GitHub source, and parity runs in GitHub Actions, which needs no access to the site. If you
   want sessions to read the live site, add `ui.shadcn.com` to the environment's allowed hosts.
-- **Size.** About 575 example tests and ~95 harnesses. Upstream's examples serve as the spec, and
+- **Size.** About 570 example tests and ~95 harnesses. Upstream's examples serve as the spec, and
   big components split into several units.
 - **Pixel noise.** Fonts, anti-aliasing, animations, and whitespace differences between React
   and Glimmer DOM can trip the comparison. One pinned browser and font set, a threshold, and

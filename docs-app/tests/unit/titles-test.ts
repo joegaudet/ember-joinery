@@ -12,6 +12,7 @@ module('Unit | title', function () {
   test('acronyms keep their capitals', function (assert) {
     assert.strictEqual(title('input-otp'), 'Input OTP')
     assert.strictEqual(title('rtl'), 'RTL')
+    assert.strictEqual(title('dom-context'), 'DOM Context')
   })
 
   test("a section's index page is its overview", function (assert) {

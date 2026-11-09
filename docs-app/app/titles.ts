@@ -1,5 +1,11 @@
 /** Words the sidebar spells in capitals. */
-const ACRONYMS: Record<string, string> = { api: 'API', otp: 'OTP', rtl: 'RTL', ui: 'UI' }
+const ACRONYMS: Record<string, string> = {
+  api: 'API',
+  dom: 'DOM',
+  otp: 'OTP',
+  rtl: 'RTL',
+  ui: 'UI',
+}
 
 /**
  * A page or section's name in the sidebar, in title case as on ui.shadcn.com:

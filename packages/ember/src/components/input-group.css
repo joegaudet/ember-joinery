@@ -1,0 +1,58 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/input-group.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="input-group" in InputGroup; keep on the element: group/input-group */
+:where(.jn-input-group) {
+  @apply relative flex w-full min-w-0 items-center outline-none has-[>textarea]:h-auto;
+}
+
+/* in inputGroupAddonVariants */
+:where(.jn-input-group-addon) {
+  @apply flex cursor-text items-center justify-center select-none;
+}
+
+/* in inputGroupAddonVariants (cva-variant align.inline-start) */
+:where(.jn-input-group-addon-align-inline-start) {
+  @apply order-first;
+}
+
+/* in inputGroupAddonVariants (cva-variant align.inline-end) */
+:where(.jn-input-group-addon-align-inline-end) {
+  @apply order-last;
+}
+
+/* in inputGroupAddonVariants (cva-variant align.block-start) */
+:where(.jn-input-group-addon-align-block-start) {
+  @apply order-first w-full justify-start;
+}
+
+/* in inputGroupAddonVariants (cva-variant align.block-end) */
+:where(.jn-input-group-addon-align-block-end) {
+  @apply order-last w-full justify-start;
+}
+
+/* in inputGroupButtonVariants */
+:where(.jn-input-group-button) {
+  @apply flex items-center shadow-none;
+}
+
+/* in InputGroupText */
+:where(.jn-input-group-text) {
+  @apply flex items-center [&_svg]:pointer-events-none;
+}
+
+/* data-slot="input-group-control" in InputGroupInput */
+:where(.jn-input-group-input) {
+  @apply flex-1;
+}
+
+/* data-slot="input-group-control" in InputGroupTextarea */
+:where(.jn-input-group-textarea) {
+  @apply flex-1 resize-none;
+}

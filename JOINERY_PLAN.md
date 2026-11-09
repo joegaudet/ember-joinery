@@ -436,7 +436,9 @@ StickyFooter, Link, ExternalLink, Heading, IncrementalEach and Shadowed. All the
 
 ### Phase 9: Carousel, Data Table, Code Block
 
-Each in its own package, with its example app in CI.
+Each in its own package, with its example app in CI. Carousel's headless part, the `{{embla}}`
+modifier, ships in `@ember-joinery/carousel` rather than as a primitive, so `primitives` takes no
+Embla dependency.
 
 ### Phase 10: Charts
 

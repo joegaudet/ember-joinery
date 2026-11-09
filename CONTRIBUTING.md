@@ -124,6 +124,11 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    and `getNextMatch()` for typing to an item, and `focusable` and `{{restoreFocus}}` for
    finding focus a place. Test them with `tab()`, `pressKey()` and `typeKeys()` from
    `@ember-joinery/test-support`: a test can't press the real Tab key.
+   For overlays: `{{topLayer}}` for a part that shows above everything, `{{anchorTo}}` (or
+   `FloatingUI`) to place it against its trigger, `{{dismissable}}` to close it on Escape or a
+   press or focus outside (with its trigger in `inside`), and `Portal` only where a part must
+   render somewhere else. Test them with `press()`, `pressOutside()` and `pressEscape()`:
+   `click()` sends no `pointerdown`, which the dismiss stack listens for.
 3. Its styles come from the ported style sheets, `packages/ember/src/styles/<style>.css`, which
    `node scripts/port-styles.mjs` writes from upstream's (it renames `cn-` to `jn-`, drops the
    `.style-<name>` wrapper and puts each selector in `:where()`; don't edit them by hand).

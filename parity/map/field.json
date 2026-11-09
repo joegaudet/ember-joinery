@@ -1,0 +1,14 @@
+{
+  "$comment": "Waiting for components that haven't landed: field-demo, field-select and field-rtl (Select), field-slider (Slider). The unit that lands each ports its examples onto the Field page and maps them here.",
+  "examples": {
+    "field-input": "field-input",
+    "field-textarea": "field-textarea",
+    "field-fieldset": "field-fieldset",
+    "field-checkbox": "field-checkbox",
+    "field-radio": "field-radio",
+    "field-switch": "field-switch",
+    "field-choice-card": "field-choice-card",
+    "field-group": "field-group",
+    "field-responsive": "field-responsive"
+  }
+}

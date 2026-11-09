@@ -9,7 +9,7 @@ import {
   staticPartModifier,
   type StaticPartSignature,
 } from '../-private/static-part.gts'
-import { separatorPartAria, type Orientation } from '../-private/separator-aria.ts'
+import { separatorAria, type SeparatorOrientation } from '@ember-joinery/primitives/separator'
 
 /** How an item looks: transparent, outlined, or on a muted background. */
 export type ItemVariant = 'default' | 'outline' | 'muted'
@@ -270,14 +270,14 @@ export default class Item extends Component<ItemSignature> {
 /** What the separator part takes, as a component and as a modifier. */
 export interface ItemSeparatorOptions {
   /** Default `horizontal`. */
-  orientation?: Orientation
+  orientation?: SeparatorOrientation
   /** Whether assistive technology skips it. Default `true`, as upstream's. */
   decorative?: boolean
 }
 
 export interface ItemSeparatorSignature {
   Args: ItemSeparatorOptions & {
-    /** The tag to render instead of `div`. */
+    /** The tag to render instead of `div`, such as `hr` or `li`. */
     as?: TagName
   }
   Element: HTMLElement
@@ -285,26 +285,40 @@ export interface ItemSeparatorSignature {
 
 const SEPARATOR_CLASS = 'jn-item-separator'
 
-function separatorAttributes({ orientation, decorative }: ItemSeparatorOptions = {}): Record<
-  string,
-  string | undefined
-> {
+/**
+ * The separator's attributes: the primitives' `separatorAria()`, as upstream's ItemSeparator
+ * renders its Separator (horizontal and decorative unless you say), with its own `data-slot`.
+ * `tag` is the component's `@as`; the modifier's element is taken for a `div`.
+ */
+function separatorAttributes({
+  orientation = 'horizontal',
+  decorative = true,
+  tag,
+}: ItemSeparatorOptions & { tag?: string } = {}): Record<string, string | undefined> {
   return {
     'data-slot': 'item-separator',
-    ...separatorPartAria(orientation, decorative, 'horizontal'),
+    ...separatorAria({ orientation, decorative, tag }),
     'data-test-jn-part': 'separator',
   }
 }
 
-/** A line between a group's items: upstream's Separator, which is decorative unless you say. */
-const ItemSeparator: TOC<ItemSeparatorSignature> = <template>
-  {{#let (separatorAttributes orientation=@orientation decorative=@decorative) as |attributes|}}
+/**
+ * A line between a group's items: upstream's ItemSeparator, which renders its Separator, so
+ * it is decorative unless you pass `@decorative={{false}}`. An `<ItemGroup>` yields it too
+ * (`<g.Separator />`).
+ */
+export const ItemSeparator: TOC<ItemSeparatorSignature> = <template>
+  {{#let
+    (separatorAttributes orientation=@orientation decorative=@decorative tag=@as)
+    as |attributes|
+  }}
     <As
       @as={{@as}}
       class={{SEPARATOR_CLASS}}
       data-slot={{get attributes "data-slot"}}
       role={{get attributes "role"}}
       aria-orientation={{get attributes "aria-orientation"}}
+      aria-hidden={{get attributes "aria-hidden"}}
       data-orientation={{get attributes "data-orientation"}}
       data-test-jn-part={{get attributes "data-test-jn-part"}}
       ...attributes

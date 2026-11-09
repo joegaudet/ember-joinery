@@ -161,7 +161,8 @@ renders, upstream's `buttonGroupVariants`, for code of your own.
 ### Separator
 
 The group's `Separator` part visually divides buttons within a group: upstream's Separator, in
-the input colour, decorative (`role="none"`).
+the input colour, decorative (`role="none"` and `aria-hidden="true"`, from the primitives'
+[`separatorAria()`](/primitives/separator.md)).
 
 | Argument       | Type                         | Default      | What it does                          |
 | -------------- | ---------------------------- | ------------ | ------------------------------------- |
@@ -213,6 +214,8 @@ give `@as` a tag, or put the `text` modifier on your own component:
 |             | `data-test-jn`       | `button-group`                                                                    |
 | Separator   | `class`, `data-slot` | `jn-button-group-separator`, `button-group-separator`                             |
 |             | `role`               | `none`, or `separator` with `@decorative={{false}}`                               |
+|             | `aria-hidden`        | `true` while it is decorative                                                     |
+|             | `aria-orientation`   | `vertical`, on a vertical one with `@decorative={{false}}`                        |
 |             | `data-orientation`   | its `@orientation`                                                                |
 |             | `data-test-jn-part`  | `separator`                                                                       |
 | Text        | `class`              | `jn-button-group-text` (no `data-slot`, as upstream's)                            |

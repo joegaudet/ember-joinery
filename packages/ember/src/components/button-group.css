@@ -35,11 +35,12 @@
 /*
  * Written by hand, not by extract-classes.mjs, which reads one file: ButtonGroupSeparator
  * renders upstream's Separator (apps/v4/registry/bases/radix/ui/separator.tsx), and these are
- * that component's inline utilities. They come first in Separator's cn() call, so
- * ButtonGroupSeparator's own classes beat them: the style sheet's `jn-button-group-separator`
- * rule (`bg-input` in every style) beats `bg-border`, and `data-horizontal:w-auto` above beats
- * `data-horizontal:w-full`. Those two are left out, so what remains overrides nothing the
- * sheet's rule sets.
+ * that component's inline utilities, as in separator.css. They come first in Separator's cn()
+ * call, so ButtonGroupSeparator's own classes beat them: the style sheet's
+ * `jn-button-group-separator` rule (`bg-input` in every style) beats `bg-border`, and
+ * `data-horizontal:w-auto` above beats `data-horizontal:w-full`. Those two are left out, so what
+ * remains overrides nothing the sheet's rule sets. For the same reason it doesn't render
+ * Joinery's Separator: separator.css comes after this file, so its `bg-border` would win.
  */
 :where(.jn-button-group-separator) {
   @apply shrink-0 data-horizontal:h-px data-vertical:w-px data-vertical:self-stretch;

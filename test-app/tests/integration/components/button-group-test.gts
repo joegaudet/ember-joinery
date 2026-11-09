@@ -58,6 +58,8 @@ module('Integration | components | button-group', function (hooks) {
       .hasAttribute('data-slot', 'button-group-separator')
       .hasAttribute('data-orientation', 'vertical', 'vertical by default, between buttons')
       .hasAttribute('role', 'none', 'decorative, as upstream')
+      .hasAttribute('aria-hidden', 'true', "the primitive's: nothing in it is read")
+      .doesNotHaveAttribute('aria-orientation')
     assert.deepEqual(buttonGroupClasses().split(' '), [
       'jn-button-group',
       'group/button-group',
@@ -187,6 +189,7 @@ module('Integration | components | button-group', function (hooks) {
       .hasAttribute('role', 'separator')
       .hasAttribute('data-orientation', 'horizontal')
       .doesNotHaveAttribute('aria-orientation', "horizontal is the role's default")
+      .doesNotHaveAttribute('aria-hidden')
     assert.strictEqual(getComputedStyle(horizontal!).height, '1px', 'data-horizontal:h-px')
     assert
       .dom(own)

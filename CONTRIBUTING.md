@@ -194,7 +194,10 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    utilities go after the output by hand, under a comment that says so. They come first in its
    `cn()` call, so the part's own classes beat them: leave out each one the part's rule or
    inline utilities override in any style (ButtonGroupSeparator's `bg-input` beats Separator's
-   `bg-border`), since after the sheet it would win instead.
+   `bg-border`), since after the sheet it would win instead. Its ARIA comes from that
+   component's primitive (the parts spread `separatorAria()` from
+   `@ember-joinery/primitives/separator`), but the part doesn't render the styled component:
+   component CSS goes in A–Z, so `separator.css`, after `item.css`, would beat the part's rules.
 
 A component is done when it has everything listed under "Definition of done for every
 component" in the plan: its primitive, the styled component, its harness, tests written with the

@@ -14,6 +14,7 @@ import {
   ItemContent,
   ItemGroup,
   ItemMedia,
+  ItemSeparator,
   ItemTitle,
   asItem,
   itemAttributes,
@@ -299,6 +300,7 @@ module('Integration | components | item', function (hooks) {
       .hasClass('jn-item-separator')
       .hasAttribute('data-slot', 'item-separator')
       .hasAttribute('role', 'none', 'decorative, as upstream')
+      .hasAttribute('aria-hidden', 'true', "the primitive's: nothing in it is read")
       .hasAttribute('data-orientation', 'horizontal')
       .doesNotHaveAttribute('aria-orientation')
     const separator = getComputedStyle(line!)
@@ -309,7 +311,43 @@ module('Integration | components | item', function (hooks) {
     const small = new ItemGroupHarness('small')
     assert.strictEqual(getComputedStyle(small.element).rowGap, '10px', 'gap-2.5 with sm items')
     assert.dom(small.element).hasAttribute('role', 'group', 'your role wins')
-    assert.dom(small.separators[0]).hasAttribute('role', 'separator')
+    assert
+      .dom(small.separators[0])
+      .hasAttribute('role', 'separator')
+      .doesNotHaveAttribute('aria-hidden')
+    await a11yAudit()
+  })
+
+  test('ItemSeparator is exported too, takes @as, and its modifier makes your own element one', async function (assert) {
+    await render(
+      <template>
+        <ItemGroup @name="own" role="group" aria-label="Own" as |g|>
+          <Item @size="sm" as |i|><i.Content>One</i.Content></Item>
+          <ItemSeparator @as="hr" @decorative={{false}} />
+          <Item @size="sm" as |i|><i.Content>Two</i.Content></Item>
+          <div {{g.separator orientation="vertical"}}></div>
+        </ItemGroup>
+      </template>,
+    )
+    const [hr, own] = new ItemGroupHarness('own').separators
+    assert
+      .dom(hr)
+      .hasTagName('hr')
+      .hasClass('jn-item-separator')
+      .hasAttribute('data-slot', 'item-separator')
+      .doesNotHaveAttribute('role', 'an <hr> is a separator already')
+      .doesNotHaveAttribute('aria-hidden')
+    const line = getComputedStyle(hr!)
+    assert.strictEqual(line.height, '1px', 'h-px, on an <hr> too')
+    assert.strictEqual(line.marginTop, '8px', 'my-2')
+    assert
+      .dom(own)
+      .hasClass('jn-item-separator')
+      .hasAttribute('data-slot', 'item-separator')
+      .hasAttribute('role', 'none')
+      .hasAttribute('aria-hidden', 'true')
+      .hasAttribute('data-orientation', 'vertical')
+    assert.strictEqual(getComputedStyle(own!).width, '1px', 'data-vertical:w-px')
     await a11yAudit()
   })
 

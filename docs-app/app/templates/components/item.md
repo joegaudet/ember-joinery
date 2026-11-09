@@ -182,7 +182,7 @@ classes and attributes below, and keeps them current as its arguments change.
 
 A container that groups related items together with consistent styling: a list (`role="list"`),
 which yields `Separator`, a line between items, and its modifier, `separator`. It takes `@as`
-and `@name`, for `ItemGroupHarness`.
+and `@name`, for `ItemGroupHarness`. The module exports the separator too, as `ItemSeparator`.
 
 ```gts
 <ItemGroup as |g|>
@@ -194,13 +194,15 @@ and `@name`, for `ItemGroupHarness`.
 
 ### Separator
 
-A separator between items in a group: upstream's Separator, decorative (`role="none"`).
+A separator between items in a group (`g.Separator`, or `ItemSeparator`): upstream's
+Separator, decorative (`role="none"` and `aria-hidden="true"`, from the primitives'
+[`separatorAria()`](/primitives/separator.md)).
 
 | Argument       | Type                         | Default        | What it does                                          |
 | -------------- | ---------------------------- | -------------- | ----------------------------------------------------- |
 | `@orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | Which way it runs                                     |
 | `@decorative`  | `boolean`                    | `true`         | `false` gives it the `separator` role, outside a list |
-| `@as`          | tag name                     | `div`          | The tag to render                                     |
+| `@as`          | tag name                     | `div`          | The tag to render (an `<hr>` needs no `role`)         |
 
 A list holds only its items, so keep a group's separators decorative unless you give the group
 another role.
@@ -268,7 +270,8 @@ Displays a footer below the item content, the item's full width.
 | Separator   | `jn-item-separator`                                                   | `item-separator`   | `separator`                   |
 
 The item also has `data-variant` and `data-size`, the media `data-variant`, and the separator
-`data-orientation`.
+`data-orientation`, with `role="none"` and `aria-hidden="true"` (or with `@decorative={{false}}`,
+the `separator` role, and `aria-orientation="vertical"` when it is vertical).
 
 ## Keyboard interactions
 

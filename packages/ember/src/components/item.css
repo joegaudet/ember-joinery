@@ -55,9 +55,11 @@
 /*
  * Written by hand, not by extract-classes.mjs, which reads one file: ItemSeparator renders
  * upstream's Separator (apps/v4/registry/bases/radix/ui/separator.tsx), and these are that
- * component's inline utilities. ItemSeparator's own classes (the style sheet's
- * `jn-item-separator` rule, `my-2` in every style) come after them in Separator's cn() call
- * and override none of them, so they hold here, after the sheet, as they do upstream.
+ * component's inline utilities, the same as separator.css's. ItemSeparator's own classes (the
+ * style sheet's `jn-item-separator` rule, `my-2` in every style) come after them in Separator's
+ * cn() call and override none of them, so they hold here, after the sheet, as they do upstream.
+ * ItemSeparator doesn't render Joinery's Separator for them: separator.css comes after this
+ * file, so its rule would beat the part's own wherever the two meet.
  */
 :where(.jn-item-separator) {
   @apply shrink-0 bg-border data-horizontal:h-px data-horizontal:w-full data-vertical:w-px data-vertical:self-stretch;

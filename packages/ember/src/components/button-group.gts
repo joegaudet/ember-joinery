@@ -3,7 +3,7 @@ import { get } from '@ember/helper'
 import type { ComponentLike } from '@glint/template'
 import { As, type TagName } from '@ember-joinery/primitives/as'
 import { part, type PartModifier } from '@ember-joinery/primitives/part'
-import { separatorPartAria, type Orientation } from '../-private/separator-aria.ts'
+import { separatorAria, type SeparatorOrientation } from '@ember-joinery/primitives/separator'
 
 /** Which way a button group runs: a row, or a column. */
 export type ButtonGroupOrientation = 'horizontal' | 'vertical'
@@ -28,7 +28,7 @@ export function buttonGroupClasses({
 /** What the separator part takes, as a component and as a modifier. */
 export interface ButtonGroupSeparatorOptions {
   /** Default `vertical`: a line between two buttons in a row. */
-  orientation?: Orientation
+  orientation?: SeparatorOrientation
   /** Whether assistive technology skips it. Default `true`, as upstream's. */
   decorative?: boolean
 }
@@ -43,13 +43,20 @@ export interface ButtonGroupSeparatorSignature {
 
 const SEPARATOR_CLASS = 'jn-button-group-separator'
 
-function separatorAttributes({ orientation, decorative }: ButtonGroupSeparatorOptions = {}): Record<
-  string,
-  string | undefined
-> {
+/**
+ * The separator's attributes: the primitives' `separatorAria()`, as upstream's
+ * ButtonGroupSeparator renders its Separator (vertical and decorative unless you say), with
+ * its own `data-slot`. `tag` is the component's `@as`; the modifier's element is taken for a
+ * `div`.
+ */
+function separatorAttributes({
+  orientation = 'vertical',
+  decorative = true,
+  tag,
+}: ButtonGroupSeparatorOptions & { tag?: string } = {}): Record<string, string | undefined> {
   return {
     'data-slot': 'button-group-separator',
-    ...separatorPartAria(orientation, decorative, 'vertical'),
+    ...separatorAria({ orientation, decorative, tag }),
     'data-test-jn-part': 'separator',
   }
 }
@@ -59,13 +66,17 @@ function separatorAttributes({ orientation, decorative }: ButtonGroupSeparatorOp
  * and decorative unless you say. Outline buttons have borders and need none.
  */
 const Separator: TOC<ButtonGroupSeparatorSignature> = <template>
-  {{#let (separatorAttributes orientation=@orientation decorative=@decorative) as |attributes|}}
+  {{#let
+    (separatorAttributes orientation=@orientation decorative=@decorative tag=@as)
+    as |attributes|
+  }}
     <As
       @as={{@as}}
       class={{SEPARATOR_CLASS}}
       data-slot={{get attributes "data-slot"}}
       role={{get attributes "role"}}
       aria-orientation={{get attributes "aria-orientation"}}
+      aria-hidden={{get attributes "aria-hidden"}}
       data-orientation={{get attributes "data-orientation"}}
       data-test-jn-part={{get attributes "data-test-jn-part"}}
       ...attributes

@@ -262,7 +262,10 @@ computed `overflow` rather than adding a rule. Two template traps: where a file 
 ember-modifier's `modifier`, `(modifier …)` in its templates means that function, not the
 keyword (import it as `functionModifier`); and a curried `(modifier …)` is a new modifier
 whenever its arguments change, so give one that keeps state (a focus scope) an `enabled`
-argument rather than currying it in an `(if …)`.
+argument rather than currying it in an `(if …)`. A part whose size follows its trigger's (a
+select's list, `min-w-(--radix-select-trigger-width)`) calls `ignoreROError()` from
+`resize-observer.ts`: anchoring sets that width from a resize observer, and the browser's benign
+"ResizeObserver loop" message would otherwise fail the test.
 
 **Your own element.** Every part takes `@as`, a tag (`<Button @as="a" href="/login">`), through
 `As`. For a component of the caller's own, such as `LinkTo`, there is a part modifier made with

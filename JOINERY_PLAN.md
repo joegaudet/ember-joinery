@@ -583,6 +583,13 @@ workspace.
   owner of the newest rendered `<Toaster>`, and `setupToaster(hooks)` points it at each test's
   owner through `globalThis.JOINERY_TOAST_OWNER`, as `JOINERY_ANCHOR_FALLBACK` does for anchoring.
 - Classic apps need ember-auto-import ≥ 2 to consume `.gts` v2 addons; the classic example proves it.
+- **Where Select and Combobox part from upstream, for WCAG.** Radix's open Select hides the rest
+  of the page with `aria-hidden`, leaving the trigger focusable but hidden; Joinery's makes it
+  inert, as a modal dialog does. Base UI's Combobox leaves its chevron, clear and chip remove
+  buttons unnamed and gives its separator `role="separator"`, which a listbox may not hold;
+  Joinery's name the buttons (an argument with an English default each) and hide the separator
+  from assistive technology. Upstream's examples leave their comboboxes unlabelled, so the
+  guide's add `aria-label`. The pixels are upstream's.
 
 ## Next steps
 

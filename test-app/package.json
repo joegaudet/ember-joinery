@@ -22,6 +22,7 @@
     "@babel/plugin-transform-typescript": "^7.29.7",
     "@babel/runtime": "^7.29.7",
     "@ember-joinery/carousel": "workspace:*",
+    "@ember-joinery/chart": "workspace:*",
     "@ember-joinery/code-block": "workspace:*",
     "@ember-joinery/ember": "workspace:*",
     "@ember-joinery/primitives": "workspace:*",

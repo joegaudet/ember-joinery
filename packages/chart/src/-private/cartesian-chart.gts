@@ -11,7 +11,7 @@ import { hash } from '@ember/helper'
 import { on } from '@ember/modifier'
 import { htmlSafe, type SafeString } from '@ember/template'
 import { modifier } from 'ember-modifier'
-import type { ComponentLike } from '@glint/template'
+import type { ComponentLike, WithBoundArgs } from '@glint/template'
 import { idFor } from '@ember-joinery/primitives/id'
 import { resizeObserver } from '@ember-joinery/primitives/resize-observer'
 import { Registry } from './registry.ts'
@@ -44,6 +44,7 @@ import {
   YAxis,
   type ChartPart,
   type ChartRegistrar,
+  type DotArgs,
   type LabelList,
   type LabelPosition,
 } from './parts.gts'
@@ -61,21 +62,21 @@ import type { TextStyle } from './text-size.ts'
 /** What every cartesian chart yields: its parts, each a component bound to the chart. */
 export interface CartesianChartParts {
   /** The x-axis: recharts' `XAxis`. */
-  XAxis: ComponentLike<import('./parts.gts').XAxisSignature>
+  XAxis: WithBoundArgs<typeof XAxis, 'chart'>
   /** The y-axis: recharts' `YAxis`. */
-  YAxis: ComponentLike<import('./parts.gts').YAxisSignature>
+  YAxis: WithBoundArgs<typeof YAxis, 'chart'>
   /** Grid lines behind the marks: recharts' `CartesianGrid`. */
-  CartesianGrid: ComponentLike<import('./parts.gts').CartesianGridSignature>
+  CartesianGrid: WithBoundArgs<typeof CartesianGrid, 'chart'>
   /** An area series: recharts' `Area`. */
-  Area: ComponentLike<import('./parts.gts').AreaSignature>
+  Area: WithBoundArgs<typeof Area, 'chart'>
   /** A bar series: recharts' `Bar`. */
-  Bar: ComponentLike<import('./parts.gts').BarSignature>
+  Bar: WithBoundArgs<typeof Bar, 'chart'>
   /** A line series: recharts' `Line`. */
-  Line: ComponentLike<import('./parts.gts').LineSignature>
+  Line: WithBoundArgs<typeof Line, 'chart'>
   /** The tooltip: shadcn's `ChartTooltip`. */
-  ChartTooltip: ComponentLike<import('./parts.gts').ChartTooltipSignature>
+  ChartTooltip: WithBoundArgs<typeof ChartTooltip, 'chart'>
   /** The legend: shadcn's `ChartLegend`. */
-  ChartLegend: ComponentLike<import('./parts.gts').ChartLegendSignature>
+  ChartLegend: WithBoundArgs<typeof ChartLegend, 'chart'>
 }
 
 export interface CartesianChartSignature {
@@ -141,7 +142,20 @@ interface DrawnSeries {
   stroke?: string
   strokeWidth?: string | number
   strokeDasharray?: string
-  bars: { d: string; fill?: string; fillOpacity?: string | number; stroke?: string; strokeWidth?: string | number; x: number; y: number; width: number; height: number; radius: string; index: number; value: string }[]
+  bars: {
+    d: string
+    fill?: string
+    fillOpacity?: string | number
+    stroke?: string
+    strokeWidth?: string | number
+    x: number
+    y: number
+    width: number
+    height: number
+    radius: string
+    index: number
+    value: string
+  }[]
   dots: DotRender[]
   labels: DrawnLabel[]
 }
@@ -194,21 +208,61 @@ function labelPlacement(
   const DY = { start: '0.71em', middle: '0.355em', end: '0em' } as const
   switch (position) {
     case 'top':
-      return { x: x + width / 2, y: y - vertical * offset, anchor: 'middle', dy: DY[vertical > 0 ? 'end' : 'start'] }
+      return {
+        x: x + width / 2,
+        y: y - vertical * offset,
+        anchor: 'middle',
+        dy: DY[vertical > 0 ? 'end' : 'start'],
+      }
     case 'bottom':
-      return { x: x + width / 2, y: y + height + vertical * offset, anchor: 'middle', dy: DY[vertical > 0 ? 'start' : 'end'] }
+      return {
+        x: x + width / 2,
+        y: y + height + vertical * offset,
+        anchor: 'middle',
+        dy: DY[vertical > 0 ? 'start' : 'end'],
+      }
     case 'left':
-      return { x: x - horizontal * offset, y: y + height / 2, anchor: horizontal > 0 ? 'end' : 'start', dy: DY.middle }
+      return {
+        x: x - horizontal * offset,
+        y: y + height / 2,
+        anchor: horizontal > 0 ? 'end' : 'start',
+        dy: DY.middle,
+      }
     case 'right':
-      return { x: x + width + horizontal * offset, y: y + height / 2, anchor: horizontal > 0 ? 'start' : 'end', dy: DY.middle }
+      return {
+        x: x + width + horizontal * offset,
+        y: y + height / 2,
+        anchor: horizontal > 0 ? 'start' : 'end',
+        dy: DY.middle,
+      }
     case 'insideLeft':
-      return { x: x + horizontal * offset, y: y + height / 2, anchor: horizontal > 0 ? 'start' : 'end', dy: DY.middle }
+      return {
+        x: x + horizontal * offset,
+        y: y + height / 2,
+        anchor: horizontal > 0 ? 'start' : 'end',
+        dy: DY.middle,
+      }
     case 'insideRight':
-      return { x: x + width - horizontal * offset, y: y + height / 2, anchor: horizontal > 0 ? 'end' : 'start', dy: DY.middle }
+      return {
+        x: x + width - horizontal * offset,
+        y: y + height / 2,
+        anchor: horizontal > 0 ? 'end' : 'start',
+        dy: DY.middle,
+      }
     case 'insideTop':
-      return { x: x + width / 2, y: y + vertical * offset, anchor: 'middle', dy: DY[vertical > 0 ? 'start' : 'end'] }
+      return {
+        x: x + width / 2,
+        y: y + vertical * offset,
+        anchor: 'middle',
+        dy: DY[vertical > 0 ? 'start' : 'end'],
+      }
     case 'insideBottom':
-      return { x: x + width / 2, y: y + height - vertical * offset, anchor: 'middle', dy: DY[vertical > 0 ? 'end' : 'start'] }
+      return {
+        x: x + width / 2,
+        y: y + height - vertical * offset,
+        anchor: 'middle',
+        dy: DY[vertical > 0 ? 'end' : 'start'],
+      }
     default:
       return { x: x + width / 2, y: y + height / 2, anchor: 'middle', dy: DY.middle }
   }
@@ -231,7 +285,6 @@ function observeSize(
   observer.observe(element, onEntry)
   return () => observer.unobserve(element, onEntry)
 }
-
 
 interface SurfaceSignature {
   Args: { chart: CartesianChart }
@@ -468,7 +521,11 @@ const Surface: TOC<SurfaceSignature> = <template>
         <g class="recharts-zIndex-layer_600">
           {{#each @chart.series as |series|}}
             {{#if series.dots.length}}
-              <g class="recharts-layer recharts-{{series.type}}-dots" data-test-jn-part="dots" data-test-jn-value={{series.key}}>
+              <g
+                class="recharts-layer recharts-{{series.type}}-dots"
+                data-test-jn-part="dots"
+                data-test-jn-value={{series.key}}
+              >
                 {{#each series.dots as |dot|}}
                   {{#if dot.component}}
                     {{#let dot.component as |Dot|}}
@@ -571,7 +628,11 @@ const Surface: TOC<SurfaceSignature> = <template>
             {{/if}}
           {{/each}}
           {{#each @chart.labelLists as |list|}}
-            <g class="recharts-layer recharts-label-list" data-test-jn-part="labels" data-test-jn-value={{list.series}}>
+            <g
+              class="recharts-layer recharts-label-list"
+              data-test-jn-part="labels"
+              data-test-jn-value={{list.series}}
+            >
               {{#each list.items as |item|}}
                 <text
                   class={{list.class}}
@@ -604,7 +665,11 @@ const Surface: TOC<SurfaceSignature> = <template>
         class="recharts-tooltip-wrapper"
         tabindex="-1"
         style={{@chart.tooltipStyle}}
-        {{@chart.measureTooltip @chart.isTooltipActive @chart.tooltipLabel @chart.tooltipPayload.length}}
+        {{@chart.measureTooltip
+          @chart.isTooltipActive
+          @chart.tooltipLabel
+          @chart.tooltipPayload.length
+        }}
       >
         {{#let @chart.tooltipContent as |Content|}}
           <Content
@@ -623,7 +688,10 @@ const Surface: TOC<SurfaceSignature> = <template>
   </div>
 </template>
 
-export default class CartesianChart extends Component<CartesianChartSignature> implements ChartRegistrar {
+export default class CartesianChart
+  extends Component<CartesianChartSignature>
+  implements ChartRegistrar
+{
   readonly #parts = new Registry<ChartPart>()
   readonly chartId = idFor(this, 'chart')
 
@@ -706,7 +774,8 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
 
   get seriesParts(): (Area | Bar | Line)[] {
     return this.partList.filter(
-      (part): part is Area | Bar | Line => part instanceof Area || part instanceof Bar || part instanceof Line,
+      (part): part is Area | Bar | Line =>
+        part instanceof Area || part instanceof Bar || part instanceof Line,
     )
   }
 
@@ -721,7 +790,12 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
   get margin(): Required<Margin> {
     const margin = this.args.margin
     if (!margin) return DEFAULT_MARGIN
-    return { top: margin.top ?? 0, right: margin.right ?? 0, bottom: margin.bottom ?? 0, left: margin.left ?? 0 }
+    return {
+      top: margin.top ?? 0,
+      right: margin.right ?? 0,
+      bottom: margin.bottom ?? 0,
+      left: margin.left ?? 0,
+    }
   }
 
   axisSettings(part: XAxis | YAxis | undefined, axis: 'x' | 'y'): AxisSettings {
@@ -733,11 +807,14 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
       return settings
     }
     const args = part.args as XAxis['args'] & YAxis['args']
-    const padding = args.padding as { left?: number; right?: number; top?: number; bottom?: number } | undefined
+    const padding = args.padding as
+      { left?: number; right?: number; top?: number; bottom?: number } | undefined
     return {
       ...settings,
       dataKey: args.dataKey,
-      type: args.type ?? (this.layout === 'vertical' ? (axis === 'x' ? 'number' : 'category') : settings.type),
+      type:
+        args.type ??
+        (this.layout === 'vertical' ? (axis === 'x' ? 'number' : 'category') : settings.type),
       hide: args.hide ?? false,
       height: num(args.height, settings.height),
       width: num(args.width, settings.width),
@@ -840,7 +917,9 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
 
   get wrapperStyle(): SafeString {
     const size = this.size!
-    return htmlSafe(`position: relative; cursor: default; width: ${size.width}px; height: ${size.height}px;`)
+    return htmlSafe(
+      `position: relative; cursor: default; width: ${size.width}px; height: ${size.height}px;`,
+    )
   }
 
   get clipId(): string {
@@ -865,11 +944,23 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
       horizontal:
         args.horizontal === false
           ? []
-          : geometry.grid.horizontal.map(y => ({ ...common, x1: offset.left, y1: y, x2: offset.left + offset.width, y2: y })),
+          : geometry.grid.horizontal.map(y => ({
+              ...common,
+              x1: offset.left,
+              y1: y,
+              x2: offset.left + offset.width,
+              y2: y,
+            })),
       vertical:
         args.vertical === false
           ? []
-          : geometry.grid.vertical.map(x => ({ ...common, x1: x, y1: offset.top, x2: x, y2: offset.top + offset.height })),
+          : geometry.grid.vertical.map(x => ({
+              ...common,
+              x1: x,
+              y1: offset.top,
+              x2: x,
+              y2: offset.top + offset.height,
+            })),
     }
   }
 
@@ -883,7 +974,9 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
       line: settings.axisLine ? { ...axis.line, stroke: settings.stroke, fill: 'none' } : null,
       ticks: axis.ticks.map(tick => ({
         ...tick,
-        tickLine: settings.tickLine ? { ...tick.line, stroke: settings.stroke, fill: 'none' } : null,
+        tickLine: settings.tickLine
+          ? { ...tick.line, stroke: settings.stroke, fill: 'none' }
+          : null,
       })),
       showLabels: settings.tick,
       textAnchor: axis.textAnchor,
@@ -895,7 +988,9 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
   get axes() {
     const geometry = this.geometry
     if (!geometry) return []
-    return [this.drawAxis(geometry.xAxis, 'xAxis'), this.drawAxis(geometry.yAxis, 'yAxis')].filter(axis => axis !== null)
+    return [this.drawAxis(geometry.xAxis, 'xAxis'), this.drawAxis(geometry.yAxis, 'yAxis')].filter(
+      axis => axis !== null,
+    )
   }
 
   drawLabels(part: Area | Bar | Line, geometry: SeriesGeometry): DrawnLabel[] {
@@ -908,7 +1003,11 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
           ? geometry.bars.map(bar => ({ box: bar, payload: bar.payload, value: bar.value }))
           : geometry.points
               .filter(point => point.x !== null && point.y !== null)
-              .map(point => ({ box: { x: point.x!, y: point.y!, width: 0, height: 0 }, payload: point.payload, value: point.value }))
+              .map(point => ({
+                box: { x: point.x!, y: point.y!, width: 0, height: 0 },
+                payload: point.payload,
+                value: point.value,
+              }))
       return {
         key: `label-${i}`,
         class: ['recharts-text', args.class].filter(Boolean).join(' '),
@@ -985,7 +1084,12 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
           stroke,
           strokeWidth,
           strokeDasharray: args.strokeDasharray,
-          dots: this.dots(args.dot, false, drawn, { r: 3, fill: '#fff', stroke, strokeWidth: String(strokeWidth) }),
+          dots: this.dots(args.dot, false, drawn, {
+            r: 3,
+            fill: '#fff',
+            stroke,
+            strokeWidth: String(strokeWidth),
+          }),
         }
       }
       const args = (part as Line).args
@@ -998,12 +1102,22 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
         strokeWidth,
         strokeDasharray: args.strokeDasharray,
         fill: args.fill ?? '#fff',
-        dots: this.dots(args.dot, true, drawn, { r: 3, fill: args.fill ?? '#fff', stroke, strokeWidth: String(strokeWidth) }),
+        dots: this.dots(args.dot, true, drawn, {
+          r: 3,
+          fill: args.fill ?? '#fff',
+          stroke,
+          strokeWidth: String(strokeWidth),
+        }),
       }
     })
   }
 
-  dots(option: Area['args']['dot'], fallback: boolean, drawn: SeriesGeometry, defaults: { r: number; fill: string; stroke: string; strokeWidth: string }): DotRender[] {
+  dots(
+    option: Area['args']['dot'],
+    fallback: boolean,
+    drawn: SeriesGeometry,
+    defaults: { r: number; fill: string; stroke: string; strokeWidth: string },
+  ): DotRender[] {
     const result: DotRender[] = []
     for (const point of drawn.points) {
       if (point.x === null || point.y === null) continue
@@ -1013,7 +1127,7 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
         r: defaults.r,
         index: point.index,
         value: point.value,
-        payload: point.payload as Record<string, unknown>,
+        payload: point.payload as DotArgs['payload'],
         dataKey: drawn.settings.dataKey,
         stroke: defaults.stroke,
         strokeWidth: defaults.strokeWidth,
@@ -1037,7 +1151,9 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
   }
 
   get labelLists(): (DrawnLabel & { series: string })[] {
-    return this.series.flatMap(series => series.labels.map(list => ({ ...list, series: series.key })))
+    return this.series.flatMap(series =>
+      series.labels.map(list => ({ ...list, series: series.key })),
+    )
   }
 
   // ---------------------------------------------------------------------------------------
@@ -1049,10 +1165,14 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
     if (!geometry || !tooltip || tooltip.args.active === false) return null
     const pointer = this.pointer
     if (pointer) {
-      return activeIndexAt(geometry.categoryTicks, this.layout === 'horizontal' ? pointer.x : pointer.y)
+      return activeIndexAt(
+        geometry.categoryTicks,
+        this.layout === 'horizontal' ? pointer.x : pointer.y,
+      )
     }
     if (this.keyboardActive && this.keyboardIndex !== null) return this.keyboardIndex
-    if (typeof tooltip.args.defaultIndex === 'number' && this.keyboardIndex === null) return tooltip.args.defaultIndex
+    if (typeof tooltip.args.defaultIndex === 'number' && this.keyboardIndex === null)
+      return tooltip.args.defaultIndex
     if (tooltip.args.active === true) return this.keyboardIndex ?? 0
     return null
   }
@@ -1070,7 +1190,9 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
     if (!tick) return null
     const pointer = this.pointer
     if (pointer) {
-      return this.layout === 'horizontal' ? { x: tick.coordinate, y: pointer.y } : { x: pointer.x, y: tick.coordinate }
+      return this.layout === 'horizontal'
+        ? { x: tick.coordinate, y: pointer.y }
+        : { x: pointer.x, y: tick.coordinate }
     }
     const first = geometry.series.find(series => !series.settings.hide)
     const point = first?.points[index]
@@ -1103,7 +1225,11 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
       const fill = 'fill' in args ? (args.fill as string | undefined) : undefined
       const stroke = 'stroke' in args ? (args.stroke as string | undefined) : undefined
       const color =
-        part instanceof Bar ? fill : part instanceof Line ? (stroke ?? '#3182bd') : itemColor(stroke ?? '#3182bd', fill)
+        part instanceof Bar
+          ? fill
+          : part instanceof Line
+            ? (stroke ?? '#3182bd')
+            : itemColor(stroke ?? '#3182bd', fill)
       items.push({
         name: args.name ?? keyOf(args.dataKey),
         value,
@@ -1117,7 +1243,9 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
       })
     }
     // recharts sorts the entries by name.
-    return items.sort((a, b) => (String(a.name) < String(b.name) ? -1 : String(a.name) > String(b.name) ? 1 : 0))
+    return items.sort((a, b) =>
+      String(a.name) < String(b.name) ? -1 : String(a.name) > String(b.name) ? 1 : 0,
+    )
   }
 
   get tooltipLabel(): unknown {
@@ -1128,11 +1256,20 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
   }
 
   get tooltipContent(): ComponentLike<{ Args: ChartTooltipContentArgs }> {
-    return this.tooltipPart?.args.content ?? (ChartTooltipContent as unknown as ComponentLike<{ Args: ChartTooltipContentArgs }>)
+    return (
+      this.tooltipPart?.args.content ??
+      (ChartTooltipContent as unknown as ComponentLike<{ Args: ChartTooltipContentArgs }>)
+    )
   }
 
   get tooltipVisible(): boolean {
-    return this.isTooltipActive && this.tooltipPayload.length > 0 && !!this.tooltipBox && this.tooltipBox.width > 0 && this.tooltipBox.height > 0
+    return (
+      this.isTooltipActive &&
+      this.tooltipPayload.length > 0 &&
+      !!this.tooltipBox &&
+      this.tooltipBox.width > 0 &&
+      this.tooltipBox.height > 0
+    )
   }
 
   get tooltipStyle(): SafeString {
@@ -1176,7 +1313,11 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
     void [...positional]
     const rect = { width: element.offsetWidth, height: element.offsetHeight }
     const current = this.#tooltipBox
-    if (!current || Math.abs(current.width - rect.width) > 1 || Math.abs(current.height - rect.height) > 1) {
+    if (
+      !current ||
+      Math.abs(current.width - rect.width) > 1 ||
+      Math.abs(current.height - rect.height) > 1
+    ) {
       this.#tooltipBox = rect
       this.tooltipBox = rect
     }
@@ -1186,15 +1327,32 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
     const tooltip = this.tooltipPart
     const geometry = this.geometry
     const coordinate = this.activeCoordinate
-    if (!tooltip || !geometry || !coordinate || !this.isTooltipActive || tooltip.args.cursor === false) return null
+    if (
+      !tooltip ||
+      !geometry ||
+      !coordinate ||
+      !this.isTooltipActive ||
+      tooltip.args.cursor === false
+    )
+      return null
     const option = typeof tooltip.args.cursor === 'object' ? tooltip.args.cursor : {}
     const { offset } = geometry
     if (this.chartName === 'BarChart') {
       const half = geometry.bandSize / 2
       const rect =
         this.layout === 'horizontal'
-          ? { x: coordinate.x - half, y: offset.top + 0.5, width: geometry.bandSize, height: offset.height - 1 }
-          : { x: offset.left + 0.5, y: coordinate.y - half, width: offset.width - 1, height: geometry.bandSize }
+          ? {
+              x: coordinate.x - half,
+              y: offset.top + 0.5,
+              width: geometry.bandSize,
+              height: offset.height - 1,
+            }
+          : {
+              x: offset.left + 0.5,
+              y: coordinate.y - half,
+              width: offset.width - 1,
+              height: geometry.bandSize,
+            }
       return {
         isRectangle: true,
         isCurve: false,
@@ -1246,7 +1404,7 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
           r: 4,
           index,
           value: point.value,
-          payload: point.payload as Record<string, unknown>,
+          payload: point.payload as DotArgs['payload'],
           dataKey: args.dataKey,
           fill,
           stroke: '#fff',
@@ -1272,7 +1430,11 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
         value: args.name ?? keyOf(args.dataKey),
         dataKey: args.dataKey,
         color:
-          part instanceof Bar ? fill : part instanceof Line ? (stroke ?? '#3182bd') : itemColor(stroke ?? '#3182bd', fill ?? '#3182bd'),
+          part instanceof Bar
+            ? fill
+            : part instanceof Line
+              ? (stroke ?? '#3182bd')
+              : itemColor(stroke ?? '#3182bd', fill ?? '#3182bd'),
         type: args.legendType ?? (part instanceof Bar ? 'rect' : 'line'),
         inactive: args.hide ?? false,
       })
@@ -1286,7 +1448,10 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
   }
 
   get legendContent(): ComponentLike<{ Args: ChartLegendContentArgs }> {
-    return this.legendPart?.args.content ?? (ChartLegendContent as unknown as ComponentLike<{ Args: ChartLegendContentArgs }>)
+    return (
+      this.legendPart?.args.content ??
+      (ChartLegendContent as unknown as ComponentLike<{ Args: ChartLegendContentArgs }>)
+    )
   }
 
   get legendStyle(): SafeString {
@@ -1316,7 +1481,11 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
   measureLegend = modifier((element: HTMLElement) =>
     observeSize(this, element, ({ width, height }) => {
       const current = this.#legendBox
-      if (!current || Math.abs(current.width - width) > 1 || Math.abs(current.height - height) > 1) {
+      if (
+        !current ||
+        Math.abs(current.width - width) > 1 ||
+        Math.abs(current.height - height) > 1
+      ) {
         this.#legendBox = { width, height }
         this.legendBox = { width, height }
       }
@@ -1331,7 +1500,10 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
     const style = getComputedStyle(text)
     const current = this.#tickStyles[axis]
     if (current.fontSize !== style.fontSize || current.letterSpacing !== style.letterSpacing) {
-      this.#tickStyles = { ...this.#tickStyles, [axis]: { fontSize: style.fontSize, letterSpacing: style.letterSpacing } }
+      this.#tickStyles = {
+        ...this.#tickStyles,
+        [axis]: { fontSize: style.fontSize, letterSpacing: style.letterSpacing },
+      }
       this.tickStyles = this.#tickStyles
     }
   })
@@ -1349,7 +1521,11 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
     const x = (event.clientX - rect.left) / scaleX
     const y = (event.clientY - rect.top) / scaleY
     const { offset } = geometry
-    const inside = x >= offset.left && x <= offset.left + offset.width && y >= offset.top && y <= offset.top + offset.height
+    const inside =
+      x >= offset.left &&
+      x <= offset.left + offset.width &&
+      y >= offset.top &&
+      y <= offset.top + offset.height
     this.pointer = inside ? { x, y } : null
   }
 
@@ -1379,7 +1555,8 @@ export default class CartesianChart extends Component<CartesianChartSignature> i
       return
     }
     const geometry = this.geometry
-    const categoryAxis = this.layout === 'horizontal' ? geometry?.xAxis.settings : geometry?.yAxis.settings
+    const categoryAxis =
+      this.layout === 'horizontal' ? geometry?.xAxis.settings : geometry?.yAxis.settings
     // recharts moves along the axis's own direction: a reversed axis runs right to left.
     const direction = categoryAxis?.reversed ? -1 : 1
     const next = current + (key === 'ArrowRight' ? 1 : -1) * direction

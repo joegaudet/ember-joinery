@@ -8,7 +8,14 @@
  * measurement (./text-size.ts), which the axes use to drop overlapping ticks.
  */
 import { scaleBand, scaleLinear, scalePoint } from 'd3-scale'
-import { stack as d3Stack, stackOffsetExpand, stackOffsetNone, stackOffsetSilhouette, stackOffsetWiggle, stackOrderNone } from 'd3-shape'
+import {
+  stack as d3Stack,
+  stackOffsetExpand,
+  stackOffsetNone,
+  stackOffsetSilhouette,
+  stackOffsetWiggle,
+  stackOrderNone,
+} from 'd3-shape'
 import { getNiceTickValues, getTickValuesFixedDomain } from './nice-ticks.ts'
 import { visibleTicks, type Orientation, type Tick, type TickInterval } from './tick-interval.ts'
 import type { TextStyle } from './text-size.ts'
@@ -200,7 +207,13 @@ export interface CartesianInput {
   barSize?: number
   maxBarSize?: number
   /** The legend's measured box and where it sits, when the chart has one. */
-  legend?: { width: number; height: number; verticalAlign: 'top' | 'middle' | 'bottom'; align: 'left' | 'center' | 'right'; layout: Layout }
+  legend?: {
+    width: number
+    height: number
+    verticalAlign: 'top' | 'middle' | 'bottom'
+    align: 'left' | 'center' | 'right'
+    layout: Layout
+  }
   /** The tick labels' font, read from the rendered labels (as recharts reads it). */
   tickStyle: { x: TextStyle; y: TextStyle }
   /** Whether to drop overlapping ticks by measuring their labels; off in a server render. */
@@ -221,7 +234,11 @@ export interface CartesianGeometry {
 }
 
 /** A percentage of `total` (`'10%'`), or a number as is. */
-export function percentValue(value: number | string | undefined, total: number, fallback = 0): number {
+export function percentValue(
+  value: number | string | undefined,
+  total: number,
+  fallback = 0,
+): number {
   if (value === undefined || value === null) return fallback
   if (typeof value === 'number') return value
   const trimmed = value.trim()
@@ -238,7 +255,9 @@ function isNumber(value: unknown): value is number {
 }
 
 /** recharts' plot area: the chart less its margins, its drawn axes and its legend. */
-export function plotArea(input: Pick<CartesianInput, 'width' | 'height' | 'margin' | 'xAxis' | 'yAxis' | 'legend'>): Box {
+export function plotArea(
+  input: Pick<CartesianInput, 'width' | 'height' | 'margin' | 'xAxis' | 'yAxis' | 'legend'>,
+): Box {
   const { margin, xAxis, yAxis, legend } = input
   const shown = (axis: AxisSettings) => !axis.hide && !axis.mirror
   const offset = {
@@ -249,9 +268,15 @@ export function plotArea(input: Pick<CartesianInput, 'width' | 'height' | 'margi
   }
   if (legend) {
     const { align, verticalAlign, layout } = legend
-    if ((layout === 'vertical' || (layout === 'horizontal' && verticalAlign === 'middle')) && align !== 'center') {
+    if (
+      (layout === 'vertical' || (layout === 'horizontal' && verticalAlign === 'middle')) &&
+      align !== 'center'
+    ) {
       offset[align] += legend.width
-    } else if ((layout === 'horizontal' || (layout === 'vertical' && align === 'center')) && verticalAlign !== 'middle') {
+    } else if (
+      (layout === 'horizontal' || (layout === 'vertical' && align === 'center')) &&
+      verticalAlign !== 'middle'
+    ) {
       offset[verticalAlign] += legend.height
     }
   }
@@ -268,10 +293,18 @@ function categoryAxisOf(layout: Layout): 'x' | 'y' {
 }
 
 /** recharts' `combineRealScaleType`: a line or area chart puts categories on points, bars in bands. */
-function scaleTypeOf(axis: AxisSettings, chartName: ChartName, hasBar: boolean): 'point' | 'band' | 'linear' {
+function scaleTypeOf(
+  axis: AxisSettings,
+  chartName: ChartName,
+  hasBar: boolean,
+): 'point' | 'band' | 'linear' {
   if (axis.scale !== 'auto') return axis.scale
   if (axis.type === 'category') {
-    if (chartName === 'LineChart' || chartName === 'AreaChart' || (chartName === 'ComposedChart' && !hasBar)) {
+    if (
+      chartName === 'LineChart' ||
+      chartName === 'AreaChart' ||
+      (chartName === 'ComposedChart' && !hasBar)
+    ) {
       return 'point'
     }
     return 'band'
@@ -376,7 +409,11 @@ function stackGroups(input: CartesianInput): Map<string, [number, number][]> {
 }
 
 /** A domain bound the chart resolves from the data: `auto`, `dataMin - 5`, a function. */
-function resolveBound(bound: DomainBound, data: [number, number], which: 0 | 1): number | undefined {
+function resolveBound(
+  bound: DomainBound,
+  data: [number, number],
+  which: 0 | 1,
+): number | undefined {
   if (isNumber(bound)) return bound
   if (typeof bound === 'function') return bound(data[which])
   if (bound === 'auto') return data[which]
@@ -417,7 +454,8 @@ function valueDomain(
       const values = Array.isArray(raw) ? raw : [raw]
       for (const value of values) {
         const number = Number(value)
-        if (value === null || value === undefined || value === '' || !Number.isFinite(number)) continue
+        if (value === null || value === undefined || value === '' || !Number.isFinite(number))
+          continue
         min = Math.min(min, number)
         max = Math.max(max, number)
       }
@@ -560,21 +598,32 @@ function tickGeometry(
 function axisLineOf(axis: AxisSettings, box: AxisGeometry['box']): AxisGeometry['line'] {
   const { x, y, width, height } = box
   if (axis.orientation === 'top' || axis.orientation === 'bottom') {
-    const needHeight = Number((axis.orientation === 'top' && !axis.mirror) || (axis.orientation === 'bottom' && axis.mirror))
+    const needHeight = Number(
+      (axis.orientation === 'top' && !axis.mirror) ||
+        (axis.orientation === 'bottom' && axis.mirror),
+    )
     return { x1: x, y1: y + needHeight * height, x2: x + width, y2: y + needHeight * height }
   }
-  const needWidth = Number((axis.orientation === 'left' && !axis.mirror) || (axis.orientation === 'right' && axis.mirror))
+  const needWidth = Number(
+    (axis.orientation === 'left' && !axis.mirror) || (axis.orientation === 'right' && axis.mirror),
+  )
   return { x1: x + needWidth * width, y1: y, x2: x + needWidth * width, y2: y + height }
 }
 
 /** An axis's box, beside the plot area on its side. */
-function axisBox(axis: AxisSettings, offset: Box, input: CartesianInput): AxisGeometry['box'] {
+function axisBox(axis: AxisSettings, offset: Box): AxisGeometry['box'] {
   if (axis.axis === 'x') {
-    const y =
-      axis.orientation === 'top'
-        ? offset.top - axis.height
-        : offset.top + offset.height
-    return { x: offset.left, y: axis.mirror ? (axis.orientation === 'top' ? offset.top : offset.top + offset.height - axis.height) : y, width: offset.width, height: axis.height }
+    const y = axis.orientation === 'top' ? offset.top - axis.height : offset.top + offset.height
+    return {
+      x: offset.left,
+      y: axis.mirror
+        ? axis.orientation === 'top'
+          ? offset.top
+          : offset.top + offset.height - axis.height
+        : y,
+      width: offset.width,
+      height: axis.height,
+    }
   }
   const x =
     axis.orientation === 'left'
@@ -584,11 +633,8 @@ function axisBox(axis: AxisSettings, offset: Box, input: CartesianInput): AxisGe
       : axis.mirror
         ? offset.left + offset.width - axis.width
         : offset.left + offset.width
-  void input
   return { x, y: offset.top, width: axis.width, height: offset.height }
 }
-
-type AnyScale = ((value: never) => number | undefined) & { bandwidth?: () => number; ticks?: (count: number) => number[] }
 
 /**
  * Everything a cartesian chart draws, in pixels. recharts' selectors, in one pass: the plot
@@ -609,7 +655,6 @@ export function cartesianGeometry(input: CartesianInput): CartesianGeometry {
   const categoryScaleType = scaleTypeOf(categoryAxis, input.chartName, hasBar)
   let categoryRange = rangeOf(categoryAxis, offset, layout)
   if (categoryAxis.reversed) categoryRange = [categoryRange[1], categoryRange[0]]
-  let categoryScale: AnyScale
   let bandSize = 0
   let categoryPosition: (index: number) => number | null
   if (categoryScaleType === 'band' || categoryScaleType === 'point') {
@@ -619,13 +664,13 @@ export function cartesianGeometry(input: CartesianInput): CartesianGeometry {
         ? scaleBand<number>().domain(indexes).range(categoryRange)
         : scalePoint<number>().domain(indexes).range(categoryRange)
     bandSize = scale.bandwidth()
-    categoryScale = scale as unknown as AnyScale
     categoryPosition = index => scale(index) ?? null
   } else {
     const numbers = categoryValues.map(Number).filter(Number.isFinite)
-    const extent: [number, number] = numbers.length ? [Math.min(...numbers), Math.max(...numbers)] : [0, 0]
+    const extent: [number, number] = numbers.length
+      ? [Math.min(...numbers), Math.max(...numbers)]
+      : [0, 0]
     const scale = scaleLinear().domain(extent).range(categoryRange)
-    categoryScale = scale as unknown as AnyScale
     categoryPosition = index => {
       const value = Number(categoryValues[index])
       return Number.isFinite(value) ? scale(value) : null
@@ -646,10 +691,16 @@ export function cartesianGeometry(input: CartesianInput): CartesianGeometry {
   const valueScale = scaleLinear().domain(domain).range(valueRange)
 
   // Ticks: every category, or the value axis's nice ticks.
-  const valueTickValues = (valueAxis.ticks as number[] | undefined) ?? niceTicks ?? valueScale.ticks(valueAxis.tickCount)
-  const rawCategoryTicks: Tick[] = (categoryAxis.ticks
-    ? categoryAxis.ticks.map((value, index) => ({ index, value, coordinate: (categoryPosition(categoryValues.indexOf(value)) ?? NaN) + categoryOffset }))
-    : categoryTicks.map(tick => ({ ...tick }))
+  const valueTickValues =
+    (valueAxis.ticks as number[] | undefined) ?? niceTicks ?? valueScale.ticks(valueAxis.tickCount)
+  const rawCategoryTicks: Tick[] = (
+    categoryAxis.ticks
+      ? categoryAxis.ticks.map((value, index) => ({
+          index,
+          value,
+          coordinate: (categoryPosition(categoryValues.indexOf(value)) ?? NaN) + categoryOffset,
+        }))
+      : categoryTicks.map(tick => ({ ...tick }))
   ).filter(tick => Number.isFinite(tick.coordinate))
   const rawValueTicks: Tick[] = valueTickValues
     .map((value, index) => ({ index, value, coordinate: valueScale(value) }))
@@ -657,7 +708,7 @@ export function cartesianGeometry(input: CartesianInput): CartesianGeometry {
 
   const viewBox = { x: 0, y: 0, width: input.width, height: input.height }
   const axisGeometry = (axis: AxisSettings, rawTicks: Tick[]): AxisGeometry => {
-    const box = axisBox(axis, offset, input)
+    const box = axisBox(axis, offset)
     const style = axis.axis === 'x' ? input.tickStyle.x : input.tickStyle.y
     const shown = input.measure
       ? visibleTicks({
@@ -672,7 +723,9 @@ export function cartesianGeometry(input: CartesianInput): CartesianGeometry {
           angle: axis.angle,
           style,
         })
-      : rawTicks.filter((_, i) => typeof axis.interval !== 'number' || i % (axis.interval + 1) === 0)
+      : rawTicks.filter(
+          (_, i) => typeof axis.interval !== 'number' || i % (axis.interval + 1) === 0,
+        )
     const vertical = axis.orientation === 'left' || axis.orientation === 'right'
     return {
       settings: axis,
@@ -735,23 +788,35 @@ export function cartesianGeometry(input: CartesianInput): CartesianGeometry {
   }
 
   // The series.
-  const base = baseValueOf(domain, undefined)
-  const toPixel = (category: number | null, value: number | null): { x: number | null; y: number | null } =>
+  const toPixel = (
+    category: number | null,
+    value: number | null,
+  ): { x: number | null; y: number | null } =>
     layout === 'horizontal' ? { x: category, y: value } : { x: value, y: category }
   const visibleBars = input.series.filter(series => series.type === 'bar' && !series.hide)
   const slots: { key: string; barSize?: number }[] = []
   for (const bar of visibleBars) {
-    const key = bar.stackId !== undefined && bar.stackId !== null ? `stack:${bar.stackId}` : `bar:${bar.id}`
-    if (!slots.some(slot => slot.key === key)) slots.push({ key, barSize: bar.barSize ?? input.barSize })
+    const key =
+      bar.stackId !== undefined && bar.stackId !== null ? `stack:${bar.stackId}` : `bar:${bar.id}`
+    if (!slots.some(slot => slot.key === key))
+      slots.push({ key, barSize: bar.barSize ?? input.barSize })
   }
-  const positions = barPositions(bandSize, slots, input.barGap, input.barCategoryGap, input.maxBarSize)
+  const positions = barPositions(
+    bandSize,
+    slots,
+    input.barGap,
+    input.barCategoryGap,
+    input.maxBarSize,
+  )
 
   const series = input.series.map((settings): SeriesGeometry => {
     const stacked = stacks.get(settings.id)
     const seriesBase = baseValueOf(domain, settings.baseValue)
     if (settings.type === 'bar') {
       const key =
-        settings.stackId !== undefined && settings.stackId !== null ? `stack:${settings.stackId}` : `bar:${settings.id}`
+        settings.stackId !== undefined && settings.stackId !== null
+          ? `stack:${settings.stackId}`
+          : `bar:${settings.id}`
       const position = positions[slots.findIndex(slot => slot.key === key)]
       const bars: BarRectangle[] = []
       if (!settings.hide && position) {
@@ -779,8 +844,26 @@ export function cartesianGeometry(input: CartesianInput): CartesianGeometry {
               : { x: offset.left, y: bandStart, width: offset.width, height: position.size }
           bars.push(
             layout === 'horizontal'
-              ? { x: bandStart, y: valueEnd, width: position.size, height: valueStart - valueEnd, value: raw, payload: datum, index, background }
-              : { x: valueStart, y: bandStart, width: valueEnd - valueStart, height: position.size, value: raw, payload: datum, index, background },
+              ? {
+                  x: bandStart,
+                  y: valueEnd,
+                  width: position.size,
+                  height: valueStart - valueEnd,
+                  value: raw,
+                  payload: datum,
+                  index,
+                  background,
+                }
+              : {
+                  x: valueStart,
+                  y: bandStart,
+                  width: valueEnd - valueStart,
+                  height: position.size,
+                  value: raw,
+                  payload: datum,
+                  index,
+                  background,
+                },
           )
         })
       }
@@ -797,7 +880,10 @@ export function cartesianGeometry(input: CartesianInput): CartesianGeometry {
         top = Number.isFinite(Number(raw[1])) ? valueScale(Number(raw[1])) : null
       } else {
         const number = Number(raw)
-        top = raw === null || raw === undefined || raw === '' || !Number.isFinite(number) ? null : valueScale(number)
+        top =
+          raw === null || raw === undefined || raw === '' || !Number.isFinite(number)
+            ? null
+            : valueScale(number)
       }
       return { ...toPixel(center, top), value: raw, payload: datum, index }
     })
@@ -807,7 +893,12 @@ export function cartesianGeometry(input: CartesianInput): CartesianGeometry {
         areaBase = data.map((datum, index) => {
           const category = categoryPosition(index)
           const center = category === null ? null : category + categoryOffset
-          return { ...toPixel(center, valueScale(stacked[index]![0])), value: undefined, payload: datum, index }
+          return {
+            ...toPixel(center, valueScale(stacked[index]![0])),
+            value: undefined,
+            payload: datum,
+            index,
+          }
         })
       } else if (data.some(datum => Array.isArray(valueOf(datum, settings.dataKey)))) {
         areaBase = data.map((datum, index) => {
@@ -821,7 +912,6 @@ export function cartesianGeometry(input: CartesianInput): CartesianGeometry {
     }
     return { settings, points, base: areaBase, bars: [] }
   })
-  void base
 
   return {
     offset,
@@ -859,13 +949,26 @@ export function tooltipTranslate(options: {
   reverse: boolean
   position?: number
 }): number {
-  const { coordinate, offset, tooltipSize, viewBoxStart, viewBoxSize, allowEscape, reverse, position } = options
+  const {
+    coordinate,
+    offset,
+    tooltipSize,
+    viewBoxStart,
+    viewBoxSize,
+    allowEscape,
+    reverse,
+    position,
+  } = options
   if (isNumber(position)) return position
   const negative = coordinate - tooltipSize - (offset > 0 ? offset : 0)
   const positive = coordinate + offset
   if (allowEscape) return reverse ? negative : positive
   if (reverse) {
-    return negative < viewBoxStart ? Math.max(positive, viewBoxStart) : Math.max(negative, viewBoxStart)
+    return negative < viewBoxStart
+      ? Math.max(positive, viewBoxStart)
+      : Math.max(negative, viewBoxStart)
   }
-  return positive + tooltipSize > viewBoxStart + viewBoxSize ? Math.max(negative, viewBoxStart) : Math.max(positive, viewBoxStart)
+  return positive + tooltipSize > viewBoxStart + viewBoxSize
+    ? Math.max(negative, viewBoxStart)
+    : Math.max(positive, viewBoxStart)
 }

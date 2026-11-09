@@ -6,7 +6,7 @@
 import Component from '@glimmer/component'
 import { hash } from '@ember/helper'
 import type Owner from '@ember/owner'
-import type { ComponentLike } from '@glint/template'
+import type { ComponentLike, WithBoundArgs } from '@glint/template'
 import { Registry } from './registry.ts'
 import type { CurveType } from './paths.ts'
 import type { DataKey, DomainBound } from './cartesian.ts'
@@ -25,7 +25,8 @@ export interface ChartRegistrar {
 }
 
 /** Every part a chart reads. */
-export type ChartPart = XAxis | YAxis | CartesianGrid | Area | Line | Bar | ChartTooltip | ChartLegend
+export type ChartPart =
+  XAxis | YAxis | CartesianGrid | Area | Line | Bar | ChartTooltip | ChartLegend
 
 interface PartArgs {
   /** The chart it belongs to; the chart's yield passes it. */
@@ -168,7 +169,8 @@ export interface DotArgs {
   r: number
   index: number
   value: unknown
-  payload: Record<string, unknown>
+  /** The row the point came from. */
+  payload: Record<string, string | number | null | undefined>
   dataKey: DataKey
   stroke?: string
   strokeWidth?: number | string
@@ -179,7 +181,7 @@ export interface DotArgs {
 export type DotOption =
   | boolean
   | { r?: number; fill?: string; stroke?: string; strokeWidth?: number | string; class?: string }
-  | ComponentLike<{ Args: DotArgs; Element: SVGElement }>
+  | ComponentLike<{ Args: DotArgs; Element: Element }>
 
 /** The arguments every series shares. */
 export interface SeriesArgs extends PartArgs {
@@ -202,7 +204,7 @@ export interface SeriesArgs extends PartArgs {
 /** What a series yields: its label list. */
 export interface SeriesParts {
   /** Labels at each point (or bar): recharts' `LabelList`. */
-  LabelList: ComponentLike<LabelListSignature>
+  LabelList: WithBoundArgs<typeof LabelList, 'series'>
 }
 
 abstract class Series<S extends { Args: SeriesArgs }> extends Part<S> {

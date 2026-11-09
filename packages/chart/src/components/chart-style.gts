@@ -42,7 +42,9 @@ ${entries
 
   <template>
     {{#if this.css}}
-      <style>{{this.css}}</style>
+      <style>
+        {{this.css}}
+      </style>
     {{/if}}
   </template>
 }

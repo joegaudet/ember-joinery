@@ -52,7 +52,10 @@ export default class ChartLegendContent extends Component<ChartLegendContentSign
           key,
           label: itemConfig?.label ?? '',
           iconNode: Array.isArray(icon) ? (icon as IconNode) : undefined,
-          iconComponent: icon && !Array.isArray(icon) ? (icon as ComponentLike<{ Element: Element }>) : undefined,
+          iconComponent:
+            icon && !Array.isArray(icon)
+              ? (icon as ComponentLike<{ Element: Element }>)
+              : undefined,
           swatchStyle: htmlSafe(color ? `background-color: ${color};` : ''),
         }
       })
@@ -67,13 +70,21 @@ export default class ChartLegendContent extends Component<ChartLegendContentSign
         ...attributes
       >
         {{#each this.entries as |entry|}}
-          <div class="jn-chart-legend-item" data-test-jn-part="item" data-test-jn-value={{entry.key}}>
+          <div
+            class="jn-chart-legend-item"
+            data-test-jn-part="item"
+            data-test-jn-value={{entry.key}}
+          >
             {{#if entry.iconNode}}
               <Icon @icon={{entry.iconNode}} />
             {{else if entry.iconComponent}}
               <entry.iconComponent />
             {{else}}
-              <div class="jn-chart-legend-swatch" style={{entry.swatchStyle}} data-test-jn-part="swatch"></div>
+              <div
+                class="jn-chart-legend-swatch"
+                style={{entry.swatchStyle}}
+                data-test-jn-part="swatch"
+              ></div>
             {{/if}}
             {{entry.label}}
           </div>

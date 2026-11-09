@@ -16,6 +16,7 @@ allowBuilds:
 overrides:
   # Examples ask for the published ranges; inside the workspace they get the local packages.
   '@ember-joinery/carousel': 'workspace:*'
+  '@ember-joinery/chart': 'workspace:*'
   '@ember-joinery/code-block': 'workspace:*'
   '@ember-joinery/ember': 'workspace:*'
   '@ember-joinery/primitives': 'workspace:*'

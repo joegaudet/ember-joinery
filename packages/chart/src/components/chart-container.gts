@@ -1,22 +1,21 @@
 import Component from '@glimmer/component'
 import { hash } from '@ember/helper'
-import type { ComponentLike } from '@glint/template'
+import type { WithBoundArgs } from '@glint/template'
 import { idFor } from '@ember-joinery/primitives/id'
 import ChartStyle from './chart-style.gts'
 import AreaChart from './area-chart.gts'
 import BarChart from './bar-chart.gts'
 import LineChart from './line-chart.gts'
-import type { CartesianChartSignature } from '../-private/cartesian-chart.gts'
 import type { ChartConfig } from '../types.ts'
 
 /** What `ChartContainer` yields: the charts, each given the container's config. */
 export interface ChartContainerParts {
   /** An area chart: recharts' `AreaChart`. */
-  AreaChart: ComponentLike<CartesianChartSignature>
+  AreaChart: WithBoundArgs<typeof AreaChart, 'config' | 'inContainer' | 'initialDimension'>
   /** A bar chart: recharts' `BarChart`. */
-  BarChart: ComponentLike<CartesianChartSignature>
+  BarChart: WithBoundArgs<typeof BarChart, 'config' | 'inContainer' | 'initialDimension'>
   /** A line chart: recharts' `LineChart`. */
-  LineChart: ComponentLike<CartesianChartSignature>
+  LineChart: WithBoundArgs<typeof LineChart, 'config' | 'inContainer' | 'initialDimension'>
 }
 
 export interface ChartContainerSignature {

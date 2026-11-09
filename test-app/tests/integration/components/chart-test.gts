@@ -2,6 +2,7 @@ import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
 import { render, rerender, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
+import type { TOC } from '@ember/component/template-only'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
 import { TrendingDown, TrendingUp } from 'lucide'
@@ -11,8 +12,8 @@ import {
   ChartStyle,
   ChartTooltipContent,
   Dot,
-  LineChart,
   type ChartConfig,
+  type DotArgs,
 } from '@ember-joinery/chart'
 import { ChartHarness, ChartTooltipHarness } from '@ember-joinery/chart/test-support'
 
@@ -65,7 +66,13 @@ module('Integration | components | chart', function (hooks) {
     } satisfies ChartConfig
     await render(
       <template>
-        <ChartContainer @config={{config}} @id="visitors" @name="visitors" class="h-[200px]" as |chart|>
+        <ChartContainer
+          @config={{config}}
+          @id="visitors"
+          @name="visitors"
+          class="h-[200px]"
+          as |chart|
+        >
           <chart.BarChart @data={{chartData}} as |c|>
             <c.Bar @dataKey="desktop" @fill="var(--color-desktop)" />
           </chart.BarChart>
@@ -85,7 +92,11 @@ module('Integration | components | chart', function (hooks) {
     const style = chart.element.querySelector('style')!.textContent!
     assert.true(style.includes('.dark [data-chart=chart-visitors]'), 'a rule for dark mode')
     assert.true(style.includes('--color-mobile: #dc2626;'), "the theme's dark colour")
-    assert.strictEqual(getComputedStyle(chart.element).display, 'flex', "upstream's inline utilities")
+    assert.strictEqual(
+      getComputedStyle(chart.element).display,
+      'flex',
+      "upstream's inline utilities",
+    )
     assert.strictEqual(getComputedStyle(chart.element).fontSize, '12px', 'text-xs')
     await a11yAudit()
   })
@@ -94,9 +105,20 @@ module('Integration | components | chart', function (hooks) {
     await render(
       <template>
         <ChartContainer @config={{chartConfig}} @name="area" style="width: 229px" as |chart|>
-          <chart.AreaChart @data={{chartData}} @margin={{twelve}} @accessibilityLayer={{true}} as |c|>
+          <chart.AreaChart
+            @data={{chartData}}
+            @margin={{twelve}}
+            @accessibilityLayer={{true}}
+            as |c|
+          >
             <c.CartesianGrid @vertical={{false}} />
-            <c.XAxis @dataKey="month" @tickLine={{false}} @axisLine={{false}} @tickMargin={{8}} @tickFormatter={{monthAbbr}} />
+            <c.XAxis
+              @dataKey="month"
+              @tickLine={{false}}
+              @axisLine={{false}}
+              @tickMargin={{8}}
+              @tickFormatter={{monthAbbr}}
+            />
             <c.Area
               @dataKey="desktop"
               @type="natural"
@@ -119,10 +141,16 @@ module('Integration | components | chart', function (hooks) {
     assert.strictEqual(area.fill, 'var(--color-desktop)')
     assert.deepEqual(chart.xTicks, ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'])
     assert.deepEqual(chart.yTicks, [], 'no y-axis drawn')
-    assert.true(chart.gridLines.horizontal.includes(99) && chart.gridLines.horizontal.includes(0), 'the plot edges')
+    assert.true(
+      chart.gridLines.horizontal.includes(99) && chart.gridLines.horizontal.includes(0),
+      'the plot edges',
+    )
     assert.deepEqual(chart.gridLines.vertical, [], 'vertical={false}')
     const tick = chart.surface.querySelector('.recharts-xAxis-tick-labels text')!
-    assert.dom(tick).hasAttribute('x', '12').hasAttribute('y', '113', 'below the plot by tickSize and tickMargin')
+    assert
+      .dom(tick)
+      .hasAttribute('x', '12')
+      .hasAttribute('y', '113', 'below the plot by tickSize and tickMargin')
     assert.dom(tick.querySelector('tspan')).hasAttribute('dy', '0.71em')
     // shadcn's CSS greys `.recharts-cartesian-axis-tick text`, recharts 2's labels; recharts 3
     // draws them in `.recharts-cartesian-axis-tick-label`, so they keep #666 on ui.shadcn.com too.
@@ -137,19 +165,47 @@ module('Integration | components | chart', function (hooks) {
         <ChartContainer @config={{chartConfig}} style="width: 229px" as |chart|>
           <chart.AreaChart @data={{chartData}} @margin={{margin}} as |c|>
             <c.CartesianGrid @vertical={{false}} />
-            <c.XAxis @dataKey="month" @tickLine={{false}} @axisLine={{false}} @tickMargin={{8}} @tickFormatter={{monthAbbr}} />
+            <c.XAxis
+              @dataKey="month"
+              @tickLine={{false}}
+              @axisLine={{false}}
+              @tickMargin={{8}}
+              @tickFormatter={{monthAbbr}}
+            />
             <c.YAxis @tickLine={{false}} @axisLine={{false}} @tickMargin={{8}} @tickCount={{3}} />
-            <c.Area @dataKey="mobile" @type="natural" @fill="var(--color-mobile)" @fillOpacity={{0.4}} @stroke="var(--color-mobile)" @stackId="a" />
-            <c.Area @dataKey="desktop" @type="natural" @fill="var(--color-desktop)" @fillOpacity={{0.4}} @stroke="var(--color-desktop)" @stackId="a" />
+            <c.Area
+              @dataKey="mobile"
+              @type="natural"
+              @fill="var(--color-mobile)"
+              @fillOpacity={{0.4}}
+              @stroke="var(--color-mobile)"
+              @stackId="a"
+            />
+            <c.Area
+              @dataKey="desktop"
+              @type="natural"
+              @fill="var(--color-desktop)"
+              @fillOpacity={{0.4}}
+              @stroke="var(--color-desktop)"
+              @stackId="a"
+            />
           </chart.AreaChart>
         </ChartContainer>
       </template>,
     )
     const chart = new ChartHarness()
-    assert.deepEqual(chart.plot, { x: 40, y: 0, width: 177, height: 99 }, 'the y-axis takes 60px from the left margin')
+    assert.deepEqual(
+      chart.plot,
+      { x: 40, y: 0, width: 177, height: 99 },
+      'the y-axis takes 60px from the left margin',
+    )
     assert.deepEqual(chart.yTicks, ['0', '300', '600'], 'nice ticks over the stacked total')
     assert.strictEqual(chart.seriesFor('mobile').areaPath, RECHARTS.areaAxes.mobile)
-    assert.strictEqual(chart.seriesFor('desktop').areaPath, RECHARTS.areaAxes.desktop, 'on top of mobile')
+    assert.strictEqual(
+      chart.seriesFor('desktop').areaPath,
+      RECHARTS.areaAxes.desktop,
+      'on top of mobile',
+    )
     const label = chart.surface.querySelector('.recharts-yAxis-tick-labels text')!
     assert.dom(label).hasAttribute('x', '26').hasAttribute('text-anchor', 'end')
     await a11yAudit()
@@ -163,9 +219,25 @@ module('Integration | components | chart', function (hooks) {
         <ChartContainer @config={{chartConfig}} style="width: 275px" as |chart|>
           <chart.LineChart @data={{chartData}} @margin={{twelve}} as |c|>
             <c.CartesianGrid @vertical={{false}} />
-            <c.XAxis @dataKey="month" @tickLine={{false}} @axisLine={{false}} @tickMargin={{8}} @tickFormatter={{monthAbbr}} />
-            <c.ChartTooltip @cursor={{false}} @content={{component ChartTooltipContent hideLabel=true}} />
-            <c.Line @dataKey="desktop" @type="natural" @stroke="var(--color-desktop)" @strokeWidth={{2}} @dot={{dot}} @activeDot={{activeDot}} />
+            <c.XAxis
+              @dataKey="month"
+              @tickLine={{false}}
+              @axisLine={{false}}
+              @tickMargin={{8}}
+              @tickFormatter={{monthAbbr}}
+            />
+            <c.ChartTooltip
+              @cursor={{false}}
+              @content={{component ChartTooltipContent hideLabel=true}}
+            />
+            <c.Line
+              @dataKey="desktop"
+              @type="natural"
+              @stroke="var(--color-desktop)"
+              @strokeWidth={{2}}
+              @dot={{dot}}
+              @activeDot={{activeDot}}
+            />
           </chart.LineChart>
         </ChartContainer>
       </template>,
@@ -177,13 +249,24 @@ module('Integration | components | chart', function (hooks) {
     assert.strictEqual(line.stroke, 'var(--color-desktop)')
     const dots = chart.dots('desktop')
     assert.strictEqual(dots.length, 6)
-    assert.dom(dots[1]).hasAttribute('r', '3').hasAttribute('cx', '62.2').hasAttribute('cy', '5.859375')
-    assert.dom(dots[1]).hasAttribute('fill', 'var(--color-desktop)').hasAttribute('stroke-width', '2').hasClass('recharts-line-dot')
+    assert
+      .dom(dots[1])
+      .hasAttribute('r', '3')
+      .hasAttribute('cx', '62.2')
+      .hasAttribute('cy', '5.859375')
+    assert
+      .dom(dots[1])
+      .hasAttribute('fill', 'var(--color-desktop)')
+      .hasAttribute('stroke-width', '2')
+      .hasClass('recharts-line-dot')
 
     await chart.hover(1)
     assert.true(chart.isTooltipVisible)
     assert.strictEqual(chart.activeDots.length, 1)
-    assert.dom(chart.activeDots[0]).hasAttribute('r', '6', 'activeDot={{r: 6}}').hasAttribute('stroke', '#fff')
+    assert
+      .dom(chart.activeDots[0])
+      .hasAttribute('r', '6', 'activeDot={{r: 6}}')
+      .hasAttribute('stroke', '#fff')
     assert.strictEqual(chart.cursor, null, 'cursor={false}')
     assert.strictEqual(chart.tooltip?.label, null, 'hideLabel')
     assert.deepEqual(chart.tooltip?.names, ['Desktop'])
@@ -196,7 +279,13 @@ module('Integration | components | chart', function (hooks) {
         <ChartContainer @config={{chartConfig}} style="width: 1200px" as |chart|>
           <chart.BarChart @data={{chartData}} @accessibilityLayer={{true}} as |c|>
             <c.CartesianGrid @vertical={{false}} />
-            <c.XAxis @dataKey="month" @tickLine={{false}} @tickMargin={{10}} @axisLine={{false}} @tickFormatter={{monthAbbr}} />
+            <c.XAxis
+              @dataKey="month"
+              @tickLine={{false}}
+              @tickMargin={{10}}
+              @axisLine={{false}}
+              @tickFormatter={{monthAbbr}}
+            />
             <c.ChartTooltip @content={{component ChartTooltipContent}} />
             <c.ChartLegend @content={{component ChartLegendContent}} />
             <c.Bar @dataKey="desktop" @fill="var(--color-desktop)" @radius={{4}} />
@@ -208,9 +297,15 @@ module('Integration | components | chart', function (hooks) {
     const chart = new ChartHarness()
     assert.strictEqual(chart.height, 675)
     assert.deepEqual(chart.legend?.labels, ['Desktop', 'Mobile'])
-    const legendHeight = chart.wrapper.querySelector<HTMLElement>('.recharts-legend-wrapper')!.offsetHeight
+    const legendHeight = chart.wrapper.querySelector<HTMLElement>(
+      '.recharts-legend-wrapper',
+    )!.offsetHeight
     assert.strictEqual(legendHeight, 28, 'pt-3 and a 16px line')
-    assert.deepEqual(chart.plot, { x: 5, y: 5, width: 1190, height: 607 }, 'the legend takes its height from the plot')
+    assert.deepEqual(
+      chart.plot,
+      { x: 5, y: 5, width: 1190, height: 607 },
+      'the legend takes its height from the plot',
+    )
     const [january] = chart.bars('desktop')
     assert.strictEqual(
       january!.getAttribute('d')!.replace(/\s+/g, ' '),
@@ -221,12 +316,20 @@ module('Integration | components | chart', function (hooks) {
       chart.seriesFor('mobile').points.map(point => point.x),
       [105.833, 304.167, 502.5, 700.833, 899.167, 1097.5],
     )
-    assert.deepEqual(chart.categories, [104.167, 302.5, 500.833, 699.167, 897.5, 1095.833], 'band centres')
+    assert.deepEqual(
+      chart.categories,
+      [104.167, 302.5, 500.833, 699.167, 897.5, 1095.833],
+      'band centres',
+    )
 
     await chart.hover(1)
     assert.true(chart.isTooltipVisible)
     assert.strictEqual(chart.tooltip?.label, 'February')
-    assert.deepEqual(chart.tooltip?.names, ['Desktop', 'Mobile'], 'sorted by name, as recharts sorts them')
+    assert.deepEqual(
+      chart.tooltip?.names,
+      ['Desktop', 'Mobile'],
+      'sorted by name, as recharts sorts them',
+    )
     assert.deepEqual(chart.tooltip?.entryValues, ['305', '200'])
     assert.strictEqual(chart.tooltip?.indicator, 'dot')
     assert.dom(chart.cursor).hasClass('recharts-rectangle').hasClass('recharts-tooltip-cursor')
@@ -245,9 +348,24 @@ module('Integration | components | chart', function (hooks) {
       <template>
         <ChartContainer @config={{chartConfig}} style="width: 229px" as |chart|>
           <chart.AreaChart @data={{chartData}} @margin={{twelve}} as |c|>
-            <c.XAxis @dataKey="month" @tickLine={{false}} @axisLine={{false}} @tickMargin={{8}} @tickFormatter={{monthAbbr}} />
-            <c.ChartTooltip @cursor={{false}} @content={{component ChartTooltipContent indicator="line"}} />
-            <c.Area @dataKey="desktop" @type="natural" @fill="var(--color-desktop)" @fillOpacity={{0.4}} @stroke="var(--color-desktop)" />
+            <c.XAxis
+              @dataKey="month"
+              @tickLine={{false}}
+              @axisLine={{false}}
+              @tickMargin={{8}}
+              @tickFormatter={{monthAbbr}}
+            />
+            <c.ChartTooltip
+              @cursor={{false}}
+              @content={{component ChartTooltipContent indicator="line"}}
+            />
+            <c.Area
+              @dataKey="desktop"
+              @type="natural"
+              @fill="var(--color-desktop)"
+              @fillOpacity={{0.4}}
+              @stroke="var(--color-desktop)"
+            />
           </chart.AreaChart>
         </ChartContainer>
       </template>,
@@ -257,15 +375,26 @@ module('Integration | components | chart', function (hooks) {
     const tooltip = chart.tooltip!
     assert.strictEqual(tooltip.indicator, 'line')
     assert.strictEqual(tooltip.label, 'March', 'one series and a line: the label nests beside it')
-    assert.deepEqual(tooltip.items.map(item => [item.name, item.value]), [['Desktop', '237']])
+    assert.deepEqual(
+      tooltip.items.map(item => [item.name, item.value]),
+      [['Desktop', '237']],
+    )
     assert.dom(tooltip.items[0]!.indicator).hasStyle({ width: '4px' }, 'w-1')
     const [dot] = chart.activeDots
-    assert.dom(dot).hasAttribute('cx', '94').hasAttribute('r', '4').hasAttribute('fill', 'var(--color-desktop)')
+    assert
+      .dom(dot)
+      .hasAttribute('cx', '94')
+      .hasAttribute('r', '4')
+      .hasAttribute('fill', 'var(--color-desktop)')
     const position = chart.tooltipPosition!
     const box = chart.wrapper.querySelector<HTMLElement>('.recharts-tooltip-wrapper')!
     const width = box.offsetWidth
     assert.true(position.x >= 12 && position.x + width <= 217 + 1, 'inside the plot across')
-    assert.strictEqual(position.x, Math.max(94 - width - 10, 12), 'flipped to the left of the point')
+    assert.strictEqual(
+      position.x,
+      Math.max(94 - width - 10, 12),
+      'flipped to the left of the point',
+    )
     await a11yAudit()
   })
 
@@ -325,7 +454,13 @@ module('Integration | components | chart', function (hooks) {
           <ChartContainer @config={{chartConfig}} style="width: 400px" as |chart|>
             <chart.BarChart @data={{chartData}} as |c|>
               <c.CartesianGrid @vertical={{false}} />
-              <c.XAxis @dataKey="month" @tickLine={{false}} @axisLine={{false}} @tickFormatter={{monthAbbr}} @reversed={{true}} />
+              <c.XAxis
+                @dataKey="month"
+                @tickLine={{false}}
+                @axisLine={{false}}
+                @tickFormatter={{monthAbbr}}
+                @reversed={{true}}
+              />
               <c.ChartTooltip @content={{component ChartTooltipContent}} />
               <c.ChartLegend @content={{component ChartLegendContent}} />
               <c.Bar @dataKey="desktop" @fill="var(--color-desktop)" @radius={{4}} />
@@ -338,7 +473,11 @@ module('Integration | components | chart', function (hooks) {
     const [first, , , , , last] = chart.categories
     assert.true(first! > last!, 'January on the right')
     const legend = chart.legend!.element
-    assert.strictEqual(getComputedStyle(legend).direction, 'rtl', 'the legend lays out right to left')
+    assert.strictEqual(
+      getComputedStyle(legend).direction,
+      'rtl',
+      'the legend lays out right to left',
+    )
     await chart.focus()
     assert.strictEqual(chart.tooltip?.label, 'January')
     await chart.press('ArrowLeft')
@@ -384,15 +523,29 @@ module('Integration | components | chart', function (hooks) {
           <chart.AreaChart @data={{chartData}} as |c|>
             <c.ChartTooltip @content={{component ChartTooltipContent}} />
             <c.ChartLegend @content={{component ChartLegendContent}} />
-            <c.Area @dataKey="mobile" @stackId="a" @stroke="var(--color-mobile)" @fill="var(--color-mobile)" />
-            <c.Area @dataKey="desktop" @stackId="a" @stroke="var(--color-desktop)" @fill="var(--color-desktop)" />
+            <c.Area
+              @dataKey="mobile"
+              @stackId="a"
+              @stroke="var(--color-mobile)"
+              @fill="var(--color-mobile)"
+            />
+            <c.Area
+              @dataKey="desktop"
+              @stackId="a"
+              @stroke="var(--color-desktop)"
+              @fill="var(--color-desktop)"
+            />
           </chart.AreaChart>
         </ChartContainer>
       </template>,
     )
     const chart = new ChartHarness()
     const legend = chart.legend!
-    assert.deepEqual(legend.labels, ['Desktop', 'Mobile'], 'sorted by data key, as recharts sorts the legend')
+    assert.deepEqual(
+      legend.labels,
+      ['Desktop', 'Mobile'],
+      'sorted by data key, as recharts sorts the legend',
+    )
     assert.strictEqual(legend.items[0]!.swatch, null, 'an icon in place of the swatch')
     assert.dom(legend.element.querySelector('svg')).hasStyle({ width: '12px', height: '12px' })
     await chart.hover(0)
@@ -420,7 +573,10 @@ module('Integration | components | chart', function (hooks) {
     )
     const chart = new ChartHarness()
     const ticks = ['0', '0.25', '0.5', '0.75', '1']
-    assert.true(chart.yTicks.every(tick => ticks.includes(tick)), 'fractions of the whole')
+    assert.true(
+      chart.yTicks.every(tick => ticks.includes(tick)),
+      'fractions of the whole',
+    )
     assert.strictEqual(chart.yTicks.at(-1), '1')
     const top = chart.seriesFor('desktop').points.map(point => point.y)
     assert.deepEqual(top, [chart.plot.y, chart.plot.y], 'the top series reaches 100% in every row')
@@ -430,8 +586,15 @@ module('Integration | components | chart', function (hooks) {
   test('a label list labels each point, and a custom dot draws itself', async function (assert) {
     const formatter = (value: string) => value.toUpperCase()
     const margin = { top: 20, left: 12, right: 12 }
-    const ColoredDot = <template>
-      <Dot @cx={{@cx}} @cy={{@cy}} @r={{5}} fill={{@payload.fill}} stroke={{@payload.fill}} data-test-dot />
+    const ColoredDot: TOC<{ Args: DotArgs; Element: Element }> = <template>
+      <Dot
+        @cx={{@cx}}
+        @cy={{@cy}}
+        @r={{5}}
+        fill={{@payload.fill}}
+        stroke={{@payload.fill}}
+        data-test-dot
+      />
     </template>
     const data = [
       { browser: 'chrome', visitors: 275, fill: 'red' },
@@ -442,7 +605,14 @@ module('Integration | components | chart', function (hooks) {
         <ChartContainer @config={{chartConfig}} style="width: 300px" as |chart|>
           <chart.LineChart @data={{data}} @margin={{margin}} as |c|>
             <c.Line @dataKey="visitors" @dot={{ColoredDot}} as |line|>
-              <line.LabelList @position="top" @offset={{12}} class="fill-foreground" @fontSize={{12}} @dataKey="browser" @formatter={{formatter}} />
+              <line.LabelList
+                @position="top"
+                @offset={{12}}
+                @class="fill-foreground"
+                @fontSize={{12}}
+                @dataKey="browser"
+                @formatter={{formatter}}
+              />
             </c.Line>
           </chart.LineChart>
         </ChartContainer>
@@ -452,17 +622,30 @@ module('Integration | components | chart', function (hooks) {
     assert.deepEqual(chart.labels('visitors'), ['CHROME', 'SAFARI'])
     const [label] = chart.surface.querySelectorAll('.recharts-label-list text')
     const [point] = chart.seriesFor('visitors').points
-    assert.true(Math.abs(Number(label!.getAttribute('y')) - (point!.y - 12)) < 0.001, '12px above its point')
+    assert.true(
+      Math.abs(Number(label!.getAttribute('y')) - (point!.y - 12)) < 0.001,
+      '12px above its point',
+    )
     assert.dom(label).hasAttribute('text-anchor', 'middle').hasAttribute('font-size', '12')
     const dots = chart.dots('visitors')
     assert.strictEqual(dots.length, 2)
-    assert.dom(dots[0]).hasAttribute('data-test-dot').hasAttribute('fill', 'red').hasAttribute('r', '5').hasClass('recharts-dot')
+    assert
+      .dom(dots[0])
+      .hasAttribute('data-test-dot')
+      .hasAttribute('fill', 'red')
+      .hasAttribute('r', '5')
+      .hasClass('recharts-dot')
     await a11yAudit()
   })
 
   test('ChartTooltipContent renders on its own, with labelKey, nameKey and formatters', async function (assert) {
     const payload = [
-      { name: 'chrome', value: 1286, dataKey: 'visitors', payload: { browser: 'chrome', fill: 'var(--chart-1)' } },
+      {
+        name: 'chrome',
+        value: 1286,
+        dataKey: 'visitors',
+        payload: { browser: 'chrome', fill: 'var(--chart-1)' },
+      },
     ]
     const config = {
       visitors: { label: 'Total Visitors' },
@@ -471,15 +654,27 @@ module('Integration | components | chart', function (hooks) {
     const labelFormatter = (value: unknown) => `→ ${String(value)}`
     await render(
       <template>
-        <ChartTooltipContent @active={{true}} @payload={{payload}} @label="ignored" @config={{config}} @labelKey="visitors" @nameKey="browser" @labelFormatter={{labelFormatter}} />
+        <ChartTooltipContent
+          @active={{true}}
+          @payload={{payload}}
+          @label="ignored"
+          @config={{config}}
+          @labelKey="visitors"
+          @nameKey="browser"
+          @labelFormatter={{labelFormatter}}
+        />
         <ChartTooltipContent @active={{false}} @payload={{payload}} @label="hidden" />
       </template>,
     )
     const tooltips = ChartTooltipHarness.findAll()
     assert.strictEqual(tooltips.length, 1, 'an inactive tooltip draws nothing')
     const tooltip = tooltips[0]!
-    assert.strictEqual(tooltip.label, '→ Total Visitors', 'labelKey finds the config label; labelFormatter formats it')
-    assert.deepEqual(tooltip.names, ['Chrome'], 'nameKey finds the row\'s browser in the config')
+    assert.strictEqual(
+      tooltip.label,
+      '→ Total Visitors',
+      'labelKey finds the config label; labelFormatter formats it',
+    )
+    assert.deepEqual(tooltip.names, ['Chrome'], "nameKey finds the row's browser in the config")
     assert.deepEqual(tooltip.entryValues, ['1,286'], 'numbers are formatted')
     assert.dom(tooltip.items[0]!.indicator).hasStyle({ width: '10px', height: '10px' }, 'a dot')
     assert.dom(tooltip.element).hasClass('jn-chart-tooltip').hasStyle({ fontSize: '12px' })
@@ -488,7 +683,11 @@ module('Integration | components | chart', function (hooks) {
 
   test('ChartStyle writes nothing for a config without colours', async function (assert) {
     const config = { views: { label: 'Views' } } satisfies ChartConfig
-    await render(<template><div data-test-style><ChartStyle @id="x" @config={{config}} /></div></template>)
+    await render(
+      <template>
+        <div data-test-style><ChartStyle @id="x" @config={{config}} /></div>
+      </template>,
+    )
     assert.dom('[data-test-style] style').doesNotExist()
     await a11yAudit()
   })

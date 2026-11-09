@@ -1,4 +1,4 @@
-import { blur, focus, settled, triggerEvent } from '@ember/test-helpers'
+import { blur, focus, triggerEvent } from '@ember/test-helpers'
 import { Harness, pressKey } from '@ember-joinery/test-support'
 
 const collapse = (value: string | null | undefined): string =>
@@ -58,7 +58,12 @@ export class ChartTooltipHarness extends Harness {
   }
 
   /** Each entry: its key, the name it shows, its value's text, and its indicator. */
-  get items(): { key: string; name: string; value: string | null; indicator: HTMLElement | null }[] {
+  get items(): {
+    key: string
+    name: string
+    value: string | null
+    indicator: HTMLElement | null
+  }[] {
     return this.parts('item').map(item => ({
       key: item.getAttribute('data-test-jn-value') ?? '',
       name: collapse(item.querySelector('[data-test-jn-part="name"]')?.textContent),
@@ -178,24 +183,34 @@ export class ChartHarness extends Harness {
 
   /** A bar series' bars, as `<path>` elements. */
   bars(key: string): SVGPathElement[] {
-    return Array.from(this.seriesFor(key).element.querySelectorAll<SVGPathElement>('[data-test-jn-part="bar"]'))
+    return Array.from(
+      this.seriesFor(key).element.querySelectorAll<SVGPathElement>('[data-test-jn-part="bar"]'),
+    )
   }
 
   /** A series' dots (circles, or the custom dots it draws). */
   dots(key: string): Element[] {
-    const group = this.surface.querySelector(`[data-test-jn-part="dots"][data-test-jn-value="${key}"]`)
+    const group = this.surface.querySelector(
+      `[data-test-jn-part="dots"][data-test-jn-value="${key}"]`,
+    )
     return group ? Array.from(group.children) : []
   }
 
   /** A series' labels' text (`LabelList`). */
   labels(key: string): string[] {
-    const group = this.surface.querySelector(`[data-test-jn-part="labels"][data-test-jn-value="${key}"]`)
-    return group ? Array.from(group.querySelectorAll('text')).map(text => collapse(text.textContent)) : []
+    const group = this.surface.querySelector(
+      `[data-test-jn-part="labels"][data-test-jn-value="${key}"]`,
+    )
+    return group
+      ? Array.from(group.querySelectorAll('text')).map(text => collapse(text.textContent))
+      : []
   }
 
   #tickTexts(axis: 'xAxis' | 'yAxis'): string[] {
     const group = this.queryPart(`${axis}-labels`)
-    return group ? Array.from(group.querySelectorAll('text')).map(text => collapse(text.textContent)) : []
+    return group
+      ? Array.from(group.querySelectorAll('text')).map(text => collapse(text.textContent))
+      : []
   }
 
   /** The x-axis's tick labels, as drawn. Empty without a drawn x-axis. */
@@ -247,7 +262,6 @@ export class ChartHarness extends Harness {
       ? client(coordinate, plot.y, plot.height, rect.top)
       : client(plot.y + plot.height / 2, plot.y, plot.height, rect.top)
     await triggerEvent(wrapper, 'mousemove', { clientX, clientY })
-    await settled()
   }
 
   /** Moves the pointer off the chart, which hides the tooltip. */

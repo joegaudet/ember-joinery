@@ -17,7 +17,9 @@ export type ChartIcon = IconNode | ComponentLike<{ Element: Element }>
 export type ChartConfigItem = {
   label?: string
   icon?: ChartIcon
-} & ({ color?: string; theme?: never } | { color?: never; theme: Record<keyof typeof THEMES, string> })
+} & (
+  { color?: string; theme?: never } | { color?: never; theme: Record<keyof typeof THEMES, string> }
+)
 
 /**
  * The labels, icons and colours of a chart's series, by key. Each colour becomes a CSS
@@ -101,3 +103,22 @@ export interface ChartLegendContentArgs {
   verticalAlign?: 'top' | 'middle' | 'bottom'
   config?: ChartConfig
 }
+
+export type {
+  AreaSignature,
+  AxisArgs,
+  BarSignature,
+  CartesianGridSignature,
+  ChartLegendSignature,
+  ChartTooltipSignature,
+  DotArgs,
+  DotOption,
+  LabelListSignature,
+  LabelPosition,
+  LineSignature,
+  SeriesArgs,
+  XAxisSignature,
+  YAxisSignature,
+} from './-private/parts.gts'
+export type { CurveType } from './-private/paths.ts'
+export type { CartesianChartSignature, CartesianChartParts } from './-private/cartesian-chart.gts'

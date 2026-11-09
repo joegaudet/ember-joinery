@@ -119,13 +119,20 @@ export default class ChartTooltipContent extends Component<ChartTooltipContentSi
           value: item.value !== null && item.value !== undefined ? text(item.value) : null,
           icon,
           iconNode: Array.isArray(icon) ? (icon as IconNode) : undefined,
-          iconComponent: icon && !Array.isArray(icon) ? (icon as ComponentLike<{ Element: Element }>) : undefined,
+          iconComponent:
+            icon && !Array.isArray(icon)
+              ? (icon as ComponentLike<{ Element: Element }>)
+              : undefined,
           indicatorStyle: htmlSafe(
-            indicatorColor ? `--color-bg: ${indicatorColor}; --color-border: ${indicatorColor};` : '',
+            indicatorColor
+              ? `--color-bg: ${indicatorColor}; --color-border: ${indicatorColor};`
+              : '',
           ),
         }
         if (formatter && item.value !== undefined && item.name) {
-          entry.formatted = String(formatter(item.value, item.name, item, index, item.payload) ?? '')
+          entry.formatted = String(
+            formatter(item.value, item.name, item, index, item.payload) ?? '',
+          )
         }
         return entry
       })
@@ -184,10 +191,16 @@ export default class ChartTooltipContent extends Component<ChartTooltipContentSi
                         </div>
                       {{/if}}
                     {{/if}}
-                    <span class="jn-chart-tooltip-name" data-test-jn-part="name">{{entry.name}}</span>
+                    <span
+                      class="jn-chart-tooltip-name"
+                      data-test-jn-part="name"
+                    >{{entry.name}}</span>
                   </div>
                   {{#if entry.value}}
-                    <span class="jn-chart-tooltip-value" data-test-jn-part="value">{{entry.value}}</span>
+                    <span
+                      class="jn-chart-tooltip-value"
+                      data-test-jn-part="value"
+                    >{{entry.value}}</span>
                   {{/if}}
                 </div>
               {{/if}}

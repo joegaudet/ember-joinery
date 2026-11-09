@@ -51,7 +51,10 @@ function isVisible(
 ): boolean {
   if (sign * position < sign * start || sign * position > sign * end) return false
   const size = getSize()
-  return sign * (position - (sign * size) / 2 - start) >= 0 && sign * (position + (sign * size) / 2 - end) <= 0
+  return (
+    sign * (position - (sign * size) / 2 - start) >= 0 &&
+    sign * (position + (sign * size) / 2 - end) <= 0
+  )
 }
 
 function everyNth<T>(items: T[], n: number): T[] {
@@ -60,7 +63,14 @@ function everyNth<T>(items: T[], n: number): T[] {
   return items.filter((_, i) => i % n === 0)
 }
 
-function ticksEnd(sign: number, start: number, end: number, getSize: GetSize, ticks: Tick[], gap: number): Tick[] {
+function ticksEnd(
+  sign: number,
+  start: number,
+  end: number,
+  getSize: GetSize,
+  ticks: Tick[],
+  gap: number,
+): Tick[] {
   const result = ticks.slice()
   for (let i = result.length - 1; i >= 0; i--) {
     let entry = result[i]!
@@ -68,7 +78,10 @@ function ticksEnd(sign: number, start: number, end: number, getSize: GetSize, ti
     const tickSize = () => (size ??= getSize(ticks[i]!, i))
     if (i === result.length - 1) {
       const overflow = sign * (entry.coordinate + (sign * tickSize()) / 2 - end)
-      entry = { ...entry, tickCoord: overflow > 0 ? entry.coordinate - overflow * sign : entry.coordinate }
+      entry = {
+        ...entry,
+        tickCoord: overflow > 0 ? entry.coordinate - overflow * sign : entry.coordinate,
+      }
     } else {
       entry = { ...entry, tickCoord: entry.coordinate }
     }
@@ -97,7 +110,10 @@ function ticksStart(
     if (tail) {
       const tailSize = getSize(tail, len - 1)
       const overflow = sign * (tail.coordinate + (sign * tailSize) / 2 - end)
-      const entry = { ...tail, tickCoord: overflow > 0 ? tail.coordinate - overflow * sign : tail.coordinate }
+      const entry = {
+        ...tail,
+        tickCoord: overflow > 0 ? tail.coordinate - overflow * sign : tail.coordinate,
+      }
       result[len - 1] = entry
       if (isVisible(sign, entry.tickCoord, () => tailSize, start, end)) {
         end = entry.tickCoord - sign * (tailSize / 2 + gap)
@@ -112,7 +128,10 @@ function ticksStart(
     const tickSize = () => (size ??= getSize(ticks[i]!, i))
     if (i === 0) {
       const overflow = sign * (entry.coordinate - (sign * tickSize()) / 2 - start)
-      entry = { ...entry, tickCoord: overflow < 0 ? entry.coordinate - overflow * sign : entry.coordinate }
+      entry = {
+        ...entry,
+        tickCoord: overflow < 0 ? entry.coordinate - overflow * sign : entry.coordinate,
+      }
     } else {
       entry = { ...entry, tickCoord: entry.coordinate }
     }
@@ -125,7 +144,14 @@ function ticksStart(
   return result
 }
 
-function equidistant(sign: number, initialStart: number, end: number, getSize: GetSize, ticks: Tick[], gap: number): Tick[] {
+function equidistant(
+  sign: number,
+  initialStart: number,
+  end: number,
+  getSize: GetSize,
+  ticks: Tick[],
+  gap: number,
+): Tick[] {
   for (let step = 1; step <= ticks.length; step++) {
     let start = initialStart
     let ok = true
@@ -195,12 +221,16 @@ export function visibleTicks(options: TickIntervalOptions): Tick[] {
   if (typeof interval === 'number') return everyNth(ticks, interval + 1)
 
   const sizeKey = orientation === 'top' || orientation === 'bottom' ? 'width' : 'height'
-  const unitSize = unit && sizeKey === 'width' ? getStringSize(unit, style) : { width: 0, height: 0 }
+  const unitSize =
+    unit && sizeKey === 'width' ? getStringSize(unit, style) : { width: 0, height: 0 }
   const getSize: GetSize = (tick, index) => {
     const value = tickFormatter ? tickFormatter(tick.value as never, index) : tick.value
     const size = getStringSize(value, style)
     return sizeKey === 'width'
-      ? angledWidth({ width: size.width + unitSize.width, height: size.height + unitSize.height }, options.angle)
+      ? angledWidth(
+          { width: size.width + unitSize.width, height: size.height + unitSize.height },
+          options.angle,
+        )
       : size.height
   }
   const [first, second] = ticks
@@ -210,7 +240,8 @@ export function visibleTicks(options: TickIntervalOptions): Tick[] {
   const start = sign === 1 ? (isWidth ? x : y) : isWidth ? x + width : y + height
   const end = sign === 1 ? (isWidth ? x + width : y + height) : isWidth ? x : y
 
-  if (interval === 'equidistantPreserveStart') return equidistant(sign, start, end, getSize, ticks, minTickGap)
+  if (interval === 'equidistantPreserveStart')
+    return equidistant(sign, start, end, getSize, ticks, minTickGap)
   if (interval === 'equidistantPreserveEnd')
     return equidistantPreserveEnd(sign, start, end, getSize, ticks, minTickGap)
   const candidates =

@@ -107,7 +107,8 @@ export function areaPath(
   const curve = curveFactory(type, layout)
   if (Array.isArray(base)) {
     const paired = points.map((point, index) => ({ ...point, base: base[index] as Point }))
-    const areaDefined = (d: (typeof paired)[number]) => d.base != null && defined(d.base) && defined(d)
+    const areaDefined = (d: (typeof paired)[number]) =>
+      d.base != null && defined(d.base) && defined(d)
     const generator =
       layout === 'vertical'
         ? d3Area<(typeof paired)[number]>()
@@ -118,7 +119,9 @@ export function areaPath(
             .x(d => d.x!)
             .y1(d => d.y!)
             .y0(d => d.base.y!)
-    return generator.defined(areaDefined).curve(curve)(connectNulls ? paired.filter(areaDefined) : paired)
+    return generator.defined(areaDefined).curve(curve)(
+      connectNulls ? paired.filter(areaDefined) : paired,
+    )
   }
   const flat = base as number
   const generator =
@@ -140,7 +143,10 @@ function round(value: number): number {
 }
 
 function path(strings: TemplateStringsArray, ...values: number[]): string {
-  return strings.reduce((out, string, i) => out + string + (i < values.length ? round(values[i]!) : ''), '')
+  return strings.reduce(
+    (out, string, i) => out + string + (i < values.length ? round(values[i]!) : ''),
+    '',
+  )
 }
 
 /**
@@ -157,17 +163,26 @@ export function rectanglePath(
   const maxRadius = Math.min(Math.abs(round(width)) / 2, Math.abs(round(height)) / 2)
   const ySign = round(height) >= 0 ? 1 : -1
   const xSign = round(width) >= 0 ? 1 : -1
-  const clockWise = (round(height) >= 0 && round(width) >= 0) || (round(height) < 0 && round(width) < 0) ? 1 : 0
+  const clockWise =
+    (round(height) >= 0 && round(width) >= 0) || (round(height) < 0 && round(width) < 0) ? 1 : 0
   if (maxRadius > 0 && Array.isArray(radius)) {
-    const r = [0, 1, 2, 3].map(i => Math.min(radius[i] ?? 0, maxRadius)) as [number, number, number, number]
+    const r = [0, 1, 2, 3].map(i => Math.min(radius[i] ?? 0, maxRadius)) as [
+      number,
+      number,
+      number,
+      number,
+    ]
     let d = path`M${x},${y + ySign * r[0]}`
     if (r[0] > 0) d += path`A ${r[0]},${r[0]},0,0,${clockWise},${x + xSign * r[0]},${y}`
     d += path`L ${x + width - xSign * r[1]},${y}`
-    if (r[1] > 0) d += path`A ${r[1]},${r[1]},0,0,${clockWise},\n        ${x + width},${y + ySign * r[1]}`
+    if (r[1] > 0)
+      d += path`A ${r[1]},${r[1]},0,0,${clockWise},\n        ${x + width},${y + ySign * r[1]}`
     d += path`L ${x + width},${y + height - ySign * r[2]}`
-    if (r[2] > 0) d += path`A ${r[2]},${r[2]},0,0,${clockWise},\n        ${x + width - xSign * r[2]},${y + height}`
+    if (r[2] > 0)
+      d += path`A ${r[2]},${r[2]},0,0,${clockWise},\n        ${x + width - xSign * r[2]},${y + height}`
     d += path`L ${x + xSign * r[3]},${y + height}`
-    if (r[3] > 0) d += path`A ${r[3]},${r[3]},0,0,${clockWise},\n        ${x},${y + height - ySign * r[3]}`
+    if (r[3] > 0)
+      d += path`A ${r[3]},${r[3]},0,0,${clockWise},\n        ${x},${y + height - ySign * r[3]}`
     return `${d}Z`
   }
   const uniform = typeof radius === 'number' ? radius : 0

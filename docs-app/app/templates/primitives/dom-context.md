@@ -4,7 +4,7 @@ Data shared with everything rendered inside a provider, as React's context is: `
 makes the data and `<Consume>` reads the nearest provider's, found by walking up the DOM.
 Reading it is synchronous and reactive. They are ember-primitives' `Provide` and `Consume`.
 
-<Example @name="dom-context-counter" @title="One counter, two consumers" />
+<Example @name="dom-context-greeting" @title="A provider and a consumer" />
 
 ## Usage
 
@@ -29,6 +29,28 @@ A class or function as `@data` is made into one instance for that provider, with
 lifetime (as [`createStore`](/primitives/store.md) does); anything else is given as is. The
 consumer's `@key` is the provider's `@data`, or its `@key`, and a class key types the data.
 Providers with the same key are independent: a consumer reads the nearest one above it.
+
+## Examples
+
+### Reactive data
+
+Reading the data is reactive, and every consumer under one provider reads the same instance:
+
+<Example @name="dom-context-counter" @title="One counter, two consumers" />
+
+### Independent providers
+
+Providers with the same `@key` stay apart: each consumer reads the nearest one above it. A
+string key works for that, though it leaves the consumer's data untyped:
+
+<Example @name="dom-context-independent" @title="Two stores under one key" />
+
+### A function as data
+
+A function as `@data` is called once per provider, and what it returns is the data. Its
+destructors run when the provider goes, so a timer or a subscription stops with it:
+
+<Example @name="dom-context-timer" @title="A timer, read twice" />
 
 ## API
 

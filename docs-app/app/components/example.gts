@@ -36,6 +36,7 @@ export class Example extends Component<ExampleSignature> {
   @tracked example: LoadedExample | undefined
   @tracked missing = false
   @tracked sourceHtml = ''
+  @tracked filesHtml: { path: string; html: string }[] = []
   @tracked testHtml = ''
   @tracked copied = false
 
@@ -51,13 +52,15 @@ export class Example extends Component<ExampleSignature> {
       this.missing = true
       return
     }
-    const [source, test] = await Promise.all([
+    const [source, test, ...files] = await Promise.all([
       highlight(example.source),
       example.test ? highlight(example.test) : Promise.resolve(''),
+      ...example.files.map(file => highlight(file.source)),
     ])
     if (this.isDestroying) return
     // Shiki output for files in this repository: trusted.
     this.sourceHtml = source
+    this.filesHtml = example.files.map((file, index) => ({ path: file.path, html: files[index]! }))
     this.testHtml = test
     this.example = example
   }
@@ -97,8 +100,17 @@ export class Example extends Component<ExampleSignature> {
     list?.querySelector<HTMLElement>(`#${CSS.escape(this.tabId(target))}`)?.focus()
   }
 
+  /** The Template tab's text: the example, then each file it imports, under its path. */
+  get templateText(): string {
+    const example = this.example
+    if (!example) return ''
+    return [example.source, ...example.files.map(file => `// ${file.path}\n\n${file.source}`)].join(
+      '\n',
+    )
+  }
+
   copy = async () => {
-    const text = this.tab === 'test' ? (this.example?.test ?? '') : (this.example?.source ?? '')
+    const text = this.tab === 'test' ? (this.example?.test ?? '') : this.templateText
     await navigator.clipboard?.writeText(text)
     if (this.isDestroying) return
     this.copied = true
@@ -155,6 +167,10 @@ export class Example extends Component<ExampleSignature> {
               <span class="example-copied" role="status">{{if this.copied "Copied"}}</span>
               {{#if (this.isTab "template")}}
                 {{this.html this.sourceHtml}}
+                {{#each this.filesHtml as |file|}}
+                  <p class="example-file">{{file.path}}</p>
+                  {{this.html file.html}}
+                {{/each}}
               {{else}}
                 {{this.html this.testHtml}}
               {{/if}}

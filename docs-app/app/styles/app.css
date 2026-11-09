@@ -529,6 +529,15 @@
     font: 0.84rem/1.6 var(--g-mono);
   }
 
+  /* The name of a file the example imports, above its source. */
+  .example-file {
+    margin: 0;
+    padding: 0.6rem 1.25rem;
+    border-top: 1px solid var(--g-border);
+    font: 500 0.78rem var(--g-mono);
+    color: var(--g-muted);
+  }
+
   .example-copy {
     position: sticky;
     float: right;

@@ -7,8 +7,6 @@ view, for content below the fold that is expensive to render. They are ember-pri
 
 <Example @name="viewport-deferred" @title="Comments rendered as they scroll in" />
 
-<Example @name="viewport-visibility" @title="Watching an element with the shared observer" />
-
 ## Usage
 
 ```gts
@@ -26,7 +24,29 @@ with its attributes, to be watched; give it the size the content will have, so t
 jump. Once the block renders it stays. With `@mode="replace"`, the block takes the element's
 place rather than going inside it.
 
+### Contain mode (the default)
+
+The block renders inside `InViewport`'s element, which stays in the page around it:
+
+<Example @name="viewport-contain" @title="Content in contain mode" />
+
+### Replace mode
+
+With `@mode="replace"`, the block takes the element's place, and the element goes:
+
+<Example @name="viewport-replace" @title="Content in replace mode" />
+
+### A custom tag name
+
+`@tagName` picks the element (a `div` by default):
+
+<Example @name="viewport-tag-name" @title="A section as the placeholder" />
+
+### The shared observers
+
 For your own observing, `viewport(this)` is one set of observers per app (per test, in tests):
+
+<Example @name="viewport-visibility" @title="Watching an element with the shared observer" />
 
 ```ts
 import { modifier } from 'ember-modifier'

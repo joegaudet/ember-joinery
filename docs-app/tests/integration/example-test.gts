@@ -31,6 +31,29 @@ module('Integration | <Example>', function (hooks) {
     await a11yAudit()
   })
 
+  test('the Template tab also shows the files the example imports, which Copy includes', async function (assert) {
+    const copied: string[] = []
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: async (text: string) => void copied.push(text) },
+    })
+    try {
+      await render(<template><Example @name="load-on-demand" /></template>)
+      await click(tab('template'))
+      assert.dom('.example-code').includesText("import('./lazy/revenue-summary.gts')")
+      assert.dom('.example-file').hasText('lazy/revenue-summary.gts', 'the file, by name')
+      assert.dom('.example-code pre.shiki').exists({ count: 2 }, 'and its source')
+      assert.dom('.example-code').includesText('const RevenueSummary')
+
+      await click('.example-copy')
+      assert.true(copied[0]?.includes('// lazy/revenue-summary.gts'), 'copied with the example')
+      assert.true(copied[0]?.includes('const RevenueSummary'))
+      await a11yAudit()
+    } finally {
+      delete (navigator as { clipboard?: unknown }).clipboard
+    }
+  })
+
   test('arrow keys, Home and End move between the tabs', async function (assert) {
     await render(<template><Example @name="introduction" /></template>)
 

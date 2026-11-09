@@ -8,6 +8,8 @@ import Component from '@glimmer/component'
 import type { TOC } from '@ember/component/template-only'
 import { cached, tracked } from '@glimmer/tracking'
 import { hash } from '@ember/helper'
+import { registerDestructor } from '@ember/destroyable'
+import type Owner from '@ember/owner'
 import { on } from '@ember/modifier'
 import { htmlSafe, type SafeString } from '@ember/template'
 import { modifier } from 'ember-modifier'
@@ -57,7 +59,7 @@ import type {
   LegendPayloadItem,
   TooltipPayloadItem,
 } from '../types.ts'
-import type { TextStyle } from './text-size.ts'
+import { clearStringSizeCache, type TextStyle } from './text-size.ts'
 
 /** What every cartesian chart yields: its parts, each a component bound to the chart. */
 export interface CartesianChartParts {
@@ -678,9 +680,7 @@ const Surface: TOC<SurfaceSignature> = <template>
             @label={{@chart.tooltipLabel}}
             @config={{@chart.args.config}}
             @coordinate={{@chart.tooltipCoordinate}}
-            @labelClassName={{@chart.tooltipPart.args.labelClassName}}
-            @labelFormatter={{@chart.tooltipPart.args.labelFormatter}}
-            @formatter={{@chart.tooltipPart.args.formatter}}
+            @tooltip={{@chart.tooltipProps}}
           />
         {{/let}}
       </div>
@@ -703,6 +703,24 @@ export default class CartesianChart
   @tracked pointer: { x: number; y: number } | null = null
   @tracked keyboardIndex: number | null = null
   @tracked keyboardActive = false
+
+  /** Bumped when the page's fonts finish loading, which changes how wide tick labels are. */
+  @tracked fontRevision = 0
+
+  constructor(owner: Owner, args: CartesianChartSignature['Args']) {
+    super(owner, args)
+    // Tick labels are measured to drop those that would overlap, and a web font that loads
+    // after the first render changes their size: measure again once it has.
+    const fonts = typeof document !== 'undefined' ? document.fonts : undefined
+    if (fonts?.addEventListener) {
+      const onFontsLoaded = () => {
+        clearStringSizeCache()
+        this.fontRevision += 1
+      }
+      fonts.addEventListener('loadingdone', onFontsLoaded)
+      registerDestructor(this, () => fonts.removeEventListener('loadingdone', onFontsLoaded))
+    }
+  }
 
   register(part: ChartPart): void {
     this.#parts.add(part)
@@ -865,6 +883,7 @@ export default class CartesianChart
 
   @cached
   get geometry(): CartesianGeometry | null {
+    void this.fontRevision
     const size = this.size
     if (!size) return null
     const legend = this.legendPart
@@ -1203,6 +1222,20 @@ export default class CartesianChart
     return this.layout === 'horizontal'
       ? { x: tick.coordinate, y: (geometry.offset.top + size.height) / 2 }
       : { x: (geometry.offset.left + size.width) / 2, y: tick.coordinate }
+  }
+
+  /**
+   * What the tooltip's own arguments pass to its content. They go in one object: passed one by
+   * one, an argument the tooltip leaves out would reach the content as `undefined` and override
+   * the one curried into it (recharts passes only the props given).
+   */
+  get tooltipProps(): ChartTooltipContentArgs['tooltip'] {
+    const args = this.tooltipPart?.args
+    return {
+      labelClassName: args?.labelClassName,
+      labelFormatter: args?.labelFormatter,
+      formatter: args?.formatter,
+    }
   }
 
   get tooltipCoordinate(): { x: number; y: number } | undefined {

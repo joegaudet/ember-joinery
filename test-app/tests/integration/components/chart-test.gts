@@ -638,6 +638,32 @@ module('Integration | components | chart', function (hooks) {
     await a11yAudit()
   })
 
+  test("the chart tooltip's own label formatter and class reach its content", async function (assert) {
+    const upper = (value: unknown) => String(value).toUpperCase()
+    await render(
+      <template>
+        <ChartContainer @config={{chartConfig}} style="width: 400px" as |chart|>
+          <chart.BarChart @data={{chartData}} as |c|>
+            <c.XAxis @dataKey="month" />
+            <c.ChartTooltip
+              @content={{component ChartTooltipContent indicator="line"}}
+              @labelFormatter={{upper}}
+              @labelClassName="w-32"
+            />
+            <c.Bar @dataKey="desktop" @fill="var(--color-desktop)" />
+          </chart.BarChart>
+        </ChartContainer>
+      </template>,
+    )
+    const chart = new ChartHarness()
+    await chart.hover(0)
+    const tooltip = chart.tooltip!
+    assert.strictEqual(tooltip.label, 'JANUARY', "the tooltip's labelFormatter")
+    assert.strictEqual(tooltip.indicator, 'line', "the content's own curried arguments stay")
+    assert.dom(tooltip.part('label')).hasClass('w-32')
+    await a11yAudit()
+  })
+
   test('ChartTooltipContent renders on its own, with labelKey, nameKey and formatters', async function (assert) {
     const payload = [
       {

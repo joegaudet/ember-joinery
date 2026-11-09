@@ -90,11 +90,17 @@ export interface ChartTooltipContentArgs {
   label?: unknown
   /** The chart's config, from `ChartContainer`. */
   config?: ChartConfig
-  labelFormatter?: LabelFormatter
-  labelClassName?: string
-  formatter?: ValueFormatter
   /** Where the tooltip points, in the chart's pixels. */
   coordinate?: { x: number; y: number }
+  /**
+   * The chart tooltip's own `@labelClassName`, `@labelFormatter` and `@formatter`, for its
+   * content (each one the tooltip was given wins over the content's own, as in recharts).
+   */
+  tooltip?: {
+    labelClassName?: string
+    labelFormatter?: LabelFormatter
+    formatter?: ValueFormatter
+  }
 }
 
 /** What a chart hands its legend's `@content`, besides that component's own arguments. */

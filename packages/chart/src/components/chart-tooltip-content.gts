@@ -6,6 +6,7 @@ import { cssValue, payloadConfig } from '../-private/config.ts'
 import type {
   ChartConfig,
   ChartIcon,
+  ChartTooltipContentArgs,
   LabelFormatter,
   TooltipPayloadItem,
   ValueFormatter,
@@ -26,6 +27,8 @@ export interface ChartTooltipContentSignature {
     config?: ChartConfig
     /** Where the tooltip points; the chart passes it. Unused. */
     coordinate?: { x: number; y: number }
+    /** The chart tooltip's own label class and formatters; the chart passes them. */
+    tooltip?: ChartTooltipContentArgs['tooltip']
     /** Hides the label. */
     hideLabel?: boolean
     /** Hides each entry's indicator. */
@@ -84,13 +87,26 @@ export default class ChartTooltipContent extends Component<ChartTooltipContentSi
     return Boolean(this.args.active && this.args.payload?.length)
   }
 
+  get labelFormatter(): LabelFormatter | undefined {
+    return this.args.tooltip?.labelFormatter ?? this.args.labelFormatter
+  }
+
+  get labelClassName(): string | undefined {
+    return this.args.tooltip?.labelClassName ?? this.args.labelClassName
+  }
+
+  get formatter(): ValueFormatter | undefined {
+    return this.args.tooltip?.formatter ?? this.args.formatter
+  }
+
   get nestLabel(): boolean {
     return (this.args.payload?.length ?? 0) === 1 && this.indicator !== 'dot'
   }
 
   /** The label's text, or null for none. */
   get label(): { text: string } | null {
-    const { hideLabel, payload, labelKey, label, labelFormatter } = this.args
+    const { hideLabel, payload, labelKey, label } = this.args
+    const labelFormatter = this.labelFormatter
     const config = this.args.config ?? {}
     if (hideLabel || !payload?.length) return null
     const [item] = payload
@@ -104,7 +120,8 @@ export default class ChartTooltipContent extends Component<ChartTooltipContentSi
   }
 
   get entries(): Entry[] {
-    const { payload, nameKey, color, formatter } = this.args
+    const { payload, nameKey, color } = this.args
+    const formatter = this.formatter
     const config = this.args.config ?? {}
     return (payload ?? [])
       .filter(item => item.type !== 'none')
@@ -140,15 +157,18 @@ export default class ChartTooltipContent extends Component<ChartTooltipContentSi
 
   <template>
     {{#if this.visible}}
+      {{! Upstream's box has no data-slot; Joinery's gives it one, so the share of Tailwind's
+          preflight Joinery's parts get (border-box sizing) applies outside a chart too. }}
       <div
         class="jn-chart-tooltip {{@class}}"
+        data-slot="chart-tooltip"
         data-test-jn="chart-tooltip"
         data-indicator={{this.indicator}}
         ...attributes
       >
         {{#unless this.nestLabel}}
           {{#if this.label}}
-            <div class="jn-chart-tooltip-label {{@labelClassName}}" data-test-jn-part="label">
+            <div class="jn-chart-tooltip-label {{this.labelClassName}}" data-test-jn-part="label">
               {{this.label.text}}
             </div>
           {{/if}}
@@ -184,7 +204,7 @@ export default class ChartTooltipContent extends Component<ChartTooltipContentSi
                     {{#if this.nestLabel}}
                       {{#if this.label}}
                         <div
-                          class="jn-chart-tooltip-label {{@labelClassName}}"
+                          class="jn-chart-tooltip-label {{this.labelClassName}}"
                           data-test-jn-part="label"
                         >
                           {{this.label.text}}

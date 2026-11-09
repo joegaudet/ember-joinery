@@ -63,8 +63,10 @@ export default class ChartLegendContent extends Component<ChartLegendContentSign
 
   <template>
     {{#if @payload.length}}
+      {{! A data-slot upstream's legend doesn't have, as the tooltip's: see ChartTooltipContent. }}
       <div
         class="jn-chart-legend {{@class}}"
+        data-slot="chart-legend"
         data-vertical-align={{if @verticalAlign @verticalAlign "bottom"}}
         data-test-jn="chart-legend"
         ...attributes

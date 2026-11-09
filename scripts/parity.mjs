@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* global document, requestAnimationFrame -- the page functions run in the browser */
+/* global document, window, Element, HTMLImageElement, requestAnimationFrame -- the page functions run in the browser */
 // `pnpm parity`: screenshots each mapped upstream example in shadcn/ui's own rendering (the
 // reference app in parity/) and in Joinery's (the guide's `/parity/<name>` route), in light and
 // dark, and compares them pixel by pixel. See "Parity" in CONTRIBUTING.md.
@@ -18,8 +18,9 @@
 // Each comparison loads both pages at the same fixed viewport, with the same fonts (the parity
 // app's @fontsource packages, served by a server of this script's own on every run, so they load
 // whichever servers the pages come from, and injected into both pages; a font that doesn't load
-// is an error, not a fallback), every image on the page loaded (or failed) first, animations and
-// transitions off, and `prefers-reduced-motion`.
+// is an error, not a fallback), every image loaded (or failed) first, those on the page and those
+// an avatar loads off it before it shows them, animations and transitions off, and
+// `prefers-reduced-motion`.
 // The diff is measured over the content's bounding box (everything on either page that isn't
 // the background; see "Comparing screenshots" below), and a diff over the example's threshold
 // (1% of the box's pixels unless its map entry sets one, with a reason) fails. The HTML report,
@@ -652,16 +653,46 @@ const joineryReady = () => Boolean(document.querySelector('[data-parity], [data-
 export const IMAGE_TIMEOUT = 30_000
 
 /**
- * Runs in the page: waits until every `<img>` has loaded (or failed) and been decoded, and
- * returns those still loading after `timeout`. An example's images start loading only when the
- * app renders it, after the page's load event, and neither app waits for them before it says
- * it's ready, so without this a screenshot could catch one side with its image and the other
- * without. A lazy image is made eager, since a full-page screenshot shows it. One that fails to
- * load counts as settled: the browser draws it broken on both sides alike.
+ * Runs in the page before any of its own scripts: keeps every image that is given a source,
+ * whether or not it is in the document. Radix's Avatar, and Joinery's, load the picture off the
+ * page (`new Image()`) and render their `<img>` only once it has loaded, showing the fallback
+ * until then, so the page's own `<img>`s don't say what is still on its way.
  */
-function settleImages(timeout) {
-  const images = [...document.images]
-  for (const image of images) if (image.loading === 'lazy') image.loading = 'eager'
+function trackImages() {
+  const images = new Set()
+  Object.defineProperty(window, '__parityImages', { value: images })
+  const prototype = HTMLImageElement.prototype
+  for (const name of ['src', 'srcset']) {
+    const own = Object.getOwnPropertyDescriptor(prototype, name)
+    Object.defineProperty(prototype, name, {
+      ...own,
+      set(value) {
+        images.add(this)
+        own.set.call(this, value)
+      },
+    })
+  }
+  const setAttribute = Element.prototype.setAttribute
+  Element.prototype.setAttribute = function (name, value) {
+    if (this instanceof HTMLImageElement && /^(src|srcset)$/i.test(name)) images.add(this)
+    return setAttribute.call(this, name, value)
+  }
+}
+
+/**
+ * Runs in the page: waits until every image has loaded (or failed) and been decoded, the
+ * page's `<img>`s and those `trackImages()` saw loading off the page, then gives the app a
+ * moment to render what loaded (an avatar swaps its fallback for an `<img>`) and looks again,
+ * until no new image turns up. Returns those still loading after `timeout`. An example's images
+ * start loading only when the app renders it, after the page's load event, and neither app
+ * waits for them before it says it's ready, so without this a screenshot could catch one side
+ * with its image and the other without. A lazy image is made eager, since a full-page
+ * screenshot shows it. One that fails to load counts as settled: the browser draws it broken
+ * (or the avatar its fallback) on both sides alike.
+ */
+async function settleImages(timeout) {
+  const deadline = performance.now() + timeout
+  const all = () => new Set([...document.images, ...(window.__parityImages ?? [])])
   const settled = image =>
     (image.complete
       ? Promise.resolve()
@@ -670,10 +701,19 @@ function settleImages(timeout) {
           image.addEventListener('error', done, { once: true })
         })
     ).then(() => image.decode().catch(() => {}))
-  const late = new Promise(done => setTimeout(done, timeout))
-  return Promise.race([Promise.all(images.map(settled)), late]).then(() =>
-    images.filter(image => !image.complete).map(image => image.currentSrc || image.src),
-  )
+  const wait = ms => new Promise(done => setTimeout(done, ms))
+  let images = all()
+  while (performance.now() < deadline) {
+    for (const image of images) if (image.loading === 'lazy') image.loading = 'eager'
+    await Promise.race([Promise.all([...images].map(settled)), wait(deadline - performance.now())])
+    await wait(100)
+    await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)))
+    const now = all()
+    const quiet = [...now].every(image => images.has(image) && image.complete)
+    images = now
+    if (quiet) break
+  }
+  return [...images].filter(image => !image.complete).map(image => image.currentSrc || image.src)
 }
 
 /** Opens a page, waits until it has rendered, and screenshots it. */
@@ -682,6 +722,7 @@ async function screenshot(context, url, { theme, ready, fontsUrl, fonts }) {
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
   try {
+    await page.addInitScript(trackImages)
     await page.goto(url, { waitUntil: 'load', timeout: 60_000 })
     await page.waitForFunction(ready, null, { timeout: 30_000 })
     const failed = await page.$('[data-parity-missing], [data-parity-error]')

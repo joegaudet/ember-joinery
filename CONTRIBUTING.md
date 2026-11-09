@@ -365,7 +365,9 @@ elements by `data-jn-*` attributes rather than `data-slot`, because joinery.css 
 `pnpm parity` renders each mapped upstream example in the React reference app (`parity/`) and
 the matching Ember example in the guide's `/parity/<name>` route, then compares screenshots in
 light and dark: the same fixed viewport, fonts and Chromium on both sides, with animations off.
-The diff is measured over the content's bounding box, the smallest box holding everything on
+Each page's images have loaded (or failed) first, both those in the page and those an avatar
+loads off it (`new Image()`, as Radix's and Joinery's do) before it swaps out its fallback, so
+both sides show the same state. The diff is measured over the content's bounding box, the smallest box holding everything on
 either page that isn't the background (the whole page, if the two backgrounds differ), so an
 empty stage or a missing part fails however small the example is. Two pixels count as different
 when they are more than about 8 levels of grey apart, so a 1px `--border` line or a `--muted`

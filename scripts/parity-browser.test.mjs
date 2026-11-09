@@ -278,3 +278,58 @@ test('a screenshot waits for the images on the page', { skip, timeout: 60_000 },
     slow.close()
   }
 })
+
+test(
+  'a screenshot waits for images loaded off the page, and what renders once they load',
+  { skip, timeout: 60_000 },
+  async () => {
+    // As Radix's Avatar (and Joinery's) do, the reference page loads its image with
+    // `new Image()`, off the page, and shows a light fallback until it arrives, 700ms after the
+    // page asks for it; then it swaps in an <img>. The page has no <img> while it waits, so only
+    // a wait that follows every image given a source, in the page or not, catches it; caught
+    // early, the reference page would show the fallback, and the comparison would fail.
+    const svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="34"><rect width="120" height="34" fill="#0a0a0a"/></svg>'
+    const slow = createServer((_request, response) => {
+      setTimeout(() => {
+        response.writeHead(200, { 'content-type': 'image/svg+xml', 'cache-control': 'no-store' })
+        response.end(svg)
+      }, 700)
+    })
+    await new Promise(done => slow.listen(0, '127.0.0.1', done))
+    const src = `http://127.0.0.1:${slow.address().port}/photo.svg`
+    try {
+      const { code, results } = await run(['--themes', 'light'], {
+        map: { 'button-demo': 'same' },
+        files: {
+          'reference/index.html': PAGE(`
+            setTimeout(() => {
+              const fallback = '<span style="display: block; width: 120px; height: 34px; background: #e5e5e5"></span>'
+              document.body.innerHTML = stage(name, fallback)
+              const image = new Image()
+              image.addEventListener('load', () => {
+                document.querySelector('[data-parity]').innerHTML =
+                  '<img src="${src}" width="120" height="34" alt="" style="display: block">'
+              })
+              image.src = '${src}'
+              document.documentElement.dataset.parityReady = 'true'
+            }, 50)
+          `),
+          'guide/index.html': PAGE(`
+            setTimeout(() => {
+              const box = '<span style="display: block; width: 120px; height: 34px; background: #0a0a0a"></span>'
+              document.body.innerHTML = stage(name, box)
+            }, 50)
+          `),
+        },
+      })
+      assert.deepEqual(
+        results.map(result => [result.id, result.status, result.ratio]),
+        [['button-demo', 'pass', 0]],
+      )
+      assert.equal(code, 0)
+    } finally {
+      slow.close()
+    }
+  },
+)

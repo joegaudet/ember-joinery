@@ -1,8 +1,4 @@
-/** The test hooks `setupColorScheme` registers on: QUnit's `hooks`, or Vitest's shape of it. */
-export interface TestHooks {
-  beforeEach(callback: () => void | Promise<void>): void
-  afterEach(callback: () => void | Promise<void>): void
-}
+import type { TestHooks } from './test-hooks.ts'
 
 /** A color scheme the system can prefer. */
 export type SystemColorScheme = 'light' | 'dark'

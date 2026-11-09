@@ -10,5 +10,6 @@
 `FieldError` (its block, or `@errors`: one message, or a list of distinct ones), with an `as…`
 modifier for each part that has nothing of its own to render. `@ember-joinery/test-support`
 adds `FieldHarness`, `FieldSetHarness` and `FieldGroupHarness`. A radio group's items now name
-their group in `data-test-jn-owner`, so `RadioGroupHarness` finds them inside a Field or a label
-around them, and the checkable harnesses count a control in a disabled `<fieldset>` as disabled.
+their group's `id` (the caller's own, when they give one) in `data-test-jn-owner`, so
+`RadioGroupHarness` finds them inside a Field or a label around them, and the checkable
+harnesses count a control in a disabled `<fieldset>` as disabled.

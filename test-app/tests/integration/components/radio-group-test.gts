@@ -4,7 +4,7 @@ import { render, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
-import { RadioGroup } from '@ember-joinery/ember'
+import { Field, FieldLabel, RadioGroup } from '@ember-joinery/ember'
 import { RadioGroupHarness, tab } from '@ember-joinery/test-support'
 
 /** A colour as the browser resolves it, for comparing with a token. */
@@ -151,6 +151,46 @@ module('Integration | components | radio-group', function (hooks) {
     await rtl.focus('default')
     await rtl.press('ArrowLeft')
     assert.strictEqual(rtl.value, 'comfortable')
+    await a11yAudit()
+  })
+
+  test('the harness finds items inside a Field, whether the group has its own id or yours', async function (assert) {
+    // Each item is named with aria-label: axe reads no name through the field's role="group"
+    // inside the label, though browsers do (see radio-group-choice-card).
+    await render(
+      <template>
+        <RadioGroup @name="ours" @defaultValue="pro" aria-label="Ours" as |group|>
+          <FieldLabel for="ours-pro">
+            <Field @orientation="horizontal">
+              <group.Item @value="pro" id="ours-pro" aria-label="Pro" />
+              Pro
+            </Field>
+          </FieldLabel>
+        </RadioGroup>
+        <RadioGroup @name="yours" @defaultValue="plus" id="plans" aria-label="Yours" as |group|>
+          <FieldLabel for="yours-plus">
+            <Field @orientation="horizontal">
+              <group.Item @value="plus" id="yours-plus" aria-label="Plus" />
+              Plus
+            </Field>
+          </FieldLabel>
+          <FieldLabel for="yours-team">
+            <Field @orientation="horizontal">
+              <group.Item @value="team" id="yours-team" aria-label="Team" />
+              Team
+            </Field>
+          </FieldLabel>
+        </RadioGroup>
+      </template>,
+    )
+    assert.deepEqual(new RadioGroupHarness('ours').options, ['pro'])
+    const yours = new RadioGroupHarness('yours')
+    assert.dom(yours.element).hasAttribute('id', 'plans', 'the caller’s id wins')
+    assert.dom(yours.item('plus')).hasAttribute('data-test-jn-owner', 'plans')
+    assert.deepEqual(yours.options, ['plus', 'team'], 'its items follow it')
+    assert.strictEqual(yours.value, 'plus')
+    await yours.choose('team')
+    assert.strictEqual(yours.value, 'team')
     await a11yAudit()
   })
 

@@ -2,7 +2,7 @@ import Component from '@glimmer/component'
 import { hash } from '@ember/helper'
 import { on } from '@ember/modifier'
 import { registerDestructor } from '@ember/destroyable'
-import Modifier from 'ember-modifier'
+import Modifier, { modifier } from 'ember-modifier'
 import type { WithBoundArgs } from '@glint/template'
 import { As, type TagName } from './as.gts'
 import { ControllableState } from './controllable-state.ts'
@@ -13,6 +13,17 @@ import { BubbleInput, FormControl, preventEnter } from './-private/form-control.
 import { Indicator } from './-private/indicator.gts'
 
 const ARROW_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']
+
+/**
+ * Names, in an item's `data-test-jn-owner`, the `id` its group's element has: the group's own,
+ * which the template renders (so a page rendered on the server has it), or the caller's, when
+ * they give the group one. `RadioGroupHarness` follows it to an item that sits inside another
+ * component, such as a Field or a label around it.
+ */
+const ownedByGroup = modifier<{ Element: HTMLElement }>(element => {
+  const group = element.parentElement?.closest('[data-test-jn="radio-group"]')
+  if (group?.id) element.setAttribute('data-test-jn-owner', group.id)
+})
 
 interface ArrowKeysSignature {
   Element: HTMLElement
@@ -113,6 +124,7 @@ class RadioGroupItem extends Component<RadioGroupItemSignature> {
       data-test-jn-value={{@value}}
       data-test-jn-owner={{idFor @group}}
       ...attributes
+      {{ownedByGroup}}
       {{@group.roving.item tabStopId=@value focusable=this.isFocusable active=this.isChecked}}
       {{on "keydown" preventEnter}}
       {{on "click" this.choose}}
@@ -200,9 +212,9 @@ export interface RadioGroupSignature {
  * In a form, each item renders a hidden native radio beside it, as Radix's does, named by the
  * group's `@formName`, so the form submits the chosen value and checks `@required`.
  *
- * Each item names the group's `id` in `data-test-jn-owner`, so `RadioGroupHarness` still finds
- * an item that sits inside another component, such as a Field or a label around it. A caller's
- * own `id` on the group wins; its items are then found where they sit, inside nothing else.
+ * Each item names the group's `id` in `data-test-jn-owner`, the caller's own when they give the
+ * group one, so `RadioGroupHarness` still finds an item that sits inside another component, such
+ * as a Field or a label around it.
  */
 export class RadioGroup extends Component<RadioGroupSignature> {
   selection = new ControllableState<string | null>({

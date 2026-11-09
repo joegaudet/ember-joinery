@@ -58,10 +58,16 @@ export function isWithin(element: Element, scope: Scope): boolean {
   return false
 }
 
-/** The root of the component instance an element belongs to: its nearest `data-test-jn` ancestor. */
+/**
+ * The root of the component instance an element belongs to: its nearest `data-test-jn`
+ * ancestor. A wrapper's root (`data-test-jn-wrapper`: a scroller, a layout, a heading) is
+ * passed over, so what the caller puts inside a wrapper stays the part of the component around
+ * it.
+ */
 export function componentOf(element: Element): Element | null {
   for (const ancestor of ancestors(element)) {
-    if (ancestor.hasAttribute(attributes.component)) return ancestor
+    if (ancestor.hasAttribute(attributes.component) && !ancestor.hasAttribute(attributes.wrapper))
+      return ancestor
   }
   return null
 }

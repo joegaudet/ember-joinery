@@ -7,6 +7,8 @@
  *   data-test-jn-part="<part>"   a part of the component (`trigger`, `content`, `item`…)
  *   data-test-jn-owner="<id>"    on a portalled or top-layer part: the `id` of its root
  *   data-test-jn-value="<key>"   an option, item, tab or toggle, by its key
+ *   data-test-jn-wrapper         on a root that wraps the caller's content (a scroller, a
+ *                                layout): the parts inside it belong to the component around it
  */
 export const attributes = {
   component: 'data-test-jn',
@@ -14,6 +16,7 @@ export const attributes = {
   part: 'data-test-jn-part',
   owner: 'data-test-jn-owner',
   value: 'data-test-jn-value',
+  wrapper: 'data-test-jn-wrapper',
 } as const
 
 /** A value made safe to put inside a double-quoted CSS attribute selector. */
@@ -56,5 +59,9 @@ export const selectors = {
   /** An option, item, tab or toggle, by its key (`data-test-jn-value`). */
   value(key?: string): string {
     return attribute(attributes.value, key)
+  },
+  /** The root of a component that wraps the caller's content (`data-test-jn-wrapper`). */
+  wrapper(): string {
+    return attribute(attributes.wrapper)
   },
 }

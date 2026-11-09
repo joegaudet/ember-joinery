@@ -339,6 +339,7 @@ module('Integration | test-support | Harness', function (hooks) {
       part: 'data-test-jn-part',
       owner: 'data-test-jn-owner',
       value: 'data-test-jn-value',
+      wrapper: 'data-test-jn-wrapper',
     })
     assert.strictEqual(selectors.component(), '[data-test-jn]')
     assert.strictEqual(selectors.component('dialog'), '[data-test-jn="dialog"]')

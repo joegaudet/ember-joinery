@@ -1,0 +1,72 @@
+import { Card, Icon } from '@ember-joinery/ember'
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@ember-joinery/chart'
+import { Activity, TrendingUp } from 'lucide'
+
+const chartData = [
+  { month: 'January', desktop: 186 },
+  { month: 'February', desktop: 305 },
+  { month: 'March', desktop: 237 },
+  { month: 'April', desktop: 73 },
+  { month: 'May', desktop: 209 },
+  { month: 'June', desktop: 214 },
+]
+
+const chartConfig = {
+  desktop: {
+    label: 'Desktop',
+    color: 'var(--chart-1)',
+    icon: Activity,
+  },
+} satisfies ChartConfig
+
+const margin = { left: 12, right: 12 }
+const monthAbbr = (value: string) => value.slice(0, 3)
+
+<template>
+  <Card as |card|>
+    <card.Header>
+      <card.Title>Area Chart - Step</card.Title>
+      <card.Description>
+        Showing total visitors for the last 6 months
+      </card.Description>
+    </card.Header>
+    <card.Content>
+      <ChartContainer @config={{chartConfig}} as |chart|>
+        <chart.AreaChart @accessibilityLayer={{true}} @data={{chartData}} @margin={{margin}} as |c|>
+          <c.CartesianGrid @vertical={{false}} />
+          <c.XAxis
+            @dataKey="month"
+            @tickLine={{false}}
+            @axisLine={{false}}
+            @tickMargin={{8}}
+            @tickFormatter={{monthAbbr}}
+          />
+          <c.ChartTooltip
+            @cursor={{false}}
+            @content={{component ChartTooltipContent hideLabel=true}}
+          />
+          <c.Area
+            @dataKey="desktop"
+            @type="step"
+            @fill="var(--color-desktop)"
+            @fillOpacity={{0.4}}
+            @stroke="var(--color-desktop)"
+          />
+        </chart.AreaChart>
+      </ChartContainer>
+    </card.Content>
+    <card.Footer>
+      <div class="flex w-full items-start gap-2 text-sm">
+        <div class="grid gap-2">
+          <div class="flex items-center gap-2 leading-none font-medium">
+            Trending up by 5.2% this month
+            <Icon @icon={{TrendingUp}} class="h-4 w-4" />
+          </div>
+          <div class="flex items-center gap-2 leading-none text-muted-foreground">
+            January - June 2024
+          </div>
+        </div>
+      </div>
+    </card.Footer>
+  </Card>
+</template>

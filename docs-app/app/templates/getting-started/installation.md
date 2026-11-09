@@ -44,13 +44,18 @@ components you import into your `.gjs` and `.gts` files.
 
 ## Tailwind apps
 
-Joinery doesn't need Tailwind, but it works alongside it. Import `joinery.css` as above, and in
-your Tailwind entry point, name Joinery's layer before Tailwind's:
+Joinery doesn't need Tailwind, but it works alongside it. Import `joinery.css` as above, and
+start your Tailwind entry point by placing Joinery's layer between Tailwind's `base` and
+`components`:
 
 ```css
-/* Layers declared first lose, so Tailwind's utilities override Joinery's rules. */
-@layer joinery, theme, base, components, utilities;
+/* Layers declared first lose. */
+@layer theme, base, joinery, components, utilities;
 @import 'tailwindcss';
 ```
 
-Then a `class="…"` on a component overrides its own styles.
+Tailwind's preflight lives in `base`, and it resets every button, input and margin. With
+Joinery's layer above it, those resets don't undo Joinery's padding, borders and backgrounds.
+With Tailwind's utilities above Joinery's layer, a `class="…"` on a component overrides its
+own styles. The `@layer` line has to come before any other style sheet declares a layer, so
+import this entry point before `joinery.css`.

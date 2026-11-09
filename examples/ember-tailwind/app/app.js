@@ -3,7 +3,7 @@ import compatModules from '@embroider/virtual/compat-modules'
 import Resolver from 'ember-resolver'
 import loadInitializers from 'ember-load-initializers'
 import config from 'ember-tailwind/config/environment'
-// The Tailwind entry point; it names Joinery's layer before Tailwind's.
+// The Tailwind entry point; it puts Joinery's layer between Tailwind's base and utilities.
 import './styles/app.css'
 // Joinery's component CSS, in the `joinery` cascade layer.
 import '@ember-joinery/ember/joinery.css'

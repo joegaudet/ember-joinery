@@ -16,9 +16,22 @@
 // the inline utilities scripts/extract-classes.mjs pulls out of upstream's source). The entry
 // is generated here, so adding a component's CSS file is all it takes to ship it. The themes
 // and tailwind.css are copied as written.
+//
+// Everything a style ships is in `@layer joinery`, but for what Tailwind puts at the top level
+// for the rules to use (`@property` registrations, keyframes, and `@layer properties`, its
+// fallback for browsers without `@property`). An unlayered rule would beat an app's own layered
+// CSS, so `layered()` checks each compile and fails the build on one (see there for the one it
+// drops).
 
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs'
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from 'node:fs'
 import { basename, dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -83,6 +96,75 @@ export function entries() {
   ]
 }
 
+/**
+ * CSS's top-level statements and blocks (`@layer x;`, `a { … }`, `@media … { … }`), as
+ * `{ text, start, end }` offsets into it, skipping comments and leaving braces in strings alone.
+ */
+export function topLevel(css) {
+  const blocks = []
+  let depth = 0
+  let start = 0
+  let quote
+  const push = end => {
+    const text = css.slice(start, end).trim()
+    if (text) blocks.push({ text, start, end })
+    start = end
+  }
+  for (let index = 0; index < css.length; index++) {
+    const char = css[index]
+    if (quote) {
+      if (char === '\\') index++
+      else if (char === quote) quote = undefined
+      continue
+    }
+    if (char === '/' && css[index + 1] === '*') {
+      const end = css.indexOf('*/', index + 2)
+      index = end === -1 ? css.length : end + 1
+      if (depth === 0) start = index + 1
+      continue
+    }
+    if (char === '"' || char === "'") quote = char
+    else if (char === '{') depth++
+    else if (char === '}' && --depth === 0) push(index + 1)
+    else if (char === ';' && depth === 0) push(index + 1)
+  }
+  return blocks
+}
+
+/** What may sit outside `@layer joinery`: what Tailwind emits for the rules to use. */
+const TOP_LEVEL = /^@(layer|property|keyframes|-webkit-keyframes|charset)\b/
+
+/**
+ * shadcn.css's last rule, kept upstream for backwards compatibility: unlayered, so it wins over
+ * other utilities on an element with a bare `.shimmer` class. Joinery's parts never have one (a
+ * part's rule `@apply`s `shimmer`, which brings the utility's own reduced-motion rule along), so
+ * all it would do is reach into an app's own `.shimmer` elements.
+ */
+const SHIMMER_COMPAT =
+  /^@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{\s*\.shimmer\s*\{[^{}]*\}\s*\}$/
+
+/**
+ * A compiled style, checked: everything but what Tailwind emits for the rules to use is in a
+ * layer. It drops shadcn.css's unlayered `.shimmer` rule (see SHIMMER_COMPAT) and throws on any
+ * other unlayered CSS.
+ */
+export function layered(css, style = 'a') {
+  let output = ''
+  let from = 0
+  for (const block of topLevel(css)) {
+    if (TOP_LEVEL.test(block.text)) continue
+    if (SHIMMER_COMPAT.test(block.text)) {
+      output += css.slice(from, block.start)
+      from = block.end
+      continue
+    }
+    throw new Error(
+      `build-css: the ${style} style has CSS outside @layer joinery, which would beat an app's own layered CSS:\n${block.text.slice(0, 300)}`,
+    )
+  }
+  return output + css.slice(from)
+}
+
 /** Compiles one style's entry with the Tailwind CLI into `output`, or throws with its output. */
 function compile(entry, output, style) {
   if (!existsSync(tailwind)) {
@@ -99,6 +181,7 @@ function compile(entry, output, style) {
   if (result.status !== 0) {
     throw new Error(`build-css: tailwindcss failed on the ${style} style\n${result.stderr}`)
   }
+  writeFileSync(output, layered(readFileSync(output, 'utf8'), style))
 }
 
 /** Builds every file into `outDir`. */

@@ -1593,7 +1593,11 @@ export default class CartesianChart
     const geometry = this.geometry
     const categoryAxis =
       this.layout === 'horizontal' ? geometry?.xAxis.settings : geometry?.yAxis.settings
-    // recharts moves along the axis's own direction: a reversed axis runs right to left.
+    // ArrowRight moves to the next row and ArrowLeft to the previous one, the other way on a
+    // reversed category axis, as recharts 3 does in a horizontal chart. In a vertical chart
+    // recharts' keyboardEventsMiddleware flips every move (its direction there is never
+    // 'left-to-right'), so its ArrowRight goes up to the previous row; Joinery's goes down to
+    // the next, as in a horizontal chart. The guide's Keyboard interactions section says so.
     const direction = categoryAxis?.reversed ? -1 : 1
     const next = current + (key === 'ArrowRight' ? 1 : -1) * direction
     const count = geometry?.categoryTicks.length ?? 0

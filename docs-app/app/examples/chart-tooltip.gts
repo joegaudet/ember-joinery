@@ -2,7 +2,9 @@ import { ChartTooltipContent } from '@ember-joinery/chart'
 
 // Upstream's demo draws each tooltip with a copy of ChartTooltipContent's markup (its
 // `TooltipDemo`); Joinery's ChartTooltipContent renders on its own, so the demo uses it, with
-// each entry's colour as its `color`.
+// each entry's colour as its `color`. TooltipDemo's box adds `transition-all ease-in-out
+// hover:-translate-y-0.5`, so each box lifts on hover; those classes go on each box here. Its
+// items leave out ChartTooltipContent's `flex-wrap`, which changes nothing at these widths.
 const pageViews = [
   { name: 'Desktop', value: 186, color: 'var(--chart-1)' },
   { name: 'Mobile', value: 80, color: 'var(--chart-2)' },
@@ -46,7 +48,7 @@ const chrome = [{ name: 'Chrome', value: 1286, color: 'var(--chart-1)' }]
         @active={{true}}
         @label="Page Views"
         @payload={{pageViews}}
-        class="w-[8rem]"
+        class="w-[8rem] transition-all ease-in-out hover:-translate-y-0.5"
       />
     </div>
     <div class="items-end">
@@ -79,7 +81,7 @@ const chrome = [{ name: 'Chrome', value: 1286, color: 'var(--chart-1)' }]
         @hideLabel={{true}}
         @payload={{browsers}}
         @indicator="dashed"
-        class="w-[8rem]"
+        class="w-[8rem] transition-all ease-in-out hover:-translate-y-0.5"
       />
     </div>
     <div class="hidden! md:flex!">
@@ -87,7 +89,7 @@ const chrome = [{ name: 'Chrome', value: 1286, color: 'var(--chart-1)' }]
         @active={{true}}
         @label="Page Views"
         @payload={{desktop}}
-        class="w-[9rem]"
+        class="w-[9rem] transition-all ease-in-out hover:-translate-y-0.5"
         @indicator="line"
       />
     </div>
@@ -101,7 +103,7 @@ const chrome = [{ name: 'Chrome', value: 1286, color: 'var(--chart-1)' }]
         @hideLabel={{true}}
         @payload={{chrome}}
         @indicator="dot"
-        class="w-[8rem]"
+        class="w-[8rem] transition-all ease-in-out hover:-translate-y-0.5"
       />
       <svg
         xmlns="http://www.w3.org/2000/svg"

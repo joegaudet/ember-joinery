@@ -50,8 +50,10 @@ pnpm add @ember-joinery/chart
 ```
 
 The chart's styles are in Joinery's CSS (see [Installation](/getting-started/installation.md)),
-so there is nothing more to import. The colours are the theme's `--chart-1` to `--chart-5`,
-which `tokens.css` and every base colour define, light and dark:
+so there is nothing more to import. The colours are the theme's `--chart-1` to `--chart-5`:
+`tokens.css` and every base colour define them, light and dark, each its own (Neutral's, in
+`tokens.css`, are greys). For the colours upstream's manual installation adds, paste them into
+your CSS, after `tokens.css` (it isn't in a layer, so neither is this):
 
 ```css
 :root {
@@ -417,6 +419,16 @@ This argument adds keyboard access and screen reader support to your charts.
 <chart.LineChart @accessibilityLayer={{true}} />
 ```
 
+- With the accessibility layer, the chart's `<svg>` has the `application` role and takes focus,
+  and the arrow keys read it row by row through the tooltip, as Recharts' does (see
+  [Keyboard interactions](#keyboard-interactions)). Give it a `@title` (and a `@desc`) to name
+  it for a screen reader.
+- The axes' labels keep Recharts 3's `#666`. shadcn's CSS greys `.recharts-cartesian-axis-tick
+text`, where Recharts 2 drew the labels; Recharts 3 draws them in
+  `.recharts-cartesian-axis-tick-label`, so they are `#666` on ui.shadcn.com too, as here.
+- A chart shows its data as a picture. Where the numbers matter, show them as text or a table
+  beside it too.
+
 ## RTL
 
 Joinery's charts take the page's direction for their tooltip and legend. A chart's x-axis runs
@@ -581,18 +593,13 @@ With the accessibility layer, the chart takes focus.
 | `ArrowRight` / `ArrowLeft` | Moves the tooltip to the next or previous row along the x-axis |
 | `Enter`                    | Hides the tooltip, or shows it again                           |
 
-Leaving the chart hides the tooltip.
+Leaving the chart hides the tooltip. On a reversed category axis (`@reversed`), the arrows
+swap, so `ArrowRight` still moves right.
 
-## Accessibility
-
-- With the accessibility layer, the chart's `<svg>` has the `application` role and takes focus,
-  and the arrow keys read it row by row through the tooltip, as Recharts' does. Give it a
-  `@title` (and a `@desc`) to name it for a screen reader.
-- The axes' labels keep Recharts 3's `#666`. shadcn's CSS greys `.recharts-cartesian-axis-tick
-text`, where Recharts 2 drew the labels; Recharts 3 draws them in
-  `.recharts-cartesian-axis-tick-label`, so they are `#666` on ui.shadcn.com too, as here.
-- A chart shows its data as a picture. Where the numbers matter, show them as text or a table
-  beside it too.
+In a vertical chart (`@layout="vertical"`, its rows down the y-axis), `ArrowRight` moves to the
+next row, down, and `ArrowLeft` to the previous one, as in a horizontal chart. Recharts 3 moves
+the other way there: it flips every move in a chart that doesn't run left to right, so its
+`ArrowRight` moves up a row.
 
 ## Testing
 

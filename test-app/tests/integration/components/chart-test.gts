@@ -803,6 +803,17 @@ module('Integration | components | chart', function (hooks) {
     assert.true(bars[1]!.width > bars[0]!.width, 'February (305) longer than January (186)')
     await chart.hover(1)
     assert.strictEqual(chart.tooltip?.label, 'February')
+    await chart.unhover()
+    await chart.focus()
+    assert.strictEqual(chart.tooltip?.label, 'January', 'focus shows the first row')
+    await chart.press('ArrowRight')
+    assert.strictEqual(
+      chart.tooltip?.label,
+      'February',
+      "ArrowRight moves down to the next row (recharts 3's moves up; see the guide)",
+    )
+    await chart.press('ArrowLeft')
+    assert.strictEqual(chart.tooltip?.label, 'January')
     await a11yAudit()
   })
 

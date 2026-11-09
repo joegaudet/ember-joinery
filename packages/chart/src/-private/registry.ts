@@ -4,9 +4,14 @@
  * chart's block renders before the marks inside its `<svg>`, so every part has registered by
  * the time the chart lays them out in the same render.
  *
- * A registration must not read what it writes: Glimmer forbids changing tracked state that the
- * same render has already read. So the list is a plain array, and a tracked revision is only
- * ever set, never read, by `register()`.
+ * Glimmer's debug build forbids changing tracked state that the same render has already read
+ * ("You attempted to update `revision`… but it had already been used previously in the same
+ * computation"). A registration sets `revision`, so nothing may read `items` earlier in a render
+ * than the block that registers: not in the first render, and not in a later one, where a part
+ * the block adds inside an `{{#if}}` registers while the render revalidates the template in
+ * order. The chart reads its parts only after its `{{yield}}` (an attribute on the wrapper, which
+ * is evaluated before the block, would trip it). And a registration never reads what it writes:
+ * the list is a plain array, and `add()` and `remove()` only set the revision.
  */
 import { tracked } from '@glimmer/tracking'
 

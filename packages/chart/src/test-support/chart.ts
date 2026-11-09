@@ -144,7 +144,7 @@ export class ChartHarness extends Harness {
 
   /** The plot area: the chart less its margins, axes and legend. */
   get plot(): { x: number; y: number; width: number; height: number } {
-    const rect = this.surface.querySelector('clipPath rect')!
+    const rect = this.part('plot')
     const read = (name: string) => Number(rect.getAttribute(name))
     return { x: read('x'), y: read('y'), width: read('width'), height: read('height') }
   }
@@ -235,7 +235,7 @@ export class ChartHarness extends Harness {
 
   /** Where each row sits along the category axis, in the chart's pixels. */
   get categories(): number[] {
-    const value = this.wrapper.getAttribute('data-test-jn-categories')
+    const value = this.queryPart('plot')?.getAttribute('data-test-jn-categories')
     return value ? value.split(' ').map(Number) : []
   }
 

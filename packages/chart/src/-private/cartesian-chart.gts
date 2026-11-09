@@ -309,7 +309,6 @@ const Surface: TOC<SurfaceSignature> = <template>
     data-test-jn-name={{unless @chart.args.inContainer @chart.args.name}}
     data-test-jn-part="wrapper"
     data-layout={{@chart.layout}}
-    data-test-jn-categories={{@chart.categoryCoordinates}}
     {{on "mousemove" @chart.onMouseMove}}
     {{on "mouseleave" @chart.onMouseLeave}}
     ...attributes
@@ -329,7 +328,12 @@ const Surface: TOC<SurfaceSignature> = <template>
     >
       <title>{{@chart.args.title}}</title>
       <desc>{{@chart.args.desc}}</desc>
-      {{! The block registers the chart's parts (and can hold <defs>) before the marks below read them. }}
+      {{!
+        The block registers the chart's parts (and can hold <defs>). Nothing above it may read
+        them, in this render or a later one: a part the block adds (inside an if, say) writes
+        the registry, and Glimmer forbids writing tracked state the same render has read. So
+        everything that reads them, the categories attribute included, comes after it.
+      }}
       {{yield}}
       {{#if @chart.geometry}}
         <g class="recharts-zIndex-layer_-100">
@@ -375,6 +379,8 @@ const Surface: TOC<SurfaceSignature> = <template>
         <defs>
           <clipPath id={{@chart.clipId}}>
             <rect
+              data-test-jn-part="plot"
+              data-test-jn-categories={{@chart.categoryCoordinates}}
               x={{@chart.geometry.offset.left}}
               y={{@chart.geometry.offset.top}}
               height={{@chart.geometry.offset.height}}

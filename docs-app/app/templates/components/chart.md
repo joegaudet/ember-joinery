@@ -572,8 +572,9 @@ for a chart outside one.
 |                                   | `data-chart`              | its id, which `ChartStyle`'s rules select              |
 |                                   | `data-test-jn`            | `chart`                                                |
 | the chart (`.recharts-wrapper`)   | `data-test-jn-part`       | `wrapper`                                              |
-|                                   | `data-test-jn-categories` | where each row sits along the category axis, in pixels |
 | its `<svg>` (`.recharts-surface`) | `data-test-jn-part`       | `surface`                                              |
+| the plot area (its clip `<rect>`) | `data-test-jn-part`       | `plot`                                                 |
+|                                   | `data-test-jn-categories` | where each row sits along the category axis, in pixels |
 | a series                          | `data-test-jn-part`       | `series`, with `data-test-jn-value` its data key       |
 |                                   | `data-test-jn-points`     | its points, as `x,y` pairs                             |
 | `ChartTooltipContent`             | `data-test-jn`            | `chart-tooltip`                                        |

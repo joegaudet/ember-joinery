@@ -514,6 +514,62 @@ module('Integration | components | chart', function (hooks) {
     await a11yAudit()
   })
 
+  test('parts the block adds or removes later redraw the chart', async function (assert) {
+    // Each part registers with the chart as it is built, so one built in a later render (inside
+    // an if) must not change what that render has already read: Ember's debug build fails that.
+    class State {
+      @tracked more = false
+    }
+    const state = new State()
+    await render(
+      <template>
+        <ChartContainer @config={{chartConfig}} style="width: 400px" as |chart|>
+          <chart.LineChart @data={{chartData}} as |c|>
+            <c.XAxis @dataKey="month" />
+            <c.Line @dataKey="desktop" @stroke="var(--color-desktop)" as |line|>
+              {{#if state.more}}
+                <line.LabelList @position="top" />
+              {{/if}}
+            </c.Line>
+            {{#if state.more}}
+              <c.Line @dataKey="mobile" @stroke="var(--color-mobile)" />
+              <c.ChartLegend @content={{component ChartLegendContent}} />
+            {{/if}}
+          </chart.LineChart>
+        </ChartContainer>
+      </template>,
+    )
+    const chart = new ChartHarness()
+    const keys = () => chart.series.map(series => series.key)
+    assert.deepEqual(keys(), ['desktop'])
+    assert.strictEqual(chart.legend, null, 'no legend yet')
+    assert.deepEqual(chart.labels('desktop'), [])
+    assert.strictEqual(chart.categories.length, 6)
+    const plotHeight = chart.plot.height
+
+    state.more = true
+    await rerender()
+    await settled()
+    assert.deepEqual(keys(), ['desktop', 'mobile'], 'a series added later is drawn')
+    assert.deepEqual(chart.legend?.labels, ['Desktop', 'Mobile'], 'and a legend')
+    assert.true(chart.plot.height < plotHeight, 'which takes its height from the plot')
+    assert.deepEqual(
+      chart.labels('desktop'),
+      ['186', '305', '237', '73', '209', '214'],
+      "a label list added to a series' block",
+    )
+    assert.strictEqual(chart.categories.length, 6)
+
+    state.more = false
+    await rerender()
+    await settled()
+    assert.deepEqual(keys(), ['desktop'], 'and they go when they are removed')
+    assert.strictEqual(chart.legend, null)
+    assert.deepEqual(chart.labels('desktop'), [])
+    assert.strictEqual(chart.plot.height, plotHeight)
+    await a11yAudit()
+  })
+
   test('a config icon replaces the legend swatch and the tooltip indicator', async function (assert) {
     const config = {
       desktop: { label: 'Desktop', color: 'var(--chart-1)', icon: TrendingDown },

@@ -1,0 +1,22 @@
+{
+  "examples": {
+    "button-demo": "button-demo",
+    "button-size": "button-size",
+    "button-default": "button-default",
+    "button-outline": "button-outline",
+    "button-secondary": "button-secondary",
+    "button-ghost": "button-ghost",
+    "button-destructive": "button-destructive",
+    "button-link": "button-link",
+    "button-icon": "button-icon",
+    "button-with-icon": {
+      "example": "button-with-icon",
+      "threshold": 0.02,
+      "reason": "Upstream's example draws Tabler's git-branch icon; Joinery's icons are lucide's, whose git-branch differs in a few strokes."
+    },
+    "button-rounded": "button-rounded",
+    "button-spinner": "button-spinner",
+    "button-aschild": "button-aschild",
+    "button-rtl": "button-rtl"
+  }
+}

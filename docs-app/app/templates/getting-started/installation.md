@@ -22,13 +22,22 @@ pnpm add @ember-joinery/ember
 pnpm add --save-dev @ember-joinery/test-support
 ```
 
-Then import Joinery's CSS once, in `app/app.ts`:
+Then import Joinery's CSS once, in `app/app.ts`: the theme's tokens, then the components:
 
 ```ts
+import '@ember-joinery/ember/tokens.css'
 import '@ember-joinery/ember/joinery.css'
 ```
 
 The rules sit in the `joinery` cascade layer, so your own CSS always wins over them.
+[Theming](/getting-started/theming.md) has the other base colours and styles, and how to paste
+in a theme from ui.shadcn.com.
+
+The examples import icons from [`lucide`](https://lucide.dev/), as shadcn's do, one at a time:
+
+```bash
+pnpm add lucide
+```
 
 ## Classic apps
 
@@ -39,19 +48,21 @@ Classic ember-cli apps consume v2 addons through
 pnpm add --save-dev ember-auto-import @ember-joinery/ember @ember-joinery/test-support
 ```
 
-Import the CSS from `app/app.js` as in a Vite app. ember-auto-import bundles it, along with the
+Import the CSS (`tokens.css`, then `joinery.css`) from `app/app.js` as in a Vite app. ember-auto-import bundles it, along with the
 components you import into your `.gjs` and `.gts` files.
 
 ## Tailwind apps
 
-Joinery doesn't need Tailwind, but it works alongside it. Import `joinery.css` as above, and
-start your Tailwind entry point by placing Joinery's layer between Tailwind's `base` and
-`components`:
+Joinery doesn't need Tailwind, but it works alongside it. Import `tokens.css` and
+`joinery.css` as above, and start your Tailwind entry point by placing Joinery's layer between
+Tailwind's `base` and `components`, then add Joinery's `tailwind.css`, which maps the tokens to
+Tailwind's theme (`bg-primary`, `rounded-lg`) and adds the `dark:` variant:
 
 ```css
 /* Layers declared first lose. */
 @layer theme, base, joinery, components, utilities;
 @import 'tailwindcss';
+@import '@ember-joinery/ember/tailwind.css';
 ```
 
 Tailwind's preflight lives in `base`, and it resets every button, input and margin. With

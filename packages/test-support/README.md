@@ -136,6 +136,24 @@ popover's content portalled to the end of `<body>`. Those parts carry `data-test
 any child inside the content are found wherever the content is rendered, at any depth of
 nesting.
 
+## Layers, anchoring and dismissal
+
+Overlays sit in the top layer and close on Escape or a press outside, through the dismiss stack
+in `@ember-joinery/primitives/dismiss`. These drive them as a user does:
+
+| Helper                         | What it does                                                                          |
+| ------------------------------ | ------------------------------------------------------------------------------------- |
+| `pressEscape(target?)`         | Presses Escape where focus is, or on `target`. Only the top layer closes              |
+| `press(element, options?)`     | Presses an element as a pointer does: `pointerdown`, then `click()`, then `pointerup` |
+| `pressOutside(target?, opts?)` | `press()` outside every layer: on `target`, or the test's root element                |
+| `isInTopLayer(element)`        | Whether it is an open popover or a modal `<dialog>`                                   |
+| `placementOf(element)`         | `{ side, align }`, where an anchored element ended up, from `data-side`/`data-align`  |
+| `setupAnchorFallback(hooks)`   | Forces the Floating UI fallback for a module's tests, as CI's fallback run does       |
+
+`click()` sends no pointer events, and the dismiss stack listens for `pointerdown`, as Radix's
+does, so use `press()` and `pressOutside()` for presses that should dismiss something.
+`{ pointerType: 'touch' }` presses as a finger does, which dismisses on the click that follows.
+
 ## Selectors
 
 Every Joinery component renders these attributes. They are public API: the harnesses use them,

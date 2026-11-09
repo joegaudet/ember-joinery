@@ -1,0 +1,3 @@
+/* Layers declared first lose, so Tailwind's utilities override Joinery's rules. */
+@layer joinery, theme, base, components, utilities;
+@import 'tailwindcss';

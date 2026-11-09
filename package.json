@@ -18,7 +18,7 @@
     "typecheck": "pnpm -r run typecheck",
     "test": "pnpm --filter test-app test",
     "test:anchor-fallback": "JOINERY_ANCHOR_FALLBACK=1 pnpm --filter test-app test",
-    "test:examples": "pnpm --filter './examples/*' run test",
+    "test:examples": "pnpm --filter './examples/*' --workspace-concurrency=1 run test",
     "parity": "node scripts/parity.mjs",
     "demo:build": "pnpm --filter test-app run build:demo",
     "guide:build": "pnpm --filter docs-app run build",

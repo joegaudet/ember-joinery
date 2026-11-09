@@ -224,8 +224,9 @@ and Hover Card do: `popperOptions()` and `anchorContent` anchor it, `exposePrope
 the `--radix-<name>-content-transform-origin` (and the rest) that upstream's classes read,
 `PopperArrow` is Radix's arrow, `Delay` is an open or close delay that `settled()` waits for,
 and `graceArea()` is the path a pointer may cross to the content. In the top layer the content
-is a popover, whose `overflow: auto` would clip an arrow: one rule of Joinery's own after
-extract-classes' output turns it off. Two template traps: where a file imports
+is a popover, whose `overflow: auto` would clip an arrow: `src/css/base.css` resets the
+browser's popover styles on every part (`[data-slot][popover]`), that one included, so test the
+computed `overflow` rather than adding a rule. Two template traps: where a file imports
 ember-modifier's `modifier`, `(modifier …)` in its templates means that function, not the
 keyword (import it as `functionModifier`); and a curried `(modifier …)` is a new modifier
 whenever its arguments change, so give one that keeps state (a focus scope) an `enabled`

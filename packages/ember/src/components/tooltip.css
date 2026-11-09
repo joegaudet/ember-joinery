@@ -16,13 +16,3 @@
 :where(.jn-tooltip-arrow) {
   @apply z-50 translate-y-[calc(-50%_-_2px)] bg-foreground fill-foreground;
 }
-
-/*
- * Joinery's own, not upstream's: the content is in the browser's top layer (the primitives'
- * `{{topLayer}}` makes it a popover), and the browser gives a popover `overflow: auto`, which
- * would clip what reaches past its edge (a tooltip's arrow). Upstream's content is a plain
- * element, so nothing is clipped; nor is it here.
- */
-:where(.jn-tooltip-content[popover]) {
-  overflow: visible;
-}

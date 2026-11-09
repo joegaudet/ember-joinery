@@ -1,0 +1,12 @@
+{
+  "$comment": "Waiting for components that haven't landed: toggle-group-font-weight-selector (Field). The unit that lands Field ports it onto the Toggle Group page (its Custom section) and maps it here.",
+  "examples": {
+    "toggle-group-demo": "toggle-group-demo",
+    "toggle-group-outline": "toggle-group-outline",
+    "toggle-group-sizes": "toggle-group-sizes",
+    "toggle-group-spacing": "toggle-group-spacing",
+    "toggle-group-vertical": "toggle-group-vertical",
+    "toggle-group-disabled": "toggle-group-disabled",
+    "toggle-group-rtl": "toggle-group-rtl"
+  }
+}

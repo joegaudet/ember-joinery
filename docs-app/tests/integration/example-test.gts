@@ -152,6 +152,17 @@ module('Integration | <Example>', function (hooks) {
     }
   })
 
+  test('@dir lays the preview out right to left, and only the preview', async function (assert) {
+    await render(<template><Example @name="introduction" @dir="rtl" /></template>)
+    assert.dom('.example-preview').hasAttribute('dir', 'rtl')
+    assert.strictEqual(getComputedStyle(find('.example-preview button')!).direction, 'rtl')
+    assert.strictEqual(getComputedStyle(find('.example-bar')!).direction, 'ltr', 'not the frame')
+    await a11yAudit()
+
+    await render(<template><Example @name="introduction" /></template>)
+    assert.dom('.example-preview').doesNotHaveAttribute('dir', 'without it, the page decides')
+  })
+
   test('a missing example says so instead of failing the page', async function (assert) {
     await render(<template><Example @name="no-such-example" /></template>)
     assert.dom('.example-missing[role="alert"]').includesText('no-such-example')

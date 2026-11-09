@@ -229,6 +229,12 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   `<component>-<example>`, each exporting the example as its default export. Show one in a page
   with `<Example @name="…" />` (add `@title`, and `@align="start"` where upstream's preview
   aligns it). The frame has Preview, Template and Test tabs and a copy button.
+- Upstream's right-to-left examples (`<name>-rtl`, whose `<ComponentPreview>` has
+  `direction="rtl"`) are shown with `<Example @name="<name>-rtl" @dir="rtl" />`. `@dir` puts
+  `dir` on the preview, as the parity route's `?dir=rtl` does, and Joinery's components take
+  their direction from the nearest `dir`, so the example needs no provider of its own. Port
+  the Arabic text: upstream's preview opens in Arabic (it also offers Hebrew and English, a
+  picker the frame doesn't have).
 - Every example has a test, `docs-app/tests/examples/<name>-test.gts`, written with harness
   classes and ending in an axe audit. The guide shows it in the example's Test tab, so write it
   the way you'd want a reader to write theirs. `docs-app/tests/unit/examples-test.ts` fails

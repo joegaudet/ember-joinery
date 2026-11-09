@@ -17,6 +17,13 @@ interface ExampleSignature {
     title?: string
     /** Where the preview places the example, as upstream's `align`. Centred by default. */
     align?: 'center' | 'start' | 'end'
+    /**
+     * The preview's text direction, as upstream's `direction`: `rtl` for its right-to-left
+     * (`*-rtl`) examples. It sets `dir` on the preview, as the parity route's `?dir=rtl` does,
+     * and Joinery's components take their direction from the nearest `dir`. Without it, the
+     * preview follows the page.
+     */
+    dir?: 'ltr' | 'rtl'
   }
 }
 
@@ -133,7 +140,11 @@ export class Example extends Component<ExampleSignature> {
           </p>
         {{else if this.example}}
           {{#if (this.isTab "preview")}}
-            <div class="example-preview guide-stage" data-align={{if @align @align "center"}}>
+            <div
+              class="example-preview guide-stage"
+              data-align={{if @align @align "center"}}
+              dir={{@dir}}
+            >
               <this.example.component />
             </div>
           {{else}}

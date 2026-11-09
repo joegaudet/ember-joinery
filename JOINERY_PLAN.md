@@ -312,7 +312,8 @@ and axe audit, so about 575 example tests, plus the integration suite.
   yields and data attributes for each part), keyboard interactions, accessibility, Testing (the
   component's harness members), and Upstream (a link to the shadcn page and the pinned commit).
 - **The example frame**, as in Formwright, plus a theme switcher (base colour, radius,
-  light/dark), an RTL toggle, and width presets (375, 768, 1440).
+  light/dark), an RTL toggle, and width presets (375, 768, 1440). `@dir="rtl"` shows one of
+  upstream's right-to-left (`*-rtl`) examples, as the parity route's `?dir=rtl` does.
 - **Theme builder page:** edit the tokens, watch every component update live, and copy the CSS.
 - The acceptance test renders every page (its `PAGES` come from the templates directory), and
   every example has `docs-app/tests/examples/<name>-test.gts`, written with harnesses and ending

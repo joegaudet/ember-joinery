@@ -118,8 +118,10 @@ module('Integration | primitives | viewport', function (hooks) {
       const other: IntersectionObserverEntry[] = []
       const recordOther = (entry: IntersectionObserverEntry) => other.push(entry)
       observers.observe(target, recordOther)
-      await settled()
+      await waitForObservers()
       assert.strictEqual(other.length, 1, 'a second callback hears where the element is now')
+      assert.true(other[0]!.isIntersecting)
+      assert.strictEqual(entries.length, 1, 'and the first hears nothing new')
 
       observers.unobserve(target, record)
       observers.unobserve(target, recordOther)

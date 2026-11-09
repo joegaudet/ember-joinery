@@ -15,13 +15,16 @@ export interface ElementObserver {
 /**
  * One observer shared by every element and callback that asks for it: the observer hands each
  * entry to the callbacks of the entry's element. Using one observer instead of one per element
- * is much cheaper when many elements are watched.
+ * is much cheaper when many elements are watched. Elements are held weakly, as the observers
+ * themselves hold them, so one that is never unobserved can still be collected.
  *
  * Tests wait for an element's first entry (or two frames, for an element the observer has
  * nothing to say about yet, such as a ResizeObserver's hidden one).
  */
 export class SharedObserver<Entry extends { target: Element }> {
-  readonly #callbacks = new Map<Element, Set<EntryCallback<Entry>>>()
+  #callbacks = new WeakMap<Element, Set<EntryCallback<Entry>>>()
+  /** Each element's last entry, for a callback that starts listening after it came. */
+  #latest = new WeakMap<Element, Entry>()
   readonly #waiting = new Map<Element, unknown>()
   readonly #observer: ElementObserver
 
@@ -34,6 +37,7 @@ export class SharedObserver<Entry extends { target: Element }> {
       this.#settle(entry.target)
       const callbacks = this.#callbacks.get(entry.target)
       if (!callbacks) continue
+      this.#latest.set(entry.target, entry)
       for (const callback of [...callbacks]) callback(entry)
     }
   }
@@ -57,17 +61,39 @@ export class SharedObserver<Entry extends { target: Element }> {
   }
 
   /**
-   * Starts calling `callback` with `element`'s entries. A callback added for an element that is
-   * already observed gets the element's current entry too: the observer starts over for it.
+   * Gives `callback` alone the entry `element`'s other callbacks last had: where the element is
+   * now, since the observer would have sent another had it changed. It comes after the current
+   * render, as the observer's own entries do, and not at all if a newer entry reaches the
+   * callback first or it stops listening.
+   */
+  #replay(element: Element, callback: EntryCallback<Entry>, entry: Entry): void {
+    const token = waiter.beginAsync()
+    queueMicrotask(() => {
+      waiter.endAsync(token)
+      if (this.#latest.get(element) !== entry) return
+      if (this.#callbacks.get(element)?.has(callback)) callback(entry)
+    })
+  }
+
+  /**
+   * Starts calling `callback` with `element`'s entries, beginning with where the element is
+   * now. A callback added for an element that is already observed gets the element's current
+   * entry on its own: the element's other callbacks hear nothing new.
    */
   observe(element: Element, callback: EntryCallback<Entry>): void {
-    let callbacks = this.#callbacks.get(element)
-    if (callbacks?.has(callback)) return
-    if (!callbacks) this.#callbacks.set(element, (callbacks = new Set()))
-    else this.#observer.unobserve(element)
+    const callbacks = this.#callbacks.get(element)
+    if (!callbacks) {
+      this.#callbacks.set(element, new Set([callback]))
+      this.#wait(element)
+      this.#observer.observe(element)
+      return
+    }
+    if (callbacks.has(callback)) return
     callbacks.add(callback)
-    this.#wait(element)
-    this.#observer.observe(element)
+    // Before the element's first entry arrives there is nothing to replay: that entry reaches
+    // every callback, this one included.
+    const latest = this.#latest.get(element)
+    if (latest) this.#replay(element, callback, latest)
   }
 
   /** Stops calling `callback` (the same function `observe` was given) for `element`. */
@@ -78,6 +104,7 @@ export class SharedObserver<Entry extends { target: Element }> {
     callbacks.delete(callback)
     if (callbacks.size > 0) return
     this.#callbacks.delete(element)
+    this.#latest.delete(element)
     this.#settle(element)
     this.#observer.unobserve(element)
   }
@@ -89,7 +116,8 @@ export class SharedObserver<Entry extends { target: Element }> {
 
   disconnect(): void {
     for (const element of [...this.#waiting.keys()]) this.#settle(element)
-    this.#callbacks.clear()
+    this.#callbacks = new WeakMap()
+    this.#latest = new WeakMap()
     this.#observer.disconnect()
   }
 }

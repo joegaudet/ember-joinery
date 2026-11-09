@@ -3,8 +3,8 @@ import type Owner from '@ember/owner'
 import { instanceFor, type InstanceDefinition } from './-private/instances.ts'
 
 /**
- * What `createStore` makes one of per context: a class, constructed with the context's owner,
- * or a function that returns the instance. The definition itself is the key, so share one
+ * What `createStore` makes one of per context: a class, constructed with the context's owner
+ * (if it has one), or a function that returns the instance. The definition itself is the key, so share one
  * definition: two arrow functions that do the same thing are two keys.
  */
 export type StoreDefinition<T extends object> = InstanceDefinition<T>
@@ -55,19 +55,18 @@ export function findOwner(context: unknown): Owner | undefined {
  * function in place of the class is called once per context, to construct the instance
  * yourself: `createStore(this, () => new Draft('Untitled'))`.
  *
- * It is ember-primitives' `createStore`. The context needs an owner (a component, route,
- * controller, service, helper or modifier all have one), which the class is constructed with.
+ * Any object can be a context. One with no owner (a plain class of your own) gets an instance
+ * all the same, constructed with nothing and given no owner, so it can't inject services.
+ * It is ember-primitives' `createStore`.
  *
- * @param context what the instance belongs to: anything with an owner, or the owner itself
+ * @param context what the instance belongs to: any object, or the owner itself
  * @param definition the class, or a function returning the instance
  */
 export function createStore<T extends object>(context: object, definition: StoreDefinition<T>): T {
-  const owner = findOwner(context)
-  if (!owner) {
+  if ((typeof context !== 'object' && typeof context !== 'function') || context === null) {
     throw new Error(
-      `Joinery: createStore() found no owner on ${String(context)}. Pass a component, route, ` +
-        'or anything else with an owner.',
+      `Joinery: createStore() needs an object to keep the instance on, not ${String(context)}`,
     )
   }
-  return instanceFor(context, owner, definition, 'createStore()')
+  return instanceFor(context, findOwner(context), definition, 'createStore()')
 }

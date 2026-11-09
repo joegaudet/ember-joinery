@@ -2,7 +2,7 @@ import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
 import { click, render, settled } from '@ember/test-helpers'
 import { on } from '@ember/modifier'
-import { destroy, registerDestructor } from '@ember/destroyable'
+import { destroy, isDestroyed, registerDestructor } from '@ember/destroyable'
 import { getOwner, setOwner } from '@ember/owner'
 import { service as injected } from '@ember/service'
 import Component from '@glimmer/component'
@@ -147,8 +147,42 @@ module('Integration | primitives | store', function (hooks) {
     await a11yAudit()
   })
 
-  test('it needs an owner', async function (assert) {
-    assert.throws(() => createStore({}, Tally), /createStore\(\) found no owner/)
+  test('any object is a context, with an owner or without: made when first asked for', async function (assert) {
+    class Demo {
+      two = 2
+      made: unknown[]
+      constructor(...args: unknown[]) {
+        this.made = args
+        assert.step('created')
+      }
+    }
+    // A class of your own, with no owner: as ember-primitives' own test has it.
+    class Host {
+      get foo() {
+        return createStore(this, Demo)
+      }
+    }
+
+    const host = new Host()
+    assert.verifySteps([], 'nothing is made until it is asked for')
+    assert.strictEqual(host.foo.two, 2)
+    assert.strictEqual(host.foo, host.foo, 'the same instance each time')
+    assert.verifySteps(['created'])
+    assert.deepEqual(host.foo.made, [], 'constructed with nothing, as there is no owner')
+    assert.strictEqual(getOwner(host.foo), undefined, 'and given none')
+
+    const demo = host.foo
+    destroy(host)
+    await settled()
+    assert.true(isDestroyed(demo), 'destroyed with its context')
+    await a11yAudit()
+  })
+
+  test('a context must be an object', async function (assert) {
+    assert.throws(
+      () => createStore('text' as unknown as object, Tally),
+      /createStore\(\) needs an object/,
+    )
     await a11yAudit()
   })
 

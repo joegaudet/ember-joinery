@@ -12,11 +12,12 @@ const instances = new WeakMap<object, Map<InstanceDefinition<object>, object>>()
 /**
  * The one instance of `definition` for `context`, made the first time it is asked for and
  * destroyed with `context`. `service()` keys it on the owner, `createStore()` on any context.
- * The class is constructed with `owner`, and the instance gets that owner.
+ * The class is constructed with `owner`, and the instance gets that owner. With no owner (a
+ * `createStore()` context that has none), the class is constructed with nothing.
  */
 export function instanceFor<T extends object>(
   context: object,
-  owner: Owner,
+  owner: Owner | undefined,
   definition: InstanceDefinition<T>,
   caller: string,
 ): T {
@@ -28,8 +29,9 @@ export function instanceFor<T extends object>(
       `Joinery: ${caller} was asked for an instance after its ${context === owner ? 'owner' : 'context'} was destroyed`,
       !isDestroying(context) && !isDestroyed(context),
     )
-    instance = isNewable<T>(definition) ? new definition(owner) : (definition as () => T)()
-    if (getOwner(instance) === undefined) setOwner(instance, owner)
+    if (!isNewable<T>(definition)) instance = (definition as () => T)()
+    else instance = owner ? new definition(owner) : new (definition as new () => T)()
+    if (owner && getOwner(instance) === undefined) setOwner(instance, owner)
     associateDestroyableChild(context, instance)
     byDefinition.set(definition, instance)
   }

@@ -1,5 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
 import { render, rerender, settled } from '@ember/test-helpers'
 import { on } from '@ember/modifier'
 import { tracked } from '@glimmer/tracking'
@@ -7,15 +8,6 @@ import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
 import { Input, asInput, inputAttributes, inputClasses } from '@ember-joinery/ember'
 import { InputHarness, tab } from '@ember-joinery/test-support'
-
-/** An element's classes and attributes (but the test's own `data-case`), to compare two. */
-function rendering(element: Element): { classes: string[]; attributes: Record<string, string> } {
-  const attributes: Record<string, string> = {}
-  for (const { name, value } of element.attributes) {
-    if (name !== 'class' && name !== 'data-case') attributes[name] = value
-  }
-  return { classes: [...element.classList].sort(), attributes }
-}
 
 class State {
   @tracked value = ''

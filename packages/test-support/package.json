@@ -35,7 +35,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "node ../../scripts/gen-barrels.mjs . && rm -rf dist && tsc -p tsconfig.json",
-    "typecheck": "node ../../scripts/gen-barrels.mjs . && tsc -p tsconfig.json --noEmit",
+    "typecheck": "node ../../scripts/gen-barrels.mjs . && tsc -p tsconfig.json --noEmit && tsc -p type-tests/tsconfig.json",
     "prepack": "node ../../scripts/gen-barrels.mjs . && rm -rf dist && tsc -p tsconfig.json"
   },
   "dependencies": {

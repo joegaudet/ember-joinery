@@ -1,0 +1,14 @@
+{
+  "$comment": "Waiting for components that haven't landed: combobox-custom (Item), combobox-input-group (Input Group) and combobox-rtl (Field). The unit that lands each ports its example onto the Combobox page and maps it here. The Primitives Combobox page shows Joinery's own combobox-headless, which has no upstream counterpart, so it isn't mapped.",
+  "examples": {
+    "combobox-demo": "combobox-demo",
+    "combobox-basic": "combobox-basic",
+    "combobox-multiple": "combobox-multiple",
+    "combobox-clear": "combobox-clear",
+    "combobox-groups": "combobox-groups",
+    "combobox-invalid": "combobox-invalid",
+    "combobox-disabled": "combobox-disabled",
+    "combobox-auto-highlight": "combobox-auto-highlight",
+    "combobox-popup": "combobox-popup"
+  }
+}

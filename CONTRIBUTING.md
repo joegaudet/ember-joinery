@@ -114,6 +114,11 @@ Behaviour changes start with a failing test in `test-app/tests/`. Write tests wi
 classes, not raw selectors. A new component gets a harness class; page objects are harness
 subclasses with `@child` declarations. Every test ends in an axe audit.
 
+A component's harness extends `Harness` from `@ember-joinery/test-support`: it names its
+`data-test-jn` value in `static component`, reaches its parts with `part()`, and reads state
+through ARIA. The package's README covers the base class and the `data-test-jn-*` selector
+reference, and `test-app/tests/fixtures/harness/` has small examples.
+
 ## Parity
 
 `pnpm parity` (†) renders each upstream example in the React reference app (`parity/`) and the

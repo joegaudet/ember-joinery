@@ -485,6 +485,11 @@ test('injectedCss loads the fonts, fixes the scheme and stops motion', () => {
   )
   assert.match(css, /color-scheme: dark !important/)
   assert.match(css, /animation-duration: 0s !important/)
+  assert.match(
+    css,
+    /body \{ font-family: var\(--font-sans\) !important; line-height: 1\.5 !important; \}/,
+    "the body's font and line height too",
+  )
 })
 
 test("fontMounts serves the parity app's fonts, and says what to install when they are missing", () => {

@@ -531,7 +531,10 @@ export const FONTS = [
 
 /**
  * The CSS both pages get before a screenshot: the same fonts (from the font server at
- * `fontsUrl`), no motion, a fixed scheme.
+ * `fontsUrl`), no motion, a fixed scheme. The body takes the same font and line height too
+ * (preflight's 1.5, which the reference app's body has): charts measure their grid's tick
+ * labels in a span on `<body>`, as recharts does, to drop those that would overlap, so both
+ * bodies must match for both grids to keep the same lines.
  */
 export function injectedCss(theme, fontsUrl = '', fonts = FONTS) {
   const origin = fontsUrl.replace(/\/$/, '')
@@ -546,6 +549,7 @@ export function injectedCss(theme, fontsUrl = '', fonts = FONTS) {
 }
 [data-parity] { font-family: var(--font-sans) !important; }
 [data-parity][dir='rtl'] { font-family: var(--font-ar) !important; }
+body { font-family: var(--font-sans) !important; line-height: 1.5 !important; }
 *, *::before, *::after {
   animation-duration: 0s !important;
   animation-delay: 0s !important;

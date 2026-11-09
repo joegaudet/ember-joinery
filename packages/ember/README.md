@@ -11,7 +11,8 @@ npm install @ember-joinery/ember
 ```
 
 ```js
-import '@ember-joinery/ember/joinery.css'
+import '@ember-joinery/ember/tokens.css' // shadcn's theme tokens (or themes/<colour>.css)
+import '@ember-joinery/ember/joinery.css' // the components, in the Nova style (or styles/<style>.css)
 ```
 
 Full documentation: the guide at **https://joegaudet.com/ember-joinery/guide/**. Design and API

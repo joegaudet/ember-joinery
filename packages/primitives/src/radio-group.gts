@@ -6,6 +6,7 @@ import Modifier from 'ember-modifier'
 import type { WithBoundArgs } from '@glint/template'
 import { As, type TagName } from './as.gts'
 import { ControllableState } from './controllable-state.ts'
+import { idFor } from './id.ts'
 import type { Direction } from './direction.gts'
 import { RovingFocus, type Orientation } from './roving-focus.gts'
 import { BubbleInput, FormControl, preventEnter } from './-private/form-control.ts'
@@ -110,6 +111,7 @@ class RadioGroupItem extends Component<RadioGroupItemSignature> {
       value={{@value}}
       data-test-jn-part="item"
       data-test-jn-value={{@value}}
+      data-test-jn-owner={{idFor @group}}
       ...attributes
       {{@group.roving.item tabStopId=@value focusable=this.isFocusable active=this.isChecked}}
       {{on "keydown" preventEnter}}
@@ -197,6 +199,10 @@ export interface RadioGroupSignature {
  *
  * In a form, each item renders a hidden native radio beside it, as Radix's does, named by the
  * group's `@formName`, so the form submits the chosen value and checks `@required`.
+ *
+ * Each item names the group's `id` in `data-test-jn-owner`, so `RadioGroupHarness` still finds
+ * an item that sits inside another component, such as a Field or a label around it. A caller's
+ * own `id` on the group wins; its items are then found where they sit, inside nothing else.
  */
 export class RadioGroup extends Component<RadioGroupSignature> {
   selection = new ControllableState<string | null>({
@@ -231,6 +237,7 @@ export class RadioGroup extends Component<RadioGroupSignature> {
     <As
       @as={{@as}}
       @tag="div"
+      id={{idFor this}}
       role="radiogroup"
       aria-required={{if @required "true"}}
       aria-orientation={{@orientation}}

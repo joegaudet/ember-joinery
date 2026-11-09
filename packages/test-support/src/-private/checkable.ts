@@ -44,9 +44,13 @@ export function accessibleName(element: HTMLElement): string {
   return textOf(element)
 }
 
-/** Whether a control can't be used: `disabled`, or `aria-disabled="true"`. */
+/**
+ * Whether a control can't be used: `disabled`, inside a disabled `<fieldset>` (`:disabled`), or
+ * `aria-disabled="true"`.
+ */
 export function isDisabled(element: HTMLElement): boolean {
   if ('disabled' in element && (element as HTMLButtonElement).disabled) return true
+  if (element.matches(':disabled')) return true
   return element.getAttribute('aria-disabled') === 'true'
 }
 

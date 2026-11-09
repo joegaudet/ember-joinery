@@ -5,7 +5,8 @@
  *   data-test-jn="<component>"   the root of a component instance (`dialog`, `button`…)
  *   data-test-jn-name="<@name>"  on the root, when the component was given `@name`
  *   data-test-jn-part="<part>"   a part of the component (`trigger`, `content`, `item`…)
- *   data-test-jn-owner="<id>"    on a portalled or top-layer part: the `id` of its root
+ *   data-test-jn-owner="<id>"    on a portalled or top-layer part, or one a caller may wrap in
+ *                                another component (a radio item in a Field): its root's `id`
  *   data-test-jn-value="<key>"   an option, item, tab or toggle, by its key
  *   data-test-jn-wrapper         on a root that wraps the caller's content (a scroller, a
  *                                layout): the parts inside it belong to the component around it

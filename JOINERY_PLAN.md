@@ -22,6 +22,9 @@ Deviations from the intake, and why:
   sheets mechanically (`cn-` becomes `jn-`), so it ships Nova as the default and the other seven
   (Luma, Lyra, Maia, Mira, Rhea, Sera, Vega) as alternatives, and the guide's theme switcher
   offers all of them.
+- **The base colours, corrected.** At the pinned commit, upstream's base colours
+  (`registry/base-colors.ts`) are Neutral, Stone, Zinc, Mauve, Olive, Mist and Taupe; Gray and
+  Slate are gone. Joinery ships those seven, ported from `registry/themes.ts`.
 - **Clarified while building** (no decision changed). The generated `meta.json` covers every
   A–Z section of the guide (Components, Primitives, Charts, Blocks, Formwright and Reference),
   not only Components. The Guide section now says what "Autonomous execution" already did: the
@@ -183,8 +186,10 @@ render in production, as Formwright's `data-test-fw-*` do.
 ### Styling pipeline
 
 - `packages/ember/src/styles/<style>.css` holds shadcn's eight style sheets, ported by
-  `scripts/port-styles.mjs`. The script renames `cn-` to `jn-` and otherwise keeps upstream's
-  `@apply` rules verbatim, so upstream changes diff cleanly. Components render the same semantic
+  `scripts/port-styles.mjs`. The script renames `cn-` to `jn-` and makes physical sides logical
+  (`pl-2` to `ps-2`, as upstream's right-to-left build does, so one sheet serves both
+  directions), and otherwise keeps upstream's `@apply` rules verbatim, so upstream changes diff
+  cleanly. Components render the same semantic
   classes upstream's do (`jn-button jn-button-variant-outline jn-button-size-sm`), plus the data
   attributes.
 - Upstream also puts some utility classes inline in each component (`inline-flex`, `shrink-0`…).
@@ -195,8 +200,8 @@ render in production, as Formwright's `data-test-fw-*` do.
 - The build compiles all of that with Tailwind v4 into `dist/joinery.css` (the Nova style, in
   `@layer joinery`), `dist/styles/<style>.css` (the other seven), `dist/tokens.css` (the default
   neutral theme, light and `.dark`), `dist/themes/*.css` (shadcn's base colours: neutral, stone,
-  zinc, gray, slate) and `dist/tailwind.css` (`@theme inline` mapping the tokens to utilities,
-  for Tailwind apps).
+  zinc, mauve, olive, mist, taupe) and `dist/tailwind.css` (`@theme inline` mapping the tokens to
+  utilities, for Tailwind apps).
 - Apps without Tailwind import `tokens.css` and `joinery.css`. Tailwind apps also import
   `tailwind.css` and can override any part with `class`.
 

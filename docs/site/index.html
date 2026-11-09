@@ -129,9 +129,10 @@
         <h2>Vite or classic, Tailwind or not</h2>
         <p>
           Joinery's packages are v2 addons. Vite (Embroider) apps import them directly; classic
-          ember-cli apps use ember-auto-import 2. Import the CSS once:
+          ember-cli apps use ember-auto-import 2. Import the theme and the components' CSS once:
         </p>
-        <pre><code>import '@ember-joinery/ember/joinery.css'</code></pre>
+        <pre><code>import '@ember-joinery/ember/tokens.css'
+import '@ember-joinery/ember/joinery.css'</code></pre>
         <p>
           Every kind of app has an example in the repository, built and tested in CI. The
           <a href="guide/getting-started/installation.md">installation guide</a> has the steps.
@@ -168,7 +169,14 @@
           <code>--primary</code>, <code>--ring</code>, <code>--radius</code>,
           <code>--chart-1</code> to <code>--chart-5</code>…), dark mode is a
           <code>.dark</code> class, and all eight of shadcn's styles ship: Nova by default, plus
-          Luma, Lyra, Maia, Mira, Rhea, Sera and Vega.
+          Luma, Lyra, Maia, Mira, Rhea, Sera and Vega. Pick a base colour the same way:
+        </p>
+        <pre><code>import '@ember-joinery/ember/themes/stone.css'   // in place of tokens.css
+import '@ember-joinery/ember/styles/lyra.css'   // in place of joinery.css</code></pre>
+        <p>
+          Every example in the guide can switch style, base colour, radius, light and dark, and
+          right to left, and show itself at a phone's or a tablet's width. See
+          <a href="guide/getting-started/theming.md">Theming</a>.
         </p>
       </section>
 

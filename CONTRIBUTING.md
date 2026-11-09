@@ -88,10 +88,16 @@ Every module in a rollup-built package's barrel is also a subpath export, one pe
 their own; import them by relative path inside the package only. A file and a folder with the
 same name (`anchor.ts` and `anchor/`) fail the build.
 
-`@ember-joinery/ember` also builds its CSS: `packages/ember/build-css.mjs` lists the CSS files it
-ships, and after every rollup build the Tailwind v4 CLI compiles each into `dist/`
-(`dist/joinery.css` and the rest). In watch mode (`pnpm start` in the package), editing any CSS
-file under `src/` rebuilds them.
+`@ember-joinery/ember` also builds its CSS: after every rollup build, `packages/ember/build-css.mjs`
+compiles each style with the Tailwind v4 CLI, Nova into `dist/joinery.css` and the other seven
+into `dist/styles/<style>.css`, and copies `dist/tokens.css` (the Neutral base colour),
+`dist/themes/<colour>.css` and `dist/tailwind.css`. A style is `src/css/setup.css` (Tailwind's
+theme, inlined, tw-animate-css, shadcn's own variants and the token mapping, none of it emitted),
+then, in `@layer joinery`, `src/css/base.css` (the radius scale, and the share of Tailwind's
+preflight upstream's parts rely on, scoped to `[data-slot]`), the ported sheet, and every
+component's own CSS (`src/components/**/*.css`, A–Z). The script writes that entry itself, so a
+component's CSS file needs no list edited. In watch mode (`pnpm start` in the package), editing
+any CSS file under `src/` rebuilds them.
 
 ## Porting a component
 
@@ -131,10 +137,14 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    `click()` sends no `pointerdown`, which the dismiss stack listens for.
 3. Its styles come from the ported style sheets, `packages/ember/src/styles/<style>.css`, which
    `node scripts/port-styles.mjs` writes from upstream's (it renames `cn-` to `jn-`, drops the
-   `.style-<name>` wrapper and puts each selector in `:where()`; don't edit them by hand).
-   Upstream also writes utility classes inline in the component. For those, run
-   `node scripts/extract-classes.mjs <name>`: it prints them as `@apply` rules, which go after
-   the style sheet's rules. Keep its output whole, because the order is upstream's. Upstream's
+   `.style-<name>` wrapper, puts each selector in `:where()`, and makes physical sides logical,
+   `pl-2` to `ps-2`, as upstream's right-to-left build does, so one sheet serves both
+   directions; don't edit them by hand). The same script writes the base colours,
+   `packages/ember/src/themes/<colour>.css`, from upstream's `registry/themes.ts`. Upstream also
+   writes utility classes inline in the component. For those, run
+   `node scripts/extract-classes.mjs <name> --out packages/ember/src/components/<name>.css`: it
+   writes them as `@apply` rules, which the build puts after the style sheet's rules. Keep its
+   output whole, because the order is upstream's. Upstream's
    registry build (shadcn's `transformStyle`) swaps each semantic class for its style rule's
    utilities, and of two conflicting classes the later wins. Where the rule's utilities land
    depends on the call:
@@ -161,6 +171,76 @@ A component is done when it has everything listed under "Definition of done for 
 component" in the plan: its primitive, the styled component, its harness, tests written with the
 harness (including the keyboard pattern, controlled and uncontrolled state, RTL and an axe audit),
 a guide page with every upstream example, a parity mapping for each example, and a changeset.
+
+### The pattern, with Button as the reference
+
+Button was ported first so every later component can copy it. A component `<name>` is these
+files, each its own, so components land side by side without touching each other's:
+
+| File                                                    | What it holds                                 |
+| ------------------------------------------------------- | --------------------------------------------- |
+| `packages/ember/src/components/<name>.gts`              | The component (the barrel exports it)         |
+| `packages/ember/src/components/<name>.css`              | `extract-classes.mjs`'s output, kept whole    |
+| `packages/test-support/src/<name>.ts`                   | Its harness, `<Name>Harness`                  |
+| `test-app/tests/integration/components/<name>-test.gts` | Its tests, written with the harness           |
+| `docs-app/app/templates/components/<name>.md`           | Its guide page                                |
+| `docs-app/app/examples/<example>.gts`                   | One per upstream example, named as upstream's |
+| `docs-app/tests/examples/<example>-test.gts`            | Each example's test                           |
+| `parity/map/<name>.json`                                | Each upstream example, mapped                 |
+| `.changeset/<name>.md`                                  | Its changeset                                 |
+
+**The markup.** Each part renders what upstream's does, plus Joinery's test attributes:
+
+- the classes upstream's source gives it: its semantic classes renamed (`jn-button
+jn-button-variant-outline jn-button-size-sm`) and the markers `extract-classes.mjs` lists
+  (`group/button`). A part upstream gives no semantic class gets `jn-<data-slot>`, the class
+  the script's rules use (`jn-spinner`);
+- `data-slot`, and Radix's `data-state` (`open`, `checked`…), as upstream's;
+- typed `@variant` and `@size` arguments, rendered as `data-variant` and `data-size`, with
+  upstream's defaults;
+- `data-test-jn="<name>"` and `data-test-jn-name={{@name}}` on the root, and
+  `data-test-jn-part` on each other part.
+
+Render them in the template (so a server-rendered page is styled), with `...attributes` last,
+so a caller's `class` adds to the component's and their attributes win.
+
+**Your own element.** Every part takes `@as`, a tag (`<Button @as="a" href="/login">`), through
+`As`. For a component of the caller's own, such as `LinkTo`, there is a part modifier made with
+`part()`: a compound component yields one per part (`<LinkTo {{d.trigger}}>`), and a component
+that is one part exports one (`<LinkTo {{button variant="outline"}}>`). The modifier and the
+template take their classes and attributes from the same functions (`buttonClasses`,
+`buttonAttributes`), so both render the same thing.
+
+**Icons and strings.** Upstream's `lucide-react` icons are `lucide`'s, drawn by `<Icon>`
+(`ArrowUpIcon` is `<Icon @icon={{ArrowUp}} />`). An icon a component draws itself can be
+replaced, and every string it shows is an argument with upstream's English as the default
+(Spinner's `@label`, `Loading`).
+
+**The harness** extends `Harness`, names `static component`, reads state through the DOM and
+ARIA (`label`, `isDisabled`, `isPressed`), and acts with `@ember/test-helpers` (`click()`,
+`focus()`). The guide page's Testing section lists its members.
+
+**The tests** cover rendering (classes and data attributes), every variant and size, the style
+sheet actually styling it (computed sizes, so a missing rule fails), attributes and listeners,
+controlled and uncontrolled state where it has any, the APG keyboard pattern and focus, `@as`
+and the modifier, RTL (in a `DirectionProvider`, checking that logical sides flip), and the
+harness's own members. Every test ends in `a11yAudit()`.
+
+**The guide page** follows its ui.shadcn.com page: the title and description, the first example,
+Installation, Usage, then each of upstream's sections in upstream's order, with its `<Example>`
+and upstream's text (in Joinery's terms: `@variant` for `variant`), then API Reference
+(arguments, the modifier, data attributes), Keyboard interactions, Accessibility, Testing and
+Upstream (the link and the pinned commit).
+
+**The examples** are upstream's, line for line: the same text, the same layout classes (the
+guide compiles Tailwind's utilities for them, see "The guide") and the same icons. Where one has
+to differ, a comment in it says why: an icon-only button upstream leaves unnamed gets
+`aria-label`, so the audit passes, and an icon from another set is lucide's. An example that
+needs a component that hasn't landed waits for it, and the gap is listed in the PR.
+
+**The parity map** lists every example on the page. One shown on two pages
+(`button-group-demo` is on Button's and Button Group's) is mapped on the page the inventory
+names as its `page`.
 
 ## Tests first
 
@@ -304,7 +384,16 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
 - Examples are `.gts` files in `docs-app/app/examples/`, one per upstream example, named
   `<component>-<example>`, each exporting the example as its default export. Show one in a page
   with `<Example @name="…" />` (add `@title`, and `@align="start"` where upstream's preview
-  aligns it). The frame has Preview, Template and Test tabs and a copy button.
+  aligns it). The frame has Preview, Template and Test tabs and a copy button. Above the
+  preview, switchers show it in any of the eight styles, base colours and radii, light or dark,
+  right to left, and in a 375, 768 or 1440px viewport (an `<iframe>` that wide, so the
+  breakpoints respond). The guide loads every style, each scoped to the previews that pick it
+  (`docs-app/joinery-css.mjs` builds that from the package's `dist/`), and the base colour and
+  radius are tokens on the preview itself.
+- An example lays itself out with upstream's Tailwind classes. `docs-app/app/styles/examples.css`
+  compiles Tailwind's utilities from `docs-app/app/examples` only, with no preflight, into
+  `@layer utilities` above Joinery's, so a class on a component overrides its style as on
+  ui.shadcn.com.
 - Upstream's right-to-left examples (`<name>-rtl`, whose `<ComponentPreview>` has
   `direction="rtl"`) are shown with `<Example @name="<name>-rtl" @dir="rtl" />`. `@dir` puts
   `dir` on the preview, as the parity route's `?dir=rtl` does, and Joinery's components take
@@ -312,7 +401,8 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   the Arabic text: upstream's preview opens in Arabic (it also offers Hebrew and English, a
   picker the frame doesn't have).
 - Every example has a test, `docs-app/tests/examples/<name>-test.gts`, written with harness
-  classes and ending in an axe audit. The guide shows it in the example's Test tab, so write it
+  classes and ending in an axe audit. A test renders its example in Nova, as a preview starts
+  (the test helper puts `data-style="nova"` on the test's root). The guide shows it in the example's Test tab, so write it
   the way you'd want a reader to write theirs. `docs-app/tests/unit/examples-test.ts` fails
   when an example has no test, a test has no example, or a test never calls `a11yAudit()`.
 - The guide's own CSS (`docs-app/app/styles/app.css`) sits in `@layer guide`, below
@@ -322,15 +412,16 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   stage but not what's inside, and the text styles the page would pass down (font, size, line
   height, colour) start over, as in upstream's preview. The stage adds no reset of its own, so
   the guide and the parity comparison see Joinery as an app without Tailwind does. That
-  includes box sizing: upstream's parts get `border-box` from Tailwind's preflight, so a part
-  whose size depends on it sets it in joinery.css, and the parity comparison catches one that
-  doesn't. Keep new guide rules inside the layer, and scope any that select bare elements or
+  includes box sizing: upstream's parts get `border-box` from Tailwind's preflight, and
+  joinery.css gives Joinery's parts the same (`src/css/base.css`, scoped to `[data-slot]`), so
+  the parity comparison catches a part that misses it. Keep new guide rules inside the layer, and scope any that select bare elements or
   every element.
 - `/parity/<name>` renders one example with no frame and no guide around it, centred as
   upstream's preview is, for the screenshot comparison. `?theme=dark` puts `.dark` on `<html>`
   and `?theme=light` (the default) puts `.light` there; either also pins `color-scheme`, so the
   browser's or OS's preference can't change the page. `?dir=rtl` lays it out right to left,
-  and `?align=start|end` places it. The example's root carries `data-parity="<name>"`; an
+  `?align=start|end` places it, and `?style=` and `?base=` pick a style and a base colour
+  (Nova and Neutral by default). The example's root carries `data-parity="<name>"`; an
   unknown name renders `data-parity-missing` instead.
 
 ## The website
@@ -358,8 +449,6 @@ The Tailwind app declares `@layer theme, base, joinery, components, utilities;` 
 importing Tailwind: Joinery's layer above `base`, so preflight's resets don't undo its rules,
 and below `utilities`, so a class on a component overrides them. Its tests check both.
 
-Two things wait on later work. The smoke tests only import the packages so far; the first
-display component (†) renders itself in each of them, which is what proves a classic app
-consumes `.gts` v2 addon components. And the apps import only `joinery.css`: the theme (†)
-adds `tokens.css` to every app and `tailwind.css` to the Tailwind one, and the Installation
-page with them.
+Each app imports `tokens.css` and `joinery.css`, and the Tailwind one `tailwind.css` too, and
+renders a Button with a lucide icon, which its smoke test drives with `ButtonHarness`: that is
+what proves a classic app consumes `.gts` v2 addon components.

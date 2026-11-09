@@ -1,8 +1,8 @@
 {
-  "$comment": "Waiting for components that haven't landed: skeleton-card (Card). The unit that lands Card ports it onto the Skeleton page and maps it here.",
   "examples": {
     "skeleton-demo": "skeleton-demo",
     "skeleton-avatar": "skeleton-avatar",
+    "skeleton-card": "skeleton-card",
     "skeleton-text": "skeleton-text",
     "skeleton-form": "skeleton-form",
     "skeleton-table": "skeleton-table",

@@ -32,7 +32,9 @@ here, or with your own CSS, which wins over Joinery's (its rules are in the `joi
 
 ## Card
 
-Upstream's example (`skeleton-card`) shows skeletons in a Card, and comes with Card.
+Skeletons in a [card](/components/card.md), standing in for its title, description and image.
+
+<Example @name="skeleton-card" @title="Card" />
 
 ## Text
 

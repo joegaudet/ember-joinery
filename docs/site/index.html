@@ -142,11 +142,12 @@ import '@ember-joinery/ember/joinery.css'</code></pre>
       <section id="usage">
         <p class="eyebrow">Usage</p>
         <h2>Strict mode, named args, typed parts</h2>
-        <pre><code>import { Dialog, Button, Input } from '@ember-joinery/ember'
+        <pre><code>import { on } from '@ember/modifier'
+import { Dialog, Button, Input } from '@ember-joinery/ember'
 
 &lt;template&gt;
   &lt;Dialog @name="edit-profile" as |d|&gt;
-    &lt;d.Trigger&gt;Edit profile&lt;/d.Trigger&gt;
+    &lt;Button @variant="outline" {{d.trigger}}&gt;Edit profile&lt;/Button&gt;
     &lt;d.Content&gt;
       &lt;d.Header&gt;
         &lt;d.Title&gt;Edit profile&lt;/d.Title&gt;
@@ -154,8 +155,8 @@ import '@ember-joinery/ember/joinery.css'</code></pre>
       &lt;/d.Header&gt;
       &lt;Input @name="name" @value={{this.name}} @onValueChange={{this.setName}} /&gt;
       &lt;d.Footer&gt;
-        &lt;d.Close&gt;Cancel&lt;/d.Close&gt;
-        &lt;Button&gt;Save changes&lt;/Button&gt;
+        &lt;Button @variant="outline" {{d.close}}&gt;Cancel&lt;/Button&gt;
+        &lt;Button @name="save" {{d.close}} {{on "click" this.save}}&gt;Save changes&lt;/Button&gt;
       &lt;/d.Footer&gt;
     &lt;/d.Content&gt;
   &lt;/Dialog&gt;

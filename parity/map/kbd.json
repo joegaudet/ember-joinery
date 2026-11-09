@@ -1,5 +1,5 @@
 {
-  "$comment": "Waiting for components that haven't landed: kbd-tooltip (Tooltip and Button Group), kbd-input-group (Input Group). The unit that lands the last of each one's components ports it onto the Kbd page and maps it here.",
+  "$comment": "Waiting for components that haven't landed: kbd-tooltip (Button Group; Tooltip has landed), kbd-input-group (Input Group). The unit that lands the last of each one's components ports it onto the Kbd page and maps it here.",
   "examples": {
     "kbd-demo": {
       "example": "kbd-demo",

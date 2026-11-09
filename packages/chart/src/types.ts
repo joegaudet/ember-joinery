@@ -71,7 +71,7 @@ export interface LegendPayloadItem {
 /** Formats a tooltip's label: the active row's category (or its config label). */
 export type LabelFormatter = (label: unknown, payload: readonly TooltipPayloadItem[]) => unknown
 
-/** Formats a tooltip entry's value. */
+/** Formats a tooltip entry as text, in place of its indicator, name and value. */
 export type ValueFormatter = (
   value: unknown,
   name: string | number,
@@ -79,6 +79,34 @@ export type ValueFormatter = (
   index: number,
   payload: unknown,
 ) => unknown
+
+/**
+ * A component that draws a tooltip entry, in place of its indicator, name and value: what
+ * recharts' `formatter` does when it returns markup. It is handed recharts' formatter
+ * arguments by name, and the chart's config.
+ */
+export interface TooltipFormatterSignature {
+  Args: {
+    /** The entry's value at the active row: a number, or a string. */
+    value: number | string
+    /** The series' name (its `@name`, or its data key). */
+    name: string | number
+    /** The whole entry. */
+    item: TooltipPayloadItem
+    /** The entry's index among the tooltip's entries. */
+    index: number
+    /** The row the entry came from. */
+    payload: Record<string, unknown> | undefined
+    /** The chart's config. */
+    config: ChartConfig
+  }
+}
+
+/**
+ * A tooltip's `@formatter`: a function that returns an entry's text (`ValueFormatter`), or a
+ * component that draws the entry (`TooltipFormatterSignature`), for markup.
+ */
+export type TooltipFormatter = ValueFormatter | ComponentLike<TooltipFormatterSignature>
 
 /** What a chart hands its tooltip's `@content`, besides that component's own arguments. */
 export interface ChartTooltipContentArgs {
@@ -99,7 +127,7 @@ export interface ChartTooltipContentArgs {
   tooltip?: {
     labelClassName?: string
     labelFormatter?: LabelFormatter
-    formatter?: ValueFormatter
+    formatter?: TooltipFormatter
   }
 }
 

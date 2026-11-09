@@ -511,9 +511,32 @@ renders on its own, given them.
 | `@nameKey`        | `string`                      |         | The config or data key of each entry's name  |
 | `@labelFormatter` | `(label, payload) => string`  |         | Formats the label                            |
 | `@labelClassName` | `string`                      |         | Classes for the label                        |
-| `@formatter`      | `(value, name, …) => string`  |         | Formats each entry                           |
+| `@formatter`      | a function, or a component    |         | Formats each entry (see below)               |
 | `@color`          | `string`                      |         | One indicator colour for every entry         |
 | `@class`          | `string`                      |         | Classes for the box, in a curried `@content` |
+
+`@formatter` draws an entry in place of its indicator, name and value. Recharts' `formatter`
+returns text or markup; here a function returns the text (`(value, name, item, index, payload)
+=> string`), and a component draws markup, handed the same as `@value`, `@name`, `@item`,
+`@index` and `@payload` (the row), and the chart's `@config`. Either can also go on the
+`ChartTooltip` part, which wins over its content's.
+
+```gts
+import type { TOC } from '@ember/component/template-only'
+import { ChartTooltipContent, type TooltipFormatterSignature } from '@ember-joinery/chart'
+
+const Kcal: TOC<TooltipFormatterSignature> = <template>
+  {{@name}}
+  <div class="ms-auto font-mono font-medium tabular-nums">
+    {{@value}}
+    <span class="font-normal text-muted-foreground">kcal</span>
+  </div>
+</template>
+
+<template>
+  <c.ChartTooltip @content={{component ChartTooltipContent hideLabel=true formatter=Kcal}} />
+</template>
+```
 
 ### ChartLegendContent
 

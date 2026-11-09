@@ -1,6 +1,7 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
 import { render, rerender, settled } from '@ember/test-helpers'
+import Component from '@glimmer/component'
 import { tracked } from '@glimmer/tracking'
 import type { TOC } from '@ember/component/template-only'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
@@ -14,6 +15,7 @@ import {
   Dot,
   type ChartConfig,
   type DotArgs,
+  type TooltipFormatterSignature,
 } from '@ember-joinery/chart'
 import { ChartHarness, ChartTooltipHarness } from '@ember-joinery/chart/test-support'
 
@@ -661,6 +663,83 @@ module('Integration | components | chart', function (hooks) {
     assert.strictEqual(tooltip.label, 'JANUARY', "the tooltip's labelFormatter")
     assert.strictEqual(tooltip.indicator, 'line', "the content's own curried arguments stay")
     assert.dom(tooltip.part('label')).hasClass('w-32')
+    await a11yAudit()
+  })
+
+  test("a component @formatter draws each entry, as recharts' formatter can return markup", async function (assert) {
+    // The shape of upstream's chart-tooltip-advanced: the label, the value with a unit, and a
+    // total under the last entry.
+    const totalOf = (row: Record<string, unknown> | undefined) => String(row?.['total'])
+    const Kcal: TOC<TooltipFormatterSignature> = <template>
+      <span data-test-kcal={{@name}}>{{@value}} kcal</span>
+      {{#if @index}}<span data-test-total>Total {{totalOf @payload}}</span>{{/if}}
+    </template>
+    const data = chartData.map(row => ({ ...row, total: row.desktop + row.mobile }))
+    await render(
+      <template>
+        <ChartContainer @config={{chartConfig}} style="width: 400px" as |chart|>
+          <chart.BarChart @data={{data}} as |c|>
+            <c.XAxis @dataKey="month" />
+            <c.ChartTooltip
+              @content={{component ChartTooltipContent hideLabel=true formatter=Kcal}}
+            />
+            <c.Bar @dataKey="desktop" @stackId="a" @fill="var(--color-desktop)" />
+            <c.Bar @dataKey="mobile" @stackId="a" @fill="var(--color-mobile)" />
+          </chart.BarChart>
+        </ChartContainer>
+      </template>,
+    )
+    const chart = new ChartHarness()
+    await chart.hover(1)
+    const tooltip = chart.tooltip!
+    assert.strictEqual(tooltip.items.length, 2)
+    assert.dom('[data-test-kcal="desktop"]', tooltip.element).hasText('305 kcal')
+    assert.dom('[data-test-kcal="mobile"]', tooltip.element).hasText('200 kcal')
+    assert.dom('[data-test-total]', tooltip.element).exists({ count: 1 }).hasText('Total 505')
+    assert.deepEqual(
+      tooltip.items.map(item => [item.indicator, item.value]),
+      [
+        [null, null],
+        [null, null],
+      ],
+      'in place of the indicator, name and value',
+    )
+    await a11yAudit()
+  })
+
+  test("the chart tooltip's own @formatter can be a class component, handed the config", async function (assert) {
+    class Labelled extends Component<TooltipFormatterSignature> {
+      get label(): string {
+        return this.args.config[String(this.args.name)]?.label ?? String(this.args.name)
+      }
+      <template>
+        <span data-test-labelled>{{this.label}} {{@value}} ({{@item.color}})</span>
+      </template>
+    }
+    const toText = (value: unknown, name: string | number) => `${String(name)}=${String(value)}`
+    const payload = [{ name: 'desktop', value: 186, dataKey: 'desktop', payload: {} }]
+    await render(
+      <template>
+        <ChartContainer @config={{chartConfig}} style="width: 400px" as |chart|>
+          <chart.LineChart @data={{chartData}} as |c|>
+            <c.XAxis @dataKey="month" />
+            <c.ChartTooltip @content={{component ChartTooltipContent}} @formatter={{Labelled}} />
+            <c.Line @dataKey="desktop" @stroke="var(--color-desktop)" />
+          </chart.LineChart>
+        </ChartContainer>
+        <div data-test-text>
+          <ChartTooltipContent @active={{true}} @payload={{payload}} @formatter={{toText}} />
+        </div>
+      </template>,
+    )
+    const chart = new ChartHarness()
+    await chart.hover(2)
+    assert
+      .dom('[data-test-labelled]', chart.tooltip!.element)
+      .hasText('Desktop 237 (var(--color-desktop))')
+    assert
+      .dom('[data-test-text] [data-test-jn-part="item"]')
+      .hasText('desktop=186', 'a function still formats the entry as text')
     await a11yAudit()
   })
 

@@ -15,7 +15,7 @@ import type {
   ChartLegendContentArgs,
   ChartTooltipContentArgs,
   LabelFormatter,
-  ValueFormatter,
+  TooltipFormatter,
 } from '../types.ts'
 
 /** What a part needs of its chart: somewhere to register. */
@@ -362,7 +362,8 @@ export interface ChartTooltipSignature {
     /** Passed to the content, for its label. */
     labelClassName?: string
     labelFormatter?: LabelFormatter
-    formatter?: ValueFormatter
+    /** Formats each entry: a function returning its text, or a component that draws it. */
+    formatter?: TooltipFormatter
     /** Leaves out entries whose value is null. Default true. */
     filterNull?: boolean
     /** Moves the tooltip box smoothly. Default true. */

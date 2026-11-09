@@ -1,4 +1,5 @@
 import Component from '@glimmer/component'
+import { getComponentTemplate } from '@ember/component'
 import { htmlSafe, type SafeString } from '@ember/template'
 import type { ComponentLike } from '@glint/template'
 import Icon, { type IconNode } from '@ember-joinery/ember/components/icon'
@@ -8,6 +9,8 @@ import type {
   ChartIcon,
   ChartTooltipContentArgs,
   LabelFormatter,
+  TooltipFormatter,
+  TooltipFormatterSignature,
   TooltipPayloadItem,
   ValueFormatter,
 } from '../types.ts'
@@ -43,8 +46,11 @@ export interface ChartTooltipContentSignature {
     labelFormatter?: LabelFormatter
     /** Classes for the label. */
     labelClassName?: string
-    /** Formats each entry, in place of its indicator, name and value. */
-    formatter?: ValueFormatter
+    /**
+     * Formats each entry, in place of its indicator, name and value: a function returning its
+     * text, or a component that draws it (for markup, as recharts' formatter can return).
+     */
+    formatter?: TooltipFormatter
     /** One indicator colour for every entry. Default each entry's `fill` (in its row) or colour. */
     color?: string
     /** Classes for the tooltip box, for use in a curried `@content`: `class="w-[150px]"`. */
@@ -61,11 +67,28 @@ interface Entry {
   iconNode?: IconNode
   iconComponent?: ComponentLike<{ Element: Element }>
   indicatorStyle: SafeString
+  /** The formatter function's text. */
   formatted?: string
+  /** What the formatter component is handed. */
+  custom?: Omit<TooltipFormatterSignature['Args'], 'config'>
 }
 
 function text(value: unknown): string {
   return typeof value === 'number' ? value.toLocaleString() : String(value)
+}
+
+/**
+ * Whether a formatter is a component rather than a function: a `<template>` or a curried
+ * `(component …)` is not a function at all, and a class component has a template.
+ */
+function isFormatterComponent(
+  formatter: TooltipFormatter,
+): formatter is ComponentLike<TooltipFormatterSignature> {
+  return (
+    typeof formatter !== 'function' ||
+    getComponentTemplate(formatter) !== undefined ||
+    /^class[\s{]/.test(Function.prototype.toString.call(formatter))
+  )
 }
 
 /**
@@ -95,8 +118,18 @@ export default class ChartTooltipContent extends Component<ChartTooltipContentSi
     return this.args.tooltip?.labelClassName ?? this.args.labelClassName
   }
 
-  get formatter(): ValueFormatter | undefined {
+  get formatter(): TooltipFormatter | undefined {
     return this.args.tooltip?.formatter ?? this.args.formatter
+  }
+
+  /** The formatter, when it is a component. */
+  get formatterComponent(): ComponentLike<TooltipFormatterSignature> | undefined {
+    const formatter = this.formatter
+    return formatter && isFormatterComponent(formatter) ? formatter : undefined
+  }
+
+  get config(): ChartConfig {
+    return this.args.config ?? {}
   }
 
   get nestLabel(): boolean {
@@ -147,9 +180,19 @@ export default class ChartTooltipContent extends Component<ChartTooltipContentSi
           ),
         }
         if (formatter && item.value !== undefined && item.name) {
-          entry.formatted = String(
-            formatter(item.value, item.name, item, index, item.payload) ?? '',
-          )
+          if (isFormatterComponent(formatter)) {
+            entry.custom = {
+              value: item.value as number | string,
+              name: item.name,
+              item,
+              index,
+              payload: item.payload,
+            }
+          } else {
+            entry.formatted = String(
+              (formatter as ValueFormatter)(item.value, item.name, item, index, item.payload) ?? '',
+            )
+          }
         }
         return entry
       })
@@ -181,7 +224,18 @@ export default class ChartTooltipContent extends Component<ChartTooltipContentSi
               data-test-jn-part="item"
               data-test-jn-value={{entry.key}}
             >
-              {{#if entry.formatted}}
+              {{#if entry.custom}}
+                {{#if this.formatterComponent}}
+                  <this.formatterComponent
+                    @value={{entry.custom.value}}
+                    @name={{entry.custom.name}}
+                    @item={{entry.custom.item}}
+                    @index={{entry.custom.index}}
+                    @payload={{entry.custom.payload}}
+                    @config={{this.config}}
+                  />
+                {{/if}}
+              {{else if entry.formatted}}
                 {{entry.formatted}}
               {{else}}
                 {{#if entry.iconNode}}

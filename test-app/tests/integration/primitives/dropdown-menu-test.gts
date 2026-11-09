@@ -110,7 +110,7 @@ function placementTests(hooks: TestHooks) {
           <DropdownMenu @defaultOpen={{true}} as |m|>
             <m.Trigger class="dm-trigger">Open</m.Trigger>
             <m.Content class="dm-content" @align="start">
-              <m.Sub @defaultOpen={{true}} as |s|>
+              <m.Sub as |s|>
                 <s.Trigger>Invite users</s.Trigger>
                 <s.Content class="dm-content"><m.Item>Email</m.Item></s.Content>
               </m.Sub>
@@ -121,7 +121,7 @@ function placementTests(hooks: TestHooks) {
           <DropdownMenu @name="rtl" @defaultOpen={{true}} as |m|>
             <m.Trigger class="dm-trigger">فتح</m.Trigger>
             <m.Content class="dm-content" @align="start">
-              <m.Sub @defaultOpen={{true}} as |s|>
+              <m.Sub as |s|>
                 <s.Trigger>دعوة</s.Trigger>
                 <s.Content class="dm-content"><m.Item>بريد</m.Item></s.Content>
               </m.Sub>
@@ -131,6 +131,7 @@ function placementTests(hooks: TestHooks) {
       </template>,
     )
     const ltr = new DropdownMenuHarness().sub('Invite users')
+    await ltr.open()
     const trigger = rect(ltr.trigger)
     const content = rect(ltr.content!)
     near(assert, content.left, rect(ltr.trigger.closest('[role=menu]')!).right, 'on the right')
@@ -138,6 +139,7 @@ function placementTests(hooks: TestHooks) {
     assert.strictEqual(ltr.side, 'right')
 
     const rtl = new DropdownMenuHarness('rtl').sub('دعوة')
+    await rtl.open()
     const rtlContent = rect(rtl.content!)
     near(assert, rtlContent.right, rect(rtl.trigger.closest('[role=menu]')!).left, 'on the left')
     assert.strictEqual(rtl.side, 'left')

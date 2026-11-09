@@ -31,6 +31,7 @@ import {
   type MenuCheckboxItemOptions,
   type MenuContentHost,
   type MenuItemOptions,
+  type MenuRoot,
 } from './-private/menu.gts'
 
 /** What a `<ContextMenu>` takes. */
@@ -121,6 +122,8 @@ export interface ContextMenuBlockParams {
   group: PartModifier<HTMLElement>
   label: PartModifier<HTMLElement>
   separator: PartModifier<HTMLElement>
+  /** The root, for a styled layer's own item modifiers (`menuItemPart(c.menu, look)`). */
+  menu: MenuRoot
   /** Whether it is open. */
   isOpen: boolean
   /** Closes it. */
@@ -300,6 +303,7 @@ export class ContextMenu extends Component<ContextMenuSignature> implements Menu
           group=groupPart
           label=labelPart
           separator=separatorPart
+          menu=this
           isOpen=this.isOpen
           close=this.close
         )

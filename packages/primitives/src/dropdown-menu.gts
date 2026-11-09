@@ -36,10 +36,15 @@ import {
   type MenuCheckboxItemOptions,
   type MenuContentHost,
   type MenuItemOptions,
+  type MenuRoot,
 } from './-private/menu.gts'
 
 export {
+  checkboxItemPart as menuCheckboxItemPart,
+  itemPart as menuItemPart,
   type MenuCheckedState,
+  type MenuItemLook,
+  type MenuRoot,
   type MenuCheckboxItemBlockParams,
   type MenuCheckboxItemOptions,
   type MenuContentArgs,
@@ -146,6 +151,8 @@ export interface DropdownMenuBlockParams {
   separator: PartModifier<HTMLElement>
   /** Makes your own element the arrow (ember-primitives'). */
   arrow: PartModifier<HTMLElement>
+  /** The root, for a styled layer's own item modifiers (`menuItemPart(m.menu, look)`). */
+  menu: MenuRoot
   /** Whether it is open. */
   isOpen: boolean
   /** Opens it. */
@@ -361,6 +368,7 @@ export class DropdownMenu extends Component<DropdownMenuSignature> implements Me
           label=labelPart
           separator=separatorPart
           arrow=this.arrow
+          menu=this
           isOpen=this.isOpen
           open=this.open
           close=this.close

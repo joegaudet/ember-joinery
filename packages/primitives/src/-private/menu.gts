@@ -30,7 +30,7 @@ import { inertOthers, type Undo } from '../hide-others.ts'
 import { idFor } from '../id.ts'
 import { topLayer } from '../layer.ts'
 import { link } from '../link-helper.ts'
-import { part, type PartModifier, type PartSpec } from '../part.ts'
+import { part, type AttributeValue, type PartModifier, type PartSpec } from '../part.ts'
 import { Presence } from '../presence.gts'
 import { scrollLock } from '../scroll-lock.ts'
 import { getNextMatch, isTypeaheadKey, Typeahead } from '../typeahead.ts'
@@ -564,10 +564,36 @@ function withTextValue<Named extends MenuItemOptions>(
 }
 
 /** A plain item's modifier: `<a {{m.item}}>`, `<LinkTo {{m.item onSelect=…}}>`. */
-export function itemPart(root: MenuRoot): PartModifier<HTMLElement, MenuItemOptions> {
+/**
+ * What a styled layer adds to an item's modifier: its classes and attributes (`data-slot`,
+ * `data-variant`…), from the modifier's own arguments.
+ */
+export type MenuItemLook<Named> = (named: Named) => {
+  class?: string
+  attributes?: Readonly<Record<string, AttributeValue>>
+}
+
+function withLook<Named>(
+  spec: PartSpec<HTMLElement>,
+  named: Named,
+  look: MenuItemLook<Named> | undefined,
+): PartSpec<HTMLElement> {
+  if (!look) return spec
+  const extra = look(named)
+  return { ...spec, class: extra.class, attributes: { ...extra.attributes, ...spec.attributes } }
+}
+
+/**
+ * A plain item's modifier for a menu's root: `<a {{m.item}}>`, `<LinkTo {{m.item onSelect=…}}>`.
+ * A styled layer passes its `look`, so the modifier renders what its Item does.
+ */
+export function itemPart<Named extends MenuItemOptions = MenuItemOptions>(
+  root: MenuRoot,
+  look?: MenuItemLook<Named>,
+): PartModifier<HTMLElement, Named> {
   return withTextValue(
-    part<HTMLElement, MenuItemOptions>(options =>
-      itemSpec(root, options, { part: 'item', role: 'menuitem' }),
+    part<HTMLElement, Named>(options =>
+      withLook(itemSpec(root, options, { part: 'item', role: 'menuitem' }), options, look),
     ),
   )
 }
@@ -581,13 +607,14 @@ export interface MenuCheckboxItemOptions extends MenuItemOptions {
 }
 
 /** A checkbox item's modifier: `role="menuitemcheckbox"`, its `aria-checked` and `data-state`. */
-export function checkboxItemPart(
+export function checkboxItemPart<Named extends MenuCheckboxItemOptions = MenuCheckboxItemOptions>(
   root: MenuRoot,
-): PartModifier<HTMLElement, MenuCheckboxItemOptions> {
+  look?: MenuItemLook<Named>,
+): PartModifier<HTMLElement, Named> {
   return withTextValue(
-    part<HTMLElement, MenuCheckboxItemOptions>(options => {
+    part<HTMLElement, Named>(options => {
       const checked = options.checked ?? false
-      return itemSpec(root, options, {
+      const spec = itemSpec(root, options, {
         part: 'checkbox-item',
         role: 'menuitemcheckbox',
         attributes: {
@@ -596,6 +623,7 @@ export function checkboxItemPart(
         },
         onSelect: () => options.onCheckedChange?.(checked === 'indeterminate' ? true : !checked),
       })
+      return withLook(spec, options, look)
     }),
   )
 }

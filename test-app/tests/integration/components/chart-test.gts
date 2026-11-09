@@ -773,6 +773,7 @@ module('Integration | components | chart', function (hooks) {
       </template>
     }
     const toText = (value: unknown, name: string | number) => `${String(name)}=${String(value)}`
+    const toNothing = () => ''
     const payload = [{ name: 'desktop', value: 186, dataKey: 'desktop', payload: {} }]
     await render(
       <template>
@@ -786,6 +787,9 @@ module('Integration | components | chart', function (hooks) {
         <div data-test-text>
           <ChartTooltipContent @active={{true}} @payload={{payload}} @formatter={{toText}} />
         </div>
+        <div data-test-empty>
+          <ChartTooltipContent @active={{true}} @payload={{payload}} @formatter={{toNothing}} />
+        </div>
       </template>,
     )
     const chart = new ChartHarness()
@@ -796,6 +800,10 @@ module('Integration | components | chart', function (hooks) {
     assert
       .dom('[data-test-text] [data-test-jn-part="item"]')
       .hasText('desktop=186', 'a function still formats the entry as text')
+    assert
+      .dom('[data-test-empty] [data-test-jn-part="item"]')
+      .hasText('', "an empty result is the entry's text too, as upstream renders it")
+    assert.dom('[data-test-empty] [data-test-jn-part="name"]').doesNotExist()
     await a11yAudit()
   })
 

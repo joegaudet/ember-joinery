@@ -67,7 +67,8 @@ interface Entry {
   iconNode?: IconNode
   iconComponent?: ComponentLike<{ Element: Element }>
   indicatorStyle: SafeString
-  /** The formatter function's text. */
+  /** Whether a formatter function drew the entry, and its text (which may be empty). */
+  isFormatted?: boolean
   formatted?: string
   /** What the formatter component is handed. */
   custom?: Omit<TooltipFormatterSignature['Args'], 'config'>
@@ -189,6 +190,9 @@ export default class ChartTooltipContent extends Component<ChartTooltipContentSi
               payload: item.payload,
             }
           } else {
+            // Its result stands in for the entry whatever it is, an empty string included, as
+            // upstream renders the formatter's result whenever it calls it.
+            entry.isFormatted = true
             entry.formatted = String(
               (formatter as ValueFormatter)(item.value, item.name, item, index, item.payload) ?? '',
             )
@@ -235,7 +239,7 @@ export default class ChartTooltipContent extends Component<ChartTooltipContentSi
                     @config={{this.config}}
                   />
                 {{/if}}
-              {{else if entry.formatted}}
+              {{else if entry.isFormatted}}
                 {{entry.formatted}}
               {{else}}
                 {{#if entry.iconNode}}

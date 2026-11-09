@@ -110,9 +110,10 @@ ember-joinery/
   docs/site/       hand-written marketing page (index.html, site.css, logo.svg, favicon.svg, social-card.png)
   docs/social-card.html
   scripts/         publish.mjs, publish-plan.mjs (from Formwright), upstream.mjs, parity.mjs,
-                   extract-classes.mjs, site-screenshots.mjs, gen-barrels.mjs, entrypoints.mjs,
-                   *.test.mjs
+                   port-styles.mjs, extract-classes.mjs, site-screenshots.mjs, gen-barrels.mjs,
+                   entrypoints.mjs, *.test.mjs
   upstream.json    the shadcn-ui/ui and ember-primitives commits last synced
+  upstream/        inventory.json: every docs page's examples and their styles, the ui, charts, blocks
   CLAUDE.md  CONTRIBUTING.md  README.md  LICENSE.md  NOTICE  JOINERY_PLAN.md
   .changeset/  .github/workflows/{ci,parity,upstream,pages,release,bootstrap-publish}.yml
 ```
@@ -298,8 +299,8 @@ and axe audit, so about 575 example tests, plus the integration suite.
 4. Tests cover rendering, controlled and uncontrolled state, the APG keyboard pattern, focus
    management, RTL and an axe audit, on Ember 7.3 and 6.12.
 5. Its guide page has every upstream example for the component, each tested with the harness.
-6. Each upstream example is mapped in `parity/map.json`, and the screenshot comparison passes in
-   light and dark.
+6. Each upstream example is mapped in `parity/map/<component>.json`, and the screenshot
+   comparison passes in light and dark.
 7. A changeset, and `docs/site/` updated wherever the site shows the component.
 
 ## Guide (`docs-app/`, Kolay)
@@ -330,23 +331,26 @@ ember-primitives. `pages.yml` builds the demo and guide, then deploys `docs/site
 
 ## Parity and upstream watch
 
-- **Reference app** (`parity/`, private): a React 19 + Tailwind 4 Vite app that renders shadcn's
-  `registry/bases/radix/ui` and `examples/radix/`, each example in the style its docs page uses
-  (charts from `registry/new-york-v4/charts`), from the commit pinned in `upstream.json`. `parity.mjs
-fetch` downloads them into a gitignored `parity/.upstream/`.
+- **Reference app** (`parity/`, private, its own pnpm workspace): a React 19 + Tailwind 4 Vite
+  app that renders shadcn's `registry/bases/radix/ui` and `examples/radix/`, each example in the
+  style its docs page uses (charts from `registry/new-york-v4/charts`), from the commit pinned in
+  `upstream.json`. `upstream.mjs fetch` downloads them into a gitignored `.upstream/`, and the
+  app generates upstream's `styles/<style>/ui` from them with the published `shadcn` package's
+  transforms, as upstream's registry build does.
 - **Joinery side:** docs-app has a `/parity/<id>` route that renders one example with no frame.
 - **Comparison** (`scripts/parity.mjs`, the `parity.yml` workflow): pinned Playwright Chromium,
   fixed viewport, fonts loaded, animations off. Both sides are screenshotted in light and dark and
   diffed with pixelmatch. The check fails over a threshold (1% of pixels by default; an override
-  for an example needs a written reason in `parity/map.json`), and a side-by-side report is
+  for an example needs a written reason in `parity/map/<component>.json`), and a side-by-side report is
   uploaded. With `--require-complete`, an upstream example missing from the map also fails, which
   keeps coverage complete. CI turns that flag on for the final unit; until then, the check covers
   the examples that are mapped.
-- **Upstream watch** (`scripts/upstream.mjs`, a weekly `upstream.yml`): lists upstream changes
-  since the pinned shas in shadcn's `registry/bases/radix/{ui,blocks}`, `registry/styles`,
-  `examples/radix`, `registry/new-york-v4/charts`, its docs pages, and
-  `ember-primitives/src`, mapped to Joinery components, plus new upstream components, and updates
-  one tracking issue. A sync PR ports the changes and bumps `upstream.json`.
+- **Upstream watch** (`scripts/upstream.mjs changes`, a weekly `upstream.yml`): lists upstream
+  changes since the pinned shas in shadcn's `registry/bases/radix/{ui,blocks}`, `registry/styles`
+  (down to the rules that changed), `examples/radix`, `registry/new-york-v4/charts`, its docs
+  pages, `packages/react` (the chat set's headless parts), and `ember-primitives/src`, mapped to
+  Joinery components, plus new upstream components, and updates one tracking issue. A sync PR
+  ports the changes and bumps `upstream.json`.
 
 ## Phases (the order of the work; each phase is a group of units in the stacked PR)
 

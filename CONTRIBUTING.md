@@ -30,7 +30,7 @@ node --test scripts/*.test.mjs
 pnpm test                          # test-app, Ember 7.3
 pnpm --filter docs-app test        # every guide example and page
 pnpm test:examples                 # vite-basic, classic, tailwind (formwright †), one at a time
-pnpm parity                        # † screenshot comparison with shadcn/ui
+pnpm parity                        # screenshot comparison with shadcn/ui (see "Parity")
 ```
 
 CI also runs the suite on the previous LTS (6.12) by overriding `ember-source` for the whole
@@ -95,22 +95,32 @@ file under `src/` rebuilds them.
 ## Porting a component
 
 Joinery copies [ui.shadcn.com](https://ui.shadcn.com/). Port from the upstream source at the
-commits pinned in `upstream.json`, never from memory:
+commits pinned in `upstream.json`, never from memory. `node scripts/upstream.mjs fetch` checks
+both repositories out at those commits into `.upstream/` (sparse and shallow, so it's quick), and
+`upstream/inventory.json` lists each docs page's examples and the style each is shown in.
 
-1. Read, in shadcn-ui/ui:
+1. Read, in `.upstream/shadcn-ui`:
    - the component's source, `apps/v4/registry/bases/radix/ui/<name>.tsx`;
    - its rules in each style sheet, `apps/v4/registry/styles/style-*.css` (Nova is the default);
    - its docs page, `apps/v4/content/docs/components/radix/<name>.mdx`;
    - every example that page references (`<ComponentPreview name="…">`), in
-     `apps/v4/examples/radix/`.
+     `apps/v4/examples/radix/` (or `examples/base/` where the page's `styleName` is `base-*`,
+     as on Combobox).
 
-   If ember-primitives has the component, read it in `ember-primitives/src/components/` too.
+   If ember-primitives has the component, read it in
+   `.upstream/ember-primitives/ember-primitives/src/components/` too. To see an example as
+   upstream renders it, run the parity app (`parity/README.md`).
 
 2. Put the behaviour in `@ember-joinery/primitives`, the styled component in
    `@ember-joinery/ember`, and the harness in `@ember-joinery/test-support`.
-3. Its styles come from the ported style sheets (`scripts/port-styles.mjs` †, which renames
-   `cn-` to `jn-`). `scripts/extract-classes.mjs` (†) moves the utility classes upstream writes
-   inline into the component's base rule.
+3. Its styles come from the ported style sheets, `packages/ember/src/styles/<style>.css`, which
+   `node scripts/port-styles.mjs` writes from upstream's (it renames `cn-` to `jn-`, drops the
+   `.style-<name>` wrapper and puts each selector in `:where()`; don't edit them by hand).
+   Upstream also writes utility classes inline in the component. For those, run
+   `node scripts/extract-classes.mjs <name>`: it prints them as `@apply` rules for the
+   component's base rule, which goes after the style sheet's (upstream's inline classes win over
+   its style classes), lists the `group/*` markers the element must keep, and leaves conditional
+   classes as comments.
 
 A component is done when it has everything listed under "Definition of done for every
 component" in the plan: its primitive, the styled component, its harness, tests written with the
@@ -130,18 +140,34 @@ reference, and `test-app/tests/fixtures/harness/` has small examples.
 
 ## Parity
 
-`pnpm parity` (†) renders each upstream example in the React reference app (`parity/`) and the
-matching Ember example in the guide's `/parity/<id>` route, then compares screenshots in light
-and dark. `parity/map.json` maps upstream example ids to Joinery examples. An unmapped upstream
-example fails the check. So does a diff over the threshold, unless the map gives that example its
-own threshold along with a written reason.
+`pnpm parity` renders each mapped upstream example in the React reference app (`parity/`) and
+the matching Ember example in the guide's `/parity/<name>` route, then compares screenshots in
+light and dark: the same fixed viewport, fonts and Chromium on both sides, with animations off.
+A diff over the threshold (1% of the pixels) fails, unless the map gives that example its own
+threshold along with a written reason. The report, with the images side by side, is written to
+`parity-report/index.html` (CI uploads it from `parity.yml`).
+
+`parity/map/<component>.json`, one file per docs page, maps upstream example ids to Joinery
+examples (the format is in `parity/map/README.md`). With `--require-complete`, an upstream example
+missing from the map fails the check too; CI turns that on when the last component lands. With
+nothing mapped, `pnpm parity` has nothing to compare and passes. To compare locally:
+
+```bash
+node scripts/upstream.mjs fetch
+pnpm --dir parity install
+pnpm build && pnpm guide:build
+pnpm parity --only button          # components or upstream example ids; all mapped by default
+```
 
 ## Upstream sync
 
-`node scripts/upstream.mjs` (†) lists what changed upstream since the commits in `upstream.json`,
-mapped to Joinery components. A weekly workflow keeps a tracking issue up to date. A sync PR
-ports the changes and moves `upstream.json` forward in the same PR. Nothing else changes that
-file.
+`node scripts/upstream.mjs changes` lists what changed upstream since the commits in
+`upstream.json` (ui sources, style rules, examples, docs pages, charts, blocks, and
+ember-primitives' `src`), mapped to Joinery components, plus any new upstream components. A
+weekly workflow (`upstream.yml`) keeps a tracking issue up to date with it. A sync PR ports the
+changes and moves `upstream.json` forward in the same PR, then reruns
+`node scripts/upstream.mjs inventory` and `node scripts/port-styles.mjs`. Nothing else changes
+`upstream.json`; CI checks that the inventory and the ported style sheets match it.
 
 ## Changesets
 

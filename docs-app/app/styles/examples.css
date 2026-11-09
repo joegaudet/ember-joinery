@@ -11,6 +11,17 @@
 @import 'tailwindcss/theme.css' layer(theme);
 @import '@ember-joinery/ember/tailwind.css';
 @import 'tailwindcss/utilities.css' layer(utilities) source(none);
+
+/* ui.shadcn.com's own utilities that upstream's examples use, from apps/v4/app/globals.css. */
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @source '../examples';
 
 /*

@@ -104,8 +104,8 @@ with Field.
 
 ## Badge
 
-Use `Badge` in the label to highlight a recommended field. Upstream's example comes with Field
-and Badge.
+Use [`Badge`](/components/badge.md) in the label to highlight a recommended field. Upstream's
+example comes with Field.
 
 ## Input Group
 

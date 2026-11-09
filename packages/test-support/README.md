@@ -128,6 +128,12 @@ What `Harness` gives a subclass:
 so a component nested inside another keeps its own parts: an accordion's `parts('item')` leaves
 out the items of an accordion inside it. A component's root is never its own part.
 
+A component that wraps your content, such as a `Scroller`, a layout or a `Heading`, marks its
+root `data-test-jn-wrapper`. Its harness finds it, and scopes `within`, `find()` and `@child`
+to it, as any harness does, but it has no parts of its own: a part inside a wrapper belongs to
+the component around the wrapper, so wrapping a dialog's body in a `Scroller` leaves the
+dialog's parts the dialog's. A wrapper can be a part itself (`<Heading data-test-jn-part="title">`).
+
 ## Portals and the top layer
 
 Some parts render outside their component's root: a dialog's content in the top layer, a
@@ -168,6 +174,7 @@ and so can you.
 | `data-test-jn-part="<part>"`     | Each part of a component: `trigger`, `content`, `item`, `option`…                     |
 | `data-test-jn-owner="<root id>"` | A part rendered outside its root (top layer or portal): the `id` of the root it's for |
 | `data-test-jn-value="<key>"`     | An option, item, tab or toggle, by its key                                            |
+| `data-test-jn-wrapper`           | A root that wraps your content: the parts inside belong to the component around it    |
 
 `selectors` builds CSS selectors for them, escaping the value, and `attributes` has their names:
 
@@ -180,6 +187,7 @@ selectors.part('trigger') // '[data-test-jn-part="trigger"]'
 selectors.owner('ember12') // '[data-test-jn-owner="ember12"]'
 selectors.value('apple') // '[data-test-jn-value="apple"]'
 selectors.part() // '[data-test-jn-part]', any part
+selectors.wrapper() // '[data-test-jn-wrapper]'
 
 attributes.owner // 'data-test-jn-owner'
 ```
@@ -313,3 +321,25 @@ await scrollIntoView('[data-test-comments]') // what an InViewport holds renders
 box.style.width = '300px'
 await waitForObservers() // and {{onResize}} has heard of it
 ```
+
+## Layouts, scrolling and links
+
+Harnesses for ember-primitives' components that shadcn has no counterpart for, from
+`@ember-joinery/primitives`:
+
+| Harness               | Drives           | What it has                                                                          |
+| --------------------- | ---------------- | ------------------------------------------------------------------------------------ |
+| `ScrollerHarness`     | `<Scroller>`     | `position`, `range`, `isAtTop`/`Bottom`/`Left`/`Right`, `scrollTo()`, `focus()`      |
+| `ZoetropeHarness`     | `<Zoetrope>`     | `items`, `visibleItems`, `canScrollLeft`/`Right`, `scrolled`, `scrollLeft`/`Right()` |
+| `HeroHarness`         | `<Hero>`         | `size`, `fillsViewport`                                                              |
+| `StickyFooterHarness` | `<StickyFooter>` | `content`, `footer`, `overflows`, `isFooterAtBottom`, `scrollToEnd()`                |
+| `LinkHarness`         | `<Link>`         | `href`, `text`, `isCurrent`, `current`, `opensInNewTab`, `isIsolated`, `follow()`    |
+| `ExternalLinkHarness` | `<ExternalLink>` | `LinkHarness`'s members                                                              |
+| `HeadingHarness`      | `<Heading>`      | `level`, `text`                                                                      |
+| `ShadowedHarness`     | `<Shadowed>`     | `shadowRoot`, `query()`, `queryAll()`, `text`                                        |
+
+Harnesses don't look into shadow roots, so `ShadowedHarness` reads what is there, and
+ember-primitives' shadow DOM helpers come too: `findInShadow(root, selector)`,
+`findShadow(root?)`, `findInFirstShadow(selector)` and `hasShadowRoot(element)`. Scrolls the
+Zoetrope and the Scroller start wait for their end, smooth ones included, so `await click()`
+and `await settled()` leave them where they stopped.

@@ -341,7 +341,11 @@ pointer events); its delays hold `settled()`, so a test waits them out.
 A component's harness extends `Harness` from `@ember-joinery/test-support`: it names its
 `data-test-jn` value in `static component`, reaches its parts with `part()`, and reads state
 through ARIA. The package's README covers the base class and the `data-test-jn-*` selector
-reference, and `test-app/tests/fixtures/harness/` has small examples.
+reference, and `test-app/tests/fixtures/harness/` has small examples. A component that wraps
+the caller's content (a `Scroller`, a layout, a `Heading`) marks its root
+`data-test-jn-wrapper`, so the parts inside stay the component's around it, and styles its own
+elements by `data-jn-*` attributes rather than `data-slot`, because joinery.css resets every
+`[data-slot]` and all it holds.
 
 ## Parity
 

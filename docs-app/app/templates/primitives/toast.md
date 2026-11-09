@@ -35,7 +35,9 @@ they go with their owner, timers and all.
   wins.
 - `toastsFor(this)` is the `Toasts` of anything with an owner (a component, a route, a test's
   `this.owner`). It has the same methods as `toast`, and `toasts`, the list the Toasters show,
-  newest first (sonner's `useSonner().toasts`).
+  newest first (sonner's `useSonner().toasts`). A change reaches `toasts` a microtask later, as
+  sonner's Toaster gets its toasts a tick later, so `toast()` can be called while a page
+  renders; `getToasts()` has a new toast at once.
 - `toastOwner()` says which owner `toast()` uses now. Before a Toaster renders, and in a test
   with `setupToaster(hooks)`, it is `globalThis.JOINERY_TOAST_OWNER`, which test-support sets
   to each test's owner.
@@ -61,15 +63,20 @@ popover styles apply to it; `joinery.css` undoes them.
 ## Behaviour
 
 - **Timers.** A toast closes after its `duration` (4 seconds, or the Toaster's `@duration`),
-  paused while the pointer or focus is on the stack and while the page is hidden. Loading
+  paused while the pointer or the keyboard's focus is on the stack and while the page is
+  hidden. Loading
   toasts, promises that haven't settled, and `duration: Infinity` have none.
 - **The stack.** The newest is in front and three show (`@visibleToasts`); the rest wait behind.
-  Hovering, focusing a toast or the hotkey (Alt+T) expands it; `@expand` keeps it expanded.
+  Hovering, the hotkey (Alt+T) or tabbing to a toast expands it; `@expand` keeps it expanded.
+  Keyboard focus (`:focus-visible`) holds it open until focus leaves; the focus a click or a tap
+  gives a toast doesn't, so the stack collapses when the pointer leaves, as in sonner.
 - **Swipe to dismiss.** A pointer drag of 45px, or a quick flick, towards one of its position's
   sides (or `@swipeDirections`) dismisses it; the other way, it follows the pointer less and
   springs back.
 - **Promises.** `toast.promise()` shows `loading` until the promise settles, then `success` or
-  `error` in its place. A resolved `Response` that isn't `ok`, or an `Error`, is a failure.
+  `error` in its place. A resolved `Response` that isn't `ok`, or an `Error`, is a failure. It
+  returns `{ id, unwrap }` (sonner's returns the id, with `unwrap` on it), and `toast.dismiss()`
+  takes either.
 
 ## API
 
@@ -93,4 +100,5 @@ page lists their members.
 
 [sonner](https://github.com/emilkowalski/sonner) 2.0.7, the version shadcn/ui's Sonner renders
 at shadcn-ui/ui@8ab2771: its `toast` state, `Toaster` and `Toast`. ember-primitives has no
-toast.
+toast. sonner is MIT licensed, © 2023 Emil Kowalski; its notice is in Joinery's `NOTICE` and
+in the built files that carry its code (this module, and `@ember-joinery/ember`'s CSS).

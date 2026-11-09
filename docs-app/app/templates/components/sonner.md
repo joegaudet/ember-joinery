@@ -60,6 +60,17 @@ Toasts belong to the app, not the page: `toast()` shows them in the app whose `<
 rendered, so each test has its own (see [Testing](#testing)). `toastsFor(this)` names the app
 from anything with an owner: `toastsFor(this).success('Saved')`.
 
+A new toast reaches the Toaster a microtask after `toast()`, as sonner's reaches its Toaster a
+tick later. So `toast()` can be called while the page renders, from a constructor or a getter,
+even below a Toaster that has already rendered. `toast.getToasts()` has it at once, and
+`await settled()` waits for it to show.
+
+The examples on this page show their toasts in the guide's one Toaster, top center, as
+ui.shadcn.com's do. It takes on the look of the preview you last pressed or focused (its style,
+base colour, radius, dark and direction), so the frame's switchers reach the toasts too. A
+preview at a fixed width (375, 768 or 1440) is an `<iframe>`, which the guide's Toaster isn't
+in: its toasts show at the page's width, in the look of the last preview used outside one.
+
 ## Types
 
 <Example @name="sonner-types" @title="Types" />
@@ -121,12 +132,17 @@ Attributes, such as `class`, go on each list, as sonner's `className` does.
 | `toast.loading(message, options?)`                                            | A loading toast, which stays until you update or dismiss it                                    |
 | `toast.promise(promise, { loading, success, error, description?, finally? })` | Loading while it waits, then `success` (given the result) or `error`. Returns `{ id, unwrap }` |
 | `toast.custom(Component, options?)`                                           | A toast drawn by your component, which gets `@id` and `@dismiss`                               |
-| `toast.dismiss(id?)`                                                          | Closes the toast with that id, or every toast                                                  |
+| `toast.dismiss(id?)`                                                          | Closes the toast with that id (or `toast.promise()`'s result), or every toast                  |
 | `toast.getHistory()`, `toast.getToasts()`                                     | Every toast made; those not dismissed                                                          |
 
 Call `toast()` again with a toast's `id` to update it in place, as a loading toast turns into
-its outcome. sonner's `toast.promise()` returns the id with `unwrap` on it; Joinery's returns
-`{ id, unwrap }`, so the id stays a plain id.
+its outcome.
+
+**`toast.promise()` returns `{ id, unwrap }`**, where sonner's returns the id with `unwrap` on
+it. Use `.id` where you need the id (`toast.success('Done', { id: result.id })`).
+`toast.dismiss()` takes either, so sonner's `const id = toast.promise(…); toast.dismiss(id)`
+still closes the toast; given anything else that isn't an id, it closes nothing and Ember's
+debug build warns (`joinery.toast.dismiss-id`).
 
 ### Toast options
 
@@ -169,16 +185,19 @@ Pressing a toast closes no [dismissable layer](/primitives/dismiss.md).
 | `Tab`       | Moves between the toasts and their buttons          |
 | `Escape`    | Collapses the stack, when focus is in it            |
 
-When focus leaves the stack it goes back where it was before. Focus in a toast also expands
-the stack and pauses the timers, as the pointer does (sonner pauses only for the pointer), so
-a keyboard user has the time a pointer user has.
+When focus leaves the stack it goes back where it was before. Focus from the keyboard (`Tab`,
+or the hotkey) also expands the stack and pauses the timers until it leaves, as the pointer
+does, so a keyboard user has the time a pointer user has; sonner pauses only for the pointer.
+A click or a tap on a toast focuses it too, but holds nothing: when the pointer leaves, the
+stack collapses and the timers run again, as in sonner.
 
 ## Accessibility
 
 - The region is a `<section>` with `aria-live="polite"`: screen readers announce each toast as
   it arrives. It is named `Notifications alt+T`; with two Toasters on a page, give each its own
   `@containerAriaLabel`.
-- The timers pause while the pointer or focus is on the stack, and when the page is hidden.
+- The timers pause while the pointer or the keyboard's focus is on the stack, and when the
+  page is hidden.
   For a message the user must act on, give it `duration: Infinity`, or use an Alert Dialog.
 - An action needs a label that says what it does (`Undo`), and a close button's name is
   `Close toast` unless `@toastOptions.closeButtonAriaLabel` says otherwise.

@@ -1,0 +1,4 @@
+{
+  "$comment": "Waiting for components that haven't landed: label-demo and label-rtl (Checkbox). field-demo is shown on this page too, and mapped on Field's (the inventory's page for it); it waits for Field. The Label page shows Joinery's own label-native until Checkbox lands; it has no upstream counterpart, so it isn't mapped.",
+  "examples": {}
+}

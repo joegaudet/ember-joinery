@@ -1,7 +1,8 @@
 {
-  "$comment": "Waiting for components that haven't landed: collapsible-basic (Card), collapsible-settings (Card, Field and Input) and collapsible-file-tree (Card and Tabs). The unit that lands the last of each one's components ports it onto the Collapsible page and maps it here.",
+  "$comment": "Waiting for components that haven't landed: collapsible-settings (Field) and collapsible-file-tree (Tabs). The unit that lands the last of each one's components ports it onto the Collapsible page and maps it here.",
   "examples": {
     "collapsible-demo": "collapsible-demo",
+    "collapsible-basic": "collapsible-basic",
     "collapsible-rtl": "collapsible-rtl"
   }
 }

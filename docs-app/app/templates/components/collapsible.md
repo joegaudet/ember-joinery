@@ -75,18 +75,17 @@ Without `@open` it keeps its own state; `@defaultOpen={{true}}` starts it open.
 
 ## Basic
 
-Upstream's example puts the collapsible in a Card, which hasn't landed in Joinery yet; it comes
-with Card.
+<Example @name="collapsible-basic" @title="Basic" @align="start" />
 
 ## Settings Panel
 
 Use a trigger button to reveal additional settings. Upstream's example is a Card of Field and
-Input controls, which haven't landed in Joinery yet; it comes with them.
+Input controls; it comes with Field, which hasn't landed in Joinery yet.
 
 ## File Tree
 
 Use nested collapsibles to build a file tree. In a conversation, this is the File Tree pattern.
-Upstream's example is a Card with Tabs, which haven't landed in Joinery yet; it comes with them.
+Upstream's example is a Card with Tabs; it comes with Tabs, which hasn't landed in Joinery yet.
 
 ## RTL
 

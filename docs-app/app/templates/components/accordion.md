@@ -76,8 +76,9 @@ are in the `joinery` layer).
 
 ## Card
 
-Wrap the `Accordion` in a `Card` component. Upstream's example comes with Card, which hasn't
-landed in Joinery yet.
+Wrap the `Accordion` in a [`Card`](/components/card.md) component.
+
+<Example @name="accordion-card" @title="Card" @align="start" />
 
 ## RTL
 

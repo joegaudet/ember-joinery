@@ -1,11 +1,11 @@
 {
-  "$comment": "Waiting for a component that hasn't landed: accordion-card (Card). The unit that lands Card ports it onto the Accordion page and maps it here.",
   "examples": {
     "accordion-demo": "accordion-demo",
     "accordion-basic": "accordion-basic",
     "accordion-multiple": "accordion-multiple",
     "accordion-disabled": "accordion-disabled",
     "accordion-borders": "accordion-borders",
+    "accordion-card": "accordion-card",
     "accordion-rtl": "accordion-rtl"
   }
 }

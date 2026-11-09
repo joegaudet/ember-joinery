@@ -1,5 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
 import { render, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
@@ -9,15 +10,6 @@ import { Button, Empty, Icon, type EmptyMediaVariant } from '@ember-joinery/embe
 import { ButtonHarness, EmptyHarness } from '@ember-joinery/test-support'
 
 const VARIANTS: EmptyMediaVariant[] = ['default', 'icon']
-
-/** An element's classes and attributes (but the test's own `data-case`), to compare two. */
-function rendering(element: Element): { classes: string[]; attributes: Record<string, string> } {
-  const attributes: Record<string, string> = {}
-  for (const { name, value } of element.attributes) {
-    if (name !== 'class' && name !== 'data-case') attributes[name] = value
-  }
-  return { classes: [...element.classList].sort(), attributes }
-}
 
 module('Integration | components | empty', function (hooks) {
   setupRenderingTest(hooks)

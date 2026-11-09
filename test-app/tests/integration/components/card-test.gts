@@ -1,5 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
 import { render } from '@ember/test-helpers'
 import { LinkTo } from '@ember/routing'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
@@ -8,15 +9,6 @@ import { Button, Card, type CardSize } from '@ember-joinery/ember'
 import { ButtonHarness, CardHarness } from '@ember-joinery/test-support'
 
 const SIZES: CardSize[] = ['default', 'sm']
-
-/** An element's classes and attributes (but the test's own `data-case`), to compare two. */
-function rendering(element: Element): { classes: string[]; attributes: Record<string, string> } {
-  const attributes: Record<string, string> = {}
-  for (const { name, value } of element.attributes) {
-    if (name !== 'class' && name !== 'data-case') attributes[name] = value
-  }
-  return { classes: [...element.classList].sort(), attributes }
-}
 
 // A 1×1 grey PNG, so an image renders without the network.
 const IMAGE =

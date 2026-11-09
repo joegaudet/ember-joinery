@@ -664,6 +664,69 @@ module('Integration | components | chart', function (hooks) {
     await a11yAudit()
   })
 
+  test('the tooltip can start on a row, or be kept hidden (@defaultIndex, @active)', async function (assert) {
+    class State {
+      @tracked active: boolean | undefined = undefined
+    }
+    const state = new State()
+    await render(
+      <template>
+        <ChartContainer @config={{chartConfig}} style="width: 400px" as |chart|>
+          <chart.LineChart @data={{chartData}} as |c|>
+            <c.XAxis @dataKey="month" />
+            <c.ChartTooltip
+              @content={{component ChartTooltipContent}}
+              @defaultIndex={{2}}
+              @active={{state.active}}
+            />
+            <c.Line @dataKey="desktop" @stroke="var(--color-desktop)" />
+          </chart.LineChart>
+        </ChartContainer>
+      </template>,
+    )
+    const chart = new ChartHarness()
+    assert.strictEqual(chart.tooltip?.label, 'March', 'shown at @defaultIndex before any pointer')
+    await chart.hover(4)
+    assert.strictEqual(chart.tooltip?.label, 'May', 'the pointer takes over')
+    await chart.unhover()
+    state.active = false
+    await rerender()
+    await chart.hover(1)
+    assert.false(chart.isTooltipVisible, '@active={{false}} never shows it')
+    await a11yAudit()
+  })
+
+  test('a vertical bar chart lays its categories down the y-axis', async function (assert) {
+    const margin = { left: -20 }
+    await render(
+      <template>
+        <ChartContainer @config={{chartConfig}} style="width: 400px" as |chart|>
+          <chart.BarChart @data={{chartData}} @layout="vertical" @margin={{margin}} as |c|>
+            <c.XAxis @type="number" @dataKey="desktop" @hide={{true}} />
+            <c.YAxis
+              @dataKey="month"
+              @type="category"
+              @tickLine={{false}}
+              @tickMargin={{10}}
+              @axisLine={{false}}
+              @tickFormatter={{monthAbbr}}
+            />
+            <c.ChartTooltip @content={{component ChartTooltipContent}} />
+            <c.Bar @dataKey="desktop" @fill="var(--color-desktop)" @radius={{5}} />
+          </chart.BarChart>
+        </ChartContainer>
+      </template>,
+    )
+    const chart = new ChartHarness()
+    assert.deepEqual(chart.yTicks, ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'])
+    const bars = chart.bars('desktop').map(bar => bar.getBoundingClientRect())
+    assert.true(bars[0]!.top < bars[1]!.top, 'January above February')
+    assert.true(bars[1]!.width > bars[0]!.width, 'February (305) longer than January (186)')
+    await chart.hover(1)
+    assert.strictEqual(chart.tooltip?.label, 'February')
+    await a11yAudit()
+  })
+
   test('ChartTooltipContent renders on its own, with labelKey, nameKey and formatters', async function (assert) {
     const payload = [
       {

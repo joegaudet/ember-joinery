@@ -147,7 +147,7 @@ export interface CartesianGridSignature {
     /** The lines' colour. Default `#ccc`, which the chart's CSS turns into `--border`. */
     stroke?: string
     strokeDasharray?: string
-    /** Recharts' `orientation`, passed through to the lines as an attribute. */
+    /** Recharts' `orientation`, taken as upstream's examples pass it; it doesn't change the grid. */
     orientation?: string
   }
 }

@@ -34,21 +34,12 @@ Field.
 
 ## Controlled
 
-A progress bar that can be controlled by a slider. Upstream's example comes with Slider.
+A progress bar that can be controlled by a slider.
 
-`@value` is the value: pass a tracked value, and the bar follows it.
+<Example @name="progress-controlled" @title="Controlled" />
 
-```gts
-import Component from '@glimmer/component'
-import { tracked } from '@glimmer/tracking'
-import { Progress } from '@ember-joinery/ember'
-
-export default class Upload extends Component {
-  @tracked uploaded = 50
-
-  <template><Progress @value={{this.uploaded}} aria-label="Upload" /></template>
-}
-```
+`@value` is the value: pass a tracked value, and the bar follows it. The example keeps the
+[Slider](/components/slider.md)'s value, an array, and gives the bar its first number.
 
 ## RTL
 

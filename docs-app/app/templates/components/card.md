@@ -68,8 +68,10 @@ property class, as upstream does; without Tailwind, set it in your own CSS or a 
 <Card style="--card-spacing: 1.5rem" as |c|>…</Card>
 ```
 
-Upstream's example switches the spacing with a Toggle Group around the login form; it comes
-with Toggle Group.
+<Example @name="card-spacing" @title="Spacing" />
+
+The example switches the spacing with a [Toggle Group](/components/toggle-group.md), which puts
+upstream's arbitrary property class on the card.
 
 Use negative margins with `-mx-(--card-spacing)` to make content go edge to edge while keeping
 it aligned with the card inset. When the edge-to-edge content sits above a footer, use

@@ -55,32 +55,13 @@ example sets `h-40`.
 
 ## Controlled
 
-Pass `@value` and `@onValueChange` to own the value:
+<Example @name="slider-controlled" @title="Controlled" />
 
-```gts
-import Component from '@glimmer/component'
-import { tracked } from '@glimmer/tracking'
-import { Slider } from '@ember-joinery/ember'
-
-export default class Temperature extends Component {
-  @tracked value = [0.3, 0.7]
-  setValue = (value: number[]) => (this.value = value)
-
-  <template>
-    <Slider
-      @value={{this.value}}
-      @onValueChange={{this.setValue}}
-      @min={{0}}
-      @max={{1}}
-      @step={{0.1}}
-    />
-  </template>
-}
-```
-
-Upstream's example (`slider-controlled`) labels the slider with a Label, which hasn't landed in
-Joinery yet; it comes with Label. `@onValueCommit` hears the value once a drag ends, or a key
-has moved it.
+Pass `@value` and `@onValueChange` to own the value, as the example does: the slider shows
+`@value`, and `@onValueChange` hears each new one. `@onValueCommit` hears the value once a drag
+ends, or a key has moved it. Upstream's label names the slider's root through `htmlFor`, which
+labels no thumb; Joinery's example keeps that, so its thumbs keep their own names (see
+[Accessibility](#accessibility)).
 
 ## Disabled
 

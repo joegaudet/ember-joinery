@@ -2,9 +2,9 @@
 
 A control that allows the user to toggle between checked and not checked.
 
-Upstream's examples lay their checkboxes out with Field and label them with Label, which
-haven't landed in Joinery yet; each comes with them. Until then, Joinery's own example labels
-its checkboxes with native labels:
+Upstream's first example lays its checkboxes out with Field, which hasn't landed in Joinery
+yet; it comes with Field. Until then, Joinery's own example labels its checkboxes with native
+labels:
 
 <Example @name="checkbox-native" @title="Checkbox" />
 
@@ -28,11 +28,11 @@ import { Checkbox } from '@ember-joinery/ember'
 ```
 
 It renders a `<button role="checkbox">`, as Radix's does, so name it with a label: tie one to
-it with `id` and `for`, or put it inside one.
+it with `id` and `for`, or put it inside one. [Label](/components/label.md) is Joinery's.
 
 ```gts
 <Checkbox id="terms" />
-<label for="terms">Accept terms and conditions</label>
+<Label for="terms">Accept terms and conditions</Label>
 ```
 
 ## Checked State
@@ -103,14 +103,12 @@ Use multiple fields to create a checkbox list. Upstream's example comes with Fie
 
 ## Table
 
-Upstream's example puts a checkbox in each row of a Table, with one in the header that checks
-them all, and comes with Table.
+<Example @name="checkbox-table" @title="Table" />
 
 ## RTL
 
 The checkbox lays itself out right to left inside any element with `dir="rtl"` (see
-[Direction](/primitives/direction.md)). Upstream's right-to-left example comes with Field and
-Label.
+[Direction](/primitives/direction.md)). Upstream's right-to-left example comes with Field.
 
 ## API Reference
 

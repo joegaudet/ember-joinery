@@ -2,10 +2,7 @@
 
 Renders an accessible label associated with controls.
 
-Upstream's first example labels a Checkbox, which hasn't landed in Joinery yet; it comes with
-Checkbox. Until then, Joinery's own example labels native checkboxes:
-
-<Example @name="label-native" @title="Label" />
+<Example @name="label-demo" @title="Label" />
 
 For form fields, use the Field component, which includes a built-in label, description and
 error handling. Field comes with the inputs.
@@ -42,14 +39,17 @@ and upstream's example here (`field-demo`, which is mapped on Field's page), com
 
 The label dims when its control is disabled: mark the control with the `peer` class and put it
 just before the label (`peer-disabled:opacity-50`), or give an ancestor marked `group` the
-attribute `data-disabled="true"` (`group-data-[disabled=true]:opacity-50`). The second label
-in the example above does the first.
+attribute `data-disabled="true"` (`group-data-[disabled=true]:opacity-50`). This example is
+Joinery's own: its second label does the first, beside a native checkbox.
+
+<Example @name="label-native" @title="Disabled" />
 
 ## RTL
 
 The label and its control lay themselves out right to left inside any element with `dir="rtl"`
-(see [Direction](/primitives/direction.md)). Upstream's right-to-left example labels a Checkbox
-too (`label-rtl`), and comes with Checkbox.
+(see [Direction](/primitives/direction.md)).
+
+<Example @name="label-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 

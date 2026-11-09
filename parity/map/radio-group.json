@@ -1,4 +1,6 @@
 {
-  "$comment": "Waiting for components that haven't landed: radio-group-demo (Label), radio-group-description, radio-group-choice-card, radio-group-fieldset, radio-group-disabled, radio-group-invalid and radio-group-rtl (Field). The Radio Group page shows Joinery's own radio-group-native, upstream's radio-group-demo with native labels, until Label lands; it isn't mapped. The units that land Field and Label port these examples onto the Radio Group page and map them here.",
-  "examples": {}
+  "$comment": "Waiting for components that haven't landed: radio-group-description, radio-group-choice-card, radio-group-fieldset, radio-group-disabled, radio-group-invalid and radio-group-rtl (Field). The unit that lands Field ports these examples onto the Radio Group page and maps them here.",
+  "examples": {
+    "radio-group-demo": "radio-group-demo"
+  }
 }

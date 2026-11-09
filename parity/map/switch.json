@@ -1,4 +1,6 @@
 {
-  "$comment": "Waiting for components that haven't landed: switch-demo (Label), switch-description, switch-choice-card, switch-disabled, switch-invalid, switch-sizes and switch-rtl (Field). The Switch page shows Joinery's own switch-native, upstream's switch-demo with a native label, until Label lands, and switch-thumb; neither is mapped. The units that land Field and Label port these examples onto the Switch page and map them here.",
-  "examples": {}
+  "$comment": "Waiting for components that haven't landed: switch-description, switch-choice-card, switch-disabled, switch-invalid, switch-sizes and switch-rtl (Field). The Switch page also shows Joinery's own switch-thumb, which has no upstream counterpart, so it isn't mapped. The unit that lands Field ports these examples onto the Switch page and maps them here.",
+  "examples": {
+    "switch-demo": "switch-demo"
+  }
 }

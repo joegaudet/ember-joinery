@@ -3,10 +3,7 @@
 A set of checkable buttons—known as radio buttons—where no more than one of the buttons can be
 checked at a time.
 
-Upstream's first example labels each item with Label, which hasn't landed in Joinery yet; it
-comes with Label. Until then, Joinery's copy of it labels the items with native labels:
-
-<Example @name="radio-group-native" @title="Radio Group" />
+<Example @name="radio-group-demo" @title="Radio Group" />
 
 ## Installation
 

@@ -2,10 +2,7 @@
 
 A control that allows the user to toggle between checked and not checked.
 
-Upstream's first example labels its switch with Label, which hasn't landed in Joinery yet; it
-comes with Label. Until then, Joinery's copy of it uses a native label:
-
-<Example @name="switch-native" @title="Switch" />
+<Example @name="switch-demo" @title="Switch" />
 
 ## Installation
 

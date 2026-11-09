@@ -11,3 +11,4 @@ docs/site/guide/
 docs/site/404.html
 examples/*/dist/
 parity/.upstream/
+docs-app/app/templates/*/meta.json

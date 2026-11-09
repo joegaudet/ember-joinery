@@ -6,3 +6,5 @@
  */
 @layer theme, base, joinery, components, utilities;
 @import 'tailwindcss';
+/* shadcn's tokens as Tailwind's theme (bg-primary, rounded-lg…) and its dark: variant. */
+@import '@ember-joinery/ember/tailwind.css';

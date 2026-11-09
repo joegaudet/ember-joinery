@@ -5,7 +5,9 @@ import { a11yAudit } from 'ember-a11y-testing/test-support'
 import * as ember from '@ember-joinery/ember'
 import * as testSupport from '@ember-joinery/test-support'
 import {
+  ButtonHarness,
   Harness,
+  IconHarness,
   KeyComboHarness,
   isInTopLayer,
   placementOf,
@@ -112,6 +114,29 @@ module('Acceptance | smoke', function (hooks) {
 
     await pressEscape()
     assert.strictEqual(tip.content, null, 'Escape closed it')
+    await a11yAudit()
+  })
+
+  test('a Joinery Button renders and works in a classic build, styled by joinery.css', async function (assert) {
+    await visit('/')
+    const save = new ButtonHarness('save')
+    assert.dom(save.element).hasTagName('button').hasClass('jn-button')
+    assert.strictEqual(save.variant, 'outline')
+    assert.strictEqual(getComputedStyle(save.element).height, '32px', "Nova's h-8")
+    assert.strictEqual(
+      getComputedStyle(save.element).borderTopLeftRadius,
+      '10px',
+      "tokens.css's --radius",
+    )
+    let clicked = false
+    save.element.addEventListener('click', () => (clicked = true), { once: true })
+    await save.click()
+    assert.true(clicked)
+
+    const up = new ButtonHarness('up')
+    assert.strictEqual(up.label, 'Back to top')
+    assert.true(up.find(IconHarness).isDecorative, 'its lucide icon')
+    assert.strictEqual(up.find(IconHarness).element.namespaceURI, 'http://www.w3.org/2000/svg')
     await a11yAudit()
   })
 })

@@ -4,6 +4,7 @@ import { setupApplicationTest, setupRenderingTest } from 'ember-qunit'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import * as ember from '@ember-joinery/ember'
 import * as testSupport from '@ember-joinery/test-support'
+import { ButtonHarness } from '@ember-joinery/test-support'
 
 /** Every cascade layer the page's style sheets declare, in order. */
 function declaredLayers() {
@@ -58,6 +59,26 @@ module('Acceptance | smoke', function (hooks) {
       `joinery is declared before utilities: ${layers.join(', ')}`,
     )
 
+    await a11yAudit()
+  })
+
+  test("tailwind.css maps the tokens, and a utility class overrides a component's style", async function (assert) {
+    await visit('/')
+    const save = new ButtonHarness('save')
+    assert.strictEqual(getComputedStyle(save.element).height, '32px', 'joinery.css styles it')
+
+    // text-muted-foreground is shadcn's token, through tailwind.css's @theme inline.
+    const muted = getComputedStyle(document.documentElement).getPropertyValue('--muted-foreground')
+    assert.ok(muted.trim().startsWith('oklch'), 'tokens.css is loaded')
+    assert.notStrictEqual(
+      getComputedStyle(find('main > p')).color,
+      'rgb(0, 0, 0)',
+      'text-muted-foreground',
+    )
+
+    const up = new ButtonHarness('up')
+    const radius = Number.parseFloat(getComputedStyle(up.element).borderTopLeftRadius)
+    assert.ok(radius > 1000, `rounded-full beats the style's radius (${radius}px)`)
     await a11yAudit()
   })
 })

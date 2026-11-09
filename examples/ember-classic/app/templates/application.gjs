@@ -3,6 +3,8 @@ import { tracked } from '@glimmer/tracking'
 import { array } from '@ember/helper'
 import { on } from '@ember/modifier'
 import { modifier } from 'ember-modifier'
+import { ArrowUp } from 'lucide'
+import { Button, Icon } from '@ember-joinery/ember'
 import { anchorTo } from '@ember-joinery/primitives/anchor'
 import { dismissable } from '@ember-joinery/primitives/dismiss'
 import { topLayer } from '@ember-joinery/primitives/layer'
@@ -89,5 +91,9 @@ class Tip extends Component {
     <p>Search with <KeyCombo @name="search" @keys="Ctrl+K" />.</p>
     <Disclosure @label="Details">The primitives work here too.</Disclosure>
     <Tip @label="Help">Anchored in the top layer.</Tip>
+    <p>
+      <Button @name="save" @variant="outline">Save</Button>
+      <Button @name="up" @size="icon" aria-label="Back to top"><Icon @icon={{ArrowUp}} /></Button>
+    </p>
   </main>
 </template>

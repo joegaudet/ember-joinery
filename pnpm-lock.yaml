@@ -5,6 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  '@ember-joinery/code-block': workspace:*
   '@ember-joinery/ember': workspace:*
   '@ember-joinery/primitives': workspace:*
   '@ember-joinery/test-support': workspace:*
@@ -428,6 +429,9 @@ importers:
 
   examples/ember-vite-basic:
     dependencies:
+      '@ember-joinery/code-block':
+        specifier: workspace:*
+        version: link:../../packages/code-block
       '@ember-joinery/ember':
         specifier: workspace:*
         version: link:../../packages/ember

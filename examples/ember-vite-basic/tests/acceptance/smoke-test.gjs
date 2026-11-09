@@ -5,6 +5,7 @@ import { a11yAudit } from 'ember-a11y-testing/test-support'
 import * as ember from '@ember-joinery/ember'
 import * as testSupport from '@ember-joinery/test-support'
 import { ButtonHarness, IconHarness } from '@ember-joinery/test-support'
+import { CodeBlockHarness, setupClipboard } from '@ember-joinery/code-block/test-support'
 
 /** Every cascade layer the page's style sheets declare, in order. */
 function declaredLayers() {
@@ -66,5 +67,25 @@ module('Acceptance | smoke', function (hooks) {
     assert.true(up.find(IconHarness).isDecorative, 'its lucide icon')
     assert.strictEqual(up.find(IconHarness).element.namespaceURI, 'http://www.w3.org/2000/svg')
     await a11yAudit()
+  })
+
+  module('an add-on', function (hooks) {
+    const clipboard = setupClipboard(hooks)
+
+    test('a Code Block from @ember-joinery/code-block, highlighted by Shiki loaded on demand', async function (assert) {
+      await visit('/')
+      const block = new CodeBlockHarness('install')
+      assert.strictEqual(block.title, 'Terminal')
+      assert.strictEqual(block.code, 'pnpm add @ember-joinery/code-block')
+      assert.true(block.isHighlighted, "Shiki and the bash grammar loaded through the app's build")
+      assert.strictEqual(
+        getComputedStyle(block.element).borderTopLeftRadius,
+        '10px',
+        "joinery.css styles the add-on's parts",
+      )
+      await block.copy()
+      assert.strictEqual(clipboard.text, 'pnpm add @ember-joinery/code-block')
+      await a11yAudit()
+    })
   })
 })

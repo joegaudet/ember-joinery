@@ -1,6 +1,8 @@
 {
-  "$comment": "Waiting for components that haven't landed: spinner-demo and spinner-rtl (Item), spinner-input-group (Input Group). The unit that lands each one ports its examples onto the Spinner page and maps them here.",
+  "$comment": "Waiting for components that haven't landed: spinner-input-group (Input Group). The unit that lands it ports its example onto the Spinner page and maps it here.",
   "examples": {
+    "spinner-demo": "spinner-demo",
+    "spinner-rtl": "spinner-rtl",
     "spinner-custom": "spinner-custom",
     "spinner-size": "spinner-size",
     "spinner-button": "spinner-button",

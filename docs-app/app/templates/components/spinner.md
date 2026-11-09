@@ -2,8 +2,7 @@
 
 An indicator that can be used to show a loading state.
 
-Upstream's first example shows a spinner in an Item, which hasn't landed in Joinery yet; it
-comes with Item. The examples below show a spinner on its own and in a Button.
+<Example @name="spinner-demo" @title="Spinner" />
 
 ## Installation
 
@@ -76,8 +75,10 @@ A spinner as an [empty state](/components/empty.md)'s media, on its icon tile.
 ## RTL
 
 A spinner turns the same way in both directions, and in a Button its `data-icon` side follows
-the text (see [Direction](/primitives/direction.md)). Upstream's right-to-left example, a
-spinner in an Item, comes with Item.
+the text (see [Direction](/primitives/direction.md)). In an [Item](/components/item.md), it
+sits on the right, as the item's media.
+
+<Example @name="spinner-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 

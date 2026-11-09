@@ -1,0 +1,53 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/tabs.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="tabs" in Tabs; keep on the element: group/tabs */
+:where(.jn-tabs) {
+  @apply flex data-horizontal:flex-col;
+}
+
+/* in tabsListVariants; keep on the element: group/tabs-list */
+:where(.jn-tabs-list) {
+  @apply inline-flex w-fit items-center justify-center text-muted-foreground group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col;
+}
+
+/* in tabsListVariants (cva-variant variant.default) */
+:where(.jn-tabs-list-variant-default) {
+  @apply bg-muted;
+}
+
+/* in tabsListVariants (cva-variant variant.line) */
+:where(.jn-tabs-list-variant-line) {
+  @apply gap-1 bg-transparent;
+}
+
+/* data-slot="tabs-trigger" in TabsTrigger */
+:where(.jn-tabs-trigger) {
+  @apply relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center whitespace-nowrap text-foreground/60 transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 dark:text-muted-foreground dark:hover:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0;
+}
+
+/* data-slot="tabs-trigger" in TabsTrigger */
+:where(.jn-tabs-trigger) {
+  @apply group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent;
+}
+
+/* data-slot="tabs-trigger" in TabsTrigger */
+:where(.jn-tabs-trigger) {
+  @apply data-active:bg-background data-active:text-foreground dark:data-active:border-input dark:data-active:bg-input/30 dark:data-active:text-foreground;
+}
+
+/* data-slot="tabs-trigger" in TabsTrigger */
+:where(.jn-tabs-trigger) {
+  @apply after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:-end-1 group-data-vertical/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100;
+}
+
+/* data-slot="tabs-content" in TabsContent */
+:where(.jn-tabs-content) {
+  @apply flex-1 outline-none;
+}

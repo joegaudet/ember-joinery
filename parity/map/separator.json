@@ -1,0 +1,9 @@
+{
+  "examples": {
+    "separator-demo": "separator-demo",
+    "separator-vertical": "separator-vertical",
+    "separator-menu": "separator-menu",
+    "separator-list": "separator-list",
+    "separator-rtl": "separator-rtl"
+  }
+}

@@ -64,6 +64,9 @@ export interface PresenceSignature {
  *     <div {{presence.ref}} data-state={{if this.open.value "open" "closed"}}>…</div>
  *   </Presence>
  *
+ * `ref` can go anywhere among the element's modifiers, before or after the part modifier that
+ * sets `data-state`: Presence looks for the animation once the render is over.
+ *
  * Tests wait for the exit: `settled()` resolves once the content is gone.
  */
 export class Presence extends Component<PresenceSignature> {
@@ -143,7 +146,7 @@ export class Presence extends Component<PresenceSignature> {
     this.#element = element
     this.#styles = getComputedStyle(element)
     element.addEventListener('animationstart', this.#onAnimationStart)
-    if (present) this.#previousAnimation = animationName(this.#styles)
+    if (present) this.#afterRender(() => (this.#previousAnimation = animationName(this.#styles)))
     // Safe during rendering: while it is present or force-mounted, `isRendered` hasn't read it.
     if (present || this.args.forceMount) this.#setObserved(true)
   }
@@ -152,52 +155,68 @@ export class Presence extends Component<PresenceSignature> {
     if (event.target === this.#element) this.#previousAnimation = animationName(this.#styles)
   }
 
+  /**
+   * Runs `look` once this render is over, unless `@present` has changed again since. `ref` runs
+   * among the element's modifiers, in template order, and the part modifier that sets
+   * `data-state` (and so starts the animation) may come after it; Radix looks after the commit
+   * for the same reason.
+   */
+  #afterRender(look: () => void): void {
+    const generation = this.#generation
+    queueMicrotask(() => {
+      if (generation === this.#generation && !isDestroying(this) && !isDestroyed(this)) look()
+    })
+  }
+
   #enter(): void {
     this.#endWait()
-    this.#previousAnimation = animationName(this.#styles)
     const element = this.#element as HTMLElement | undefined
     if (element?.style.animationFillMode === 'forwards') element.style.animationFillMode = ''
     // Safe during rendering: while it is present, `isRendered` hasn't read it.
     this.#setExited(false)
+    this.#afterRender(() => (this.#previousAnimation = animationName(this.#styles)))
   }
 
   #exit(): void {
+    const generation = this.#generation
+    const token = this.#beginWait()
+    // The content can't go during this render (it can't change state the render has read), and
+    // the exit animation can only be seen once every modifier has run: see `#afterRender`.
+    queueMicrotask(() => {
+      if (generation !== this.#generation) return this.#endWait(token)
+      const element = this.#element as HTMLElement | undefined
+      const running = this.#exitAnimations()
+      if (!element || !running.length) return this.#settle(generation, token)
+
+      void Promise.allSettled(running.map(animation => animation.finished)).then(() => {
+        if (generation !== this.#generation) return this.#endWait(token)
+        // Hold the last frame until the content is removed, so it doesn't flash back.
+        const style = element.style
+        if (style) {
+          style.animationFillMode = 'forwards'
+          this.#fillTimer = setTimeout(() => {
+            if (style.animationFillMode === 'forwards') style.animationFillMode = ''
+          })
+        }
+        this.#settle(generation, token)
+      })
+    })
+  }
+
+  /** The element's exit animations: none when it has none, the same one as before, or is hidden. */
+  #exitAnimations(): Animation[] {
     const element = this.#element
     const styles = this.#styles
     const current = animationName(styles)
-    // No exit animation (none, the same one as before, or the element is hidden): go now.
-    if (!element || current === 'none' || styles?.display === 'none') return this.#finish()
-    if (current === this.#previousAnimation) return this.#finish()
+    if (!element || current === 'none' || styles?.display === 'none') return []
+    if (current === this.#previousAnimation) return []
 
     const names = current.split(',').map(name => name.trim())
-    const running = element
+    return element
       .getAnimations()
       .filter(
         animation => animation instanceof CSSAnimation && names.includes(animation.animationName),
       )
-    if (!running.length) return this.#finish()
-
-    const generation = this.#generation
-    const token = this.#beginWait()
-    void Promise.allSettled(running.map(animation => animation.finished)).then(() => {
-      if (generation !== this.#generation) return this.#endWait(token)
-      // Hold the last frame until the content is removed, so it doesn't flash back.
-      const style = (element as HTMLElement).style
-      if (style) {
-        style.animationFillMode = 'forwards'
-        this.#fillTimer = setTimeout(() => {
-          if (style.animationFillMode === 'forwards') style.animationFillMode = ''
-        })
-      }
-      this.#settle(generation, token)
-    })
-  }
-
-  /** Removes the content, after this render (it can't change state the render has read). */
-  #finish(): void {
-    const generation = this.#generation
-    const token = this.#beginWait()
-    queueMicrotask(() => this.#settle(generation, token))
   }
 
   #settle(generation: number, token: unknown): void {

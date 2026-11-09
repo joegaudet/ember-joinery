@@ -27,6 +27,16 @@ becomes `closed`, and Presence looks at the element given `presence.ref`:
 Turning `@present` back on during the exit keeps the element. Without `presence.ref` there is
 nothing to wait for, so the content goes at once.
 
+`presence.ref` can go anywhere among the element's modifiers, before or after the part
+modifier that sets its `data-state`: Presence looks for the exit animation once the render is
+over, as Radix does after React commits.
+
+```gts
+<Presence @present={{this.open.value}} as |presence|>
+  <div {{presence.ref}} {{this.content}}>…</div>
+</Presence>
+```
+
 ## API
 
 | Argument      | Type      | What it does                                        |

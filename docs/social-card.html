@@ -1,0 +1,125 @@
+<!doctype html>
+<!-- Source of site/social-card.png. Render at 1200x630:
+     chrome --headless --window-size=1200,630 --screenshot=site/social-card.png social-card.html -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Joinery social card</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@500;800&family=Geist+Mono:wght@500&display=swap"
+    />
+    <style>
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        display: grid;
+        grid-template-columns: 1.25fr 1fr;
+        align-items: center;
+        gap: 48px;
+        padding: 0 80px;
+        box-sizing: border-box;
+        font-family: Geist, system-ui, sans-serif;
+        color: #f6f2ea;
+        background:
+          radial-gradient(36rem 26rem at 78% 50%, rgb(217 119 6 / 0.4), transparent 70%), #12110f;
+      }
+      .brand {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        font-weight: 800;
+        font-size: 34px;
+        margin-bottom: 34px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 64px;
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        font-weight: 800;
+      }
+      .accent {
+        color: #f5b04c;
+      }
+      p {
+        margin: 26px 0 0;
+        color: #cfc8bc;
+        font-size: 26px;
+        font-weight: 500;
+      }
+      /* A dialog, the way shadcn draws one. */
+      .card {
+        background: #fff;
+        color: #0a0a0a;
+        border-radius: 14px;
+        padding: 28px;
+        box-shadow: 0 30px 80px -20px rgb(217 119 6 / 0.6);
+      }
+      .title {
+        font-weight: 700;
+        font-size: 22px;
+      }
+      .desc {
+        margin: 6px 0 22px;
+        color: #737373;
+        font-size: 17px;
+      }
+      .label {
+        font-weight: 600;
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+      .input {
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        height: 42px;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        font-size: 17px;
+      }
+      .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+      .btn {
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-weight: 600;
+        font-size: 16px;
+        border: 1px solid #e5e5e5;
+      }
+      .btn.primary {
+        background: #171717;
+        border-color: #171717;
+        color: #fafafa;
+      }
+      code {
+        font-family: 'Geist Mono', monospace;
+        font-size: 0.85em;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <div class="brand"><img src="site/logo.svg" width="52" height="52" alt="" />Joinery</div>
+      <h1>Every shadcn/ui component.<br /><span class="accent">Joined to Ember.</span></h1>
+      <p>Headless primitives, shadcn's styles, and a test harness for each one.</p>
+    </div>
+    <div class="card">
+      <div class="title">Edit profile</div>
+      <div class="desc">Make changes to your profile here.</div>
+      <div class="label">Name</div>
+      <div class="input">Ada Lovelace</div>
+      <div class="label">Username</div>
+      <div class="input">@ada</div>
+      <div class="actions">
+        <span class="btn">Cancel</span><span class="btn primary">Save changes</span>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Joinery: shadcn/ui for Ember</title>
+    <meta
+      name="description"
+      content="Every shadcn/ui component for Ember: modern .gts components on a headless primitives layer, shadcn's styles and theme tokens, and a test harness for each one."
+    />
+    <link rel="canonical" href="https://joegaudet.com/ember-joinery/" />
+    <!-- Link previews (Slack, X, LinkedIn, iMessage). The card's source is docs/social-card.html. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Joinery" />
+    <meta property="og:title" content="Joinery: shadcn/ui for Ember" />
+    <meta
+      property="og:description"
+      content="Every shadcn/ui component for Ember, on headless primitives, each with a test harness."
+    />
+    <meta property="og:url" content="https://joegaudet.com/ember-joinery/" />
+    <meta property="og:image" content="https://joegaudet.com/ember-joinery/social-card.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Joinery: shadcn/ui for Ember." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap"
+    />
+    <link rel="stylesheet" href="site.css" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <nav class="site-nav" aria-label="Site">
+      <div class="container">
+        <a href="./" class="brand"
+          ><img src="logo.svg" alt="" width="28" height="28" /><strong>Joinery</strong></a
+        >
+        <ul>
+          <li class="wide-only"><a href="#why">Why</a></li>
+          <li class="wide-only"><a href="#usage">Usage</a></li>
+          <li class="wide-only"><a href="#theming">Theming</a></li>
+          <li class="wide-only"><a href="#components">Components</a></li>
+          <li class="wide-only"><a href="#testing">Testing</a></li>
+          <li><a href="guide/">Guide</a></li>
+          <li><a href="#demo">Demo</a></li>
+          <li><a href="https://github.com/joegaudet/ember-joinery">GitHub</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <header class="hero-band">
+      <div class="container hero">
+        <div class="hero-copy">
+          <p class="eyebrow">shadcn/ui for Ember 6.12 LTS and 7</p>
+          <h1>
+            Every shadcn/ui component.
+            <span class="accent-text">Joined to Ember.</span>
+          </h1>
+          <p class="hero-sub">
+            Every component on ui.shadcn.com, written as modern <code>.gts</code> components with
+            yielded parts and full Glint types, on a headless primitives layer. shadcn's own styles
+            and theme tokens, compiled so Tailwind is optional. And a test harness for every one.
+          </p>
+          <div class="hero-actions">
+            <a href="guide/" class="button">Read the guide</a>
+            <a href="https://github.com/joegaudet/ember-joinery" class="button ghost">GitHub</a>
+          </div>
+          <div class="install">
+            <span class="prompt" aria-hidden="true">$</span>
+            <code>npm i @ember-joinery/ember</code>
+          </div>
+          <p class="install-note">
+            <strong>Pre-release:</strong> Joinery is being built, and nothing is on npm yet. The
+            plan is in
+            <a href="https://github.com/joegaudet/ember-joinery/blob/main/JOINERY_PLAN.md"
+              >JOINERY_PLAN.md</a
+            >.
+          </p>
+        </div>
+        <img class="hero-mark" src="logo.svg" alt="" width="220" height="220" />
+      </div>
+    </header>
+
+    <main id="main" class="container">
+      <section id="why">
+        <p class="eyebrow">Why</p>
+        <h2>shadcn's design, the Ember way</h2>
+        <div class="features">
+          <article>
+            <h3>Parts you compose</h3>
+            <p>
+              Each component yields its parts, <code>&lt;Dialog as |d|&gt;</code> then
+              <code>&lt;d.Trigger&gt;</code> and <code>&lt;d.Content&gt;</code>, typed with Glint.
+              Swap in your own element with <code>@as</code> or a yielded modifier.
+            </p>
+          </article>
+          <article>
+            <h3>Controlled or not</h3>
+            <p>
+              Leave state to the component, or own it with <code>@open</code> and
+              <code>@onOpenChange</code>, <code>@value</code> and <code>@onValueChange</code>, as in
+              Radix.
+            </p>
+          </article>
+          <article>
+            <h3>Headless primitives</h3>
+            <p>
+              <code>@ember-joinery/primitives</code> is the behaviour underneath, unstyled: focus,
+              keyboard, layering and ARIA, covering everything ember-primitives offers.
+            </p>
+          </article>
+          <article>
+            <h3>Accessible</h3>
+            <p>
+              WCAG 2.2 AA, the WAI-ARIA keyboard patterns, and right-to-left layouts. Every test
+              ends in an axe audit.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="install">
+        <p class="eyebrow">Install</p>
+        <h2>Vite or classic, Tailwind or not</h2>
+        <p>
+          Joinery's packages are v2 addons. Vite (Embroider) apps import them directly; classic
+          ember-cli apps use ember-auto-import 2. Import the CSS once:
+        </p>
+        <pre><code>import '@ember-joinery/ember/joinery.css'</code></pre>
+        <p>
+          Every kind of app has an example in the repository, built and tested in CI. The
+          <a href="guide/getting-started/installation.md">installation guide</a> has the steps.
+        </p>
+      </section>
+
+      <section id="usage">
+        <p class="eyebrow">Usage</p>
+        <h2>Strict mode, named args, typed parts</h2>
+        <pre><code>import { Dialog, Button } from '@ember-joinery/ember'
+
+&lt;template&gt;
+  &lt;Dialog @name="edit-profile" as |d|&gt;
+    &lt;d.Trigger&gt;Edit profile&lt;/d.Trigger&gt;
+    &lt;d.Content&gt;
+      &lt;d.Header&gt;
+        &lt;d.Title&gt;Edit profile&lt;/d.Title&gt;
+        &lt;d.Description&gt;Make changes to your profile here.&lt;/d.Description&gt;
+      &lt;/d.Header&gt;
+      &lt;d.Footer&gt;
+        &lt;d.Close&gt;Cancel&lt;/d.Close&gt;
+        &lt;Button&gt;Save changes&lt;/Button&gt;
+      &lt;/d.Footer&gt;
+    &lt;/d.Content&gt;
+  &lt;/Dialog&gt;
+&lt;/template&gt;</code></pre>
+      </section>
+
+      <section id="theming">
+        <p class="eyebrow">Theming</p>
+        <h2>shadcn's tokens, so any shadcn theme pastes in</h2>
+        <p>
+          Joinery uses shadcn's token names in OKLCH (<code>--background</code>,
+          <code>--primary</code>, <code>--ring</code>, <code>--radius</code>,
+          <code>--chart-1</code> to <code>--chart-5</code>…), dark mode is a
+          <code>.dark</code> class, and all eight of shadcn's styles ship: Nova by default, plus
+          Luma, Lyra, Maia, Mira, Rhea, Sera and Vega.
+        </p>
+      </section>
+
+      <section id="components">
+        <p class="eyebrow">Components</p>
+        <h2>All of ui.shadcn.com</h2>
+        <ul class="component-groups">
+          <li><strong>Display</strong> Button, Badge, Alert, Card, Avatar, Table, Pagination…</li>
+          <li><strong>Inputs</strong> Input, Checkbox, Radio Group, Switch, Slider, Input OTP…</li>
+          <li><strong>Overlays</strong> Dialog, Sheet, Drawer, Popover, Tooltip, Toast…</li>
+          <li><strong>Menus</strong> Dropdown Menu, Menubar, Select, Combobox, Command, Tabs…</li>
+          <li><strong>Dates</strong> Calendar and Date Picker</li>
+          <li><strong>App shell</strong> Sidebar, Resizable, Scroll Area, Direction</li>
+          <li><strong>Add-ons</strong> Carousel, Data Table, Code Block and Charts</li>
+          <li><strong>Chat</strong> Message, Bubble, Attachment, Message Scroller…</li>
+        </ul>
+      </section>
+
+      <section id="testing">
+        <p class="eyebrow">Testing</p>
+        <h2>A harness for every component</h2>
+        <p>
+          <code>@ember-joinery/test-support</code> drives each component the way a user does, and
+          reads its state through ARIA, so every test checks the ARIA contract too.
+        </p>
+        <pre><code>import { DialogHarness, ButtonHarness, child } from '@ember-joinery/test-support'
+
+class EditProfile extends DialogHarness {
+  static named = 'edit-profile'
+  @child(ButtonHarness, 'save') declare save: ButtonHarness
+}
+
+const dialog = new EditProfile()
+await dialog.open()
+await dialog.save.click()
+assert.false(dialog.isOpen)</code></pre>
+      </section>
+
+      <section id="formwright">
+        <p class="eyebrow">Forms</p>
+        <h2>Formwright, built in</h2>
+        <p>
+          shadcn's <code>Form</code> is react-hook-form. Joinery's is
+          <a href="https://joegaudet.com/ember-formwright/">Formwright</a>: every Joinery input as a
+          Formwright control, through <code>@ember-joinery/formwright</code>.
+        </p>
+      </section>
+
+      <section id="demo">
+        <p class="eyebrow">Demo</p>
+        <h2>The live demo</h2>
+        <div class="demo-window">
+          <iframe src="demo/" title="Joinery live demo" loading="lazy"></iframe>
+        </div>
+      </section>
+
+      <section id="guide">
+        <p class="eyebrow">Guide</p>
+        <h2>Every component, every example, tested</h2>
+        <p>
+          The guide has a page for each component, laid out like its ui.shadcn.com page, with every
+          upstream example ported, live and tested.
+        </p>
+        <p><a href="guide/" class="button">Read the guide</a></p>
+      </section>
+
+      <section id="siblings">
+        <p class="eyebrow">Siblings</p>
+        <h2>More for Ember</h2>
+        <div class="features">
+          <article>
+            <h3><a href="https://joegaudet.com/ember-formwright/">Formwright</a></h3>
+            <p>Declarative, accessible forms, with any validator and any data layer.</p>
+          </article>
+          <article>
+            <h3><a href="https://joegaudet.com/real-enums/">real-enums</a></h3>
+            <p>Enums as classes, with members, labels and options, for TypeScript.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>
+          Joinery is an independent project, not affiliated with shadcn/ui. Its design, component
+          APIs and examples are ported from <a href="https://ui.shadcn.com/">shadcn/ui</a> (MIT, ©
+          shadcn), and its headless layer covers the features of
+          <a href="https://github.com/universal-ember/ember-primitives">ember-primitives</a>
+          (MIT).
+        </p>
+        <p>
+          MIT licensed. More open source from <a href="https://joegaudet.com/">Joe Gaudet</a>:
+          <a href="https://joegaudet.com/ember-formwright/">Formwright</a> ·
+          <a href="https://joegaudet.com/real-enums/">real-enums</a> ·
+          <a href="./" aria-current="page">Joinery</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

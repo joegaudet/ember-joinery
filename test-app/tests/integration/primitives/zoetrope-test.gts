@@ -37,6 +37,21 @@ function spyOnScrollBy(zoetrope: ZoetropeHarness): string[] {
 }
 
 /**
+ * Holds each `scrollBy` on the zoetrope's track for `count` animation frames before it sets
+ * off, as a smooth scroll on a busy page can take a while to start.
+ */
+function holdScrollBy(zoetrope: ZoetropeHarness, count: number): void {
+  const track = zoetrope.scroller
+  const original = track.scrollBy.bind(track)
+  track.scrollBy = ((options: ScrollToOptions) => {
+    void (async () => {
+      for (let i = 0; i < count; i++) await new Promise(requestAnimationFrame)
+      original(options)
+    })()
+  }) as typeof track.scrollBy
+}
+
+/**
  * Makes `matchMedia('(prefers-reduced-motion: reduce)')` match, as a system asking for reduced
  * motion does, until the returned function puts it back.
  */
@@ -347,6 +362,29 @@ module('Integration | primitives | zoetrope', function (hooks) {
     } finally {
       restore()
     }
+    await a11yAudit()
+  })
+
+  test('a smooth scroll that is slow to set off is waited for, not taken for one that ended', async function (assert) {
+    await render(
+      <template>
+        <Styles />
+        <Zoetrope class="track" aria-label="Cards">
+          <:content>{{#each (range 4) as |n|}}<a href="/cards/{{n}}">Card
+                {{n}}</a>{{/each}}</:content>
+        </Zoetrope>
+      </template>,
+    )
+    const zoetrope = new ZoetropeHarness()
+    // Longer than the three still frames that count as the end of a scroll that goes nowhere.
+    holdScrollBy(zoetrope, 8)
+
+    await zoetrope.scrollRight()
+    assert.strictEqual(zoetrope.scrolled, 208, 'it waited for the scroll to start, then to end')
+    assert.true(zoetrope.canScrollLeft)
+    await zoetrope.scrollLeft()
+    assert.strictEqual(zoetrope.scrolled, 0, 'and back')
+    assert.false(zoetrope.canScrollLeft)
     await a11yAudit()
   })
 

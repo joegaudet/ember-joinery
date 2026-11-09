@@ -282,10 +282,12 @@ export class Zoetrope extends Component<ZoetropeSignature> {
 
   /** Scrolls the track by `distance` along it: towards its end, or back when negative. */
   #scrollBy(scroller: HTMLElement, distance: number): void {
-    const rtl = isRTL(scroller)
-    scroller.scrollBy({ left: rtl ? -distance : distance, behavior: this.scrollBehavior })
+    const left = isRTL(scroller) ? -distance : distance
+    const target = { left: scroller.scrollLeft + left }
+    scroller.scrollBy({ left, behavior: this.scrollBehavior })
     this.scrolled = Math.abs(scroller.scrollLeft)
-    void waitForPromise(scrollEnd(scroller))
+    // Tests wait for it to end, a smooth one included: until it sets off for `target`, then stops.
+    void waitForPromise(scrollEnd(scroller, target))
   }
 
   /**

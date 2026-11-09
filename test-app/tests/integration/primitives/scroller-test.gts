@@ -1,3 +1,4 @@
+/* global ScrollToOptions -- a DOM type, which ESLint's browser globals don't list */
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
 import { click, render, settled } from '@ember/test-helpers'
@@ -46,6 +47,20 @@ class Demo extends Component {
 
 class PanelHarness extends Harness {
   static override component = 'panel'
+}
+
+/**
+ * Holds each `scrollTo` on `element` for `count` animation frames before it sets off, as a
+ * smooth scroll on a busy page can take a while to start.
+ */
+function holdScrollTo(element: HTMLElement, count: number): void {
+  const original = element.scrollTo.bind(element)
+  element.scrollTo = ((options: ScrollToOptions) => {
+    void (async () => {
+      for (let i = 0; i < count; i++) await new Promise(requestAnimationFrame)
+      original(options)
+    })()
+  }) as typeof element.scrollTo
 }
 
 module('Integration | primitives | scroller', function (hooks) {
@@ -125,6 +140,31 @@ module('Integration | primitives | scroller', function (hooks) {
     top.click()
     await settled()
     assert.true(scroller.isAtTop, 'only the last one ran')
+    await a11yAudit()
+  })
+
+  test('a smooth scroll that is slow to set off is waited for, not taken for one that ended', async function (assert) {
+    await render(
+      <template>
+        <style>
+          [data-test-jn-name="demo"] {
+            scroll-behavior: smooth;
+          }
+        </style>
+        <Demo />
+      </template>,
+    )
+    const scroller = new ScrollerHarness('demo')
+    assert.strictEqual(getComputedStyle(scroller.element).scrollBehavior, 'smooth')
+    // Longer than the three still frames that count as the end of a scroll that goes nowhere.
+    holdScrollTo(scroller.element, 8)
+
+    await click('#bottom')
+    assert.true(scroller.isAtBottom, 'settled() waited for the scroll to start, then to end')
+    await click('#right')
+    assert.true(scroller.isAtRight && scroller.isAtBottom)
+    await click('#top')
+    assert.true(scroller.isAtTop, 'and back')
     await a11yAudit()
   })
 

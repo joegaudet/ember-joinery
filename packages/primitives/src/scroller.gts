@@ -105,9 +105,10 @@ export class Scroller extends Component<ScrollerSignature> {
       this.#token = undefined
       const element = this.#element
       if (isDestroying(this) || isDestroyed(this) || !element) return waiter.endAsync(token)
-      element.scrollTo({ ...target(element), behavior: 'auto' })
-      // A smooth scroll (from the CSS) takes a while: tests wait for it to end.
-      void scrollEnd(element).then(() => waiter.endAsync(token))
+      const to = target(element)
+      element.scrollTo({ ...to, behavior: 'auto' })
+      // A smooth scroll (from the CSS) takes a while to start and to end: tests wait for both.
+      void scrollEnd(element, to).then(() => waiter.endAsync(token))
     })
   }
 

@@ -1,7 +1,41 @@
-import { click, fillIn, select, settled } from '@ember/test-helpers'
+import { click, fillIn, focus, select, settled } from '@ember/test-helpers'
 import { Harness } from './harness.ts'
+import { pressKey } from './focus.ts'
 
 type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+
+/**
+ * The input types in which Enter submits the form (HTML's "fields that block implicit
+ * submission"): the single-line text and number fields, not checkboxes, radios or buttons.
+ */
+const SUBMITS_ON_ENTER = new Set([
+  'text',
+  'search',
+  'url',
+  'tel',
+  'email',
+  'password',
+  'date',
+  'month',
+  'week',
+  'time',
+  'datetime-local',
+  'number',
+])
+
+function submitsOnEnter(element: Element): element is HTMLInputElement {
+  return element instanceof HTMLInputElement && SUBMITS_ON_ENTER.has(element.type)
+}
+
+/** A form's default button: its first submit button, as the browser picks it for Enter. */
+function defaultButton(form: HTMLFormElement): HTMLButtonElement | HTMLInputElement | undefined {
+  return [...form.elements].find(
+    (element): element is HTMLButtonElement | HTMLInputElement =>
+      (element instanceof HTMLButtonElement && element.type === 'submit') ||
+      (element instanceof HTMLInputElement &&
+        (element.type === 'submit' || element.type === 'image')),
+  )
+}
 
 /**
  * Drives a `<NativeForm>` from `@ember-joinery/primitives/native-form`: fills in its fields by
@@ -57,6 +91,28 @@ export class NativeFormHarness extends Harness {
   /** Selects `value` in the select named `name`. */
   async select(name: string, value: string | string[]): Promise<void> {
     await select(this.controls(name)[0]!, value)
+  }
+
+  /**
+   * Presses Enter in the field named `name`, and does what the browser then does, which a
+   * test's key events don't make it do (as with `tab()`): in a single-line field, unless the
+   * keydown was cancelled, it submits the form. That is a click on the form's default button
+   * (its first submit button), which does nothing while that button is disabled; without one,
+   * the form submits when that field is the only one Enter submits from. In a textarea, a
+   * select, a checkbox or a radio, Enter submits nothing.
+   */
+  async pressEnter(name: string): Promise<void> {
+    const control = this.controls(name)[0]!
+    await focus(control)
+    const prevented = await pressKey('Enter')
+    if (prevented || !submitsOnEnter(control)) return
+    const button = defaultButton(this.form)
+    if (button) {
+      if (!button.disabled) await click(button)
+      return
+    }
+    const fields = [...this.form.elements].filter(submitsOnEnter)
+    if (fields.length === 1) await this.submit()
   }
 
   /**

@@ -8,4 +8,4 @@ native `<form>` whose `@onChange` hears its data as an object on every input and
 `dataFromEvent` reads the same object out of any form's event, converting numbers, dates,
 checkboxes, radios, selects and files as form-data-utils does, and takes Joinery's button
 controls in through their hidden inputs. `@ember-joinery/test-support` adds
-`NativeFormHarness`.
+`NativeFormHarness`, whose `pressEnter` submits the form from a field as the browser does.

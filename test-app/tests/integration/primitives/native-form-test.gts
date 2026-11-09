@@ -3,6 +3,7 @@ import { setupRenderingTest } from 'test-app/tests/helpers'
 import { click, render } from '@ember/test-helpers'
 import { on } from '@ember/modifier'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
+import { DirectionProvider } from '@ember-joinery/primitives/direction'
 import {
   NativeForm,
   dataFromEvent,
@@ -109,6 +110,75 @@ module('Integration | primitives | native-form', function (hooks) {
     )
     await click('[data-test-own] button')
     assert.deepEqual(latest, { name: 'Ada' })
+    await a11yAudit()
+  })
+
+  test('keyboard: Enter in a field submits the form, as the browser does; not in a textarea', async function (assert) {
+    const calls: Array<[NativeFormData, NativeFormEventType]> = []
+    const record = (data: NativeFormData, type: NativeFormEventType) => calls.push([data, type])
+    await render(
+      <template>
+        <NativeForm @name="search" @onChange={{record}}>
+          <label>Query <input name="query" type="search" value="ember" /></label>
+          <label>Notes <textarea name="notes"></textarea></label>
+          <button type="submit" name="intent" value="search">Search</button>
+        </NativeForm>
+        <NativeForm @name="lone" @onChange={{record}}>
+          <label>Code <input name="code" value="1234" /></label>
+        </NativeForm>
+        <NativeForm @name="held" @onChange={{record}}>
+          <label>Name <input name="name" value="Ada" /></label>
+          <button type="submit" disabled>Save</button>
+        </NativeForm>
+      </template>,
+    )
+    const search = new NativeFormHarness('search')
+    await search.pressEnter('query')
+    assert.deepEqual(
+      calls.at(-1),
+      [{ query: 'ember', notes: '', intent: 'search' }, 'submit'],
+      'its default button submits it, and is the submitter',
+    )
+    const before = calls.length
+    await search.pressEnter('notes')
+    assert.strictEqual(calls.length, before, 'Enter in a textarea is a new line, not a submit')
+
+    await new NativeFormHarness('lone').pressEnter('code')
+    assert.deepEqual(calls.at(-1), [{ code: '1234' }, 'submit'], 'a lone field submits alone')
+
+    const count = calls.length
+    await new NativeFormHarness('held').pressEnter('name')
+    assert.strictEqual(calls.length, count, 'a disabled default button holds the form back')
+    assert.notOk(window.location.search.includes('query'), 'the page did not load')
+    await a11yAudit()
+  })
+
+  test('RTL: a form right to left hands over its fields as written', async function (assert) {
+    let latest: NativeFormData = {}
+    let type: NativeFormEventType | undefined
+    const record = (data: NativeFormData, eventType: NativeFormEventType) => {
+      latest = data
+      type = eventType
+    }
+    await render(
+      <template>
+        <DirectionProvider @dir="rtl">
+          <NativeForm @name="profile" @onChange={{record}}>
+            <label>الاسم <input name="الاسم" value="أحمد" /></label>
+            <label>العمر <input name="age" type="number" value="30" /></label>
+            <button type="submit">حفظ</button>
+          </NativeForm>
+        </DirectionProvider>
+      </template>,
+    )
+    const profile = new NativeFormHarness('profile')
+    assert.strictEqual(getComputedStyle(profile.form).direction, 'rtl')
+    await profile.fillIn('الاسم', 'سارة')
+    assert.deepEqual(latest, { الاسم: 'سارة', age: 30 })
+    assert.strictEqual(type, 'input')
+    await profile.pressEnter('age')
+    assert.deepEqual(latest, { الاسم: 'سارة', age: 30 })
+    assert.strictEqual(type, 'submit', 'Enter submits right to left too')
     await a11yAudit()
   })
 

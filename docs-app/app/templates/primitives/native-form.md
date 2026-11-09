@@ -42,6 +42,17 @@ Joinery's Checkbox, Switch and Radio Group take part through their hidden inputs
 It takes attributes on its `<form>`, which renders `data-test-jn="native-form"`.
 `NativeFormData` and `NativeFormEventType` are its types.
 
+## Keyboard interactions
+
+| Key     | What it does                                                          |
+| ------- | --------------------------------------------------------------------- |
+| `Enter` | In a single-line field, submits the form (`@onChange` hears `submit`) |
+| `Tab`   | Moves between its controls, as in any form                            |
+
+Enter submits through the form's first submit button, which does nothing while it is disabled;
+a form without one submits on Enter only when it has a single text field. In a textarea, Enter
+is a new line. The browser does all of this, as in any native form.
+
 ## Accessibility
 
 It is a native `<form>`, so it is as accessible as the controls you put in it: label each.
@@ -57,7 +68,7 @@ import { NativeFormHarness } from '@ember-joinery/test-support'
 const profile = new NativeFormHarness()
 await profile.fillIn('firstName', 'Ada')
 await profile.choose('universe', '616')
-await profile.submit()
+await profile.submit() // or, from a field: await profile.pressEnter('firstName')
 ```
 
 | Member                 | What it is                                                     |
@@ -70,6 +81,7 @@ await profile.submit()
 | `toggle(name, value?)` | Clicks a checkbox                                              |
 | `select(name, value)`  | Selects in a select                                            |
 | `submit()`             | Submits it, checking its constraints first, as a submit button |
+| `pressEnter(name)`     | Presses Enter in a field, submitting it as the browser does    |
 
 ## Upstream
 

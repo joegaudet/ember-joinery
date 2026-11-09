@@ -50,8 +50,11 @@
     "prepack": "node ../../scripts/gen-barrels.mjs . && rm -rf declarations && rollup --config"
   },
   "dependencies": {
+    "@ember/test-waiters": "^4.1.2",
     "@embroider/addon-shim": "^1.10.3",
-    "decorator-transforms": "^2.4.0"
+    "@embroider/macros": "^1.21.4",
+    "decorator-transforms": "^2.4.0",
+    "ember-modifier": "^4.3.0"
   },
   "peerDependencies": {
     "@glimmer/component": ">= 2.0.0",

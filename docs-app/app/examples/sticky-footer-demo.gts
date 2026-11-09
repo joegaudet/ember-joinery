@@ -8,11 +8,21 @@ export default class StickyFooterExample extends Component {
   content = new Content()
 
   <template>
-    <div class="fake-window">
+    {{! The data-test-jn attributes, which upstream's demo doesn't have, are what its test's
+        harness finds the demo and its controls by. }}
+    <div class="fake-window" data-test-jn="sticky-footer-demo">
       <StickyFooter>
         <:content>
-          <button type="button" {{on "click" this.content.addContent}}>Add Content</button>
-          <button type="button" {{on "click" this.content.removeContent}}>Remove Content</button>
+          <button
+            type="button"
+            data-test-jn-part="add-content"
+            {{on "click" this.content.addContent}}
+          >Add Content</button>
+          <button
+            type="button"
+            data-test-jn-part="remove-content"
+            {{on "click" this.content.removeContent}}
+          >Remove Content</button>
           <br />
 
           {{#each this.content.paragraphs as |paragraph|}}

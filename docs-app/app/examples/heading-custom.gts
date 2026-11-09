@@ -24,25 +24,27 @@ class MyHeading extends Component<{ Element: HTMLHeadingElement; Blocks: { defau
 }
 
 // Usage / output
+//
+// Upstream runs this in a REPL, a page of its own, where the first heading is an h1. Here it is
+// on the guide's page, so it sits in a section, as the Heading demo does: its headings carry on
+// from the page's, and the page keeps its one h1. On its own it starts at h1.
 <template>
-  <div class="heading-custom">
+  <section aria-label="heading-custom" class="heading-custom">
     <MyHeading>hello there</MyHeading>
 
     <section>
       <MyHeading>hello there</MyHeading>
     </section>
-  </div>
+  </section>
 
   <style>
     /* These styles are completely optional */
-    .heading-custom h1,
-    .heading-custom h2 {
+    .heading-custom :is(h1, h2, h3, h4, h5, h6) {
       margin: 0;
       position: relative;
     }
 
-    .heading-custom h1::before,
-    .heading-custom h2::before {
+    .heading-custom :is(h1, h2, h3, h4, h5, h6)::before {
       position: absolute;
       margin-left: -1.2em;
       font-size: 0.7em;
@@ -56,12 +58,36 @@ class MyHeading extends Component<{ Element: HTMLHeadingElement; Blocks: { defau
     .heading-custom h2 {
       font-size: 2.25rem;
     }
+    .heading-custom h3 {
+      font-size: 2rem;
+    }
+    .heading-custom h4 {
+      font-size: 1.5rem;
+    }
+    .heading-custom h5 {
+      font-size: 1.25rem;
+    }
+    .heading-custom h6 {
+      font-size: 1rem;
+    }
 
     .heading-custom h1::before {
       content: "h1";
     }
     .heading-custom h2::before {
       content: "h2";
+    }
+    .heading-custom h3::before {
+      content: "h3";
+    }
+    .heading-custom h4::before {
+      content: "h4";
+    }
+    .heading-custom h5::before {
+      content: "h5";
+    }
+    .heading-custom h6::before {
+      content: "h6";
     }
 
     .heading-custom {

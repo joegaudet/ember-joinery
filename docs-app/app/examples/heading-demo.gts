@@ -2,13 +2,15 @@ import { Heading } from '@ember-joinery/primitives/heading'
 import { InViewport } from '@ember-joinery/primitives/viewport'
 
 /**
- * Where upstream's demo has a `<main>`, this has a `<div class="heading-demo">`: the guide's
- * page has its own `<main>`, and a page has one. Upstream's text is white, for its dark site;
- * here it takes the preview's colour.
+ * Where upstream's demo has a `<main aria-label="heading-demo">`, this has a `<section>` with
+ * the same label: the guide's page has its own `<main>`, and a page has one. A section is a
+ * boundary for the level search too, so on the guide's page the demo's headings start below
+ * the page's own, as upstream's do. Upstream's text is white, for its dark site; here it takes
+ * the preview's colour.
  */
 <template>
   <InViewport style="min-height:300px;">
-    <div class="heading-demo not-prose">
+    <section aria-label="heading-demo" class="heading-demo not-prose">
       <Heading>a heading</Heading>
 
       <nav>
@@ -31,7 +33,7 @@ import { InViewport } from '@ember-joinery/primitives/viewport'
 
         </footer>
       </article>
-    </div>
+    </section>
   </InViewport>
 
   <style>
@@ -105,7 +107,6 @@ import { InViewport } from '@ember-joinery/primitives/viewport'
       section,
       aside,
       nav,
-      .heading-demo,
       footer {
         border: 1px dotted;
         padding: 0.25rem 1.5rem;
@@ -141,9 +142,6 @@ import { InViewport } from '@ember-joinery/primitives/viewport'
       }
       nav::before {
         content: "<nav>";
-      }
-      .heading-demo::before {
-        content: "<div>";
       }
       footer::before {
         content: "<footer>";

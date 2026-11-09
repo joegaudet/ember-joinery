@@ -83,18 +83,20 @@ export default class IncrementalEachDemo extends Component {
   }
 
   <template>
-    <div class="incremental-card not-prose">
+    {{! The data-test-jn attributes, which upstream's demo doesn't have, are what its test's
+        harness finds the demo and its controls by. }}
+    <div class="incremental-card not-prose" data-test-jn="incremental-each-demo">
       <div class="incremental-controls">
-        <button type="button" {{on "click" this.toggleMode}}>
+        <button type="button" data-test-jn-part="mode" {{on "click" this.toggleMode}}>
           Mode:
           {{this.mode}}
         </button>
-        <button type="button" {{on "click" this.toggle}}>
+        <button type="button" data-test-jn-part="toggle" {{on "click" this.toggle}}>
           {{if this.visible "Hide" "Show"}}
           rows
         </button>
         {{#if this.visible}}
-          <span class="incremental-count">
+          <span class="incremental-count" data-test-jn-part="status">
             {{rows.length}}
             rows ·
             {{this.batches}}
@@ -107,7 +109,7 @@ export default class IncrementalEachDemo extends Component {
       {{#if this.visible}}
         {{! tabindex and a label, which upstream's list doesn't have: a box that scrolls needs
             to be reachable from the keyboard. }}
-        <ul class="incremental-demo" tabindex="0" aria-label="Rows">
+        <ul class="incremental-demo" tabindex="0" aria-label="Rows" data-test-jn-part="rows">
           <IncrementalEach
             @items={{rows}}
             @batchSize={{BATCH_SIZE}}

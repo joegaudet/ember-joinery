@@ -24,7 +24,7 @@ const LOREM = [
 ]
 
 <template>
-  <div class="demo">
+  <div class="demo" data-test-jn="scroller-demo">
     <Scroller class="scroll-container" as |s|>
       {{setScrollers s}}
 
@@ -33,26 +33,35 @@ const LOREM = [
       </div>
     </Scroller>
 
-    {{! The buttons' arrows are emoji, as upstream's; each has a label to say what it does. }}
+    {{! The buttons' arrows are emoji, as upstream's; each has a label to say what it does, and
+        a part and value (which upstream's don't have) for the test's harness. }}
     <div class="fixed-button-set">
       <button
         type="button"
         aria-label="Scroll to the left"
+        data-test-jn-part="scroll-to"
+        data-test-jn-value="left"
         {{on "click" (fn click "scrollToLeft")}}
       >⬅️</button>
       <button
         type="button"
         aria-label="Scroll to the bottom"
+        data-test-jn-part="scroll-to"
+        data-test-jn-value="bottom"
         {{on "click" (fn click "scrollToBottom")}}
       >⬇️</button>
       <button
         type="button"
         aria-label="Scroll to the top"
+        data-test-jn-part="scroll-to"
+        data-test-jn-value="top"
         {{on "click" (fn click "scrollToTop")}}
       >⬆️</button>
       <button
         type="button"
         aria-label="Scroll to the right"
+        data-test-jn-part="scroll-to"
+        data-test-jn-value="right"
         {{on "click" (fn click "scrollToRight")}}
       >➡️</button>
     </div>

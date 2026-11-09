@@ -242,40 +242,47 @@ module('Integration | primitives | heading', function (hooks) {
     await a11yAudit()
   })
 
+  // These ask about nodes outside the document, so there's nothing rendered to audit, but every
+  // test ends in an audit all the same.
   module('getSectionHeadingLevel', function () {
-    test('one below the nearest heading', function (assert) {
+    test('one below the nearest heading', async function (assert) {
       const marker = markerIn('<h3>hello</h3><section></section>', 'section')
       assert.strictEqual(getSectionHeadingLevel(marker), 4)
+      await a11yAudit()
     })
 
-    test('sections without headings are transparent', function (assert) {
+    test('sections without headings are transparent', async function (assert) {
       const marker = markerIn(
         '<h2>hello</h2><section><section></section></section>',
         'section section',
       )
       assert.strictEqual(getSectionHeadingLevel(marker), 3)
+      await a11yAudit()
     })
 
-    test('headings in sibling sections are not context', function (assert) {
+    test('headings in sibling sections are not context', async function (assert) {
       const marker = markerIn(
         '<h2>hello</h2><section><h3>a sibling’s</h3></section><section></section>',
         'section + section',
       )
       assert.strictEqual(getSectionHeadingLevel(marker), 3)
+      await a11yAudit()
     })
 
-    test('no heading: 1, or startAt', function (assert) {
+    test('no heading: 1, or startAt', async function (assert) {
       assert.strictEqual(getSectionHeadingLevel(markerIn('<section></section>', 'section')), 1)
       assert.strictEqual(
         getSectionHeadingLevel(markerIn('<section></section>', 'section'), { startAt: 2 }),
         2,
       )
+      await a11yAudit()
     })
 
-    test('startAt doesn’t change a level the document sets', function (assert) {
+    test('startAt doesn’t change a level the document sets', async function (assert) {
       const marker = markerIn('<h3>hello</h3><section></section>', 'section')
       assert.strictEqual(getSectionHeadingLevel(marker, { startAt: 2 }), 4)
       assert.strictEqual(getSectionHeadingLevel(marker, { startAt: 5 }), 4)
+      await a11yAudit()
     })
   })
 })

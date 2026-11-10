@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { click, render, rerender, settled } from '@ember/test-helpers'
+import { click, find, render, rerender, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { array, hash } from '@ember/helper'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
@@ -514,7 +514,12 @@ module('Integration | components | rich-text-editor', function (hooks) {
     const body = new RichTextEditorHarness()
     assert.strictEqual(body.content.id, 'post-body')
     assert.strictEqual(body.label, 'Body')
-    assert.dom(body.content).hasAttribute('aria-labelledby', 'post-body-label')
+    // A label with no id gets one from the document's. Before Ember 7.1, FieldLabel renders
+    // through a classic component, which gives the label an id of its own (ember<N>), so the
+    // document takes that one.
+    const label = find('label')!
+    if (!/^ember\d+$/.test(label.id)) assert.strictEqual(label.id, 'post-body-label')
+    assert.dom(body.content).hasAttribute('aria-labelledby', label.id)
     assert.strictEqual(body.description, 'Markdown shortcuts work too.')
 
     await click('label')

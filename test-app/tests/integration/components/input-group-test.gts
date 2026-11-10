@@ -349,9 +349,11 @@ module('Integration | components | input-group', function (hooks) {
       assert.deepEqual(rendering(component!), rendering(modifier!), name)
     }
     // Not `addon` or `button`: a local by an element's name turns the template's into a call.
+    // Before 7.1, Ember gives a part rendered through `As` `ember-view` too; rendering() leaves
+    // that out.
     const [addonElement] = document.querySelectorAll('[data-case="addon-component"]')
     assert.deepEqual(
-      [...addonElement!.classList].sort(),
+      rendering(addonElement!).classes,
       inputGroupAddonClasses({ align: 'inline-end' }).split(' ').sort(),
     )
     for (const [name, value] of Object.entries(
@@ -361,7 +363,7 @@ module('Integration | components | input-group', function (hooks) {
     }
     const [buttonElement] = document.querySelectorAll('[data-case="button-component"]')
     assert.deepEqual(
-      [...buttonElement!.classList].sort(),
+      rendering(buttonElement!).classes,
       inputGroupButtonClasses({ size: 'icon-xs' }).split(' ').sort(),
     )
     const attributes = inputGroupButtonAttributes({ size: 'icon-xs', name: 'b' })

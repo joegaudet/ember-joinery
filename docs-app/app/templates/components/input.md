@@ -115,8 +115,9 @@ Field, comes with Field.
 
 ## Button Group
 
-To add buttons to an input, use the `ButtonGroup` component. See the Button Group component
-for more examples. Upstream's example comes with Field and Button Group.
+To add buttons to an input, use the `ButtonGroup` component. See the
+[Button Group](/components/button-group.md) component for more examples. Upstream's example, in
+a Field, comes with Field.
 
 ## Form
 

@@ -94,18 +94,12 @@ below it.
 
 ## Button
 
-Upstream's example, a copy button, a favourite toggle and a search button, with a security
-notice in a `Popover`, comes with Popover. A group button is `g.Button`: ghost and `xs` by
-default, with `@variant` and `@size` (`xs`, `sm`, `icon-xs`, `icon-sm`):
+<Example @name="input-group-button" @title="Button" />
 
-```gts
-<InputGroup as |g|>
-  <g.Input placeholder="Type to search..." aria-label="Search" />
-  <g.Addon @align="inline-end">
-    <g.Button @variant="secondary">Search</g.Button>
-  </g.Addon>
-</InputGroup>
-```
+A group button is `g.Button`: ghost and `xs` by default, with `@variant` and `@size` (`xs`,
+`sm`, `icon-xs`, `icon-sm`). To open a popover from an addon, as the second group does, give the
+addon the popover's `trigger` modifier (`<g.Addon {{popover.trigger}}>`), as upstream's
+`PopoverTrigger asChild` does: a click on the button inside it opens the popover.
 
 ## Kbd
 

@@ -1,6 +1,7 @@
 import { module, test } from 'qunit'
 import type { TOC } from '@ember/component/template-only'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
 import { render, settled } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
@@ -58,8 +59,11 @@ const Demo: TOC<{ Args: { viewport?: boolean; indicator?: boolean } }> = <templa
   </NavigationMenu>
 </template>
 
-/** An element's classes, in order, to compare two elements' as sets. */
-const classes = (element: Element) => [...element.classList].sort()
+/**
+ * An element's classes, in order, to compare two elements' as sets. Before 7.1, Ember gives a
+ * part rendered through `As` `ember-view` too; rendering() leaves that out.
+ */
+const classes = (element: Element) => rendering(element).classes
 
 module('Integration | components | navigation-menu', function (hooks) {
   setupRenderingTest(hooks)

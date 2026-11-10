@@ -50,8 +50,9 @@ inside a button. Mark its side with `data-icon`, as you would an icon's.
 ## Tooltip
 
 You can use the `Kbd` component inside a `Tooltip` component to display a tooltip with a
-keyboard key. Upstream's example (`kbd-tooltip`, in a Button Group) comes with Button Group;
-[Tooltip](/components/tooltip.md) is here already.
+keyboard key. Upstream's example (`kbd-tooltip`) puts its two tooltips' buttons in a
+[Button Group](/components/button-group.md), where a Tooltip doesn't work yet (see its
+[Nested](/components/button-group.md#nested) section): it waits for that to be fixed.
 
 ## Input Group
 

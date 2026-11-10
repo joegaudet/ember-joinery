@@ -75,8 +75,13 @@ Control the size of buttons using `@size` on individual buttons.
 ## Nested
 
 Nest `<ButtonGroup>` components to create button groups with spacing. Upstream's example
-(`button-group-nested`) has an Input, an Input Group and a Tooltip in it, which haven't landed
-in Joinery yet; it comes with them.
+(`button-group-nested`) has an Input Group in it, which hasn't landed in Joinery yet, and a
+Tooltip on one of its buttons, which doesn't work in a group yet. A Joinery Tooltip renders an
+element of its own around its trigger (with `display: contents`, so it adds no box, where
+Radix's renders none), and the group's rules, which join the elements directly inside it, reach
+that element and miss the button: the button keeps its rounded corners and its own border. The
+same goes for a Popover, a Dropdown Menu or a Select in a group, so the examples below that have
+one wait for that to be fixed too.
 
 ## Separator
 
@@ -95,28 +100,30 @@ Create a split button group by adding two buttons separated by a `Separator`.
 
 ## Input
 
-Wrap an `Input` component with buttons. Upstream's example (`button-group-input`) comes with
-Input.
+Wrap an `Input` component with buttons.
+
+<Example @name="button-group-input" @title="Input" />
 
 ## Input Group
 
 Wrap an `InputGroup` component to create complex input layouts. Upstream's example
-(`button-group-input-group`) comes with Input Group and Tooltip.
+(`button-group-input-group`) comes with Input Group, and has a Tooltip in it (see
+[Nested](#nested)).
 
 ## Dropdown Menu
 
 Create a split button group with a `DropdownMenu` component. Upstream's example
-(`button-group-dropdown`) comes with Dropdown Menu.
+(`button-group-dropdown`) comes with Dropdown Menu (see [Nested](#nested)).
 
 ## Select
 
-Pair with a `Select` component. Upstream's example (`button-group-select`) comes with Select and
-Input.
+Pair with a `Select` component. Upstream's example (`button-group-select`) comes with Select (see
+[Nested](#nested)).
 
 ## Popover
 
-Use with a `Popover` component. Upstream's example (`button-group-popover`) comes with Popover,
-Field and Textarea.
+Use with a `Popover` component. Upstream's example (`button-group-popover`) comes with Field, and
+has a Popover in the group (see [Nested](#nested)).
 
 ## RTL
 

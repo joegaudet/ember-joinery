@@ -1,9 +1,10 @@
 {
-  "$comment": "Waiting for components that haven't landed: button-group-demo and button-group-rtl (Dropdown Menu; button-group-demo is shown on Button's page too, and mapped here, its inventory page), button-group-nested (Input, Input Group, Tooltip), button-group-input (Input), button-group-input-group (Input Group, Tooltip), button-group-dropdown (Dropdown Menu), button-group-select (Select, Input), button-group-popover (Popover, Field, Textarea). The unit that lands the last of each one's components ports it onto the Button Group page (button-group-demo onto Button's too) and maps it here.",
+  "$comment": "Waiting for components that haven't landed: button-group-demo and button-group-rtl (Dropdown Menu; button-group-demo is shown on Button's page too, and mapped here, its inventory page), button-group-nested (Input Group), button-group-input-group (Input Group), button-group-dropdown (Dropdown Menu), button-group-select (Select), button-group-popover (Field). The unit that lands the last of each one's components ports it onto the Button Group page (button-group-demo onto Button's too) and maps it here. Each of those but button-group-rtl also puts a Tooltip, Popover, Dropdown Menu or Select inside a group, and waits for that to work: the overlay's root, an element with display: contents where Radix's renders none, is the group's child, so the group's child rules (joined corners, one border between items) reach it and miss the trigger inside.",
   "examples": {
     "button-group-orientation": "button-group-orientation",
     "button-group-size": "button-group-size",
     "button-group-separator": "button-group-separator",
-    "button-group-split": "button-group-split"
+    "button-group-split": "button-group-split",
+    "button-group-input": "button-group-input"
   }
 }

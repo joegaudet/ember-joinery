@@ -1,5 +1,5 @@
 {
-  "$comment": "button-group-demo is shown on this page too, and mapped on Button Group's (the inventory's page for it). It waits for Dropdown Menu: the unit that lands it adds <Example @name=\"button-group-demo\" /> to this page's Button Group section, which links to Button Group's page.",
+  "$comment": "button-group-demo is shown on this page too, and mapped on Button Group's (the inventory's page for it). It waits for Dropdown Menu, and for a Dropdown Menu to work inside a Button Group (see button-group.json's $comment): the unit that lands it adds <Example @name=\"button-group-demo\" /> to this page's Button Group section, which links to Button Group's page.",
   "examples": {
     "button-demo": "button-demo",
     "button-size": "button-size",

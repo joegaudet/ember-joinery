@@ -116,8 +116,9 @@ To add buttons to an input, use the `ButtonGroup` component. See the
 
 ## Form
 
-A full form example with multiple inputs, a select, and a button. Upstream's example comes with
-Select.
+A full form example with multiple inputs, a select, and a button.
+
+<Example @name="input-form" @title="Form" />
 
 ## RTL
 

@@ -45,8 +45,8 @@ The gradients are `<defs>` in the chart's block, which renders inside its `<svg>
 
 ## Area Chart - Interactive
 
-Upstream's interactive area chart picks its time range with a Select, which hasn't landed in
-Joinery yet, so the example comes with it.
+Upstream's interactive area chart picks its time range with a
+[Select](/components/select.md). Select has landed, but the example isn't ported yet.
 
 ## Testing
 

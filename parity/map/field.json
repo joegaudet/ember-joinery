@@ -1,8 +1,9 @@
 {
-  "$comment": "Waiting for a component that hasn't landed: field-demo, field-select and field-rtl (Select). The unit that lands it ports them onto the Field page and maps them here.",
   "examples": {
+    "field-demo": "field-demo",
     "field-input": "field-input",
     "field-textarea": "field-textarea",
+    "field-select": "field-select",
     "field-slider": {
       "example": "field-slider",
       "threshold": 0.08,
@@ -18,6 +19,7 @@
       "reason": "A FieldTitle's line height. Upstream's cn() drops the field-title rule's leading-snug for the text-sm after it in Nova, so its title is 20px tall; scripts/port-styles.mjs keeps a rule's classes as written, so Joinery's is 19.25px and what follows each title sits 0.75px higher. Fixing it means port-styles.mjs applying tailwind-merge within each rule, as upstream's cn() does (the field-title rules, Sera's label and the combobox content, across the eight sheets)."
     },
     "field-group": "field-group",
+    "field-rtl": "field-rtl",
     "field-responsive": "field-responsive"
   }
 }

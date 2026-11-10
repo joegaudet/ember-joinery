@@ -1,5 +1,5 @@
 {
-  "$comment": "field-demo is shown on this page too, and mapped on Field's (the inventory's page for it); it waits for Select. The Label page also shows Joinery's own label-native, in its Disabled section; it has no upstream counterpart, so it isn't mapped.",
+  "$comment": "field-demo is shown on this page too, and mapped on Field's (the inventory's page for it). The Label page also shows Joinery's own label-native, in its Disabled section; it has no upstream counterpart, so it isn't mapped.",
   "examples": {
     "label-demo": "label-demo",
     "label-rtl": "label-rtl"

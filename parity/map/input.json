@@ -1,5 +1,5 @@
 {
-  "$comment": "Waiting for a component that hasn't landed: input-form (Select). The unit that lands it ports the example onto the Input page and maps it here. The page also shows Joinery's own input-controlled, which has no upstream counterpart, so it isn't mapped.",
+  "$comment": "The page also shows Joinery's own input-controlled, which has no upstream counterpart, so it isn't mapped.",
   "examples": {
     "input-demo": "input-demo",
     "input-basic": "input-basic",
@@ -14,6 +14,7 @@
     "input-badge": "input-badge",
     "input-input-group": "input-input-group",
     "input-button-group": "input-button-group",
+    "input-form": "input-form",
     "input-rtl": "input-rtl"
   }
 }

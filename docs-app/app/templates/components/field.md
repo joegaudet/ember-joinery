@@ -2,8 +2,7 @@
 
 Combine labels, controls, and help text to compose accessible form fields and grouped inputs.
 
-Upstream's first example, `field-demo`, is a payment form whose expiry month and year are
-Selects; it comes with Select. The examples below show each part.
+<Example @name="field-demo" @title="Field" />
 
 ## Installation
 
@@ -144,8 +143,12 @@ with the Formwright bridge. For a form of plain native controls, the primitives'
 
 ## Select
 
-Upstream's example labels a Select of departments; it comes with Select. Until then,
-[Native Select](/components/native-select.md) works in a `Field` as any native control does.
+<Example @name="field-select" @title="Select" />
+
+Upstream's `FieldLabel` names nothing; the example's names the trigger (`for` and the trigger's
+`id`), as a combobox must be named. A [Select](/components/select.md)'s root is an element with
+`display: contents`, where Radix's renders none, so the field's rules for what is directly
+inside it reach the trigger through it, and stretch it as upstream's do.
 
 ## Slider
 
@@ -188,8 +191,9 @@ Stack `Field` components with `FieldGroup`. Add `FieldSeparator` to divide them.
 ## RTL
 
 Every part lays itself out right to left inside any element with `dir="rtl"` (see
-[Direction](/primitives/direction.md)). Upstream's right-to-left example is `field-demo` in
-Arabic, with its Selects; it comes with Select.
+[Direction](/primitives/direction.md)).
+
+<Example @name="field-rtl" @title="RTL" @dir="rtl" />
 
 ## Responsive Layout
 

@@ -72,7 +72,9 @@ A simple pagination with only page numbers.
 ## Icons Only
 
 Use just the previous and next buttons without page numbers. This is useful for data tables with
-a rows per page selector. Upstream's example has a Field and a Select, so it comes with Select.
+a rows per page selector.
+
+<Example @name="pagination-icons-only" @title="Icons Only" />
 
 ## Router links
 

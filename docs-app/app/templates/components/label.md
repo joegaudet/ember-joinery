@@ -32,9 +32,9 @@ the control inside it. A click on the label then focuses or toggles the control.
 ## Label in Field
 
 For form fields, use the [Field](/components/field.md) component, which includes built-in
-`FieldLabel`, `FieldDescription` and `FieldError` components. Upstream's example here,
-`field-demo` (mapped on Field's page), is a payment form whose month and year are Selects; it
-comes with Select.
+`FieldLabel`, `FieldDescription` and `FieldError` components.
+
+<Example @name="field-demo" @title="Label in Field" />
 
 ## Disabled
 

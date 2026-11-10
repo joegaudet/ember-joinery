@@ -104,6 +104,9 @@ importers:
       '@ember-joinery/file-upload':
         specifier: workspace:*
         version: link:../packages/file-upload
+      '@ember-joinery/maskito':
+        specifier: workspace:*
+        version: link:../packages/maskito
       '@ember-joinery/power-calendar':
         specifier: workspace:*
         version: link:../packages/power-calendar

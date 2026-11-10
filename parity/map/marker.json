@@ -1,0 +1,12 @@
+{
+  "examples": {
+    "marker-demo": "marker-demo",
+    "marker-variants": "marker-variants",
+    "marker-status": "marker-status",
+    "marker-shimmer": "marker-shimmer",
+    "marker-separator": "marker-separator",
+    "marker-border": "marker-border",
+    "marker-icon": "marker-icon",
+    "marker-link-button": "marker-link-button"
+  }
+}

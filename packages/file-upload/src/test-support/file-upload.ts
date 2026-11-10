@@ -149,14 +149,31 @@ export class FileUploadHarness extends Harness {
     return this.element.ownerDocument.activeElement === this.input
   }
 
-  /** Whether an upload is running: it is `aria-busy`. */
+  /** Whether an upload is running: its upload queue is `aria-busy`. */
   get isUploading(): boolean {
-    return this.element.getAttribute('aria-busy') === 'true'
+    return this.queue?.getAttribute('aria-busy') === 'true'
   }
 
-  /** What the zone says about the files the last drop turned away, or `undefined`. */
+  /** The zone's status region (`role="status"`), which names the files turned away. */
+  get status(): HTMLElement {
+    return this.part('status')
+  }
+
+  /**
+   * What the zone says about the files the last choice or drop turned away, as `@accept`
+   * doesn't take them, or `undefined`.
+   */
   get rejected(): string | undefined {
     const message = this.queryPart('rejected')
+    return message ? collapse(message.textContent) : undefined
+  }
+
+  /**
+   * What the zone says about the files the last drop left out, without `@multiple` (all but the
+   * first), or `undefined`.
+   */
+  get leftOut(): string | undefined {
+    const message = this.queryPart('left-out')
     return message ? collapse(message.textContent) : undefined
   }
 

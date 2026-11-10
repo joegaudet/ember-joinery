@@ -30,6 +30,13 @@ module('Example | file-upload-rtl', function (hooks) {
 
     await documents.drop(new File(['…'], 'ملاحظات.txt', { type: 'text/plain' }))
     assert.strictEqual(documents.rejected, 'نوع غير مقبول: ملاحظات.txt')
+
+    await documents.select(new File(['…'], 'مسح-ضوئي', { type: 'image/jpeg' }))
+    assert.strictEqual(
+      documents.file('مسح-ضوئي').details.split(' · ')[0],
+      'ملف',
+      'a file with no extension is a ملف, not FILE',
+    )
     await a11yAudit()
   })
 })

@@ -36,8 +36,10 @@
   @apply sr-only;
 }
 
-:where(.jn-file-upload-rejected) {
-  @apply -mt-3 px-6 pb-5 text-xs text-destructive;
+/* The status region is always there, so screen readers announce what goes in it; empty, it takes
+   no room. */
+:where(.jn-file-upload-status) {
+  @apply flex flex-col gap-1 px-6 text-xs text-destructive has-[p]:-mt-3 has-[p]:pb-5;
 }
 
 :where(.jn-file-upload-file-media) {

@@ -7,6 +7,7 @@ const removeLabel = (name: string) => `إزالة ${name}`
 const retryLabel = (name: string) => `إعادة رفع ${name}`
 const progressLabel = (name: string) => `جارٍ رفع ${name}`
 const rejectedLabel = (names: string[]) => `نوع غير مقبول: ${names.join('، ')}`
+const leftOutLabel = (names: string[]) => `ملف واحد في كل مرة؛ لم يُضف: ${names.join('، ')}`
 
 <template>
   {{!
@@ -28,6 +29,9 @@ const rejectedLabel = (names: string[]) => `نوع غير مقبول: ${names.jo
     @retryLabel={{retryLabel}}
     @progressLabel={{progressLabel}}
     @rejectedLabel={{rejectedLabel}}
+    @leftOutLabel={{leftOutLabel}}
+    @uploadFailedLabel="تعذّر الرفع"
+    @unknownKindLabel="ملف"
     class="w-full max-w-md"
   />
 </template>

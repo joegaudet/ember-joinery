@@ -1,4 +1,4 @@
-import { tracked } from '@glimmer/tracking'
+import { cached, tracked } from '@glimmer/tracking'
 import { registerDestructor } from '@ember/destroyable'
 import { Queue, type UploadFile } from 'ember-file-upload'
 import type FileQueueService from 'ember-file-upload/services/file-queue'
@@ -21,7 +21,7 @@ export interface FileEntry<T> {
   value: T
   /** Its name. */
   name: string
-  /** Its kind, from its extension: `PDF`, `PNG`, or `FILE`. */
+  /** Its kind, from its extension: `PDF`, `PNG`, or `@unknownKindLabel` (`FILE`) without one. */
   kind: string
   /** Its size, formatted (`184.3 kB`), or `undefined` when the value has none. */
   size: string | undefined
@@ -67,13 +67,21 @@ export interface FileUploadStateOptions<T> {
   sizeOf: () => ((value: T) => number | undefined) | undefined
   previewOf: () => ((value: T) => string | undefined) | undefined
   uploadFailedLabel: () => string | undefined
+  unknownKindLabel: () => string | undefined
   locale: () => string | undefined
 }
 
-/** Which list a removal happened in, and where, so focus can move to the row that took its place. */
+/**
+ * Where a row lost the button that had focus (it was removed, or a retry took its buttons away),
+ * so focus can move to the nearest button of the same kind once that has rendered.
+ */
 export interface FocusRequest {
+  /** The list it happened in. */
   list: 'list' | 'queue'
+  /** The row's index: the row that took its place, or the row itself. */
   index: number
+  /** The kind of button that had focus. */
+  button: 'remove' | 'retry'
 }
 
 let nextQueue = 0
@@ -114,10 +122,15 @@ export class FileUploadState<T> {
 
   /** The uploads in flight or failed, in the order the files were chosen. */
   @tracked uploads: readonly Upload[] = []
-  /** The names of the files the last drop turned away, as `@accept` doesn't take them. */
+  /** The names of the files the last choice or drop turned away, as `@accept` doesn't take them. */
   @tracked rejected: readonly string[] = []
-  /** Where focus goes once a removal has rendered. */
+  /** The names of the files the last choice or drop left out, without `@multiple`: all but one. */
+  @tracked leftOut: readonly string[] = []
+  /** Where focus goes once a removal or a retry has rendered. */
   @tracked focusRequest: FocusRequest | undefined
+  /** What `filter` has turned away from the choice or drop being taken, for its message. */
+  #unaccepted: string[] = []
+  #extra: string[] = []
   #destroyed = false
 
   constructor(owner: object, options: FileUploadStateOptions<T>) {
@@ -139,6 +152,8 @@ export class FileUploadState<T> {
       this.#destroyed = true
       for (const url of this.#previews.values()) URL.revokeObjectURL(url)
       this.#previews.clear()
+      // Its uploads leave whichever queue they are in, `@queue` included: nothing will settle them.
+      for (const entry of this.uploads) entry.file.queue?.remove(entry.file)
       for (const file of this.#ownQueue.files) this.#ownQueue.remove(file)
     })
   }
@@ -168,7 +183,12 @@ export class FileUploadState<T> {
     return this.uploads.some(upload => upload.state === 'uploading')
   }
 
-  /** The value's files, as the list shows them. */
+  /**
+   * The value's files, as the list shows them. Cached, so they are the same objects until the
+   * value (or how it is named, sized or previewed) changes; the list keys its rows on `value`, so
+   * a row, and the focus on its button, stays put when another file comes or goes.
+   */
+  @cached
   get files(): FileEntry<T>[] {
     const nameOf = this.#options.nameOf() ?? defaultName
     const sizeOf = this.#options.sizeOf() ?? defaultSize
@@ -180,12 +200,15 @@ export class FileUploadState<T> {
       return {
         value,
         name,
-        kind: fileKind(name),
+        kind: this.kindOf(name),
         size: bytes === undefined ? undefined : formatFileSize(bytes, locale),
         preview: previewOf(value),
       }
     })
   }
+
+  /** A file's kind, from its name: `PDF`, or `@unknownKindLabel` (`FILE`) without an extension. */
+  kindOf = (name: string): string => fileKind(name, this.#options.unknownKindLabel())
 
   /** The values the list holds, as `@value` hands them over. */
   get values(): readonly T[] {
@@ -209,48 +232,88 @@ export class FileUploadState<T> {
     return url
   }
 
-  #forget(value: unknown): void {
-    if (!(value instanceof Blob)) return
-    const url = this.#previews.get(value)
-    if (url) URL.revokeObjectURL(url)
-    this.#previews.delete(value)
+  /**
+   * Revokes the previews of the files that are neither in the value nor in the queue. It runs
+   * after each change, so in controlled mode a removal the caller refuses keeps its preview: the
+   * value still holds the file.
+   */
+  #sweep(): void {
+    if (!this.#previews.size) return
+    const kept = new Set<unknown>(this.value.value)
+    for (const entry of this.uploads) kept.add(entry.file.file)
+    for (const [blob, url] of this.#previews) {
+      if (kept.has(blob)) continue
+      URL.revokeObjectURL(url)
+      this.#previews.delete(blob)
+    }
   }
 
-  /** What the picker and the drop zone may take: ember-file-upload's `filter`. */
+  /**
+   * What the picker and the drop zone may take: ember-file-upload's `filter`. It notes what it
+   * turns away, which `onSelect` and `onDrop` then name.
+   */
   filter = (file: File, _files: File[], index: number): boolean => {
     if (this.disabled) return false
-    if (!this.multiple && index > 0) return false
-    return acceptsFile(file, this.accept)
+    if (!this.multiple && index > 0) {
+      this.#extra.push(file.name)
+      return false
+    }
+    if (acceptsFile(file, this.accept)) return true
+    this.#unaccepted.push(file.name)
+    return false
   }
 
-  /** Files dropped on the zone: those that passed `filter`, and the whole drop. */
+  /**
+   * Files dropped on the zone: those that passed `filter`, and the whole drop. Without
+   * `@multiple`, ember-file-upload's zone offers `filter` only the first file, so the rest are
+   * named as left out here.
+   */
   onDrop = (files: UploadFile[], transfer: { files: File[] }): void => {
-    const taken = new Set(files.map(file => file.file))
-    this.rejected = this.disabled
-      ? []
-      : transfer.files
-          .filter((file, index) => !taken.has(file) && (this.multiple || index === 0))
-          .map(file => file.name)
+    if (!this.multiple && !this.disabled) {
+      this.#extra.push(...transfer.files.slice(1).map(file => file.name))
+    }
+    this.#report()
     this.take(files)
   }
 
-  /** Files chosen in the file picker, which has filtered them already. */
+  /**
+   * Files chosen in the file picker. Its `accept` filters what the dialog shows, but a choice of
+   * "All files" there lets anything through, so `filter` checks them again and they are named as
+   * a drop's are.
+   */
   onSelect = (files: UploadFile[]): void => {
-    this.rejected = []
+    this.#report()
     this.take(files)
   }
 
-  /** Keeps the files, or, with `@upload`, queues them and uploads each. */
+  /** Names what `filter` turned away from the choice or drop just taken, and starts afresh. */
+  #report(): void {
+    this.rejected = this.#unaccepted
+    this.leftOut = this.#extra
+    this.#unaccepted = []
+    this.#extra = []
+  }
+
+  /**
+   * Keeps the files, or, with `@upload`, queues them and uploads each. Without `@multiple`, a new
+   * file replaces the one uploading or failed: that one leaves ember-file-upload's queue, and
+   * whatever its upload resolves to is dropped.
+   */
   take(files: UploadFile[]): void {
     if (!files.length) return
     const upload = this.#options.upload()
     if (!upload) {
-      for (const file of files) this.queue.remove(file)
+      for (const file of files) file.queue?.remove(file)
       this.#store(files.map(file => file.file as T))
       return
     }
     const fresh = files.map(file => new Upload(file))
-    this.uploads = this.multiple ? [...this.uploads, ...fresh] : fresh
+    if (this.multiple) this.uploads = [...this.uploads, ...fresh]
+    else {
+      for (const old of this.uploads) old.file.queue?.remove(old.file)
+      this.uploads = fresh
+      this.#sweep()
+    }
     for (const entry of fresh) void this.#send(entry, upload)
   }
 
@@ -261,11 +324,10 @@ export class FileUploadState<T> {
       const result = await upload(entry.file)
       if (this.#destroyed || !this.uploads.includes(entry)) return
       this.uploads = this.uploads.filter(other => other !== entry)
-      this.queue.remove(entry.file)
-      if ((result as unknown) !== entry.file.file) this.#forget(entry.file.file)
+      entry.file.queue?.remove(entry.file)
       this.#store([result])
     } catch (error) {
-      if (this.#destroyed) return
+      if (this.#destroyed || !this.uploads.includes(entry)) return
       entry.state = 'error'
       entry.error =
         error instanceof Error && error.message
@@ -278,10 +340,8 @@ export class FileUploadState<T> {
 
   #store(values: T[]): void {
     if (this.multiple) this.value.set(current => [...current, ...values])
-    else {
-      for (const old of this.value.value) this.#forget(old)
-      this.value.set(values.slice(-1))
-    }
+    else this.value.set(values.slice(-1))
+    this.#sweep()
   }
 
   /** Takes a file out of the value. Focus moves to the row that takes its place. */
@@ -289,31 +349,38 @@ export class FileUploadState<T> {
     if (this.disabled) return
     const index = this.value.value.indexOf(value)
     if (index === -1) return
-    this.#forget(value)
     this.value.set(current => current.filter(other => other !== value))
-    this.focusRequest = { list: 'list', index }
+    this.#sweep()
+    this.focusRequest = { list: 'list', index, button: 'remove' }
   }
 
   /** Empties the value. */
   clear = (): void => {
     if (this.disabled) return
-    for (const value of this.value.value) this.#forget(value)
     this.value.set([])
+    this.#sweep()
   }
 
-  /** Uploads a failed file again. */
+  /**
+   * Uploads a failed file again. Its row loses its buttons while it uploads, so focus moves to
+   * the nearest row's Retry (or remove) button, else to the file input.
+   */
   retry = (entry: Upload): void => {
     const upload = this.#options.upload()
-    if (upload && !this.disabled) void this.#send(entry, upload)
+    const index = this.uploads.indexOf(entry)
+    if (!upload || this.disabled || index === -1 || entry.state !== 'error') return
+    void this.#send(entry, upload)
+    this.focusRequest = { list: 'queue', index, button: 'retry' }
   }
 
   /** Takes a file out of the upload queue, uploading or failed; its result, if any, is dropped. */
   dismiss = (entry: Upload): void => {
+    if (this.disabled) return
     const index = this.uploads.indexOf(entry)
     if (index === -1) return
     this.uploads = this.uploads.filter(other => other !== entry)
-    this.queue.remove(entry.file)
-    this.#forget(entry.file.file)
-    this.focusRequest = { list: 'queue', index }
+    entry.file.queue?.remove(entry.file)
+    this.#sweep()
+    this.focusRequest = { list: 'queue', index, button: 'remove' }
   }
 }

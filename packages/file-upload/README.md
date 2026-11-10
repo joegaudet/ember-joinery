@@ -40,11 +40,13 @@ upload = async (file: UploadFile) => {
 
 The value is always a list (`@value`, `@defaultValue`, `@onValueChange`): of `File`s, or, with
 `@upload`, of what each upload resolved to. Without `@multiple` it holds one at most, and a new
-choice replaces it. `@accept` filters the picker and drops alike, and the zone names the files a
-drop turned away. Until an upload settles, its file is in the queue with a Progress bar that
-follows `file.progress`; a failed one shows its error, with Retry and remove buttons. With a
-block, lay out the parts yourself (`u.Dropzone`, `u.List`, `u.Queue`). Every string is an
-argument with an English default, and the parts flip right to left.
+choice replaces it. `@accept` filters the picker and drops alike, and the zone names the files
+it turned away in a status region that screen readers announce. Until an upload settles, its
+file is in the queue with a Progress bar that follows `file.progress`; a failed one shows its
+error, with Retry and remove buttons. Removing or retrying a file moves focus to the nearest
+row's button, so a keyboard user never loses it. With a block, lay out the parts yourself
+(`u.Dropzone`, `u.List`, `u.Queue`). Every string is an argument with an English default, and
+the parts flip right to left.
 
 Its harness, `FileUploadHarness`, is in `@ember-joinery/file-upload/test-support`:
 

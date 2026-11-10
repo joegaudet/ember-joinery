@@ -7,7 +7,6 @@ import Icon from '@ember-joinery/ember/components/icon'
 import Item, { ItemGroup } from '@ember-joinery/ember/components/item'
 import Progress from '@ember-joinery/ember/components/progress'
 import { fileIcon } from './labels.ts'
-import { fileKind } from '../../utils.ts'
 import type { FileUploadContext } from './context.ts'
 
 export interface FileUploadQueueSignature {
@@ -15,7 +14,10 @@ export interface FileUploadQueueSignature {
     /** The `<FileUpload>` it belongs to; `u.Queue` comes with it. */
     upload: FileUploadContext
   }
-  /** An `ItemGroup` (`role="list"`), rendered only while a file is uploading or has failed. */
+  /**
+   * An `ItemGroup` (`role="list"`), rendered only while a file is uploading or has failed, and
+   * `aria-busy` while one uploads.
+   */
   Element: HTMLElement
 }
 
@@ -26,11 +28,17 @@ const isError = (state: string): boolean => state === 'error'
  * The files `@upload` is sending, one shadcn Item each, like the file list's: a preview or an
  * icon, the name, its kind and size, and a Progress bar across the row's foot that follows
  * ember-file-upload's `progress`. A failed upload shows its error, with buttons that retry it and
- * remove it. A file leaves the queue for the list once its upload resolves.
+ * remove it (none while the `<FileUpload>` is disabled). A file leaves the queue for the list once
+ * its upload resolves.
  */
 const FileUploadQueue: TOC<FileUploadQueueSignature> = <template>
   {{#if @upload.state.uploads.length}}
-    <ItemGroup class="jn-file-upload-queue" data-test-jn-part="queue" ...attributes>
+    <ItemGroup
+      class="jn-file-upload-queue"
+      aria-busy={{if @upload.state.isUploading "true"}}
+      data-test-jn-part="queue"
+      ...attributes
+    >
       {{#each @upload.state.uploads as |upload|}}
         <Item
           @variant="outline"
@@ -58,15 +66,15 @@ const FileUploadQueue: TOC<FileUploadQueueSignature> = <template>
               {{#if (isError upload.state)}}
                 {{upload.error}}
               {{else}}
-                {{fileKind upload.name}}
+                {{call @upload.state.kindOf upload.name}}
                 ·
                 {{call @upload.state.sizeOf upload.file}}
               {{/if}}
             </i.Description>
           </i.Content>
           {{#if (isError upload.state)}}
-            <i.Actions>
-              {{#unless @upload.state.disabled}}
+            {{#unless @upload.state.disabled}}
+              <i.Actions>
                 <Button
                   @variant="ghost"
                   @size="icon-sm"
@@ -77,18 +85,18 @@ const FileUploadQueue: TOC<FileUploadQueueSignature> = <template>
                 >
                   <Icon @icon={{RotateCw}} />
                 </Button>
-              {{/unless}}
-              <Button
-                @variant="ghost"
-                @size="icon-sm"
-                @name="remove"
-                class="jn-file-upload-remove"
-                aria-label={{call @upload.labels.removeLabel upload.name}}
-                {{on "click" (fn @upload.state.dismiss upload)}}
-              >
-                <Icon @icon={{X}} />
-              </Button>
-            </i.Actions>
+                <Button
+                  @variant="ghost"
+                  @size="icon-sm"
+                  @name="remove"
+                  class="jn-file-upload-remove"
+                  aria-label={{call @upload.labels.removeLabel upload.name}}
+                  {{on "click" (fn @upload.state.dismiss upload)}}
+                >
+                  <Icon @icon={{X}} />
+                </Button>
+              </i.Actions>
+            {{/unless}}
           {{else}}
             <i.Footer>
               <Progress

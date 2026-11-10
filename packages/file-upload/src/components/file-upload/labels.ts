@@ -19,8 +19,10 @@ export interface FileUploadLabels {
   dropLabel: string
   /** A line under the hint, such as which files it takes. */
   description: string | undefined
-  /** Names the files a drop turned away. */
+  /** Names the files a choice or drop turned away, as `@accept` doesn't take them. */
   rejectedLabel: (names: string[]) => string
+  /** Names the files a drop of several left out, without `@multiple`. */
+  leftOutLabel: (names: string[]) => string
   /** Names a file's remove button. */
   removeLabel: (name: string) => string
   /** Names a failed upload's retry button. */
@@ -31,6 +33,8 @@ export interface FileUploadLabels {
 
 export const defaultRejectedLabel = (names: string[]): string =>
   `Not an accepted type: ${names.join(', ')}`
+export const defaultLeftOutLabel = (names: string[]): string =>
+  `One file at a time; left out: ${names.join(', ')}`
 export const defaultRemoveLabel = (name: string): string => `Remove ${name}`
 export const defaultRetryLabel = (name: string): string => `Retry ${name}`
 export const defaultProgressLabel = (name: string): string => `Uploading ${name}`

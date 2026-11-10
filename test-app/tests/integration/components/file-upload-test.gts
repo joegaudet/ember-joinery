@@ -1,6 +1,7 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { click, render, rerender, settled } from '@ember/test-helpers'
+import { click, focus, render, rerender, settled, triggerEvent } from '@ember/test-helpers'
+import { fn } from '@ember/helper'
 import { on } from '@ember/modifier'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
@@ -19,6 +20,16 @@ function resolved(color: string): string {
   const value = getComputedStyle(probe).color
   probe.remove()
   return value
+}
+
+/** Whether a URL still loads: a revoked object URL doesn't. */
+async function loads(url: string): Promise<boolean> {
+  try {
+    await (await fetch(url)).blob()
+    return true
+  } catch {
+    return false
+  }
 }
 
 /** Waits for the zone's colour transitions (`transition-colors`) to end. */
@@ -121,6 +132,12 @@ module('Integration | components | file-upload', function (hooks) {
     assert.strictEqual(input.width, '1px')
     assert.strictEqual(upload.list, null, 'no list while there is nothing in it')
     assert.strictEqual(upload.queue, null)
+    assert
+      .dom(upload.status)
+      .hasAttribute('role', 'status')
+      .hasText('', 'a live region already there, so what goes in it is announced')
+    assert.strictEqual(upload.status.getBoundingClientRect().height, 0, 'empty, it takes no room')
+    assert.strictEqual(upload.rejected, undefined)
     await a11yAudit()
   })
 
@@ -134,6 +151,7 @@ module('Integration | components | file-upload', function (hooks) {
     assert.strictEqual(fileKind('archive.tar.gz'), 'GZ')
     assert.strictEqual(fileKind('README'), 'FILE')
     assert.strictEqual(fileKind('.env'), 'FILE')
+    assert.strictEqual(fileKind('README', 'ملف'), 'ملف', 'the word for no extension is an argument')
     assert.strictEqual(formatFileSize(920), '920 bytes')
     assert.strictEqual(formatFileSize(184_320), '184.3 kB')
     assert.strictEqual(formatFileSize(1_240_000), '1.2 MB')
@@ -184,10 +202,15 @@ module('Integration | components | file-upload', function (hooks) {
     await upload.drop(photo(), file('setup.exe', 10, 'application/x-msdownload'))
     assert.deepEqual(upload.files, ['note-g.pdf', 'photo.png'])
     assert.strictEqual(upload.rejected, 'Not an accepted type: setup.exe')
-    assert.dom(upload.queryPart('rejected')!).hasAttribute('role', 'status')
+    assert.true(upload.status.contains(upload.queryPart('rejected')), 'in the status region')
     assert.strictEqual(
       getComputedStyle(upload.queryPart('rejected')!).color,
       resolved('var(--destructive)'),
+    )
+    assert.strictEqual(
+      getComputedStyle(upload.status).paddingBottom,
+      '20px',
+      'pb-5, with a message',
     )
 
     const preview = upload.file('photo.png')
@@ -198,6 +221,45 @@ module('Integration | components | file-upload', function (hooks) {
     await upload.select(file('sketch.svg', 400, 'image/svg+xml'))
     assert.deepEqual(upload.files, ['note-g.pdf', 'photo.png', 'sketch.svg'])
     assert.strictEqual(upload.rejected, undefined, 'a choice clears the last drop’s message')
+    await a11yAudit()
+  })
+
+  test('the file picker’s “All files” lets anything through, so a choice is filtered and named too', async function (assert) {
+    await render(<template><FileUpload @multiple={{true}} @accept=".pdf" /></template>)
+    const upload = new FileUploadHarness()
+    await upload.select(file('cv.pdf', 10, 'application/pdf'), file('setup.exe', 10, ''))
+    assert.deepEqual(upload.files, ['cv.pdf'])
+    assert.strictEqual(upload.rejected, 'Not an accepted type: setup.exe')
+    await upload.select(file('notes.pdf', 10, 'application/pdf'))
+    assert.strictEqual(upload.rejected, undefined, 'the next choice starts afresh')
+    await a11yAudit()
+  })
+
+  test('one file: a drop or choice of several takes the first, and names the rest as left out', async function (assert) {
+    await render(<template><FileUpload @name="resume" @accept=".pdf" /></template>)
+    const upload = new FileUploadHarness('resume')
+    await upload.drop(
+      file('a.pdf', 10, 'application/pdf'),
+      file('b.pdf', 10, 'application/pdf'),
+      file('c.pdf', 10, 'application/pdf'),
+    )
+    assert.deepEqual(upload.files, ['a.pdf'])
+    assert.strictEqual(upload.leftOut, 'One file at a time; left out: b.pdf, c.pdf')
+    assert.strictEqual(upload.rejected, undefined)
+    assert.true(upload.status.contains(upload.queryPart('left-out')), 'in the status region')
+
+    await upload.drop(file('setup.exe', 10, ''), file('d.pdf', 10, 'application/pdf'))
+    assert.deepEqual(upload.files, ['a.pdf'], 'the first is turned away, so nothing is taken')
+    assert.strictEqual(upload.rejected, 'Not an accepted type: setup.exe')
+    assert.strictEqual(upload.leftOut, 'One file at a time; left out: d.pdf')
+
+    // A picker without `multiple` gives one file; a script (or a test) can still give several.
+    await triggerEvent(upload.input, 'change', {
+      files: [file('e.pdf', 10, 'application/pdf'), file('f.pdf', 10, 'application/pdf')],
+    })
+    assert.deepEqual(upload.files, ['e.pdf'])
+    assert.strictEqual(upload.leftOut, 'One file at a time; left out: f.pdf')
+    assert.strictEqual(upload.rejected, undefined)
     await a11yAudit()
   })
 
@@ -333,7 +395,8 @@ module('Integration | components | file-upload', function (hooks) {
     assert.deepEqual(upload.uploading, ['notes.txt', 'photo.png'])
     assert.deepEqual(upload.files, [])
     assert.true(upload.isUploading)
-    assert.dom(upload.element).hasAttribute('data-uploading').hasAttribute('aria-busy', 'true')
+    assert.dom(upload.element).hasAttribute('data-uploading').doesNotHaveAttribute('aria-busy')
+    assert.dom(upload.queue!).hasAttribute('aria-busy', 'true', 'the queue is busy, not the whole')
     const notes = upload.file('notes.txt')
     assert.strictEqual(notes.state, 'uploading')
     assert.strictEqual(notes.details, 'TXT · 1.2 kB')
@@ -360,7 +423,7 @@ module('Integration | components | file-upload', function (hooks) {
     await uploads.resolve('photo.png', { id: 8, name: 'photo.png' })
     assert.deepEqual(upload.files, ['notes.txt', 'photo.png'])
     assert.false(upload.isUploading)
-    assert.dom(upload.element).doesNotHaveAttribute('aria-busy')
+    assert.dom(upload.element).doesNotHaveAttribute('data-uploading')
     assert.strictEqual(upload.queue, null)
     assert.strictEqual(upload.file('photo.png').details, 'PNG', 'a record with no size')
     await a11yAudit()
@@ -389,8 +452,13 @@ module('Integration | components | file-upload', function (hooks) {
     )
     await a11yAudit()
 
+    await focus(huge.retryButton.element)
     await upload.retry('huge.mov')
     assert.deepEqual(upload.uploading, ['huge.mov'], 'uploading again')
+    assert.false(huge.canRemove, 'its buttons go while it uploads')
+    assert
+      .dom(upload.file('b.txt').retryButton.element)
+      .isFocused('so focus moves to the next row’s Retry, not to <body>')
     await uploads.resolve('huge.mov', file('huge.mov', 2_000_000, 'video/quicktime'))
     assert.deepEqual(upload.files, ['huge.mov'])
 
@@ -399,6 +467,51 @@ module('Integration | components | file-upload', function (hooks) {
     assert
       .dom(upload.file('huge.mov').removeButton.element)
       .isFocused('focus moves to a remove button that is left')
+    await a11yAudit()
+  })
+
+  test('Retry moves focus to the nearest failed row’s Retry, then to the input', async function (assert) {
+    const uploads = new Uploads()
+    await render(<template><FileUpload @multiple={{true}} @upload={{uploads.upload}} /></template>)
+    const upload = new FileUploadHarness()
+    await upload.select(
+      file('a.txt', 1, 'text/plain'),
+      file('b.txt', 1, 'text/plain'),
+      file('c.txt', 1, 'text/plain'),
+    )
+    for (const name of ['a.txt', 'b.txt', 'c.txt']) await uploads.reject(name, 'Offline')
+    assert.deepEqual(upload.failed, ['a.txt', 'b.txt', 'c.txt'])
+
+    await focus(upload.file('b.txt').retryButton.element)
+    await upload.retry('b.txt')
+    assert.dom(upload.file('c.txt').retryButton.element).isFocused('the row after it')
+    await upload.retry('c.txt')
+    assert.dom(upload.file('a.txt').retryButton.element).isFocused('the row before it, at the end')
+    await upload.retry('a.txt')
+    assert.deepEqual(upload.uploading, ['a.txt', 'b.txt', 'c.txt'])
+    assert.true(upload.isFocused, 'the input, once no row has a button')
+    await a11yAudit()
+  })
+
+  test('a row stays put while others change, so its focus and its preview do', async function (assert) {
+    const uploads = new Uploads()
+    const start = [photo()]
+    await render(
+      <template>
+        <FileUpload @multiple={{true}} @defaultValue={{start}} @upload={{uploads.upload}} />
+      </template>,
+    )
+    const upload = new FileUploadHarness()
+    const row = upload.file('photo.png').element
+    const image = upload.file('photo.png').media.querySelector('img')!
+    const remove = upload.file('photo.png').removeButton.element
+    await focus(remove)
+    await upload.select(file('notes.txt', 10, 'text/plain'))
+    await uploads.resolve('notes.txt', file('notes.txt', 10, 'text/plain'))
+    assert.deepEqual(upload.files, ['photo.png', 'notes.txt'])
+    assert.strictEqual(upload.file('photo.png').element, row, 'the same row')
+    assert.strictEqual(upload.file('photo.png').media.querySelector('img'), image, 'and image')
+    assert.dom(remove).isFocused('focus stays on its remove button')
     await a11yAudit()
   })
 
@@ -415,6 +528,37 @@ module('Integration | components | file-upload', function (hooks) {
     await upload.drop(photo())
     assert.deepEqual(upload.files, ['cv.pdf'])
     assert.strictEqual(upload.rejected, undefined)
+    await a11yAudit()
+  })
+
+  test('@disabled: a failed upload shows neither Retry nor remove, and u.retry does nothing', async function (assert) {
+    class State {
+      @tracked disabled = false
+    }
+    const state = new State()
+    const uploads = new Uploads()
+    await render(
+      <template>
+        <FileUpload @upload={{uploads.upload}} @disabled={{state.disabled}} as |u|>
+          <u.Dropzone />
+          <u.Queue />
+          {{#each u.uploads as |entry|}}
+            <button type="button" data-test-retry {{on "click" (fn u.retry entry)}}>Again</button>
+          {{/each}}
+        </FileUpload>
+      </template>,
+    )
+    const upload = new FileUploadHarness()
+    await upload.select(file('cv.pdf', 10, 'application/pdf'))
+    await uploads.reject('cv.pdf', 'Offline')
+    assert.true(upload.file('cv.pdf').canRemove)
+    state.disabled = true
+    await rerender()
+    const cv = upload.file('cv.pdf')
+    assert.false(cv.canRemove, 'no remove button')
+    assert.false(cv.retryButton.exists, 'and no Retry')
+    await click('[data-test-retry]')
+    assert.deepEqual(upload.failed, ['cv.pdf'], 'still failed: a disabled upload retries nothing')
     await a11yAudit()
   })
 
@@ -448,6 +592,107 @@ module('Integration | components | file-upload', function (hooks) {
       getComputedStyle(upload.dropzone).borderTopColor,
       resolved('var(--destructive)'),
     )
+    await a11yAudit()
+  })
+
+  test('the yielded u.remove, u.retry and u.isUploading', async function (assert) {
+    const uploads = new Uploads()
+    const start = [file('kept.txt', 1, 'text/plain')]
+    await render(
+      <template>
+        <FileUpload @multiple={{true}} @upload={{uploads.upload}} @defaultValue={{start}} as |u|>
+          <u.Dropzone />
+          <u.List />
+          <u.Queue />
+          <p data-test-busy>{{if u.isUploading "Uploading…" "Idle"}}</p>
+          {{#each u.files as |entry|}}
+            <button type="button" data-test-drop {{on "click" (fn u.remove entry.value)}}>
+              Drop
+              {{entry.name}}
+            </button>
+          {{/each}}
+          {{#each u.uploads as |entry|}}
+            <button type="button" data-test-again {{on "click" (fn u.retry entry)}}>
+              Again
+              {{entry.name}}
+            </button>
+          {{/each}}
+        </FileUpload>
+      </template>,
+    )
+    const upload = new FileUploadHarness()
+    assert.dom('[data-test-busy]').hasText('Idle')
+    await click('[data-test-drop]')
+    assert.deepEqual(upload.files, [], 'u.remove takes a value out')
+
+    await upload.select(file('notes.txt', 1, 'text/plain'))
+    assert.dom('[data-test-busy]').hasText('Uploading…')
+    await click('[data-test-again]')
+    assert.deepEqual(upload.uploading, ['notes.txt'], 'u.retry leaves a running upload alone')
+    await uploads.reject('notes.txt', 'Offline')
+    assert.dom('[data-test-busy]').hasText('Idle')
+    await click('[data-test-again]')
+    assert.deepEqual(upload.uploading, ['notes.txt'], 'and sends a failed one again')
+    assert.dom('[data-test-again]').isFocused('focus stays on a button that is still there')
+    await uploads.resolve('notes.txt', 'notes.txt')
+    assert.deepEqual(upload.files, ['notes.txt'])
+    await a11yAudit()
+  })
+
+  test('one file, with @upload: a new choice replaces the one uploading, which leaves the queue', async function (assert) {
+    const uploads = new Uploads()
+    const queue = new Queue({ name: 'resume', fileQueue: undefined as never })
+    const values: unknown[][] = []
+    const change = (value: unknown[]) => values.push(value)
+    await render(
+      <template>
+        <FileUpload @queue={{queue}} @upload={{uploads.upload}} @onValueChange={{change}} />
+      </template>,
+    )
+    const upload = new FileUploadHarness()
+    await upload.select(photo())
+    const preview = upload.file('photo.png').preview!
+    assert.true(await loads(preview))
+    assert.deepEqual(
+      queue.files.map(f => f.name),
+      ['photo.png'],
+    )
+
+    await upload.select(file('cv.pdf', 10, 'application/pdf'))
+    assert.deepEqual(upload.uploading, ['cv.pdf'], 'the new file replaces it')
+    assert.deepEqual(
+      queue.files.map(f => f.name),
+      ['cv.pdf'],
+      "and the old one leaves ember-file-upload's queue",
+    )
+    assert.false(await loads(preview), 'its preview is revoked')
+
+    await uploads.resolve('photo.png', 'photo.png')
+    assert.deepEqual(values, [], 'what the replaced upload resolves to is dropped')
+    assert.deepEqual(upload.uploading, ['cv.pdf'])
+    await uploads.resolve('cv.pdf', 'cv.pdf')
+    assert.deepEqual(upload.files, ['cv.pdf'])
+    assert.deepEqual(values, [['cv.pdf']])
+    assert.deepEqual(queue.files, [])
+    await a11yAudit()
+  })
+
+  test('controlled: a removal the caller refuses keeps the row’s preview', async function (assert) {
+    const kept = [photo()]
+    const heard: string[][] = []
+    const ignore = (files: File[]) => heard.push(files.map(f => f.name))
+    await render(
+      <template>
+        <FileUpload @multiple={{true}} @value={{kept}} @onValueChange={{ignore}} />
+      </template>,
+    )
+    const upload = new FileUploadHarness()
+    const preview = upload.file('photo.png').preview!
+    await upload.remove('photo.png')
+    assert.deepEqual(heard, [[]])
+    assert.deepEqual(upload.files, ['photo.png'], 'the caller kept it')
+    assert.strictEqual(upload.file('photo.png').preview, preview)
+    assert.true(await loads(preview), 'and its preview still loads')
     await a11yAudit()
   })
 
@@ -502,6 +747,40 @@ module('Integration | components | file-upload', function (hooks) {
     )
     await uploads.resolve('photo.png', 'photo.png')
     assert.deepEqual(queue.files, [], 'and out of it once done')
+    await a11yAudit()
+  })
+
+  test('the upload queue’s strings are arguments', async function (assert) {
+    const uploads = new Uploads()
+    const retryLabel = (name: string) => `Réessayer ${name}`
+    const progressLabel = (name: string) => `Envoi de ${name}`
+    const leftOutLabel = (names: string[]) => `Un seul fichier ; ignoré : ${names.join(', ')}`
+    await render(
+      <template>
+        <FileUpload
+          @upload={{uploads.upload}}
+          @dropLabel="Déposez pour ajouter"
+          @retryLabel={{retryLabel}}
+          @progressLabel={{progressLabel}}
+          @uploadFailedLabel="Échec de l’envoi"
+          @unknownKindLabel="FICHIER"
+          @leftOutLabel={{leftOutLabel}}
+        />
+      </template>,
+    )
+    const upload = new FileUploadHarness()
+    await upload.drag(photo())
+    assert.strictEqual(upload.text, 'Déposez pour ajouter')
+    await upload.leave()
+
+    await upload.drop(file('LISEZMOI', 10, ''), file('b.txt', 10, 'text/plain'))
+    assert.strictEqual(upload.leftOut, 'Un seul fichier ; ignoré : b.txt')
+    const readme = upload.file('LISEZMOI')
+    assert.strictEqual(readme.details, 'FICHIER · 10 bytes', 'a file with no extension')
+    assert.strictEqual(readme.progressBar.label, 'Envoi de LISEZMOI')
+    await uploads.reject('LISEZMOI', undefined)
+    assert.strictEqual(readme.details, 'Échec de l’envoi')
+    assert.strictEqual(readme.retryButton.label, 'Réessayer LISEZMOI')
     await a11yAudit()
   })
 

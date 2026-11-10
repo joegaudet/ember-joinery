@@ -27,7 +27,8 @@ const call = <A, R>(fn: (arg: A) => R, arg: A): R => fn(arg)
 const FileUploadList: TOC<FileUploadListSignature> = <template>
   {{#if @upload.state.files.length}}
     <ItemGroup class="jn-file-upload-list" data-test-jn-part="list" ...attributes>
-      {{#each @upload.state.files as |entry|}}
+      {{! Keyed on the value, so a row (and the focus on its button) stays when others change. }}
+      {{#each @upload.state.files key="value" as |entry|}}
         <Item
           @variant="outline"
           @size="sm"

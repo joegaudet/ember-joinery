@@ -35,7 +35,8 @@ export interface FileUploadDropzoneSignature {
  * The zone to drop files on, or to press to choose them: ember-file-upload's `FileDropzone`
  * around a visually hidden `<input type="file">`, in the look of shadcn's Empty with a dashed
  * border. It turns `--primary` while files are dragged over it, shows the focus ring while its
- * input has focus, and names the files a drop turned away under its prompt.
+ * input has focus, and names the files a choice or drop turned away under its prompt, in a
+ * status region that is always there (empty until then), so screen readers announce it.
  */
 export default class FileUploadDropzone extends Component<FileUploadDropzoneSignature> {
   @tracked isDragging = false
@@ -51,6 +52,11 @@ export default class FileUploadDropzone extends Component<FileUploadDropzoneSign
   get rejected(): string | undefined {
     const names = this.state.rejected
     return names.length ? this.labels.rejectedLabel([...names]) : undefined
+  }
+
+  get leftOut(): string | undefined {
+    const names = this.state.leftOut
+    return names.length ? this.labels.leftOutLabel([...names]) : undefined
   }
 
   /** Whether to say files can be dropped: only where they can be, and while it takes them. */
@@ -137,14 +143,20 @@ export default class FileUploadDropzone extends Component<FileUploadDropzoneSign
           </span>
         {{/if}}
       </label>
-      {{#if this.rejected}}
-        <p
-          class="jn-file-upload-rejected"
-          data-slot="file-upload-rejected"
-          role="status"
-          data-test-jn-part="rejected"
-        >{{this.rejected}}</p>
-      {{/if}}
+      {{! A live region already in the page, so what is put in it is announced. }}
+      <div
+        class="jn-file-upload-status"
+        data-slot="file-upload-status"
+        role="status"
+        data-test-jn-part="status"
+      >
+        {{#if this.rejected}}
+          <p data-slot="file-upload-rejected" data-test-jn-part="rejected">{{this.rejected}}</p>
+        {{/if}}
+        {{#if this.leftOut}}
+          <p data-slot="file-upload-left-out" data-test-jn-part="left-out">{{this.leftOut}}</p>
+        {{/if}}
+      </div>
     </FileDropzone>
   </template>
 }

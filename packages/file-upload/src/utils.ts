@@ -20,11 +20,14 @@ export function acceptsFile(file: File, accept: string | undefined): boolean {
 
 /**
  * A file's kind, from its name's extension, in capitals: `PDF`, `PNG`… (at most four letters),
- * or `FILE` when it has none.
+ * or `unknown` (`FILE` by default) when it has none.
+ *
+ *   fileKind('cv.pdf') // 'PDF'
+ *   fileKind('README', 'ملف') // 'ملف'
  */
-export function fileKind(name: string): string {
+export function fileKind(name: string, unknown = 'FILE'): string {
   const dot = name.lastIndexOf('.')
-  return dot > 0 && dot < name.length - 1 ? name.slice(dot + 1, dot + 5).toUpperCase() : 'FILE'
+  return dot > 0 && dot < name.length - 1 ? name.slice(dot + 1, dot + 5).toUpperCase() : unknown
 }
 
 const UNITS = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte'] as const

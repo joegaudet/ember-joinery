@@ -8,6 +8,7 @@ import FileUploadDropzone from './dropzone.gts'
 import FileUploadList from './list.gts'
 import FileUploadQueue from './queue.gts'
 import {
+  defaultLeftOutLabel,
   defaultProgressLabel,
   defaultRejectedLabel,
   defaultRemoveLabel,
@@ -100,8 +101,16 @@ export interface FileUploadSignature<T = File> {
     dropLabel?: string
     /** A line under the hint, such as `PDF, up to 5 MB`. Default: `@accept`. */
     description?: string
-    /** Names the files a drop turned away. Default `Not an accepted type: a.exe, b.exe`. */
+    /**
+     * Names the files a choice or drop turned away, as `@accept` doesn't take them. Default
+     * `Not an accepted type: a.exe, b.exe`.
+     */
     rejectedLabel?: (names: string[]) => string
+    /**
+     * Names the files a drop of several left out, without `@multiple`. Default
+     * `One file at a time; left out: b.pdf, c.pdf`.
+     */
+    leftOutLabel?: (names: string[]) => string
     /** Names a file's remove button. Default `Remove cv.pdf`. */
     removeLabel?: (name: string) => string
     /** Names a failed upload's retry button. Default `Retry cv.pdf`. */
@@ -110,6 +119,8 @@ export interface FileUploadSignature<T = File> {
     progressLabel?: (name: string) => string
     /** The error an upload shows when it fails without a message. Default `Upload failed`. */
     uploadFailedLabel?: string
+    /** The kind shown for a file whose name has no extension (`README`). Default `FILE`. */
+    unknownKindLabel?: string
     /** Its name, for `FileUploadHarness` (`data-test-jn-name`). */
     name?: string
   }
@@ -123,26 +134,33 @@ export interface FileUploadSignature<T = File> {
 const handled = new WeakSet<FocusRequest>()
 
 /**
- * Once a removal has rendered, moves focus from the button that went to the one in the row that
- * took its place (or the row before it), or to the file input when its list emptied. It moves
- * focus only when it was lost with the button, so it never takes focus from somewhere else.
+ * Once a removal or a retry has rendered, moves focus from the button that went to the nearest
+ * one left: in the row now at that index (the one that took a removed row's place, or the
+ * retried row, if it still has a button), then the rows after it, then those before it,
+ * preferring a button of the same kind (remove, or Retry) in each. Failing that, any remove
+ * button, then the file input. It moves focus only when it was lost with the button, so it
+ * never takes focus from somewhere else.
  */
-const focusAfterRemoval = modifier(
-  (element: HTMLElement, [request]: [FocusRequest | undefined]) => {
-    if (!request || handled.has(request)) return
-    handled.add(request)
-    const active = element.ownerDocument.activeElement
-    if (active && active !== element.ownerDocument.body && active.isConnected) return
-    const list = element.querySelector(`.jn-file-upload-${request.list}`)
-    const rows = list ? [...list.querySelectorAll(':scope > .jn-file-upload-file')] : []
-    const row = rows[request.index] ?? rows[request.index - 1]
-    const target =
-      row?.querySelector<HTMLElement>('.jn-file-upload-remove') ??
-      element.querySelector<HTMLElement>('.jn-file-upload-remove') ??
-      element.querySelector<HTMLElement>('.jn-file-upload-input')
-    target?.focus()
-  },
-)
+const focusAfterChange = modifier((element: HTMLElement, [request]: [FocusRequest | undefined]) => {
+  if (!request || handled.has(request)) return
+  handled.add(request)
+  const active = element.ownerDocument.activeElement
+  if (active && active !== element.ownerDocument.body && active.isConnected) return
+  const list = element.querySelector(`.jn-file-upload-${request.list}`)
+  const rows = list ? [...list.querySelectorAll(':scope > .jn-file-upload-file')] : []
+  const nearest = [...rows.slice(request.index), ...rows.slice(0, request.index).reverse()]
+  const target =
+    nearest
+      .map(
+        row =>
+          row.querySelector<HTMLElement>(`.jn-file-upload-${request.button}`) ??
+          row.querySelector<HTMLElement>('button'),
+      )
+      .find(Boolean) ??
+    element.querySelector<HTMLElement>('.jn-file-upload-remove') ??
+    element.querySelector<HTMLElement>('.jn-file-upload-input')
+  target?.focus()
+})
 
 /**
  * File uploads in shadcn's look, on ember-file-upload: a drop zone around a native file input, the
@@ -178,6 +196,7 @@ export default class FileUpload<T = File> extends Component<FileUploadSignature<
       sizeOf: () => this.args.sizeOf,
       previewOf: () => this.args.previewOf,
       uploadFailedLabel: () => this.args.uploadFailedLabel,
+      unknownKindLabel: () => this.args.unknownKindLabel,
       locale: () => this.args.locale,
     })
   }
@@ -190,6 +209,7 @@ export default class FileUpload<T = File> extends Component<FileUploadSignature<
       dropLabel: this.args.dropLabel ?? 'Drop to add',
       description: this.args.description,
       rejectedLabel: this.args.rejectedLabel ?? defaultRejectedLabel,
+      leftOutLabel: this.args.leftOutLabel ?? defaultLeftOutLabel,
       removeLabel: this.args.removeLabel ?? defaultRemoveLabel,
       retryLabel: this.args.retryLabel ?? defaultRetryLabel,
       progressLabel: this.args.progressLabel ?? defaultProgressLabel,
@@ -232,10 +252,9 @@ export default class FileUpload<T = File> extends Component<FileUploadSignature<
         data-multiple={{if this.state.multiple ""}}
         data-disabled={{if this.state.disabled ""}}
         data-uploading={{if this.state.isUploading ""}}
-        aria-busy={{if this.state.isUploading "true"}}
         data-test-jn="file-upload"
         data-test-jn-name={{@name}}
-        {{focusAfterRemoval this.state.focusRequest}}
+        {{focusAfterChange this.state.focusRequest}}
         ...attributes
       >
         {{#if (has-block)}}

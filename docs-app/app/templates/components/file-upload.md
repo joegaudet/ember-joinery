@@ -46,10 +46,12 @@ of `File`s, or, with `@upload`, of what each upload resolved to. Without `@multi
 file at most, and a new choice replaces it; with it, the files add up. Choose with the file
 picker (a press on the zone, or Enter or Space on its input) or drop files on the zone.
 
-`@accept` is passed to the input as `accept`, and the zone applies the same filter to what is
-dropped on it: `.pdf`, `image/*`, `text/csv`… A dropped file it turns away is named under the
-zone's prompt. Each file the value holds is listed with a preview (an image file shows itself;
-any other, an icon for its kind), its name, its kind and size, and a button that removes it.
+`@accept` is passed to the input as `accept`, and the same filter is applied to what is dropped
+on the zone and to what the picker hands over (its "All files" choice lets anything through):
+`.pdf`, `image/*`, `text/csv`… A file it turns away is named under the zone's prompt. Without
+`@multiple`, a drop of several takes the first and names the rest as left out. Each file the
+value holds is listed with a preview (an image file shows itself; any other, an icon for its
+kind), its name, its kind and size, and a button that removes it.
 
 ## Composition
 
@@ -98,8 +100,10 @@ file's own contents).
 <div class="callout">
 
 **Submitting while files upload.** The value holds a file only once its upload has resolved.
-While any upload runs, the component carries `data-uploading` and `aria-busy="true"`, and its
-block gets `u.isUploading`: disable your submit button while it is true.
+While any upload runs, the component carries `data-uploading`, its queue is `aria-busy`, and
+its block gets `u.isUploading`: disable your submit button while it is true. Without
+`@multiple`, a new choice replaces a file still uploading: it leaves ember-file-upload's queue,
+and what its upload resolves to is dropped.
 
 </div>
 
@@ -115,7 +119,8 @@ its own.
 
 ## Disabled
 
-`@disabled` disables the input, ignores drops, hides the remove buttons and dims the zone.
+`@disabled` disables the input, ignores drops, hides the remove and Retry buttons and dims the
+zone.
 
 <Example @name="file-upload-disabled" @title="Disabled" />
 
@@ -132,47 +137,50 @@ an argument, and `@locale` writes the sizes in the language of the page.
 
 ### FileUpload
 
-| Argument             | Type                                | Default                     | What it does                                                                |
-| -------------------- | ----------------------------------- | --------------------------- | --------------------------------------------------------------------------- |
-| `@multiple`          | `boolean`                           | `false`                     | Whether it takes more than one file; without it, a new choice replaces it   |
-| `@accept`            | `string`                            | any                         | Which files to take, as `<input accept>` reads it, for the picker and drops |
-| `@disabled`          | `boolean`                           | `false`                     | Whether it takes no files and removes none                                  |
-| `@value`             | `T[]`                               |                             | The files (or upload results), controlled                                   |
-| `@defaultValue`      | `T[]`                               | `[]`                        | The files it starts with, uncontrolled                                      |
-| `@onValueChange`     | `(value: T[]) => void`              |                             | Called with the new list whenever a file is added or removed                |
-| `@upload`            | `(file: UploadFile) => Promise<T>`  |                             | Uploads each file as it is chosen; the value keeps what it resolves to      |
-| `@queue`             | `Queue` (ember-file-upload's)       | its own                     | The queue to put the files in, such as one of the `file-queue` service's    |
-| `@nameOf`            | `(value: T) => string`              | a file's or record's `name` | A value's name in the list                                                  |
-| `@sizeOf`            | `(value: T) => number \| undefined` | its `size`                  | A value's size in bytes                                                     |
-| `@previewOf`         | `(value: T) => string \| undefined` | an image file's contents    | A URL of an image of a value                                                |
-| `@locale`            | `string`                            | the browser's               | The locale sizes are written in                                             |
-| `@id`                | `string`                            |                             | The file input's `id`, so a `<FieldLabel for>` names it                     |
-| `@label`             | `string`                            |                             | The file input's `aria-label`, in place of the zone's text                  |
-| `@required`          | `boolean`                           | `false`                     | Whether a file is required                                                  |
-| `@invalid`           | `boolean`                           | `false`                     | `aria-invalid` on the input, and a destructive border on the zone           |
-| `@describedBy`       | `string`                            |                             | The input's `aria-describedby`, such as a FieldDescription's id             |
-| `@prompt`            | `string`                            | `Choose a file`             | The zone's call to action (`Choose files` with `@multiple`)                 |
-| `@hint`              | `string`                            | `or drag and drop here`     | What follows it, while it takes files                                       |
-| `@dropLabel`         | `string`                            | `Drop to add`               | What the zone says while files are dragged over it                          |
-| `@description`       | `string`                            | `@accept`                   | A line under the hint                                                       |
-| `@rejectedLabel`     | `(names: string[]) => string`       | `Not an accepted type: …`   | Names the files a drop turned away                                          |
-| `@removeLabel`       | `(name: string) => string`          | `Remove cv.pdf`             | Names a file's remove button                                                |
-| `@retryLabel`        | `(name: string) => string`          | `Retry cv.pdf`              | Names a failed upload's retry button                                        |
-| `@progressLabel`     | `(name: string) => string`          | `Uploading cv.pdf`          | Names a file's progress bar                                                 |
-| `@uploadFailedLabel` | `string`                            | `Upload failed`             | The error a failed upload shows when it rejects without a message           |
-| `@name`              | `string`                            |                             | Its name, for `FileUploadHarness` (`data-test-jn-name`)                     |
+| Argument             | Type                                | Default                     | What it does                                                                 |
+| -------------------- | ----------------------------------- | --------------------------- | ---------------------------------------------------------------------------- |
+| `@multiple`          | `boolean`                           | `false`                     | Whether it takes more than one file; without it, a new choice replaces it    |
+| `@accept`            | `string`                            | any                         | Which files to take, as `<input accept>` reads it, for the picker and drops  |
+| `@disabled`          | `boolean`                           | `false`                     | Whether it takes no files and removes none                                   |
+| `@value`             | `T[]`                               |                             | The files (or upload results), controlled                                    |
+| `@defaultValue`      | `T[]`                               | `[]`                        | The files it starts with, uncontrolled                                       |
+| `@onValueChange`     | `(value: T[]) => void`              |                             | Called with the new list whenever a file is added or removed                 |
+| `@upload`            | `(file: UploadFile) => Promise<T>`  |                             | Uploads each file as it is chosen; the value keeps what it resolves to       |
+| `@queue`             | `Queue` (ember-file-upload's)       | its own                     | The queue to put the files in, such as one of the `file-queue` service's     |
+| `@nameOf`            | `(value: T) => string`              | a file's or record's `name` | A value's name in the list                                                   |
+| `@sizeOf`            | `(value: T) => number \| undefined` | its `size`                  | A value's size in bytes                                                      |
+| `@previewOf`         | `(value: T) => string \| undefined` | an image file's contents    | A URL of an image of a value                                                 |
+| `@locale`            | `string`                            | the browser's               | The locale sizes are written in                                              |
+| `@id`                | `string`                            |                             | The file input's `id`, so a `<FieldLabel for>` names it                      |
+| `@label`             | `string`                            |                             | The file input's `aria-label`, in place of the zone's text                   |
+| `@required`          | `boolean`                           | `false`                     | Whether a file is required                                                   |
+| `@invalid`           | `boolean`                           | `false`                     | `aria-invalid` on the input, and a destructive border on the zone            |
+| `@describedBy`       | `string`                            |                             | The input's `aria-describedby`, such as a FieldDescription's id              |
+| `@prompt`            | `string`                            | `Choose a file`             | The zone's call to action (`Choose files` with `@multiple`)                  |
+| `@hint`              | `string`                            | `or drag and drop here`     | What follows it, while it takes files                                        |
+| `@dropLabel`         | `string`                            | `Drop to add`               | What the zone says while files are dragged over it                           |
+| `@description`       | `string`                            | `@accept`                   | A line under the hint                                                        |
+| `@rejectedLabel`     | `(names: string[]) => string`       | `Not an accepted type: …`   | Names the files a choice or drop turned away, as `@accept` doesn't take them |
+| `@leftOutLabel`      | `(names: string[]) => string`       | `One file at a time; …`     | Names the files a drop of several left out, without `@multiple`              |
+| `@removeLabel`       | `(name: string) => string`          | `Remove cv.pdf`             | Names a file's remove button                                                 |
+| `@retryLabel`        | `(name: string) => string`          | `Retry cv.pdf`              | Names a failed upload's retry button                                         |
+| `@progressLabel`     | `(name: string) => string`          | `Uploading cv.pdf`          | Names a file's progress bar                                                  |
+| `@uploadFailedLabel` | `string`                            | `Upload failed`             | The error a failed upload shows when it rejects without a message            |
+| `@unknownKindLabel`  | `string`                            | `FILE`                      | The kind shown for a file whose name has no extension (`README`)             |
+| `@name`              | `string`                            |                             | Its name, for `FileUploadHarness` (`data-test-jn-name`)                      |
 
 `T` is `File` unless `@upload` says otherwise. It takes attributes on its element, `class`
-included. `UploadFn<T>` is the type of `@upload`. `acceptsFile(file, accept)`, `fileKind(name)`
-and `formatFileSize(bytes, locale)`, which it filters and labels with, are exported too.
+included. `UploadFn<T>` is the type of `@upload`. `acceptsFile(file, accept)`,
+`fileKind(name, unknown)` and `formatFileSize(bytes, locale)`, which it filters and labels with,
+are exported too.
 
 ### The parts
 
-| Part         | What it is                                                                                    |
-| ------------ | --------------------------------------------------------------------------------------------- |
-| `u.Dropzone` | ember-file-upload's `FileDropzone`: the dashed zone, its hidden input, and the rejected names |
-| `u.List`     | An `ItemGroup` of the value's files, rendered while it holds one                              |
-| `u.Queue`    | An `ItemGroup` of the uploads running or failed, rendered while there is one                  |
+| Part         | What it is                                                                                   |
+| ------------ | -------------------------------------------------------------------------------------------- |
+| `u.Dropzone` | ember-file-upload's `FileDropzone`: the dashed zone, its hidden input, and its status region |
+| `u.List`     | An `ItemGroup` of the value's files, rendered while it holds one                             |
+| `u.Queue`    | An `ItemGroup` of the uploads running or failed, rendered while there is one                 |
 
 Each takes attributes, `class` included; `u.Dropzone`'s go on the zone. Its block gets
 `{ isDragging, isSupported }`.
@@ -184,28 +192,31 @@ Each takes attributes, `class` included; `u.Dropzone`'s go on the zone. Its bloc
 | `u.isUploading`   | Whether an upload is running                                                         |
 | `u.remove(value)` | Takes a value out of the list                                                        |
 | `u.clear()`       | Empties the list                                                                     |
-| `u.retry(upload)` | Uploads a failed file again                                                          |
+| `u.retry(upload)` | Uploads a failed file again (a running one, or any while disabled, it leaves alone)  |
 | `u.queue`         | ember-file-upload's queue the files go into                                          |
 
 ### Data attributes
 
-| Part   | Attribute           | Value                                                   |
-| ------ | ------------------- | ------------------------------------------------------- |
-| root   | `class`             | `jn-file-upload`                                        |
-| root   | `data-slot`         | `file-upload`                                           |
-| root   | `data-multiple`     | present with `@multiple`                                |
-| root   | `data-disabled`     | present while `@disabled`                               |
-| root   | `data-uploading`    | present, with `aria-busy="true"`, while files upload    |
-| root   | `data-test-jn`      | `file-upload`                                           |
-| zone   | `data-slot`         | `file-upload-dropzone`                                  |
-| zone   | `data-dragging`     | present while files are dragged over it                 |
-| zone   | `data-invalid`      | present with `@invalid`                                 |
-| zone   | `data-test-jn-part` | `dropzone`                                              |
-| input  | `data-test-jn-part` | `input`                                                 |
-| list   | `data-test-jn-part` | `list` (the queue's: `queue`)                           |
-| a file | `data-slot`         | `item` (an outlined, small Item)                        |
-| a file | `data-state`        | `done` in the list; `uploading` or `error` in the queue |
-| a file | `data-test-jn-name` | the file's name                                         |
+| Part   | Attribute           | Value                                                     |
+| ------ | ------------------- | --------------------------------------------------------- |
+| root   | `class`             | `jn-file-upload`                                          |
+| root   | `data-slot`         | `file-upload`                                             |
+| root   | `data-multiple`     | present with `@multiple`                                  |
+| root   | `data-disabled`     | present while `@disabled`                                 |
+| root   | `data-uploading`    | present while files upload                                |
+| root   | `data-test-jn`      | `file-upload`                                             |
+| zone   | `data-slot`         | `file-upload-dropzone`                                    |
+| zone   | `data-dragging`     | present while files are dragged over it                   |
+| zone   | `data-invalid`      | present with `@invalid`                                   |
+| zone   | `data-test-jn-part` | `dropzone`                                                |
+| input  | `data-test-jn-part` | `input`                                                   |
+| status | `role`              | `status`, always there; empty until files are turned away |
+| status | `data-test-jn-part` | `status` (its messages: `rejected`, `left-out`)           |
+| list   | `data-test-jn-part` | `list` (the queue's: `queue`)                             |
+| queue  | `aria-busy`         | `true` while files upload                                 |
+| a file | `data-slot`         | `item` (an outlined, small Item)                          |
+| a file | `data-state`        | `done` in the list; `uploading` or `error` in the queue   |
+| a file | `data-test-jn-name` | the file's name                                           |
 
 ## Keyboard interactions
 
@@ -216,7 +227,10 @@ Each takes attributes, `class` included; `u.Dropzone`'s go on the zone. Its bloc
 
 Drag and drop has no keyboard equivalent, so the file picker is always there as the way to
 choose files. Removing a file moves focus to the remove button of the row that takes its place
-(or the row before it), and to the file input once the list is empty, so it is never lost.
+(or the row before it), and to the file input once the list is empty. Retry takes a failed
+row's buttons away while it uploads again, so it moves focus to the Retry button of the next
+failed row (or the one before it), and to the file input when none is left. Rows stay put while
+other files come and go, so focus is never lost.
 
 ## Accessibility
 
@@ -227,8 +241,10 @@ choose files. Removing a file moves focus to the remove button of the row that t
   decorative (`alt=""`): the name beside it says what it is.
 - Each remove and retry button is named for its file, and each progress bar too, with the
   percentage as its value.
-- The files a drop turned away are named in a status message, which is announced.
-- While files upload, the component is `aria-busy`.
+- The files a choice or drop turned away are named in a status region (`role="status"`) that is
+  always in the page, empty until then, so screen readers announce what goes in it.
+- While files upload, the queue is `aria-busy`; the zone, the list and the status region are
+  not, so their changes are announced as they happen.
 
 ## Testing
 
@@ -260,8 +276,10 @@ await attachments.remove('cv.pdf')
 | `isDisabled`       | Whether it takes none                                               |
 | `isDragging`       | Whether files are dragged over it                                   |
 | `isFocused`        | Whether its input has focus                                         |
-| `isUploading`      | Whether an upload is running (`aria-busy`)                          |
-| `rejected`         | What it says about the files the last drop turned away              |
+| `isUploading`      | Whether an upload is running (the queue's `aria-busy`)              |
+| `status`           | The zone's status region                                            |
+| `rejected`         | What it says about the files `@accept` turned away                  |
+| `leftOut`          | What it says about the files a drop left out, without `@multiple`   |
 | `list`, `queue`    | The list and the queue, or `null` while they hold nothing           |
 | `items`            | A `FileUploadItemHarness` for every row, the list's and the queue's |
 | `files`            | The names in the list                                               |

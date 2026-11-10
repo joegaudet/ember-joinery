@@ -142,8 +142,10 @@ import { ItemContent, ItemDescription, ItemTitle, asItem } from '@ember-joinery/
 
 ## Dropdown
 
-Items as a dropdown menu's options. Upstream's example (`item-dropdown`) needs Dropdown Menu,
-which hasn't landed in Joinery yet; it comes with it.
+<Example @name="item-dropdown" @title="Dropdown" />
+
+Each [Dropdown Menu](/components/dropdown-menu.md) item holds an `Item`, so the menu's arrow
+keys and typeahead move between the people, and each item's text is its username and email.
 
 ## RTL
 

@@ -1,5 +1,4 @@
 {
-  "$comment": "Waiting for a component that hasn't landed: input-group-dropdown (Dropdown Menu). The unit that lands it ports the example onto the Input Group page and maps it here.",
   "examples": {
     "input-group-demo": "input-group-demo",
     "input-group-inline-start": "input-group-inline-start",
@@ -10,6 +9,7 @@
     "input-group-text": "input-group-text",
     "input-group-button": "input-group-button",
     "input-group-kbd": "input-group-kbd",
+    "input-group-dropdown": "input-group-dropdown",
     "input-group-spinner": "input-group-spinner",
     "input-group-textarea": "input-group-textarea",
     "input-group-custom": "input-group-custom",

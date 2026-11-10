@@ -2,9 +2,9 @@
 
 A container that groups related buttons together with consistent styling.
 
-Upstream's first example (`button-group-demo`, a mail toolbar) needs Dropdown Menu, which
-hasn't landed in Joinery yet; it comes with it. The examples below show the group with buttons,
-separators and sizes.
+Upstream's first example (`button-group-demo`, a mail toolbar) puts a Dropdown Menu inside a
+group, which doesn't work yet (see [Nested](#nested)), so it waits for that. The examples below
+show the group with buttons, separators and sizes.
 
 ## Installation
 
@@ -112,7 +112,8 @@ addon, so it waits for that to work (see [Nested](#nested)).
 ## Dropdown Menu
 
 Create a split button group with a `DropdownMenu` component. Upstream's example
-(`button-group-dropdown`) comes with Dropdown Menu (see [Nested](#nested)).
+(`button-group-dropdown`) waits for a Dropdown Menu inside a group to work (see
+[Nested](#nested)); [Dropdown Menu](/components/dropdown-menu.md) has landed.
 
 ## Select
 
@@ -129,7 +130,8 @@ inside a group to work (see [Nested](#nested)); its Field has landed.
 Joinery's styles use logical properties, so a group joins its buttons right to left inside any
 element with `dir="rtl"` (see [Direction](/primitives/direction.md)): the first button is on the
 right, with its rounded corners there. Upstream's right-to-left example (`button-group-rtl`)
-is the mail toolbar, which comes with Dropdown Menu.
+is the mail toolbar, which waits for a Dropdown Menu inside a group to work (see
+[Nested](#nested)).
 
 ## API Reference
 

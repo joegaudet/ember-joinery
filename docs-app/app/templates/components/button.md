@@ -113,8 +113,8 @@ correct spacing.
 
 To create a button group, use the `ButtonGroup` component. See the
 [Button Group](/components/button-group.md) page for more details. Upstream's example here
-(`button-group-demo`) needs Dropdown Menu too, which hasn't landed in Joinery yet; it comes with
-it.
+(`button-group-demo`) puts a Dropdown Menu inside a group, which doesn't work yet, so it waits
+for that (see that page's Nested section).
 
 ## As Child
 

@@ -118,8 +118,12 @@ Use `@size` to change the size of the avatar.
 
 ## Dropdown
 
-You can use the `Avatar` component as a trigger for a dropdown menu. Upstream's example
-(`avatar-dropdown`) needs Dropdown Menu, which hasn't landed in Joinery yet; it comes with it.
+You can use the `Avatar` component as a trigger for a dropdown menu.
+
+<Example @name="avatar-dropdown" @title="Dropdown" />
+
+The [Dropdown Menu](/components/dropdown-menu.md)'s `trigger` modifier makes the button around
+the avatar its trigger, as upstream's `DropdownMenuTrigger asChild` does.
 
 ## RTL
 

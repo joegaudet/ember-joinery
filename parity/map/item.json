@@ -1,5 +1,4 @@
 {
-  "$comment": "Waiting for components that haven't landed: item-dropdown (Dropdown Menu). The unit that lands it ports the example onto the Item page and maps it here.",
   "examples": {
     "item-demo": "item-demo",
     "item-variant": "item-variant",
@@ -10,6 +9,7 @@
     "item-group": "item-group",
     "item-header": "item-header",
     "item-link": "item-link",
+    "item-dropdown": "item-dropdown",
     "item-rtl": "item-rtl"
   }
 }

@@ -139,8 +139,9 @@ Use `@variant="destructive"` for irreversible actions.
 
 ## Avatar
 
-An account switcher dropdown triggered by an avatar. Upstream's example, `dropdown-menu-avatar`,
-comes with Avatar.
+An account switcher dropdown triggered by an avatar.
+
+<Example @name="dropdown-menu-avatar" @title="Avatar" />
 
 ## Complex
 

@@ -1,5 +1,4 @@
 {
-  "$comment": "Waiting for a component that hasn't landed: dropdown-menu-avatar (Avatar). The unit that lands Avatar ports it onto the Dropdown Menu page and maps it here.",
   "examples": {
     "dropdown-menu-demo": "dropdown-menu-demo",
     "dropdown-menu-basic": "dropdown-menu-basic",
@@ -11,6 +10,7 @@
     "dropdown-menu-radio-group": "dropdown-menu-radio-group",
     "dropdown-menu-radio-icons": "dropdown-menu-radio-icons",
     "dropdown-menu-destructive": "dropdown-menu-destructive",
+    "dropdown-menu-avatar": "dropdown-menu-avatar",
     "dropdown-menu-complex": "dropdown-menu-complex",
     "dropdown-menu-rtl": "dropdown-menu-rtl"
   }

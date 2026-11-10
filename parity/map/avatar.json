@@ -1,5 +1,4 @@
 {
-  "$comment": "Waiting for components that haven't landed: avatar-dropdown (Dropdown Menu). The unit that lands it ports the example onto the Avatar page and maps it here.",
   "examples": {
     "avatar-demo": "avatar-demo",
     "avatar-basic": "avatar-basic",
@@ -9,6 +8,7 @@
     "avatar-group-count": "avatar-group-count",
     "avatar-group-count-icon": "avatar-group-count-icon",
     "avatar-size": "avatar-size",
+    "avatar-dropdown": "avatar-dropdown",
     "avatar-rtl": "avatar-rtl"
   }
 }

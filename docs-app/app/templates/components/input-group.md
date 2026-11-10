@@ -100,7 +100,14 @@ addon the popover's `trigger` modifier (`<g.Addon {{popover.trigger}}>`), as ups
 
 ## Dropdown
 
-Upstream's example, a group button that opens a `DropdownMenu`, comes with Dropdown Menu.
+<Example @name="input-group-dropdown" @title="Dropdown" />
+
+To open a [Dropdown Menu](/components/dropdown-menu.md) from a group button, give the button the
+menu's `trigger` modifier (`<g.Button {{m.trigger}}>`), as upstream's `DropdownMenuTrigger
+asChild` does. Put the `DropdownMenu` around the addon rather than inside it: its root is an
+element with `display: contents`, where upstream's renders none, and inside the addon it would
+come between the addon and its button, so the addon's rule for a button directly inside it (its
+pull into the addon's padding) would miss it.
 
 ## Spinner
 

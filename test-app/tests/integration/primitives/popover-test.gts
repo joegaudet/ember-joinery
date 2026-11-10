@@ -87,6 +87,66 @@ function placementTests(hooks: TestHooks) {
     await a11yAudit()
   })
 
+  test('its content sees Radix Popper’s own custom properties: the anchor’s size, its room, its origin', async function (assert) {
+    await render(
+      <template>
+        <Styles />
+        <style>
+          .po-probe {
+            width: var(--radix-popper-anchor-width);
+            height: var(--radix-popper-anchor-height);
+            max-width: var(--radix-popper-available-width);
+            max-height: var(--radix-popper-available-height);
+          }
+        </style>
+        <div class="po-stage">
+          <Popover @defaultOpen={{true}} as |p|>
+            <p.Trigger class="po-trigger">Open</p.Trigger>
+            <p.Content class="po-content" aria-label="Content">
+              <div class="po-probe"></div>
+            </p.Content>
+          </Popover>
+        </div>
+      </template>,
+    )
+    const popover = new PopoverHarness()
+    const content = popover.content!
+    for (const name of ['transform-origin', 'available-width', 'available-height']) {
+      assert.strictEqual(
+        content.style.getPropertyValue(`--radix-popper-${name}`),
+        `var(--jn-anchor-${name})`,
+        `--radix-popper-${name}`,
+      )
+    }
+    for (const name of ['width', 'height']) {
+      assert.strictEqual(
+        content.style.getPropertyValue(`--radix-popper-anchor-${name}`),
+        `var(--jn-anchor-${name})`,
+        `--radix-popper-anchor-${name}`,
+      )
+    }
+    const probe = content.querySelector('.po-probe')!
+    const t = rect(popover.trigger)
+    near(
+      assert,
+      rect(probe).width,
+      t.width,
+      'w-(--radix-popper-anchor-width): as wide as the trigger',
+    )
+    near(assert, rect(probe).height, t.height, 'and as tall')
+    assert.notStrictEqual(getComputedStyle(probe).maxWidth, 'none', 'the room it has, across')
+    assert.notStrictEqual(getComputedStyle(probe).maxHeight, 'none', 'and down')
+    const computed = getComputedStyle(content)
+    const origin = computed.getPropertyValue('--radix-popper-transform-origin').trim()
+    assert.ok(origin, `the origin its animations grow from (${origin})`)
+    assert.strictEqual(
+      origin,
+      computed.getPropertyValue('--radix-popover-content-transform-origin').trim(),
+      'the same as the popover’s own',
+    )
+    await a11yAudit()
+  })
+
   test('@side, @align and @sideOffset place it', async function (assert) {
     await render(
       <template>

@@ -455,7 +455,7 @@ The box a chart draws in, and its colours.
 | `@initialDimension` | `{ width, height }` | `320 × 200` | The size the chart draws at before the container is measured |
 
 It takes attributes on its element, `class` and `style` included, and yields `AreaChart`,
-`BarChart` and `LineChart`, each given the config and the initial size.
+`BarChart`, `LineChart` and `PieChart`, each given the config and the initial size.
 
 ### AreaChart, BarChart, LineChart
 
@@ -489,7 +489,7 @@ Each chart yields its parts, with Recharts' arguments and defaults:
 | `c.CartesianGrid` | Grid lines at the axes' ticks: `@horizontal`, `@vertical`, `@stroke`, `@strokeDasharray`                                                      |
 | `c.Area`          | An area: `@dataKey`, `@type` (`linear`, `natural`, `monotone`, `step`…), `@fill`, `@fillOpacity`, `@stroke`, `@stackId`, `@dot`, `@activeDot` |
 | `c.Line`          | A line: `@dataKey`, `@type`, `@stroke`, `@strokeWidth`, `@dot` (a circle at each point, or a component), `@activeDot`                         |
-| `c.Bar`           | A bar per row: `@dataKey`, `@fill`, `@radius`, `@stackId`, `@barSize`                                                                         |
+| `c.Bar`           | A bar per row: `@dataKey`, `@fill`, `@radius`, `@stackId`, `@barSize`, `@shape`                                                               |
 | `c.ChartTooltip`  | The tooltip: `@content` (a component), `@cursor`, `@defaultIndex`, `@labelFormatter`, `@labelClassName`, `@formatter`                         |
 | `c.ChartLegend`   | The legend: `@content` (a component), `@verticalAlign`, `@align`                                                                              |
 
@@ -500,6 +500,26 @@ Each series yields `LabelList`, labels at its points or bars: `@position`, `@off
 <c.Line @dataKey="desktop" as |line|>
   <line.LabelList @position="top" @offset={{12}} @class="fill-foreground" @fontSize={{12}} />
 </c.Line>
+```
+
+A bar also yields `Cell`, one bar's attributes (`@fill`), written once per row in the rows'
+order; a bar takes the `fill` in its row too, as Recharts spreads the row over the bar. Its labels
+take that fill, unless the list has a `@fill` (or a class that sets one). A bar's `@shape` is a
+component that draws each bar, handed `@props` (its rectangle, attributes and row) and
+`@index`, as Recharts' `shape` function is; `Rectangle` is Recharts' rectangle, for it:
+
+```gts
+import { Rectangle, type BarShapeSignature } from '@ember-joinery/chart'
+
+const isActive = (index: number) => index === 2
+
+const BarShape: TOC<BarShapeSignature> = <template>
+  {{#if (isActive @index)}}
+    <Rectangle @props={{@props}} stroke={{@props.payload.fill}} stroke-dasharray="4" />
+  {{else}}
+    <Rectangle @props={{@props}} />
+  {{/if}}
+</template>
 ```
 
 A series' `@dot` and `@activeDot` take `false`, attributes (`{ r: 6 }`), or a component, handed
@@ -513,6 +533,63 @@ const ColoredDot: TOC<{ Args: DotArgs; Element: Element }> = <template>
   <Dot @cx={{@cx}} @cy={{@cy}} @r={{5}} fill={{@payload.fill}} />
 </template>
 ```
+
+### PieChart
+
+Recharts' `PieChart`: it fills the container and follows its size, or draws at `@width` and
+`@height`. It takes `@margin`, `@accessibilityLayer`, `@title` and `@desc` as the other charts
+do, `@data` for a pie with none of its own, and the ring a `Label` is placed against (`@cx`,
+`@cy`, `@innerRadius`, `@outerRadius`, `@startAngle`, `@endAngle`). It yields `Pie`,
+`ChartTooltip` and `ChartLegend`.
+
+| `c.Pie` argument           | Type                   | Default     | What it does                                                     |
+| -------------------------- | ---------------------- | ----------- | ---------------------------------------------------------------- |
+| `@data`                    | `object[]`             | the chart's | The rows, a sector each                                          |
+| `@dataKey`                 | `string`, a function   | `"value"`   | Each row's value                                                 |
+| `@nameKey`                 | `string`, a function   | `"name"`    | Each row's name, for the tooltip and legend (else its index)     |
+| `@innerRadius`             | `number`, `string`     | `0`         | The hole's radius, in pixels or a percentage of the largest      |
+| `@outerRadius`             | `number`, `string`     | `"80%"`     | The pie's radius                                                 |
+| `@cx`, `@cy`               | `number`, `string`     | `"50%"`     | The centre                                                       |
+| `@startAngle`, `@endAngle` | `number`               | `0`, `360`  | The angles, counter-clockwise from 3 o'clock                     |
+| `@paddingAngle`            | `number`               | `0`         | The gap between sectors, in degrees                              |
+| `@fill`, `@stroke`         | `string`               | grey, white | A sector's fill where its row and `Cell` have none, and its edge |
+| `@strokeWidth`             | `number`               |             | The edge's width                                                 |
+| `@label`                   | `boolean`, a component | `false`     | A label past each sector, with a line to it                      |
+| `@labelLine`               | `boolean`              | `true`      | Whether a label has a line to its sector                         |
+| `@shape`                   | a component            | `Sector`    | Draws each sector                                                |
+
+Each sector takes the `fill` in its row, as in Recharts. A pie yields `LabelList` (labels on its
+sectors, in the middle of the ring by default; `@position="outside"`, `"center"`), `Cell` (one
+sector's `@fill`, once per row) and `Label`, a label for the pie: a `@value`, or a `@content`
+component handed `@viewBox`, the chart's ring with its centre at `cx` and `cy`, which draws
+inside the pie after its sectors:
+
+```gts
+import type { LabelContentSignature } from '@ember-joinery/chart'
+
+const Total: TOC<LabelContentSignature> = <template>
+  <text x={{@viewBox.cx}} y={{@viewBox.cy}} text-anchor="middle" dominant-baseline="middle">
+    1,125
+  </text>
+</template>
+
+<template>
+  <c.Pie @data={{chartData}} @dataKey="visitors" @innerRadius={{60}} as |pie|>
+    <pie.Label @content={{Total}} />
+  </c.Pie>
+</template>
+```
+
+A pie's `@label` component is handed `@props` (where the label goes, `x`, `y` and
+`textAnchor`, and the sector, its row in `payload`) and `@index`; its `@shape`, `@props` (the
+sector's geometry, attributes and row) and `@index`, which `Sector`, Recharts' sector, draws
+(`<Sector @props={{@props}} @outerRadius={{…}} />`). Glimmer has no spread, so both take the
+props whole, as upstream spreads `{...props}`.
+
+The tooltip shows the sector under the pointer, beside its middle, and the legend has an entry
+per row. Their content is `ChartTooltipContent` and `ChartLegendContent` as in the other charts:
+a pie's tooltip entry is named by its row's `@nameKey`, so `nameKey` finds it in the config. A
+`ChartLegend`'s `@class` reaches its content, as Recharts' `className` does.
 
 ### ChartTooltipContent
 
@@ -581,7 +658,9 @@ for a chart outside one.
 | the plot area (its clip `<rect>`) | `data-test-jn-part`       | `plot`                                                 |
 |                                   | `data-test-jn-categories` | where each row sits along the category axis, in pixels |
 | a series                          | `data-test-jn-part`       | `series`, with `data-test-jn-value` its data key       |
-|                                   | `data-test-jn-points`     | its points, as `x,y` pairs                             |
+|                                   | `data-test-jn-points`     | its points (a pie's sectors' middles), as `x,y` pairs  |
+| a bar (`.recharts-rectangle`)     | `data-test-jn-part`       | `bar`, with `data-test-jn-value` its value             |
+| a sector (`.recharts-sector`)     | `data-test-jn-part`       | `sector`, with `data-test-jn-value` its row's name     |
 | `ChartTooltipContent`             | `data-test-jn`            | `chart-tooltip`                                        |
 |                                   | `data-indicator`          | its `@indicator`                                       |
 | `ChartLegendContent`              | `data-test-jn`            | `chart-legend`                                         |
@@ -607,6 +686,10 @@ next row, down, and `ArrowLeft` to the previous one, as in a horizontal chart. R
 the other way there: it flips every move in a chart that doesn't run left to right, so its
 `ArrowRight` moves up a row.
 
+In a pie chart, the tooltip shows a sector: `Tab` shows the first, and `ArrowRight` and
+`ArrowLeft` step to the next or previous one, through each pie in turn. Recharts 3 marks a
+sector active from the keyboard but shows no tooltip on a pie chart; Joinery's shows it.
+
 ## Testing
 
 `ChartHarness` from `@ember-joinery/chart/test-support` drives a chart (`data-test-jn="chart"`):
@@ -631,12 +714,16 @@ assert.deepEqual(chart.legend?.labels, ['Desktop', 'Mobile'])
 | `series`               | Each series: `key`, `type`, `points`, `path`, `areaPath`, `fill`, `stroke` |
 | `seriesFor(key)`       | One series, by data key                                                    |
 | `bars(key)`            | A bar series' bars                                                         |
+| `sectors(key)`         | A pie's sectors; `sectorNames(key)`, their rows' names                     |
+| `isPie`                | Whether it is a pie chart                                                  |
 | `dots(key)`            | A series' dots                                                             |
-| `labels(key)`          | A series' labels' text                                                     |
+| `labels(key)`          | A series' labels' text (its first label list, or a pie's `@label`s)        |
+| `labelLists(key)`      | Each of a series' label lists' text                                        |
+| `labelLines(key)`      | The lines from a pie's sectors to their labels                             |
 | `xTicks`, `yTicks`     | The axes' tick labels                                                      |
 | `gridLines`            | `{ horizontal, vertical }`: where the grid's lines are                     |
 | `categories`           | Where each row sits along the category axis                                |
-| `hover(index)`         | Points at row `index`                                                      |
+| `hover(index, key?)`   | Points at row `index`, or at sector `index` of a pie (the first, or `key`) |
 | `unhover()`            | Moves the pointer off the chart                                            |
 | `focus()`, `blur()`    | Focuses the chart, or leaves it                                            |
 | `press(key)`           | Presses `ArrowRight`, `ArrowLeft` or `Enter` on it                         |

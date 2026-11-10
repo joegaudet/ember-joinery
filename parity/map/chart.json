@@ -1,5 +1,5 @@
 {
-  "$comment": "The Chart docs page's examples and the charts gallery (registry/new-york-v4/charts) map here. Not yet ported: chart-area-interactive, whose Select has landed; the chart port (91 days of data, stacked natural areas with gradients, tooltip and legend, and a time-range Select in the header) is left to a chart unit. The gallery's bar, pie, radar, radial and tooltip charts come with the chart units that port those charts, and are mapped here when they land. The gallery draws each chart in the new-york-v4 registry's Card, which none of Joinery's eight styles is, so a gallery chart's entry compares its chart's region ([data-slot=\"chart\"]) alone, at the default threshold: the card around it differs by design, and Card's own page compares Joinery's. The two interactive examples are shown full width upstream (fullWidth), and compared whole, header and chart.",
+  "$comment": "The Chart docs page's examples and the charts gallery (registry/new-york-v4/charts) map here. Not yet ported: chart-area-interactive and chart-pie-interactive, whose Select has landed; chart-area-interactive's chart port (91 days of data, stacked natural areas with gradients, tooltip and legend, and a time-range Select in the header) is left to a chart unit. The gallery's radar, radial and tooltip charts come with the chart units that port those charts, and are mapped here when they land. The gallery draws each chart in the new-york-v4 registry's Card, which none of Joinery's eight styles is, so a gallery chart's entry compares its chart's region ([data-slot=\"chart\"]) alone, at the default threshold: the card around it differs by design, and Card's own page compares Joinery's. The interactive examples are shown full width upstream (fullWidth), and compared whole, header and chart. chart-pie-legend has no footer, so on a plain stage its card shrinks to its title and its chart to nothing; the gallery's grid cell gives it a width, so it is stretched across both stages (fullWidth), and its chart compared.",
   "examples": {
     "chart-demo": {
       "example": "chart-demo",
@@ -96,6 +96,92 @@
     },
     "chart-line-label-custom": {
       "example": "chart-line-label-custom",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-interactive": {
+      "example": "chart-bar-interactive",
+      "fullWidth": true,
+      "threshold": {
+        "light": 0.07,
+        "dark": 0.09
+      },
+      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is: Nova's header sits lower, and new-york-v4's 1px border (Nova's Card draws a ring) leaves the chart 2px narrower, so every bar is a little off and the x-axis keeps other dates (Apr 2, Apr 7\u2026 upstream; Apr 3, Apr 8\u2026 here). At upstream's width the bars are recharts' own (the chart's bar tests compare them). Each theme's threshold is its measurement rounded up, plus a point: 5.38% light, 7.04% dark."
+    },
+    "chart-bar-default": {
+      "example": "chart-bar-default",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-horizontal": {
+      "example": "chart-bar-horizontal",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-multiple": {
+      "example": "chart-bar-multiple",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-stacked": {
+      "example": "chart-bar-stacked",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-label": {
+      "example": "chart-bar-label",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-label-custom": {
+      "example": "chart-bar-label-custom",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-mixed": {
+      "example": "chart-bar-mixed",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-active": {
+      "example": "chart-bar-active",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-negative": {
+      "example": "chart-bar-negative",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-simple": {
+      "example": "chart-pie-simple",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-separator-none": {
+      "example": "chart-pie-separator-none",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-label": {
+      "example": "chart-pie-label",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-label-custom": {
+      "example": "chart-pie-label-custom",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-label-list": {
+      "example": "chart-pie-label-list",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-legend": {
+      "example": "chart-pie-legend",
+      "fullWidth": true,
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-donut": {
+      "example": "chart-pie-donut",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-donut-active": {
+      "example": "chart-pie-donut-active",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-donut-text": {
+      "example": "chart-pie-donut-text",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-stacked": {
+      "example": "chart-pie-stacked",
       "region": "[data-slot=\"chart\"]"
     }
   }

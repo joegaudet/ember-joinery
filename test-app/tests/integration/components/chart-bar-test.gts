@@ -298,6 +298,36 @@ module('Integration | components | chart | bar', function (hooks) {
     await a11yAudit()
   })
 
+  test('91 thin bars across a wide chart, as the interactive bar chart draws them', async function (assert) {
+    // The interactive chart's 91 days: its first and last values, and its largest, which sets
+    // the y-axis's domain (0 to 600).
+    const data = Array.from({ length: 91 }, (_, i) => ({
+      day: i,
+      desktop: i === 0 ? 222 : i === 90 ? 446 : i === 45 ? 499 : 100,
+    }))
+    const config = { desktop: { label: 'Desktop', color: 'var(--chart-2)' } } satisfies ChartConfig
+    const margin = { left: 12, right: 12 }
+    await render(
+      <template>
+        <ChartContainer @config={{config}} style="width: 1150px; height: 250px" as |chart|>
+          <chart.BarChart @data={{data}} @margin={{margin}} as |c|>
+            <c.XAxis @dataKey="day" @tickLine={{false}} @axisLine={{false}} @tickMargin={{8}} />
+            <c.Bar @dataKey="desktop" @fill="var(--color-desktop)" />
+          </chart.BarChart>
+        </ChartContainer>
+      </template>,
+    )
+    const bars = new ChartHarness().bars('desktop')
+    assert.strictEqual(bars.length, 91)
+    assert.strictEqual(flat(bars[0]!.getAttribute('d')), 'M 13.2374,138.6 h 9 v 81.4 h -9 Z')
+    assert.strictEqual(
+      flat(bars[90]!.getAttribute('d')),
+      'M 1126.8637,56.4667 h 9 v 163.5333 h -9 Z',
+      "recharts' bars, from the parity app",
+    )
+    await a11yAudit()
+  })
+
   test('a bar with no length is left out, as recharts leaves it out', async function (assert) {
     const data = [
       { month: 'January', desktop: 186 },

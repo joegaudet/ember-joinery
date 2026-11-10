@@ -661,6 +661,12 @@ workspace.
   takes the Escape that should close the mobile sheet; Joinery's stay closed then. The guide's
   `sidebar-menu-collapsible` makes each Collapsible the menu's `<li>` (as `sidebar-demo` does),
   where upstream's puts a `<div>` straight inside the `<ul>`. The pixels are upstream's.
+- **Where Questionnaire parts from upstream.** Its arrows that go back and forward between items
+  swap right to left (decision 20); upstream's are left and right in both directions. In the
+  guide's Dialog example, only the active item's question is the dialog's title and description:
+  upstream renders a dialog title in every item, so two elements share the dialog's title id and
+  the dialog is always named by the first question. An item's `@name` is both its answers' form
+  name and its harness value, since the item is a part of its questionnaire, not a component.
 
 ## Next steps
 

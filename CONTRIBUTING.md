@@ -326,7 +326,9 @@ input, keep the input checked with it, and fire `input` and `change` at the form
 input, the form field's name is the `name` attribute and `@name` stays the harness's; where the
 root can't take a `name` (a radio group's `<div>`), it is an argument, `@formName`. In a test of
 one, call the form element anything but `form`: a local by that name turns the template's
-`<form>` into a call to it.
+`<form>` into a call to it. A Questionnaire item is the exception to `@name`: an item is a part
+of its questionnaire, so its `@name` is its answers' form name and the item's name in `@items`,
+and the harness finds it by that (`data-test-jn-value`).
 
 **The harness** extends `Harness`, names `static component`, reads state through the DOM and
 ARIA (`label`, `isDisabled`, `isPressed`), and acts with `@ember/test-helpers` (`click()`,

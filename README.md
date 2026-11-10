@@ -77,8 +77,10 @@ layer covers the features of [ember-primitives](https://github.com/universal-emb
 which shadcn/ui's Sonner wraps, its charts port [recharts](https://github.com/recharts/recharts)
 (MIT, © recharts), which shadcn/ui's charts are built on, its Drawer ports
 [vaul](https://github.com/emilkowalski/vaul) (MIT, © Emil Kowalski), which shadcn/ui's Drawer is
-built on, and its Command follows [cmdk](https://github.com/dip/cmdk) (MIT, © Paco Coursey),
-which shadcn/ui's Command is built on, and ports its command score. Its file uploads are built on
+built on, its Command follows [cmdk](https://github.com/dip/cmdk) (MIT, © Paco Coursey),
+which shadcn/ui's Command is built on, and ports its command score, and its Calendar follows
+[React DayPicker](https://github.com/gpbl/react-day-picker) (MIT, © Giampaolo Bellavite), which
+shadcn/ui's Calendar is built on. Its file uploads are built on
 [ember-file-upload](https://github.com/adopted-ember-addons/ember-file-upload) (MIT), and its
 rich-text editor on [Tiptap](https://github.com/ueberdosis/tiptap) (MIT, © Tiptap GmbH). See
 [NOTICE](NOTICE).

@@ -450,7 +450,10 @@ This is the heaviest phase and may split into 6a (menus) and 6b (selection and T
 ### Phase 7: Dates
 
 Calendar (single, multiple and range; month and year dropdowns; locale-aware week start; RTL)
-and Date Picker (popover, range, presets).
+and Date Picker (popover, range, presets). Built so: Calendar's headless layer,
+`@ember-joinery/primitives/calendar`, replaces React DayPicker with its markup and options, and
+reads every name, number and week start from Intl in `@locale`; `@calendar` takes any calendar
+Intl knows (the Persian example's), worked out from Intl's own reading of each day.
 
 ### Phase 8: App shell and utilities
 
@@ -613,6 +616,14 @@ workspace.
   header cell, as the APG's sortable table does. Upstream's actions column has an empty header
   cell (axe's `empty-table-header`), which the guide's examples name with visually hidden text.
   The pixels are upstream's.
+- **Where Calendar parts from upstream.** Its selection is `@value`, `@defaultValue` and
+  `@onValueChange` (react-day-picker's `selected` and `onSelect`), controlled while `@value` is
+  set or `@onValueChange` comes without `@defaultValue`, as `onSelect` controls `selected`.
+  There is no `timeZone`: each day is a `Date` at local midnight. Weekday headings are Intl's
+  (two letters in English, as date-fns' short names; the narrow ones where the short ones are
+  whole words), so the Arabic and Persian headings differ from date-fns'. For WCAG, its week
+  numbers leave off the `scope` upstream's `td`s carry, and the custom-days example names each
+  day's price in its button. The pixels are upstream's.
 - **Where Select and Combobox part from upstream, for WCAG.** Radix's open Select hides the rest
   of the page with `aria-hidden`, leaving the trigger focusable but hidden; Joinery's makes it
   inert, as a modal dialog does. Base UI's Combobox leaves its chevron, clear and chip remove

@@ -194,7 +194,9 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
      `classNames={{…}}`, Input OTP's `containerClassName`), and in a cva compound variant. A
      `NOTE` marks each one; to match upstream, keep that class off the element. A
      `<part>ClassName` prop's rule goes on `jn-<data-slot>-<part>` instead
-     (`jn-input-otp-container`), the class to give that element.
+     (`jn-input-otp-container`), the class to give that element. Calendar's `classNames` parts
+     have no slot at all: their utilities go in `calendar-parts.css`, on react-day-picker's own
+     `rdp-<part>` classes, which Joinery's Calendar renders where DayPicker does.
 
    - transformStyle keeps five semantic classes on the element for its other transforms
      (`cn-rtl-flip`, `cn-font-heading`…), and other parts share them, so a rule never has one as

@@ -234,8 +234,9 @@ the trace. The block sets its own text color, so the trace does not mute it. Ups
 
 ## Tabs
 
-Show several files with Tabs, one `CodeBlock` in each tab's content. Upstream's example
-(`code-block-tabs`) comes with Tabs.
+Show several files with [Tabs](/components/tabs.md), one `CodeBlock` in each tab's content.
+
+<Example @name="code-block-tabs" @title="Tabs" />
 
 ## Message
 

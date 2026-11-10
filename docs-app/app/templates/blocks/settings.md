@@ -37,7 +37,9 @@ dashboard's Settings link, with each section a link of its own.
 - The dialog is named "Settings" and described by its title and description, which are visually
   hidden (`sr-only`), as upstream's.
 - The panel scrolls, so it can take focus (`tabindex="0"`) for the keyboard to scroll it;
-  upstream's can't, which fails WCAG 2.2's Keyboard criterion.
+  upstream's can't, which fails WCAG 2.2's Keyboard criterion. The dialog focuses the first
+  thing in it that takes focus but for a link, as Radix's does, so it opens with focus on the
+  panel, where upstream's opens with focus on its close button.
 
 ## Testing
 

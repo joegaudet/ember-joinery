@@ -1120,8 +1120,13 @@ export interface SelectContentSignature {
  * with focus trapped inside and the rest of the page inert.
  */
 export class SelectContent extends Component<SelectContentSignature> {
-  /** Where the closed content's options render: an element outside the page. */
-  readonly offPage: HTMLElement = document.createElement('div')
+  /**
+   * Where the closed content's options render: an element outside the page. A server render
+   * (FastBoot) has no `document`, so there are none there; the value shows its placeholder until
+   * the page is in a browser.
+   */
+  readonly offPage: HTMLElement | undefined =
+    typeof document === 'undefined' ? undefined : document.createElement('div')
 
   get select(): Select {
     return this.args.select
@@ -1255,7 +1260,7 @@ export class SelectContent extends Component<SelectContentSignature> {
           >{{yield}}</As>
         </div>
       {{/if}}
-    {{else}}
+    {{else if this.offPage}}
       {{#in-element this.offPage insertBefore=null}}
         <div>{{yield}}</div>
       {{/in-element}}

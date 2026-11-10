@@ -476,7 +476,10 @@ export class CalendarState {
       fallback: startOfDay(args().today ?? new Date()),
     })
     if (args().autoFocus) {
-      const target = this.focusTarget
+      // Nothing has had focus yet. The target is worked out without reading `focused`, which is
+      // set next: the calendar is made while it renders, and Ember 6.12 asserts on a tracked
+      // value written after it was read in the same render.
+      const target = this.#focusTargetOf(this.grid, undefined, undefined)
       if (target) this.focused = { date: target.date, displayMonth: target.displayMonth }
     }
   }
@@ -776,10 +779,14 @@ export class CalendarState {
    * focused last, else the first selected, else today, else the first that can take focus.
    */
   get focusTarget(): DayRef | undefined {
-    return this.#focusTargetOf(this.grid)
+    return this.#focusTargetOf(this.grid, this.focused, this.lastFocused)
   }
 
-  #focusTargetOf(grid: { date: Date; displayMonth: Date; modifiers: CalendarModifiers }[][]) {
+  #focusTargetOf(
+    grid: { date: Date; displayMonth: Date; modifiers: CalendarModifiers }[][],
+    focused: DayRef | undefined,
+    lastFocused: DayRef | undefined,
+  ) {
     const focusable = (modifiers: CalendarModifiers) =>
       !modifiers.disabled && !modifiers.hidden && !modifiers.outside
     let found: DayRef | undefined
@@ -787,8 +794,8 @@ export class CalendarState {
     for (const days of grid) {
       for (const day of days) {
         if (!focusable(day.modifiers)) continue
-        if (priority < 4 && sameRef(this.focused, day)) [found, priority] = [day, 4]
-        else if (priority < 3 && sameRef(this.lastFocused, day)) [found, priority] = [day, 3]
+        if (priority < 4 && sameRef(focused, day)) [found, priority] = [day, 4]
+        else if (priority < 3 && sameRef(lastFocused, day)) [found, priority] = [day, 3]
         else if (priority < 2 && this.isSelected(day.date)) [found, priority] = [day, 2]
         else if (priority < 1 && day.modifiers.today) [found, priority] = [day, 1]
         else if (priority < 0) [found, priority] = [day, 0]
@@ -837,7 +844,7 @@ export class CalendarState {
     const classNames = this.classNames
     const custom = args.modifiersClassNames ?? {}
     const grid = this.grid
-    const target = this.#focusTargetOf(grid)
+    const target = this.#focusTargetOf(grid, this.focused, this.lastFocused)
     const interactive = this.isInteractive
     const selected = this.selected
     const range = isRange(selected) ? selected : undefined
@@ -1065,8 +1072,17 @@ export class CalendarState {
     }
   })
 
-  /** Put it on each day's button with its `focused` modifier: it takes focus when that's set. */
+  /**
+   * Put it on each day's button with its `focused` modifier: it takes focus when that's set, once
+   * the render is over. Focusing fires the days' blur and focus handlers, which read their day;
+   * run inside the modifier, those reads would count as the modifier's, and on Ember 6.12 the next
+   * render, which updates those days, would then assert that they were read before they changed
+   * (when focus moves to an earlier week, whose modifiers render first).
+   */
   focusWhen = modifier((element: HTMLElement, [focused]: [boolean]) => {
-    if (focused && element.ownerDocument.activeElement !== element) element.focus()
+    if (!focused) return
+    queueMicrotask(() => {
+      if (element.isConnected && element.ownerDocument.activeElement !== element) element.focus()
+    })
   })
 }

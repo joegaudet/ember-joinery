@@ -112,6 +112,21 @@ export interface CalendarLabels {
   labelWeekNumberHeader(locale: CalendarLocale): string
 }
 
+const narrow = new WeakMap<CalendarLocale, boolean>()
+
+/** Whether a locale's abbreviated weekday names are too long for a calendar's columns. */
+function narrowWeekdays(locale: CalendarLocale): boolean {
+  let value = narrow.get(locale)
+  if (value === undefined) {
+    // 4 to 10 January 2026 run Sunday to Saturday.
+    value = Array.from({ length: 7 }, (_, index) => new Date(2026, 0, 4 + index)).some(
+      day => [...locale.format(day, { weekday: 'short' })].length > 4,
+    )
+    narrow.set(locale, value)
+  }
+  return value
+}
+
 /** Intl's formatting, as react-day-picker formats with date-fns. */
 export const defaultCalendarFormatters: CalendarFormatters = {
   formatCaption: (month, locale) => locale.format(month, { month: 'long', year: 'numeric' }),
@@ -120,11 +135,12 @@ export const defaultCalendarFormatters: CalendarFormatters = {
   formatYearDropdown: (year, locale) => locale.format(year, { year: 'numeric' }),
   formatWeekdayName(weekday, locale) {
     // react-day-picker shows date-fns' short day names (CLDR's "short" width: Su, Mo, Tu),
-    // which Intl doesn't offer. In English they are the abbreviation's first two letters; where
-    // the abbreviation is a whole word (Persian's, Arabic's), the narrow name fits the column.
+    // which Intl doesn't offer. In English they are the abbreviation's first two letters; in
+    // a language whose abbreviations are whole words (Persian, Arabic), the narrow names fit
+    // the columns.
     const name = locale.format(weekday, { weekday: 'short' })
     if (locale.language === 'en') return name.slice(0, 2)
-    return [...name].length > 4 ? locale.format(weekday, { weekday: 'narrow' }) : name
+    return narrowWeekdays(locale) ? locale.format(weekday, { weekday: 'narrow' }) : name
   },
   formatWeekNumber: (weekNumber, locale) =>
     locale.formatNumber(weekNumber, { minimumIntegerDigits: 2 }),

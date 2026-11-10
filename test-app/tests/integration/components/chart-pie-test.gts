@@ -460,13 +460,17 @@ module('Integration | components | chart | pie', function (hooks) {
     await render(
       <template>
         <ChartContainer @config={{chartConfig}} style={{size}} as |chart|>
-          <chart.PieChart as |c|>
-            <c.ChartTooltip @content={{component ChartTooltipContent hideLabel=true}} />
+          <chart.PieChart @data={{rows}} as |c|>
+            <c.ChartTooltip
+              @defaultIndex={{0}}
+              @content={{component ChartTooltipContent hideLabel=true}}
+            />
             <c.ChartLegend />
-            <c.Pie @data={{rows}} as |pie|>
+            <c.Pie as |pie|>
               {{#each fills as |fill|}}
                 <pie.Cell @fill={{fill}} />
               {{/each}}
+              <pie.Label @value="Total" @position="center" @class="fill-foreground" />
             </c.Pie>
           </chart.PieChart>
         </ChartContainer>
@@ -478,8 +482,20 @@ module('Integration | components | chart | pie', function (hooks) {
       ['red', 'blue'],
       "recharts' defaults: the value key `value`, the name key `name`",
     )
-    assert.deepEqual(chart.sectorNames('value'), ['a', 'b'])
+    assert.deepEqual(chart.sectorNames('value'), ['a', 'b'], "the chart's @data")
     assert.true(chart.legend!.items[0]!.swatch!.getAttribute('style')!.includes('red'))
+    assert.deepEqual(chart.tooltip!.entryValues, ['1'], '@defaultIndex shows the first sector')
+    const total = chart.surface.querySelector('text.fill-foreground')!
+    assert
+      .dom(total)
+      .hasText('Total')
+      .hasClass('fill-foreground')
+      .hasAttribute('text-anchor', 'middle')
+    assert.strictEqual(
+      Number(total.getAttribute('x')),
+      chart.width / 2,
+      "a Label's @value, centred",
+    )
     await chart.hover(1)
     assert.true(chart.tooltip!.items[0]!.indicator!.getAttribute('style')!.includes('blue'))
     await a11yAudit()

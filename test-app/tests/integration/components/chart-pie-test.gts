@@ -1,6 +1,7 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { render } from '@ember/test-helpers'
+import { render, rerender } from '@ember/test-helpers'
+import { tracked } from '@glimmer/tracking'
 import type { TOC } from '@ember/component/template-only'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
@@ -78,6 +79,16 @@ const VisitorsLabel: TOC<PieLabelSignature> = <template>
     fill="var(--foreground)"
     data-test-custom-label
   >{{@props.payload.visitors}}</text>
+</template>
+
+class LabelState {
+  @tracked visitors = 186
+}
+
+const shown = (value: unknown) => String(value)
+
+const VisitorsValue: TOC<LabelContentSignature> = <template>
+  <text x={{@viewBox.cx}} y={{@viewBox.cy}} data-test-visitors>{{shown @value}}</text>
 </template>
 
 const browserLabel = (value: string) => chartConfig[value as keyof typeof chartConfig]?.label
@@ -498,6 +509,39 @@ module('Integration | components | chart | pie', function (hooks) {
     )
     await chart.hover(1)
     assert.true(chart.tooltip!.items[0]!.indicator!.getAttribute('style')!.includes('blue'))
+    await a11yAudit()
+  })
+
+  test('a Label follows its @value, drawn by @content or as text', async function (assert) {
+    const state = new LabelState()
+    await render(
+      <template>
+        <ChartContainer @config={{chartConfig}} style={{size}} as |chart|>
+          <chart.PieChart as |c|>
+            <c.Pie
+              @data={{chartData}}
+              @dataKey="visitors"
+              @nameKey="browser"
+              @innerRadius={{60}}
+              as |pie|
+            >
+              <pie.Label @value={{state.visitors}} @content={{VisitorsValue}} />
+              <pie.Label @value={{state.visitors}} @class="fill-foreground" />
+            </c.Pie>
+          </chart.PieChart>
+        </ChartContainer>
+      </template>,
+    )
+    const chart = new ChartHarness()
+    const drawn = () => chart.surface.querySelector('[data-test-visitors]')
+    const text = () => chart.surface.querySelector('text.fill-foreground')
+    assert.dom(drawn()).hasText('186')
+    assert.dom(text()).hasText('186')
+
+    state.visitors = 237
+    await rerender()
+    assert.dom(drawn()).hasText('237', "the content is handed the label's new @value")
+    assert.dom(text()).hasText('237', 'the text shows it')
     await a11yAudit()
   })
 

@@ -103,11 +103,15 @@ module('Acceptance | guide pages', function (hooks) {
       for (const heading of document.querySelectorAll('.guide-prose h2[id]:not(.example h2)')) {
         assert.dom(heading.querySelector('a.heading-anchor')).hasAttribute('href', `#${heading.id}`)
       }
-      // Every <Example> on the page found its file and rendered it.
+      // Every <Example> on the page found its file and rendered it: a block, in its own frame.
       for (const example of document.querySelectorAll('[data-test-example]')) {
         const name = example.getAttribute('data-test-example')!
         await waitUntil(() => !example.querySelector('.example-loading'), { timeout: 15000 })
-        assert.dom(example.querySelector('.example-preview')).exists(`example ${name} rendered`)
+        const preview = () =>
+          example.querySelector('.example-preview') ??
+          example.querySelector('iframe')?.contentDocument?.querySelector('.example-preview')
+        await waitUntil(preview, { timeout: 15000 })
+        assert.dom(preview()).exists(`example ${name} rendered`)
       }
       const exceptions = AUDIT_EXCEPTIONS[page]?.rules ?? {}
       await a11yAudit({ rules: { ...exceptions, ...SCOPED_RULES } })

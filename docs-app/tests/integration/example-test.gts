@@ -356,6 +356,46 @@ module('Integration | <Example>', function (hooks) {
     await a11yAudit()
   })
 
+  test('a block shows its screen in a frame of its own, the preview wide', async function (assert) {
+    await render(
+      <template><Example @name="sidebar-menu" @title="Menu" @block={{true}} /></template>,
+    )
+    await waitUntil(() =>
+      find('iframe')?.contentDocument?.querySelector('[data-slot="sidebar-wrapper"]'),
+    )
+    const frame = find('iframe') as HTMLIFrameElement
+    assert.dom(frame).hasAttribute('title', 'Menu').hasAttribute('data-fill', 'true')
+    assert.dom(frame).doesNotHaveAttribute('width', 'as wide as the preview')
+    assert.strictEqual(frame.style.height, '600px', 'a fixed height, as a screen has')
+    const doc = frame.contentDocument!
+    const view = frame.contentWindow!
+    const stage = doc.querySelector('.example-preview') as HTMLElement
+    assert.dom(stage).hasAttribute('data-block', 'true')
+    assert.strictEqual(view.getComputedStyle(stage).paddingTop, '0px', 'nothing around the screen')
+    const wrapper = doc.querySelector('[data-slot="sidebar-wrapper"]') as HTMLElement
+    assert.strictEqual(
+      view.getComputedStyle(wrapper).minHeight,
+      `${view.innerHeight}px`,
+      "min-h-svh is the frame's height",
+    )
+    const container = doc.querySelector('[data-slot="sidebar-container"]') as HTMLElement
+    assert.strictEqual(container.getBoundingClientRect().top, 0, 'fixed to the frame, not the page')
+
+    await click('[data-test-example-width="375"]')
+    await waitUntil(() =>
+      find('iframe')?.contentDocument?.querySelector('[data-slot="sidebar-wrapper"]'),
+    )
+    const narrow = find('iframe') as HTMLIFrameElement
+    assert.dom(narrow).hasAttribute('width', '375').hasAttribute('title', 'Menu, 375px wide')
+    assert.strictEqual(narrow.style.height, '600px')
+    // The provider measures the window it renders in: the frame's, narrower than the breakpoint.
+    await waitUntil(() => !narrow.contentDocument?.querySelector('.jn-sidebar'))
+    assert
+      .dom(narrow.contentDocument!.querySelector('[data-slot="sidebar-wrapper"]'))
+      .exists('a sheet on a phone, so no desktop panel')
+    await a11yAudit()
+  })
+
   test('a missing example says so instead of failing the page', async function (assert) {
     await render(<template><Example @name="no-such-example" /></template>)
     assert.dom('.example-missing[role="alert"]').includesText('no-such-example')

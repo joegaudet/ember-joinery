@@ -574,6 +574,22 @@
     height: 18rem;
   }
 
+  /* A block at the frame's own width: as wide as the preview, border and all. */
+  .preview-frame[data-fill='true'] {
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  /*
+   * A block (`@block`): a whole screen, as upstream's `type="block"` previews show one. It fills
+   * its frame, from the top, with nothing around it; its own layout (`min-h-svh`) is the frame's.
+   */
+  .example-preview[data-block='true'] {
+    display: block;
+    min-height: 0;
+    padding: 0;
+  }
+
   /* As upstream's preview: the example centred in a fixed-height stage, or placed by @align. */
   .example-preview {
     display: flex;

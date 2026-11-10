@@ -5,8 +5,13 @@ import { waitForPromise } from '@ember/test-waiters'
 
 interface PreviewFrameSignature {
   Args: {
-    /** The viewport's width, in CSS pixels. */
-    width: number
+    /** The viewport's width, in CSS pixels. Without it, the frame is as wide as its container. */
+    width?: number
+    /**
+     * The viewport's height, in CSS pixels, for a whole screen (an Example's `@block`). Without
+     * it, the frame grows to the height of what it shows.
+     */
+    height?: number
     /** What the frame is, for assistive technology. */
     title: string
   }
@@ -57,10 +62,14 @@ export default class PreviewFrame extends Component<PreviewFrameSignature> {
       // Render once the styles are in, so the preview never shows unstyled.
       await copyStyles(doc)
       if (this.isDestroying || iframe.contentDocument !== doc) return done()
-      observer = new ResizeObserver(() => {
-        iframe.style.height = `${doc.documentElement.scrollHeight}px`
-      })
-      observer.observe(doc.body)
+      if (this.args.height) {
+        iframe.style.height = `${this.args.height}px`
+      } else {
+        observer = new ResizeObserver(() => {
+          iframe.style.height = `${doc.documentElement.scrollHeight}px`
+        })
+        observer.observe(doc.body)
+      }
       this.body = doc.body
       done()
     }
@@ -79,6 +88,7 @@ export default class PreviewFrame extends Component<PreviewFrameSignature> {
       class="preview-frame"
       title={{@title}}
       width={{@width}}
+      data-fill={{if @width undefined "true"}}
       srcdoc="<!doctype html><html><head><meta charset='utf-8'></head><body></body></html>"
       {{this.setup}}
       ...attributes

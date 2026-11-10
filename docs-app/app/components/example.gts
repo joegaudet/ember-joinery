@@ -59,8 +59,17 @@ interface ExampleSignature {
      * frame, instead of being cut off at its edge.
      */
     overflow?: 'visible'
+    /**
+     * A whole screen, as upstream's `type="block"` previews (the sidebar's): shown in a frame of
+     * its own, the preview's width (or the width preset's) and `BLOCK_HEIGHT` tall, so its fixed
+     * parts, its `svh` heights and its breakpoints are the frame's, as in upstream's `<iframe>`.
+     */
+    block?: boolean
   }
 }
+
+/** A block preview's height, in CSS pixels: upstream's is 4:2.5 of its width, about this tall. */
+const BLOCK_HEIGHT = 600
 
 /**
  * A live example, as on ui.shadcn.com's component pages: the rendered example, plus tabs with
@@ -153,7 +162,17 @@ export class Example extends Component<ExampleSignature> {
   }
 
   get frameTitle(): string {
-    return `${this.args.title ?? this.args.name}, ${this.width}px wide`
+    const name = this.args.title ?? this.args.name
+    return this.width ? `${name}, ${this.width}px wide` : name
+  }
+
+  /** Whether the preview renders in a frame: at a width preset, or a block at any width. */
+  get framed(): boolean {
+    return this.width !== undefined || Boolean(this.args.block)
+  }
+
+  get frameHeight(): number | undefined {
+    return this.args.block ? BLOCK_HEIGHT : undefined
   }
 
   isStyle = (name: string) => name === this.styleName
@@ -316,15 +335,20 @@ export class Example extends Component<ExampleSignature> {
           </p>
         {{else if this.example}}
           {{#if (this.isTab "preview")}}
-            {{#if this.width}}
-              <div class="example-viewport">
-                <PreviewFrame @width={{this.width}} @title={{this.frameTitle}}>
+            {{#if this.framed}}
+              <div class="example-viewport" data-block={{if @block "true"}}>
+                <PreviewFrame
+                  @width={{this.width}}
+                  @height={{this.frameHeight}}
+                  @title={{this.frameTitle}}
+                >
                   {{#each this.themeKey key="@identity"}}
                     <div
                       class="example-preview guide-stage {{if this.dark 'dark'}} {{@previewClass}}"
                       data-example={{@name}}
                       data-align={{if @align @align "center"}}
                       data-full-width={{if @fullWidth "true"}}
+                      data-block={{if @block "true"}}
                       data-style={{this.styleName}}
                       dir={{this.dir}}
                       style={{this.tokens}}

@@ -17,6 +17,25 @@ import { ignoreROError } from './resize-observer.ts'
 import { visuallyHidden } from './visually-hidden.gts'
 import { Delay, ElementRef, buttonType } from './-private/popper.gts'
 
+/**
+ * What a styled layer adds to a modifier the menu yields (an item's `trigger`, the `link`), so it
+ * renders what the styled part does: its classes and attributes (`data-slot`).
+ */
+export type NavigationMenuPartLook = () => {
+  class?: string
+  attributes?: Readonly<Record<string, string | undefined>>
+}
+
+/** The spec with a look's classes and attributes added (the spec's own attributes win). */
+function withLook(
+  spec: PartSpec<HTMLElement>,
+  look: NavigationMenuPartLook | undefined,
+): PartSpec<HTMLElement> {
+  if (!look) return spec
+  const extra = look()
+  return { ...spec, class: extra.class, attributes: { ...extra.attributes, ...spec.attributes } }
+}
+
 /** Which way the list runs: its triggers and links side by side, or one above another. */
 export type NavigationMenuOrientation = 'horizontal' | 'vertical'
 
@@ -40,6 +59,8 @@ export type NavigationMenuArgs = ControllableArgs<'value', string> & {
   name?: string
   /** The tag to render. Default `nav`. */
   as?: TagName
+  /** A styled layer's look for the `link` modifier, so it renders what its Link does. */
+  linkLook?: NavigationMenuPartLook
 }
 
 /** Sent up from a link that is selected, or a content that is dismissed: the content closes. */
@@ -354,7 +375,10 @@ export class NavigationMenu extends Component<NavigationMenuSignature> {
   }
 
   /** The link modifier, for the yielded Link and your own elements. */
-  link: PartModifier<HTMLElement, NavigationMenuLinkOptions> = navigationMenuLinkPart(this)
+  link: PartModifier<HTMLElement, NavigationMenuLinkOptions> = navigationMenuLinkPart(
+    this,
+    () => this.args.linkLook,
+  )
 
   root = part<HTMLElement>(() => ({
     attributes: { 'data-orientation': this.orientation, dir: this.explicitDir },
@@ -382,6 +406,7 @@ export class NavigationMenu extends Component<NavigationMenuSignature> {
           Indicator=(component NavigationMenuIndicator root=this)
           Viewport=(component NavigationMenuViewport root=this)
           link=this.link
+          navigationMenu=this
           value=this.value
           isOpen=this.isOpen
           setValue=this.setValue
@@ -714,6 +739,8 @@ export interface NavigationMenuItemSignature {
     value?: string
     /** The tag to render. Default `li`. */
     as?: TagName
+    /** A styled layer's look for the `trigger` modifier, so it renders what its Trigger does. */
+    triggerLook?: NavigationMenuPartLook
   }
   Blocks: { default: [NavigationMenuItemBlockParams] }
   Element: HTMLLIElement
@@ -792,7 +819,7 @@ export class NavigationMenuItem extends Component<NavigationMenuItemSignature> {
     const disabled = options.disabled ?? false
     const { root } = this
     const open = this.isOpen
-    return {
+    const spec: PartSpec<HTMLElement> = {
       attributes: {
         id: this.triggerId,
         'data-disabled': disabled ? '' : undefined,
@@ -845,6 +872,7 @@ export class NavigationMenuItem extends Component<NavigationMenuItemSignature> {
         }
       },
     }
+    return withLook(spec, this.args.triggerLook)
   })
 
   /** The focus proxy after an open trigger: Tab onto it goes into the content. */
@@ -904,34 +932,38 @@ export interface NavigationMenuLinkOptions {
 /** A link's modifier: Radix's NavigationMenuLink on your own element (`<LinkTo {{n.link}}>`). */
 export function navigationMenuLinkPart(
   root: NavigationMenu,
+  look: () => NavigationMenuPartLook | undefined = () => undefined,
 ): PartModifier<HTMLElement, NavigationMenuLinkOptions> {
-  return part<HTMLElement, NavigationMenuLinkOptions>(options => ({
-    attributes: {
-      'data-active': options.active ? '' : undefined,
-      'aria-current': options.active ? 'page' : undefined,
-      'data-test-jn-part': 'link',
-    },
-    on: {
-      keydown: event => onFocusGroupKeyDown(event, root.dir),
-      click: event => {
-        const target = event.target as HTMLElement
-        const select = new CustomEvent(LINK_SELECT, { bubbles: true, cancelable: true })
-        target.addEventListener(LINK_SELECT, selected => options.onSelect?.(selected), {
-          once: true,
-        })
-        target.dispatchEvent(select)
-        if (!select.defaultPrevented && !event.metaKey) {
-          target.dispatchEvent(
-            new CustomEvent(ROOT_CONTENT_DISMISS, { bubbles: true, cancelable: true }),
-          )
-        }
+  return part<HTMLElement, NavigationMenuLinkOptions>(options => {
+    const spec: PartSpec<HTMLElement> = {
+      attributes: {
+        'data-active': options.active ? '' : undefined,
+        'aria-current': options.active ? 'page' : undefined,
+        'data-test-jn-part': 'link',
       },
-    },
-    element: element => {
-      focusGroupItems.add(element)
-      return () => focusGroupItems.delete(element)
-    },
-  }))
+      on: {
+        keydown: event => onFocusGroupKeyDown(event, root.dir),
+        click: event => {
+          const target = event.target as HTMLElement
+          const select = new CustomEvent(LINK_SELECT, { bubbles: true, cancelable: true })
+          target.addEventListener(LINK_SELECT, selected => options.onSelect?.(selected), {
+            once: true,
+          })
+          target.dispatchEvent(select)
+          if (!select.defaultPrevented && !event.metaKey) {
+            target.dispatchEvent(
+              new CustomEvent(ROOT_CONTENT_DISMISS, { bubbles: true, cancelable: true }),
+            )
+          }
+        },
+      },
+      element: element => {
+        focusGroupItems.add(element)
+        return () => focusGroupItems.delete(element)
+      },
+    }
+    return withLook(spec, look())
+  })
 }
 
 interface LinkSignature {
@@ -1116,6 +1148,8 @@ export interface NavigationMenuBlockParams {
   Viewport: WithBoundArgs<typeof NavigationMenuViewport, 'root'>
   /** Makes your own element a link: `<LinkTo @route="docs" {{n.link}}>`. */
   link: PartModifier<HTMLElement, NavigationMenuLinkOptions>
+  /** The menu itself, for a styled layer. */
+  navigationMenu: NavigationMenu
   /** The open item's value, or `''`. */
   value: string
   /** Whether a content is open. */

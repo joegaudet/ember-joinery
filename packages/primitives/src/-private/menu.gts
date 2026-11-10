@@ -1386,6 +1386,11 @@ export interface MenuContentHost extends MenuRoot {
   dismiss(reason: DismissReason): void
   /** Decides where focus goes when the content has closed. */
   closeAutoFocus(event: Event, handler?: (event: Event) => void): void
+  /**
+   * A key in the content, its submenus' included, whatever handled it before: a menubar's menu
+   * opens the menu beside it on ArrowLeft and ArrowRight.
+   */
+  onContentKeyDown?(event: KeyboardEvent): void
   /** Notes a press or focus outside, for `closeAutoFocus`. */
   interactOutside(
     event: PointerDownOutsideEvent | FocusOutsideEvent,
@@ -1461,7 +1466,10 @@ export class MenuContent extends Component<MenuContentSignature> {
           loop: () => this.args.loop ?? false,
         })
         const uninstall = state.install()
+        const onKeyDown = (event: KeyboardEvent) => this.menu.onContentKeyDown?.(event)
+        element.addEventListener('keydown', onKeyDown)
         return () => {
+          element.removeEventListener('keydown', onKeyDown)
           uninstall()
           restore()
         }

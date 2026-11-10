@@ -1,0 +1,73 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/menubar.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="menubar" in Menubar */
+:where(.jn-menubar) {
+  @apply flex items-center;
+}
+
+/* data-slot="menubar-trigger" in MenubarTrigger */
+:where(.jn-menubar-trigger) {
+  @apply flex items-center outline-hidden select-none;
+}
+
+/* data-slot="menubar-content" in MenubarContent; also: jn-menu-target jn-menu-translucent */
+:where(.jn-menubar-content) {
+  @apply z-50 origin-(--radix-menubar-content-transform-origin) overflow-hidden;
+}
+
+/* data-slot="menubar-item" in MenubarItem; keep on the element: group/menubar-item */
+:where(.jn-menubar-item) {
+  @apply relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0;
+}
+
+/* data-slot="menubar-checkbox-item" in MenubarCheckboxItem */
+:where(.jn-menubar-checkbox-item) {
+  @apply relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0;
+}
+
+/* in MenubarCheckboxItem */
+:where(.jn-menubar-checkbox-item-indicator) {
+  @apply pointer-events-none absolute flex items-center justify-center;
+}
+
+/* data-slot="menubar-radio-item" in MenubarRadioItem */
+:where(.jn-menubar-radio-item) {
+  @apply relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0;
+}
+
+/* in MenubarRadioItem */
+:where(.jn-menubar-radio-item-indicator) {
+  @apply pointer-events-none absolute flex items-center justify-center;
+}
+
+/* data-slot="menubar-separator" in MenubarSeparator */
+:where(.jn-menubar-separator) {
+  @apply -mx-1 my-1 h-px;
+}
+
+/* data-slot="menubar-shortcut" in MenubarShortcut */
+:where(.jn-menubar-shortcut) {
+  @apply ms-auto;
+}
+
+/* data-slot="menubar-sub-trigger" in MenubarSubTrigger */
+:where(.jn-menubar-sub-trigger) {
+  @apply flex cursor-default items-center outline-none select-none;
+}
+
+/* in MenubarSubTrigger; keep on the element: jn-size-4; inside .jn-menubar-sub-trigger only, since other parts share .jn-rtl-flip */
+:where(.jn-menubar-sub-trigger) > :where(.jn-rtl-flip) {
+  @apply ms-auto size-4;
+}
+
+/* data-slot="menubar-sub-content" in MenubarSubContent; also: jn-menu-target jn-menu-translucent */
+:where(.jn-menubar-sub-content) {
+  @apply z-50 origin-(--radix-menubar-content-transform-origin) overflow-hidden;
+}

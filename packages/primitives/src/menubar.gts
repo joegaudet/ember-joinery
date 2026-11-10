@@ -1,6 +1,5 @@
 import Component from '@glimmer/component'
 import { hash } from '@ember/helper'
-import { on } from '@ember/modifier'
 import type Owner from '@ember/owner'
 import type { TOC } from '@ember/component/template-only'
 import type { WithBoundArgs } from '@glint/template'
@@ -9,7 +8,7 @@ import { controllable, type ControllableArgs } from './controllable-state.ts'
 import { getDirection, type Direction } from './direction.gts'
 import type { DismissReason, FocusOutsideEvent, PointerDownOutsideEvent } from './dismiss.ts'
 import { idFor } from './id.ts'
-import { part, type PartModifier } from './part.ts'
+import { part, type PartModifier, type PartSpec } from './part.ts'
 import { RovingFocus, type RovingFocusItemState } from './roving-focus.gts'
 import { ElementRef, buttonType, ensureId, type PopperContentArgs } from './-private/popper.gts'
 import {
@@ -30,10 +29,11 @@ import {
   itemPart,
   labelPart,
   separatorPart,
+  withLook,
   type MenuCheckboxItemOptions,
-  type MenuContentArgs,
   type MenuContentHost,
   type MenuItemOptions,
+  type MenuPartLook,
   type MenuRoot,
 } from './-private/menu.gts'
 
@@ -233,59 +233,12 @@ const MenubarTrigger: TOC<TriggerSignature> = <template>
   >{{yield}}</As>
 </template>
 
-interface ContentSignature {
-  Args: MenuContentArgs & {
-    /** @internal The menu, bound by it. */
-    menu: MenubarMenu
-  }
-  Blocks: { default: [] }
-  Element: HTMLDivElement
-}
-
-/** A menu's content: a Dropdown Menu's, with ArrowLeft and ArrowRight opening the next menu. */
-class MenubarContent extends Component<ContentSignature> {
-  onKeyDown = (event: KeyboardEvent): void =>
-    this.args.menu.menubar.onContentKeyDown(event, this.args.menu)
-
-  <template>
-    <MenuContent
-      @menu={{@menu}}
-      @itemPart={{@menu.item}}
-      @as={{@as}}
-      @forceMount={{@forceMount}}
-      @loop={{@loop}}
-      @side={{@side}}
-      @align={{@align}}
-      @sideOffset={{@sideOffset}}
-      @alignOffset={{@alignOffset}}
-      @avoidCollisions={{@avoidCollisions}}
-      @collisionPadding={{@collisionPadding}}
-      @arrowPadding={{@arrowPadding}}
-      @sticky={{@sticky}}
-      @hideWhenDetached={{@hideWhenDetached}}
-      @placement={{@placement}}
-      @offsetOptions={{@offsetOptions}}
-      @flipOptions={{@flipOptions}}
-      @shiftOptions={{@shiftOptions}}
-      @middleware={{@middleware}}
-      @strategy={{@strategy}}
-      @onCloseAutoFocus={{@onCloseAutoFocus}}
-      @onEscapeKeyDown={{@onEscapeKeyDown}}
-      @onPointerDownOutside={{@onPointerDownOutside}}
-      @onFocusOutside={{@onFocusOutside}}
-      @onInteractOutside={{@onInteractOutside}}
-      ...attributes
-      {{on "keydown" this.onKeyDown}}
-    >{{yield}}</MenuContent>
-  </template>
-}
-
 /** What a menubar's menu yields: its parts, their modifiers, and its state. */
 export interface MenubarMenuBlockParams {
   /** The `<button>` in the menubar that opens it (`@as` for another tag). */
   Trigger: WithBoundArgs<typeof MenubarTrigger, 'part'>
   /** The menu itself, in the top layer while it is open, below its trigger. */
-  Content: WithBoundArgs<typeof MenubarContent, 'menu'>
+  Content: WithBoundArgs<typeof MenuContent, 'menu' | 'itemPart'>
   /** Radix's `Portal`: renders its block in place (the top layer needs no portal). */
   Portal: typeof MenuPortal
   /** A group of items. */
@@ -336,6 +289,8 @@ export interface MenubarMenuSignature {
     menubar: Menubar
     /** Its value, for the menubar's `@value`. Default: an id of its own. */
     value?: string
+    /** A styled layer's look for the `trigger` modifier, so it renders what its Trigger does. */
+    triggerLook?: MenuPartLook
   }
   Blocks: { default: [MenubarMenuBlockParams] }
 }
@@ -437,6 +392,11 @@ export class MenubarMenu extends Component<MenubarMenuSignature> implements Menu
     event.preventDefault()
   }
 
+  /** ArrowLeft and ArrowRight in its content open the menu beside it. */
+  onContentKeyDown(event: KeyboardEvent): void {
+    this.menubar.onContentKeyDown(event, this)
+  }
+
   interactOutside(
     event: PointerDownOutsideEvent | FocusOutsideEvent,
     handler?: (event: PointerDownOutsideEvent | FocusOutsideEvent) => void,
@@ -464,7 +424,7 @@ export class MenubarMenu extends Component<MenubarMenuSignature> implements Menu
       this.#rovingItem.focusable = !disabled
       roving.changed()
     }
-    return {
+    const spec: PartSpec<HTMLElement> = {
       attributes: {
         role: 'menuitem',
         'aria-haspopup': 'menu',
@@ -532,6 +492,7 @@ export class MenubarMenu extends Component<MenubarMenuSignature> implements Menu
         }
       },
     }
+    return withLook(spec, { ...options }, this.args.triggerLook)
   })
 
   item = itemPart(this)
@@ -549,7 +510,7 @@ export class MenubarMenu extends Component<MenubarMenuSignature> implements Menu
     {{yield
       (hash
         Trigger=(component MenubarTrigger part=this.trigger)
-        Content=(component MenubarContent menu=this)
+        Content=(component MenuContent menu=this itemPart=this.item)
         Portal=MenuPortal
         Group=(component MenuGroup part=groupPart)
         Label=(component MenuLabel part=labelPart)

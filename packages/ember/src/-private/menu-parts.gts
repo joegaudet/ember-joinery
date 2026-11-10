@@ -1,7 +1,7 @@
-// The styled parts Dropdown Menu and Context Menu share. Upstream's two are the same but for
-// their names (`cn-dropdown-menu-item`, `cn-context-menu-item`…) and a detail or two, so each
-// part here takes the menu's `@look`: its classes and `data-slot`s. dropdown-menu.gts and
-// context-menu.gts are the public modules.
+// The styled parts Dropdown Menu, Context Menu and Menubar share. Upstream's three are the same
+// but for their names (`cn-dropdown-menu-item`, `cn-context-menu-item`, `cn-menubar-item`…) and
+// a detail or two, so each part here takes the menu's `@look`: its classes and `data-slot`s.
+// dropdown-menu.gts, context-menu.gts and menubar.gts are the public modules.
 import { hash } from '@ember/helper'
 import type { TOC } from '@ember/component/template-only'
 import type { WithBoundArgs } from '@glint/template'
@@ -25,7 +25,7 @@ import type { PartModifier } from '@ember-joinery/primitives/part'
 import Icon, { type IconNode } from '../components/icon.gts'
 
 /** Which menu the parts are for: their classes and `data-slot`s start with it. */
-export type MenuName = 'dropdown-menu' | 'context-menu'
+export type MenuName = 'dropdown-menu' | 'context-menu' | 'menubar'
 
 /** An item's look: `default`, or `destructive` for one that can't be undone. */
 export type MenuItemVariant = 'default' | 'destructive'
@@ -54,9 +54,15 @@ export interface MenuLook {
   /** The span around a checkbox or radio item's check mark. Context Menu's has no `data-slot`. */
   readonly checkboxIndicator: Slot | { readonly class: string; readonly slot?: undefined }
   readonly radioIndicator: Slot | { readonly class: string; readonly slot?: undefined }
-  /** The content's alignment and distance when it is given none: upstream's own. */
+  /** The content's alignment and distances when it is given none: upstream's own. */
   readonly contentAlign: 'start' | undefined
   readonly contentSideOffset: number | undefined
+  readonly contentAlignOffset: number | undefined
+  /**
+   * The classes of a sub trigger's chevron: `jn-rtl-flip`, and the size marker where upstream
+   * sizes it with a class (the menubar's `size-4`).
+   */
+  readonly subTriggerIcon: string
   /**
    * What the primitive's yielded modifiers add, so each renders what its part does: the
    * trigger's (a context menu's; a dropdown menu's trigger has nothing of its own but its
@@ -85,8 +91,9 @@ function dataInset(inset: unknown): 'true' | undefined {
  */
 export function menuLook(name: MenuName): MenuLook {
   const indicator = `jn-${name}-item-indicator`
+  const isMenubar = name === 'menubar'
   const trigger = {
-    class: name === 'context-menu' ? 'jn-context-menu-trigger' : undefined,
+    class: name === 'dropdown-menu' ? undefined : `jn-${name}-trigger`,
     slot: `${name}-trigger`,
   }
   const subTrigger = { class: `jn-${name}-sub-trigger`, slot: `${name}-sub-trigger` }
@@ -105,22 +112,27 @@ export function menuLook(name: MenuName): MenuLook {
     shortcut: { class: `jn-${name}-shortcut`, slot: `${name}-shortcut` },
     subTrigger,
     subContent: { class: `jn-${name}-sub-content jn-menu-target`, slot: `${name}-sub-content` },
+    // The menubar's indicators have a class each, and none has a `data-slot` but the dropdown
+    // menu's.
     checkboxIndicator:
       name === 'dropdown-menu'
         ? { class: indicator, slot: `${name}-checkbox-item-indicator` }
-        : { class: indicator },
+        : { class: isMenubar ? `jn-${name}-checkbox-item-indicator` : indicator },
     radioIndicator:
       name === 'dropdown-menu'
         ? { class: indicator, slot: `${name}-radio-item-indicator` }
-        : { class: indicator },
-    // Upstream's DropdownMenuContent starts at the trigger's start, 4px off; a context menu's
-    // place is the pointer's, which the primitive decides.
-    contentAlign: name === 'dropdown-menu' ? 'start' : undefined,
-    contentSideOffset: name === 'dropdown-menu' ? 4 : undefined,
+        : { class: isMenubar ? `jn-${name}-radio-item-indicator` : indicator },
+    // Upstream's DropdownMenuContent starts at the trigger's start, 4px off, and its
+    // MenubarContent at the trigger's start, 4px before it and 8px off; a context menu's place
+    // is the pointer's, which the primitive decides.
+    contentAlign: name === 'context-menu' ? undefined : 'start',
+    contentSideOffset: { 'dropdown-menu': 4, 'context-menu': undefined, menubar: 8 }[name],
+    contentAlignOffset: isMenubar ? -4 : undefined,
+    subTriggerIcon: isMenubar ? 'jn-rtl-flip jn-size-4' : 'jn-rtl-flip',
     triggerLook:
-      name === 'context-menu'
-        ? () => ({ class: trigger.class, attributes: { 'data-slot': trigger.slot } })
-        : undefined,
+      name === 'dropdown-menu'
+        ? undefined
+        : () => ({ class: trigger.class, attributes: { 'data-slot': trigger.slot } }),
     subTriggerLook: named => ({
       class: subTrigger.class,
       attributes: { 'data-slot': subTrigger.slot, 'data-inset': dataInset(named['inset']) },
@@ -497,6 +509,10 @@ function sideOffsetOf(sideOffset: number | undefined, look: MenuLook): number | 
   return sideOffset ?? look.contentSideOffset
 }
 
+function alignOffsetOf(alignOffset: number | undefined, look: MenuLook): number | undefined {
+  return alignOffset ?? look.contentAlignOffset
+}
+
 /** The menu's content, with Radix's placement arguments and upstream's defaults. */
 export const MenuContent: TOC<MenuContentSignature> = <template>
   <@Part
@@ -506,7 +522,7 @@ export const MenuContent: TOC<MenuContentSignature> = <template>
     @side={{@side}}
     @align={{alignOf @align @placement @rootPlacement @look}}
     @sideOffset={{sideOffsetOf @sideOffset @look}}
-    @alignOffset={{@alignOffset}}
+    @alignOffset={{alignOffsetOf @alignOffset @look}}
     @avoidCollisions={{@avoidCollisions}}
     @collisionPadding={{@collisionPadding}}
     @arrowPadding={{@arrowPadding}}
@@ -558,7 +574,7 @@ export const MenuSubTrigger: TOC<MenuSubTriggerSignature> = <template>
     data-slot={{@look.subTrigger.slot}}
     data-inset={{dataInset @inset}}
     ...attributes
-  >{{yield}}<Icon @icon={{if @icon @icon ChevronRight}} class="jn-rtl-flip" /></@Part>
+  >{{yield}}<Icon @icon={{if @icon @icon ChevronRight}} class={{@look.subTriggerIcon}} /></@Part>
 </template>
 
 export interface MenuSubContentSignature {

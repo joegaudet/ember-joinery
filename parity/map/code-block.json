@@ -1,5 +1,5 @@
 {
-  "$comment": "Waiting for components that haven't landed: code-block-trace (Trace), code-block-markdown (a Markdown renderer for Ember, upstream's Streamdown). The unit that lands each one ports its examples onto the Code Block page and maps them here.",
+  "$comment": "Waiting for components that haven't landed: code-block-markdown (a Markdown renderer for Ember, upstream's Streamdown). The unit that lands it ports its example onto the Code Block page and maps it here.",
   "examples": {
     "code-block-demo": {
       "example": "code-block-demo",
@@ -36,6 +36,7 @@
     },
     "code-block-size": "code-block-size",
     "code-block-destructive": "code-block-destructive",
+    "code-block-trace": "code-block-trace",
     "code-block-typeset": {
       "example": "code-block-typeset",
       "threshold": 0.025,

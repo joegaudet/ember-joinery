@@ -227,10 +227,12 @@ Use `@variant="destructive"` for errors and failed output.
 
 ## Trace
 
-Put a `CodeBlock` with `@size="sm"` in a Trace's collapsible content for tool and terminal
-output. Add `@wrap` and a `max-h-64` class to `b.Content` so long output wraps and scrolls inside
-the trace. The block sets its own text color, so the trace does not mute it. Upstream's example
-(`code-block-trace`) comes with Trace.
+Put a `CodeBlock` with `@size="sm"` in a [Trace](/components/trace.md)'s collapsible content
+for tool and terminal output. Add `@wrap` and a `max-h-64` class to `b.Content` so long output
+wraps and scrolls inside the trace. The block sets its own text color, so the trace does not
+mute it.
+
+<Example @name="code-block-trace" @title="Trace" />
 
 ## Tabs
 

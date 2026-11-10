@@ -29,7 +29,9 @@ const MAX_STEPS = 1200
  *   assert.strictEqual(picker.text, 'March 4th, 2026')
  *   assert.deepEqual(picker.calendar.selectedDays, ['2026-03-04'])
  *
- * A day is a `Date` (its local day) or `yyyy-MM-dd`.
+ * A day is a `Date` (its local day) or `yyyy-MM-dd`. This is not the Power Calendar add-on's
+ * `DatePickerHarness` (`@ember-joinery/power-calendar/test-support`), which drives that add-on's
+ * own `DatePicker` component.
  */
 export class DatePickerHarness extends PopoverHarness {
   /** The calendar in the popover's content. It is there only while the popover is open. */
@@ -40,11 +42,6 @@ export class DatePickerHarness extends PopoverHarness {
   /** What the trigger shows, whitespace collapsed: the date as written, or the placeholder. */
   get text(): string {
     return text(this.trigger)
-  }
-
-  /** Whether the trigger says no date is picked (`data-empty="true"`, as upstream's demo sets). */
-  get isEmpty(): boolean {
-    return this.trigger.getAttribute('data-empty') === 'true'
   }
 
   /** Whether the open calendar shows `day` in its own month (not as an outside day). */
@@ -98,11 +95,50 @@ export class DatePickerHarness extends PopoverHarness {
   }
 
   /**
-   * Picks a range: presses `from`, then `to`, going to each one's month (and opening the
-   * popover again, if picking `from` closed it).
+   * Picks the range from `from` to `to` (on or after it) in a calendar with `@mode="range"`,
+   * whatever it holds: it presses `from` until the range starts there and ends there or nowhere
+   * (a press on a day inside or outside a whole range moves only one end, as react-day-picker's
+   * does), then presses `to`, going to each one's month and opening the popover again if a
+   * press closed it. Throws when the calendar won't take that range (a day is disabled, or
+   * `@min` or `@max` rule it out).
    */
   async pickRange(from: CalendarDayInput, to: CalendarDayInput): Promise<void> {
-    await this.pick(from)
-    await this.pick(to)
+    const start = iso(from)
+    const end = iso(to)
+    if (end < start) {
+      throw new Error(
+        `Joinery harness: ${this}.pickRange() takes from (${start}) before to (${end})`,
+      )
+    }
+    for (let presses = 0; ; presses++) {
+      await this.showMonth(start)
+      const ends = this.#rangeAt(start)
+      if (ends === 'both' || (ends === 'from' && end !== start)) break
+      if (presses >= 3) {
+        throw new Error(`Joinery harness: ${this}'s calendar won't start a range on ${start}`)
+      }
+      await this.calendar.select(start)
+    }
+    if (end === start) return
+    await this.pick(end)
+    // A press that closes the popover leaves nothing to read; while it is open, check the end.
+    if (this.isOpen && this.calendar.exists && this.#rangeAt(end) !== 'to') {
+      throw new Error(`Joinery harness: ${this}'s calendar didn't end the range on ${end}`)
+    }
+  }
+
+  /**
+   * Where a shown day is in the calendar's range: `both` ends (`{ from: day, to: day }`), the
+   * `from` of a range with no end yet, its `to`, or `other`.
+   */
+  #rangeAt(day: string): 'both' | 'from' | 'to' | 'other' {
+    const calendar = this.calendar
+    const button = calendar.button(day)
+    const isStart = button.getAttribute('data-range-start') === 'true'
+    const isEnd = button.getAttribute('data-range-end') === 'true'
+    if (isStart && isEnd) return 'both'
+    if (isEnd) return 'to'
+    if (isStart || button.getAttribute('data-range-middle') === 'true') return 'other'
+    return calendar.isSelected(day) ? 'from' : 'other'
   }
 }

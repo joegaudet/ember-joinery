@@ -28,7 +28,17 @@ import { tracked } from '@glimmer/tracking'
 import { Calendar as CalendarIcon } from 'lucide'
 import { Button, Calendar, Icon, Popover } from '@ember-joinery/ember'
 
-const format = (date: Date) => date.toLocaleDateString('en-US', { dateStyle: 'long' })
+const LONG = new Intl.DateTimeFormat('en-US', { dateStyle: 'long' })
+const ORDINAL = new Intl.PluralRules('en-US', { type: 'ordinal' })
+const SUFFIXES: Partial<Record<Intl.LDMLPluralRule, string>> = { one: 'st', two: 'nd', few: 'rd' }
+
+/** date-fns' `format(date, "PPP")`, `November 10th, 2026`, from Intl. */
+function format(date: Date): string {
+  const suffix = SUFFIXES[ORDINAL.select(date.getDate())] ?? 'th'
+  return LONG.formatToParts(date)
+    .map(part => (part.type === 'day' ? `${part.value}${suffix}` : part.value))
+    .join('')
+}
 
 export default class ExampleDatePicker extends Component {
   @tracked date: Date | undefined
@@ -59,8 +69,8 @@ See the [Calendar](/components/calendar.md) page for everything the calendar tak
 
 Upstream writes the date with date-fns' `format(date, "PPP")`. Joinery has no date library:
 its dates are `Date`s, written with `Intl` (`toLocaleDateString`, `Intl.DateTimeFormat`). The
-examples below write `PPP` from `Intl` in a few lines, ordinal suffix and all
-(`November 10th, 2026`).
+snippet above and the examples below write `PPP` from `Intl` in a few lines, ordinal suffix and
+all (`November 10th, 2026`).
 
 ## Composition
 
@@ -130,9 +140,8 @@ moves to the next day.
 <Example @name="date-picker-rtl" @title="RTL" @dir="rtl" />
 
 Upstream passes react-day-picker's `arSA` locale to the calendar and date-fns' to `format`;
-Joinery's calendar takes the locale as a tag, `@locale="ar-SA"`, and the example writes the
-date with `Intl` in the same locale, so it reads `10 نوفمبر 2026` where date-fns' reads
-`نوفمبر 10, 2026`.
+Joinery's calendar takes the locale as a tag, `@locale="ar-SA"`, and the example writes date-fns'
+`arSA` `PPP` (`نوفمبر 10, 2026`) from `Intl`'s parts in the same locale.
 
 ## API Reference
 
@@ -176,13 +185,16 @@ that closes it, puts focus back on the trigger.
 
 ## Accessibility
 
-- The content is a `dialog` named by its trigger, so it reads as the date (or `Pick a date`)
-  it holds. Give the content `aria-label` to name it yourself.
+- The content is a `dialog` named by its trigger (`aria-labelledby`), so it takes the trigger's
+  name: the field's label where one names the button (`Date` in the Basic and Time examples,
+  `Date Picker Range`, `Date of birth`), the button's `aria-label` in the input examples
+  (`Select date`), and otherwise the date (or `Pick a date`) it shows, as in the demo and the
+  right-to-left example. Give the content `aria-label` to name it yourself.
 - The calendar's days are buttons named by their whole date, in a `grid` named by its month;
   see [Calendar](/components/calendar.md#accessibility).
 - In the Basic, Range, Date of Birth and Time examples, the field's label names the button
-  (`for` and `id`), as upstream's: a screen reader reads `Date` for it, and the date it shows
-  as its text. The input examples' calendar button is named by its `aria-label`.
+  (`for` and `id`), as upstream's: a screen reader reads the label (`Date`, in the Basic
+  example) for it, and the date it shows as its text. The input examples' calendar button is named by its `aria-label`.
 - In the input examples, the popover is in the input group's addon, as upstream's: a press in
   the addon that isn't on a button focuses the input, and that includes a press inside the
   open calendar but not on one of its buttons, as upstream's does (React's events bubble out
@@ -211,14 +223,23 @@ await new DatePickerHarness('stay').pickRange('2026-03-04', '2026-03-09')
 | ---------------------------------------- | ---------------------------------------------------------------------------------- |
 | `calendar`                               | The `CalendarHarness` of the calendar in the content (there only while it is open) |
 | `text`                                   | What the trigger shows: the date as written, or the placeholder                    |
-| `isEmpty`                                | Whether the trigger has `data-empty="true"`                                        |
 | `shows(day)`                             | Whether the open calendar shows the day in its own month                           |
 | `showMonth(day)`                         | Opens it and goes to the day's month; throws when the calendar can't go there      |
 | `pick(day)`                              | Opens it, goes to the day's month and presses the day                              |
-| `pickRange(from, to)`                    | Picks both ends of a range                                                         |
+| `pickRange(from, to)`                    | Picks just that range, whatever the calendar holds; throws when it won't take it   |
 | `open()`, `close()`, `isOpen`, `trigger` | The popover's, and the rest of `PopoverHarness`                                    |
 
-For an input beside the picker, read and fill the input with `InputGroupHarness`.
+A calendar in range mode moves only one end of a whole range on a press, as react-day-picker's
+does, so `pickRange()` presses `from` until the range starts and ends there (or has no end yet),
+then presses `to`, and checks the range ends there while the calendar is open.
+
+The trigger's `data-empty` is the examples' own (see the API Reference), so test it as an
+attribute: `assert.dom(picker.trigger).hasAttribute('data-empty', 'true')`. For an input beside
+the picker, read and fill the input with `InputGroupHarness`.
+
+This is not the [Power Calendar](/components/power-date-picker.md) add-on's `DatePickerHarness`
+(from `@ember-joinery/power-calendar/test-support`), which drives that add-on's own `DatePicker`
+component; import one of them under another name to use both in one test.
 
 ## Upstream
 

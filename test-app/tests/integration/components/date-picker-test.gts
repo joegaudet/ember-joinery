@@ -91,7 +91,7 @@ module('Integration | components | date picker', function (hooks) {
     )
     const picker = new DatePickerHarness('due')
     assert.strictEqual(picker.text, 'Pick a date')
-    assert.true(picker.isEmpty)
+    assert.dom(picker.trigger).hasAttribute('data-empty', 'true')
     assert.false(picker.isOpen)
     assert.false(picker.calendar.exists, 'the calendar renders only while it is open')
     await a11yAudit()
@@ -106,7 +106,7 @@ module('Integration | components | date picker', function (hooks) {
 
     await picker.pick('2026-01-20')
     assert.strictEqual(picker.text, 'January 20, 2026')
-    assert.false(picker.isEmpty)
+    assert.dom(picker.trigger).hasAttribute('data-empty', 'false')
     assert.strictEqual(state.date && isoDate(state.date), '2026-01-20')
     assert.true(picker.isOpen, 'an uncontrolled popover stays open, as upstream’s demo does')
     assert.deepEqual(picker.calendar.selectedDays, ['2026-01-20'])
@@ -279,13 +279,97 @@ module('Integration | components | date picker', function (hooks) {
     assert.true(picker.shows('2026-02-09'), 'the second month counts as shown')
     assert.false(picker.shows('2026-03-01'), 'an outside day does not')
 
-    state.range = undefined
     await picker.pickRange('2026-03-02', '2026-04-10')
-    assert.strictEqual(picker.text, 'Mar 02, 2026 - Apr 10, 2026')
+    assert.strictEqual(picker.text, 'Mar 02, 2026 - Apr 10, 2026', 'not Jan 20 - Apr 10')
     assert.deepEqual(picker.calendar.captions, ['March 2026', 'April 2026'])
     assert.strictEqual(picker.calendar.rangePosition('2026-03-02'), 'start')
     assert.strictEqual(picker.calendar.rangePosition('2026-04-10'), 'end')
     assert.true(picker.isOpen, 'the range example stays open')
+    await a11yAudit()
+  })
+
+  test('pickRange() picks just that range, whatever range the calendar holds', async function (assert) {
+    const state = new State()
+    state.range = { from: day('2026-01-20'), to: day('2026-02-09') }
+    await render(
+      <template>
+        <Popover @name="stay" as |p|>
+          <Button @variant="outline" {{p.trigger}}>Stay</Button>
+          <p.Content class="w-auto p-0" @align="start">
+            <Calendar
+              @mode="range"
+              @defaultMonth={{state.range.from}}
+              @value={{state.range}}
+              @onValueChange={{state.setRange}}
+              @numberOfMonths={{2}}
+              @today={{TODAY}}
+            />
+          </p.Content>
+        </Popover>
+      </template>,
+    )
+    const picker = new DatePickerHarness('stay')
+    const range = () => [state.range?.from, state.range?.to].map(date => date && isoDate(date))
+
+    await picker.pickRange('2026-01-05', '2026-01-10')
+    assert.deepEqual(range(), ['2026-01-05', '2026-01-10'], 'starting before the range')
+    await picker.pickRange('2026-01-07', '2026-01-08')
+    assert.deepEqual(range(), ['2026-01-07', '2026-01-08'], 'inside it')
+    await picker.pickRange('2026-01-08', '2026-02-12')
+    assert.deepEqual(range(), ['2026-01-08', '2026-02-12'], 'from its end')
+    await picker.pickRange('2026-01-08', '2026-01-20')
+    assert.deepEqual(range(), ['2026-01-08', '2026-01-20'], 'from its start, inside it')
+    await picker.pickRange('2026-01-22', '2026-01-22')
+    assert.deepEqual(range(), ['2026-01-22', '2026-01-22'], 'one day')
+    await picker.pickRange('2026-01-22', '2026-01-24')
+    assert.deepEqual(range(), ['2026-01-22', '2026-01-24'], 'from a one-day range')
+    state.range = { from: day('2026-01-26'), to: undefined }
+    await settled()
+    await picker.pickRange('2026-01-12', '2026-01-14')
+    assert.deepEqual(range(), ['2026-01-12', '2026-01-14'], 'from a range with no end yet')
+    assert.deepEqual(picker.calendar.captions, ['January 2026', 'February 2026'])
+    try {
+      await picker.pickRange('2026-01-14', '2026-01-12')
+      assert.ok(false, 'it should have thrown')
+    } catch (error) {
+      assert.true(String(error).includes('takes from (2026-01-14) before to (2026-01-12)'))
+    }
+    await a11yAudit()
+  })
+
+  test("pickRange() throws when the calendar won't take the range", async function (assert) {
+    const state = new State()
+    await render(
+      <template>
+        <Popover @name="nights" as |p|>
+          <Button @variant="outline" {{p.trigger}}>Nights</Button>
+          <p.Content class="w-auto p-0" @align="start">
+            <Calendar
+              @mode="range"
+              @value={{state.range}}
+              @onValueChange={{state.setRange}}
+              @max={{5}}
+              @today={{TODAY}}
+            />
+          </p.Content>
+        </Popover>
+      </template>,
+    )
+    const picker = new DatePickerHarness('nights')
+    await picker.pickRange('2026-01-05', '2026-01-09')
+    assert.deepEqual(
+      [state.range?.from, state.range?.to].map(date => date && isoDate(date)),
+      ['2026-01-05', '2026-01-09'],
+    )
+    try {
+      await picker.pickRange('2026-01-12', '2026-01-25')
+      assert.ok(false, 'it should have thrown')
+    } catch (error) {
+      assert.true(
+        String(error).includes("calendar didn't end the range on 2026-01-25"),
+        String(error),
+      )
+    }
     await a11yAudit()
   })
 
@@ -422,6 +506,12 @@ module('Integration | components | date picker', function (hooks) {
     const input = new InputGroupHarness('subscription')
     const picker = new DatePickerHarness('input')
     assert.strictEqual(picker.trigger.getAttribute('aria-label'), 'Select date')
+    const addon = picker.trigger.closest<HTMLElement>('[data-slot="input-group-addon"]')!
+    assert.strictEqual(
+      getComputedStyle(addon).marginInlineEnd,
+      '-4.8px',
+      "the addon's has-[>button] margin reaches the button through the Popover's root",
+    )
 
     await input.focus()
     await pressKey('ArrowDown')
@@ -447,7 +537,6 @@ module('Integration | components | date picker', function (hooks) {
     const picker = new DatePickerHarness('plain')
     assert.true(picker instanceof PopoverHarness)
     assert.strictEqual(picker.text, 'Open')
-    assert.false(picker.isEmpty, 'no data-empty')
     await picker.open()
     assert.false(picker.calendar.exists)
     try {

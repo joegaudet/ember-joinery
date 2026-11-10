@@ -18,7 +18,7 @@ module('Example | date-picker-demo', function (hooks) {
     const button = new ButtonHarness()
     assert.strictEqual(button.variant, 'outline')
     assert.strictEqual(picker.text, 'Pick a date')
-    assert.true(picker.isEmpty, 'data-empty greys the placeholder')
+    assert.dom(picker.trigger).hasAttribute('data-empty', 'true', 'which greys the placeholder')
     await a11yAudit()
 
     await picker.open()
@@ -31,7 +31,7 @@ module('Example | date-picker-demo', function (hooks) {
     const name = monthName(today)
     await picker.pick(new Date(year, month, 1))
     assert.strictEqual(picker.text, `${name} 1st, ${year}`)
-    assert.false(picker.isEmpty)
+    assert.dom(picker.trigger).hasAttribute('data-empty', 'false')
     assert.true(picker.isOpen, 'it stays open, as upstream’s does')
     await picker.pick(new Date(year, month, 22))
     assert.strictEqual(picker.text, `${name} 22nd, ${year}`)

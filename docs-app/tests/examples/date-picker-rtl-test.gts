@@ -15,7 +15,7 @@ module('Example | date-picker-rtl', function (hooks) {
     await render(<template><DatePickerRtl /></template>)
     const picker = new DatePickerHarness()
     assert.strictEqual(picker.text, 'اختر تاريخًا')
-    assert.true(picker.isEmpty)
+    assert.dom(picker.trigger).hasAttribute('data-empty', 'true')
     assert.strictEqual(getComputedStyle(picker.trigger).direction, 'rtl')
     await a11yAudit()
 
@@ -38,8 +38,13 @@ module('Example | date-picker-rtl', function (hooks) {
     )
 
     await picker.pick(day)
-    assert.strictEqual(picker.text, arabic(day, { dateStyle: 'long' }))
-    assert.false(picker.isEmpty)
+    const month = arabic(day, { month: 'long' })
+    assert.strictEqual(
+      picker.text,
+      `${month} 10, ${day.getFullYear()}`,
+      "date-fns' arSA PPP: the month, then the day, a comma and the year",
+    )
+    assert.dom(picker.trigger).hasAttribute('data-empty', 'false')
     await a11yAudit()
   })
 })

@@ -9,13 +9,22 @@ const t = {
 }
 
 /**
- * Upstream's `format(date, "PPP", { locale: arSA })`. That is date-fns'; Joinery has no date
- * library, so this is Intl's long date in Arabic (`10 نوفمبر 2026`), in the Gregorian calendar
- * with Latin digits, as date-fns' arSA and the calendar's `ar-SA` are. date-fns' puts the
- * month first (`نوفمبر 10, 2026`).
+ * Upstream's `format(date, "PPP", { locale: arSA })`, `نوفمبر 10, 2026`. That is date-fns';
+ * Joinery has no date library, so this writes arSA's `PPP` (`MMMM do, y`, its ordinal the bare
+ * number) from Intl's parts: the month's Arabic name in the Gregorian calendar, and Latin
+ * digits, as date-fns' arSA and the calendar's `ar-SA` have them.
  */
-const LONG = new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { dateStyle: 'long' })
-const format = (date: Date) => LONG.format(date)
+const PARTS = new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+})
+function format(date: Date): string {
+  const parts = PARTS.formatToParts(date)
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find(found => found.type === type)?.value ?? ''
+  return `${part('month')} ${part('day')}, ${part('year')}`
+}
 
 export default class DatePickerRtl extends Component {
   @tracked date: Date | undefined

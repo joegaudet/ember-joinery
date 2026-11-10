@@ -28,6 +28,11 @@ module('Example | date-picker-range', function (hooks) {
     assert.strictEqual(picker.text, `Jan 05, ${year} - Feb 02, ${year}`)
     assert.strictEqual(picker.calendar.rangePosition(new Date(year, 0, 5)), 'start')
     assert.strictEqual(picker.calendar.rangePosition(new Date(year, 1, 2)), 'end')
+
+    // A range after the one it holds: the first press would only move its end.
+    await picker.pickRange(new Date(year, 2, 1), new Date(year, 2, 5))
+    assert.strictEqual(picker.text, `Mar 01, ${year} - Mar 05, ${year}`)
+    assert.strictEqual(picker.calendar.selectedDays.length, 5)
     await a11yAudit()
   })
 })

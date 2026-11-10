@@ -1,0 +1,35 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/message-scroller.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="message-scroller" in MessageScroller; keep on the element: group/message-scroller */
+:where(.jn-message-scroller) {
+  @apply relative flex size-full min-h-0 flex-col overflow-hidden;
+}
+
+/* data-slot="message-scroller-viewport" in MessageScrollerViewport */
+:where(.jn-message-scroller-viewport) {
+  @apply size-full min-h-0 min-w-0 scroll-fade-b scrollbar-thin scrollbar-gutter-stable overflow-y-auto overscroll-contain contain-content data-autoscrolling:scrollbar-thumb-transparent data-autoscrolling:scrollbar-track-transparent data-pending-scroll:invisible;
+}
+
+/* data-slot="message-scroller-content" in MessageScrollerContent */
+:where(.jn-message-scroller-content) {
+  @apply flex h-max min-h-full flex-col;
+}
+
+/* data-slot="message-scroller-item" in MessageScrollerItem */
+:where(.jn-message-scroller-item) {
+  @apply min-w-0 shrink-0 [contain-intrinsic-size:auto_10rem] [content-visibility:auto];
+}
+
+/* data-slot="message-scroller-button" in MessageScrollerButton */
+:where(.jn-message-scroller-button) {
+  @apply absolute inset-s-1/2 -translate-x-1/2 rtl:translate-x-1/2 border-border bg-background text-foreground transition-[translate,scale,opacity] duration-200 hover:bg-muted hover:text-foreground data-[active=false]:pointer-events-none data-[active=false]:scale-95 data-[active=false]:opacity-0 data-[active=false]:duration-400 data-[active=false]:ease-[cubic-bezier(0.7,0,0.84,0)] data-[active=true]:translate-y-0 data-[active=true]:scale-100 data-[active=true]:opacity-100 data-[active=true]:ease-[cubic-bezier(0.23,1,0.32,1)] data-[direction=end]:bottom-4 data-[direction=end]:data-[active=false]:translate-y-full data-[direction=start]:top-4 data-[direction=start]:data-[active=false]:-translate-y-full rtl:translate-x-1/2 data-[direction=start]:[&_svg]:rotate-180;
+}
+
+/* in MessageScrollerButton, no slot to attach it to: sr-only */

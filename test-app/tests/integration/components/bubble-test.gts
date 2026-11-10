@@ -155,6 +155,24 @@ module('Integration | components | bubble', function (hooks) {
     await a11yAudit(BUT_THE_DESTRUCTIVE_TEXT, { runOnly: ['color-contrast'] })
   })
 
+  test("the Bubble page's CSS brings the destructive bubble's text up to AA", async function (assert) {
+    await render(
+      <template>
+        <style>
+          .jn-bubble-variant-destructive:not(.dark *) > .jn-bubble-content {
+            color: color-mix(in oklab, var(--destructive), black 15%);
+          }
+        </style>
+        <Bubble @variant="destructive" @name="failed" as |b|>
+          <b.Content>Failed to run the command.</b.Content>
+        </Bubble>
+      </template>,
+    )
+    assert.strictEqual(new BubbleHarness('failed').variant, 'destructive')
+    // Its contrast passes with nothing left out.
+    await a11yAudit({ include: [['#ember-testing-container']] }, { runOnly: ['color-contrast'] })
+  })
+
   test('a bubble sizes to its content, up to 80% of the row', async function (assert) {
     await render(
       <template>

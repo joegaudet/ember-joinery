@@ -1,4 +1,5 @@
 import { module, test } from 'qunit'
+import type { TOC } from '@ember/component/template-only'
 import { setupRenderingTest } from 'test-app/tests/helpers'
 import { render } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
@@ -27,7 +28,7 @@ function finishAnimations(element: Element) {
 }
 
 /** Upstream's demo, cut down: two triggers with contents of their own width, and a link. */
-const Demo = <template>
+const Demo: TOC<{ Args: { viewport?: boolean } }> = <template>
   <NavigationMenu @viewport={{@viewport}} @name="site" as |n|>
     <n.List>
       <n.Item @value="start" as |item|>

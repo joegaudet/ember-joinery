@@ -1,4 +1,5 @@
 import { module, test } from 'qunit'
+import type { TOC } from '@ember/component/template-only'
 import { setupRenderingTest } from 'test-app/tests/helpers'
 import { focus, render, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
@@ -64,7 +65,7 @@ class State {
 }
 
 /** Two items with contents (one 200 wide, one 300), a plain link, a viewport and an indicator. */
-const Menu = <template>
+const Menu: TOC<{ Args: { state: State } }> = <template>
   <Styles />
   <NavigationMenu
     class="nm-root"

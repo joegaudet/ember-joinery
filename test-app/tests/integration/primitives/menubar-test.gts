@@ -1,4 +1,5 @@
 import { module, test } from 'qunit'
+import type { TOC } from '@ember/component/template-only'
 import { setupRenderingTest } from 'test-app/tests/helpers'
 import { focus, render, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
@@ -53,7 +54,7 @@ class State {
 }
 
 /** A three-menu bar: File (with a Share submenu), Edit (Cut disabled), View, as upstream's demo. */
-const Bar = <template>
+const Bar: TOC<{ Args: { state: State; loop?: boolean; editDisabled?: boolean } }> = <template>
   <Styles />
   <div class="mb-stage">
     <Menubar

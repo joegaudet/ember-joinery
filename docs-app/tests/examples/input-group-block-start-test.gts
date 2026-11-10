@@ -2,12 +2,7 @@ import { module, test } from 'qunit'
 import { setupRenderingTest } from 'docs-app/tests/helpers'
 import { render } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
-import {
-  ButtonHarness,
-  FieldGroupHarness,
-  FieldHarness,
-  InputGroupHarness,
-} from '@ember-joinery/test-support'
+import { ButtonHarness, FieldGroupHarness, InputGroupHarness } from '@ember-joinery/test-support'
 import InputGroupBlockStart from 'docs-app/examples/input-group-block-start'
 
 module('Example | input-group-block-start', function (hooks) {

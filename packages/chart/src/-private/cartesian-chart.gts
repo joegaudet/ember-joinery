@@ -24,6 +24,7 @@ import {
   cartesianGeometry,
   defaultAxis,
   tooltipTranslate,
+  tooltipTransition,
   valueOf,
   activeIndexAt,
   type AxisGeometry,
@@ -326,10 +327,8 @@ export function tooltipStyleFor(options: {
     allowEscape: false,
     reverse: false,
   })
-  const animate = tooltip.args.isAnimationActive !== false
-  return htmlSafe(
-    `visibility: visible; ${base}${animate ? ' transition: transform 400ms;' : ''} transform: translate(${x}px, ${y}px);`,
-  )
+  const transition = tooltipTransition(tooltip.args.isAnimationActive)
+  return htmlSafe(`visibility: visible; ${base}${transition} transform: translate(${x}px, ${y}px);`)
 }
 
 /** Where recharts' legend box goes: across the chart's foot (or wherever its arguments put it). */
@@ -1321,7 +1320,11 @@ export default class CartesianChart
     return this.activeIndex !== null && this.activeIndex < (this.args.data?.length ?? 0)
   }
 
-  /** Where the tooltip points: the active row's tick, at the pointer (or the first series' point). */
+  /**
+   * Where the tooltip points: the active row's tick, at the pointer. Without one (the keyboard,
+   * `@defaultIndex`), at the first series' point, as recharts' `getPosition` gives it; a bar has
+   * none (recharts' is a no-op), so then the tick at the plot's middle, as recharts falls back.
+   */
   get activeCoordinate(): { x: number; y: number } | null {
     const geometry = this.geometry
     const index = this.activeIndex
@@ -1337,8 +1340,6 @@ export default class CartesianChart
     const first = geometry.series.find(series => !series.settings.hide)
     const point = first?.points[index]
     if (point && point.x !== null && point.y !== null) return { x: point.x, y: point.y }
-    const bar = first?.bars.find(entry => entry.index === index)
-    if (bar) return { x: bar.x + bar.width / 2, y: bar.y + bar.height / 2 }
     const size = this.size!
     return this.layout === 'horizontal'
       ? { x: tick.coordinate, y: (geometry.offset.top + size.height) / 2 }

@@ -126,8 +126,8 @@ export interface PolarAngleAxisTickArgs {
   index: number
   /** The tick: its `value`, its `coordinate` (an angle) and `index`. */
   payload: PolarTick
-  /** The label's text, as `@tickFormatter` gives it. */
-  value: unknown
+  /** The label's text, as `@tickFormatter` gives it (the raw value is `payload.value`). */
+  value: string
   /** The label's fill: the axis's `@stroke`, if it has one. */
   fill?: string
   /** `none`, as recharts passes its tick text. */

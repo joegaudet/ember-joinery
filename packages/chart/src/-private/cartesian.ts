@@ -979,3 +979,22 @@ export function tooltipTranslate(options: {
     ? Math.max(negative, viewBoxStart)
     : Math.max(positive, viewBoxStart)
 }
+
+/**
+ * recharts' `resolveTransitionProperty`: the tooltip box's transition as it moves, as a style
+ * declaration (with a leading space), or nothing. By default (`'auto'`) it moves smoothly unless
+ * the user prefers reduced motion; `true` always, `false` never.
+ */
+export function tooltipTransition(isAnimationActive: boolean | 'auto' = 'auto'): string {
+  if (isAnimationActive === false) return ''
+  if (isAnimationActive === 'auto' && prefersReducedMotion()) return ''
+  return ' transition: transform 400ms ease;'
+}
+
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  )
+}

@@ -669,8 +669,11 @@ export interface ChartTooltipSignature {
     formatter?: TooltipFormatter
     /** Leaves out entries whose value is null. Default true. */
     filterNull?: boolean
-    /** Moves the tooltip box smoothly. Default true. */
-    isAnimationActive?: boolean
+    /**
+     * Moves the tooltip box smoothly: `'auto'` (the default) unless the user prefers reduced
+     * motion, `true` always, `false` never.
+     */
+    isAnimationActive?: boolean | 'auto'
   }
 }
 

@@ -18,7 +18,13 @@ import type { ComponentLike, WithBoundArgs } from '@glint/template'
 import { idFor } from '@ember-joinery/primitives/id'
 import { resizeObserver } from '@ember-joinery/primitives/resize-observer'
 import { Registry } from './registry.ts'
-import { tooltipTranslate, valueOf, type Margin, type StackOffset } from './cartesian.ts'
+import {
+  tooltipTranslate,
+  tooltipTransition,
+  valueOf,
+  type Margin,
+  type StackOffset,
+} from './cartesian.ts'
 import { ChartLegend, ChartTooltip, type ChartPart, type DotArgs } from './parts.gts'
 import { isPlainObject } from './dots.ts'
 import {
@@ -1101,12 +1107,12 @@ export default class PolarChart extends Component<PolarChartSignature> implement
           cos > EPS ? (outer ? 'start' : 'end') : cos < -EPS ? (outer ? 'end' : 'start') : 'middle'
         const verticalAnchor: Anchor =
           Math.abs(cos) <= COS_45 ? (sin > 0 ? 'start' : 'end') : 'middle'
-        const value = args.tickFormatter
-          ? args.tickFormatter(entry.value as never, index)
-          : entry.value
+        const text = asText(
+          args.tickFormatter ? args.tickFormatter(entry.value as never, index) : entry.value,
+        )
         return {
           line: (args.tickLine ?? true) ? { x1: start.x, y1: start.y, x2: end.x, y2: end.y } : null,
-          text: asText(value),
+          text,
           dy: TEXT_DY[verticalAnchor],
           args: {
             x: end.x,
@@ -1115,7 +1121,7 @@ export default class PolarChart extends Component<PolarChartSignature> implement
             verticalAnchor,
             index,
             payload: entry,
-            value,
+            value: text,
             fill: args.stroke,
             stroke: 'none',
             cx,
@@ -1585,9 +1591,9 @@ export default class PolarChart extends Component<PolarChartSignature> implement
       allowEscape: false,
       reverse: false,
     })
-    const animate = tooltip.args.isAnimationActive !== false
+    const transition = tooltipTransition(tooltip.args.isAnimationActive)
     return htmlSafe(
-      `visibility: visible; ${base}${animate ? ' transition: transform 400ms;' : ''} transform: translate(${x}px, ${y}px);`,
+      `visibility: visible; ${base}${transition} transform: translate(${x}px, ${y}px);`,
     )
   }
 

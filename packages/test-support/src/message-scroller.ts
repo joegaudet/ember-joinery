@@ -8,6 +8,9 @@ export interface MessageScrollerEdges {
   end: boolean
 }
 
+/** The longest a row's entrance is waited for, in milliseconds. */
+const MAX_ENTRANCE = 1000
+
 /** How far each scroll key moves a viewport, as Chrome scrolls one. */
 function keyScroll(viewport: HTMLElement, key: string): number {
   const page = viewport.clientHeight * 0.875
@@ -219,9 +222,27 @@ export class MessageScrollerHarness extends Harness {
     await focus(this.viewport)
   }
 
-  /** Waits for the scroller to settle: its frames, a smooth scroll, the observers' reports. */
+  /**
+   * Waits for the scroller to settle: its frames, a smooth scroll, the observers' reports, and
+   * any entrance its rows play (a finite animation, such as a new message sliding up), which
+   * moves a row on screen while it runs.
+   */
   async settle(): Promise<void> {
     await waitForObservers()
+    // How long until the last finite animation inside it ends. Waited for by the clock, not
+    // `finished`: an animation in a row the browser skips (`content-visibility: auto`) doesn't
+    // advance until the row shows.
+    const remaining = this.element.getAnimations({ subtree: true }).map(animation => {
+      const timing = animation.effect?.getComputedTiming()
+      const end = Number(timing?.endTime ?? 0)
+      const now = Number(animation.currentTime ?? 0)
+      return Number.isFinite(end) ? end - now : 0
+    })
+    const wait = Math.min(MAX_ENTRANCE, Math.max(0, ...remaining))
+    if (wait > 0) {
+      await new Promise(resolve => setTimeout(resolve, wait))
+      await waitForObservers()
+    }
     await waitForObservers()
   }
 }

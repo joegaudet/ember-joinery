@@ -1,16 +1,20 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
 import { rendering } from 'test-app/tests/helpers/rendering'
-import { focus, render, settled } from '@ember/test-helpers'
+import { click, focus, render, settled } from '@ember/test-helpers'
+import { on } from '@ember/modifier'
+import type { TOC } from '@ember/component/template-only'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { Home, Inbox, Plus } from 'lucide'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
 import {
+  Button,
   Collapsible,
   DropdownMenu,
   Icon,
   SidebarProvider,
+  UseSidebar,
   sidebarStateFromCookie,
 } from '@ember-joinery/ember'
 import {
@@ -20,6 +24,7 @@ import {
   SidebarMenuButtonHarness,
   SidebarMenuSubButtonHarness,
   pressKey,
+  tab,
 } from '@ember-joinery/test-support'
 
 const px = (element: Element | null, property: keyof CSSStyleDeclaration) =>
@@ -42,6 +47,17 @@ class State {
 class Breakpoint {
   @tracked width = 768
 }
+
+const SCHEMES = ['light', 'dark'] as const
+
+/** A page with no block params, as a route's template rendered through an outlet. */
+const RoutedPage: TOC<{ Element: null }> = <template>
+  <UseSidebar as |sidebar|>
+    <sidebar.Trigger />
+    <p data-case="state">{{sidebar.state}} {{if sidebar.isMobile "mobile" "desktop"}}</p>
+    <button type="button" data-case="toggle" {{on "click" sidebar.toggleSidebar}}>Toggle</button>
+  </UseSidebar>
+</template>
 
 module('Integration | components | sidebar', function (hooks) {
   setupRenderingTest(hooks)
@@ -144,6 +160,7 @@ module('Integration | components | sidebar', function (hooks) {
       const element = wrapper.querySelector(`[data-slot="${slot}"]`)
       assert.dom(element).hasClass(`jn-${slot}`, slot).hasTagName(tag.toLowerCase())
       if (sidebarAttr) assert.dom(element).hasAttribute('data-sidebar', sidebarAttr)
+      else assert.dom(element).doesNotHaveAttribute('data-sidebar', `${slot}: as upstream's`)
     }
     assert.dom('[data-slot="sidebar-menu-item"]', wrapper).hasClass('group/menu-item')
     assert.dom('[data-slot="sidebar-menu-sub-item"]', wrapper).hasClass('group/menu-sub-item')
@@ -330,6 +347,177 @@ module('Integration | components | sidebar', function (hooks) {
     await sidebar.open()
     settle(sidebar.panel)
     assert.strictEqual(px(sidebar.container, 'left'), '0px')
+    await a11yAudit()
+  })
+
+  test('slid off the screen, its items are out of the tab order; the rail stays', async function (assert) {
+    await render(
+      <template>
+        <button type="button" data-case="before">Before</button>
+        <SidebarProvider @defaultOpen={{false}} as |sidebar|>
+          <sidebar.Sidebar>
+            <sidebar.Content>
+              <sidebar.Menu>
+                <sidebar.MenuItem>
+                  <sidebar.MenuButton>Home</sidebar.MenuButton>
+                  <sidebar.MenuAction aria-label="More" />
+                </sidebar.MenuItem>
+                <sidebar.MenuItem>
+                  <sidebar.MenuButton @as="a" href="#inbox">Inbox</sidebar.MenuButton>
+                </sidebar.MenuItem>
+              </sidebar.Menu>
+            </sidebar.Content>
+            <sidebar.Rail />
+          </sidebar.Sidebar>
+          <sidebar.Inset>
+            <sidebar.Trigger />
+            <button type="button" data-case="after">After</button>
+          </sidebar.Inset>
+        </SidebarProvider>
+      </template>,
+    )
+    const sidebar = new SidebarHarness()
+    const before = document.querySelector('[data-case="before"]')
+    const after = document.querySelector('[data-case="after"]')
+    settle(sidebar.panel)
+    assert.strictEqual(px(sidebar.container, 'visibility'), 'hidden', 'gone, it hides its items')
+    assert.strictEqual(px(sidebar.rail, 'visibility'), 'visible', 'but for the rail')
+
+    await sidebar.focusTrigger()
+    await tab({ shift: true })
+    assert.dom(before).isFocused('Shift+Tab from the trigger skips the sidebar')
+    await tab()
+    assert.dom(sidebar.trigger).isFocused('and Tab skips it the other way')
+    await tab()
+    assert.dom(after).isFocused()
+    await a11yAudit()
+
+    await sidebar.toggleWithRail()
+    assert.true(sidebar.isOpen, 'the rail still opens it')
+    assert.strictEqual(
+      px(sidebar.container, 'visibility'),
+      'visible',
+      'on the way in, its items show at once',
+    )
+    await focus(before!)
+    await tab()
+    assert.dom(sidebar.menuButton('Home').element).isFocused('open, Tab reaches its items')
+    await tab()
+    assert.dom(sidebar.elements('menu-action')[0]).isFocused()
+    await tab()
+    assert.dom(sidebar.menuButton('Inbox').element).isFocused()
+
+    await sidebar.pressShortcut()
+    assert.false(sidebar.isOpen, 'Ctrl+B closes it, with focus in it')
+    assert.dom(sidebar.trigger).isFocused('focus goes to the trigger, not off the screen')
+    assert.strictEqual(
+      px(sidebar.container, 'visibility'),
+      'visible',
+      'on the way out, it stays visible while it slides',
+    )
+    settle(sidebar.panel)
+    assert.strictEqual(px(sidebar.container, 'visibility'), 'hidden')
+    await a11yAudit()
+  })
+
+  test('collapsed to its icons, its items stay in the tab order', async function (assert) {
+    await render(
+      <template>
+        <SidebarProvider @defaultOpen={{false}} as |sidebar|>
+          <sidebar.Sidebar @collapsible="icon">
+            <sidebar.Content>
+              <sidebar.Menu>
+                <sidebar.MenuItem>
+                  <sidebar.MenuButton @tooltip="Home">
+                    <Icon @icon={{Home}} />
+                    <span>Home</span>
+                  </sidebar.MenuButton>
+                </sidebar.MenuItem>
+              </sidebar.Menu>
+            </sidebar.Content>
+          </sidebar.Sidebar>
+          <sidebar.Inset><sidebar.Trigger /></sidebar.Inset>
+        </SidebarProvider>
+      </template>,
+    )
+    const sidebar = new SidebarHarness()
+    settle(sidebar.panel)
+    assert.strictEqual(px(sidebar.container, 'visibility'), 'visible')
+    const home = sidebar.menuButton('Home')
+    await home.focus()
+    await sidebar.pressShortcut()
+    assert.true(sidebar.isOpen)
+    await sidebar.pressShortcut()
+    assert.false(sidebar.isOpen)
+    assert.true(home.isFocused, 'its icons still show, so focus stays where it is')
+    await sidebar.focusTrigger()
+    await tab({ shift: true })
+    assert.true(home.isFocused, 'Shift+Tab from the trigger reaches it')
+    await a11yAudit()
+  })
+
+  test('an open sidebar’s trigger rests as a ghost Button does, in light and dark', async function (assert) {
+    await render(
+      <template>
+        {{#each SCHEMES as |scheme|}}
+          <div class={{scheme}}>
+            <SidebarProvider
+              @name={{scheme}}
+              @keyboardShortcut={{false}}
+              style="min-height: 0"
+              as |sidebar|
+            >
+              <sidebar.Sidebar><sidebar.Content>{{scheme}}</sidebar.Content></sidebar.Sidebar>
+              <sidebar.Inset @as="div">
+                <sidebar.Trigger />
+                <Button @variant="ghost" @size="icon-sm" data-case="ghost">Ghost</Button>
+                <Button
+                  @variant="ghost"
+                  @size="icon-sm"
+                  aria-expanded="true"
+                  data-case="expanded"
+                >Menu</Button>
+              </sidebar.Inset>
+            </SidebarProvider>
+            <SidebarProvider @keyboardShortcut={{false}} style="min-height: 0" as |sidebar|>
+              <Button @variant="ghost" data-case="own" {{sidebar.trigger}}>Own</Button>
+            </SidebarProvider>
+          </div>
+        {{/each}}
+      </template>,
+    )
+    for (const scheme of SCHEMES) {
+      const sidebar = new SidebarHarness(scheme)
+      const within = document.querySelector(`.${scheme}`)!
+      const ghost = within.querySelector('[data-case="ghost"]')
+      const expanded = within.querySelector('[data-case="expanded"]')
+      const own = within.querySelector('[data-case="own"]')
+      assert.dom(sidebar.trigger).hasAttribute('aria-expanded', 'true')
+      assert.notStrictEqual(
+        px(expanded, 'backgroundColor'),
+        px(ghost, 'backgroundColor'),
+        `${scheme}: the sheet's ghost rule fills an expanded Button`,
+      )
+      for (const [what, element] of [
+        ['Trigger', sidebar.trigger],
+        ['{{sidebar.trigger}} on a ghost Button', own],
+      ] as const) {
+        assert.dom(element).hasAttribute('aria-expanded', 'true').hasClass('jn-sidebar-trigger')
+        assert.strictEqual(
+          px(element, 'backgroundColor'),
+          px(ghost, 'backgroundColor'),
+          `${scheme}: ${what}, open, has a ghost Button's resting background`,
+        )
+        assert.strictEqual(
+          px(element, 'color'),
+          px(ghost, 'color'),
+          `${scheme}: ${what}, open, has a ghost Button's resting colour`,
+        )
+      }
+      await sidebar.toggle()
+      assert.dom(sidebar.trigger).hasAttribute('aria-expanded', 'false')
+      assert.strictEqual(px(sidebar.trigger, 'backgroundColor'), px(ghost, 'backgroundColor'))
+    }
     await a11yAudit()
   })
 
@@ -787,6 +975,36 @@ module('Integration | components | sidebar', function (hooks) {
     await sidebar.toggle()
     assert.false(sidebar.isOpen, 'your own trigger closes it')
     assert.dom(sidebar.trigger).hasAttribute('aria-expanded', 'false')
+    await a11yAudit()
+  })
+
+  test('<UseSidebar> reaches the provider around it, as upstream’s useSidebar() does', async function (assert) {
+    await render(
+      <template>
+        <SidebarProvider @name="app" as |sidebar|>
+          <sidebar.Sidebar>
+            <sidebar.Content>
+              <sidebar.Menu>
+                <sidebar.MenuItem><sidebar.MenuButton>Home</sidebar.MenuButton></sidebar.MenuItem>
+              </sidebar.Menu>
+            </sidebar.Content>
+          </sidebar.Sidebar>
+          <sidebar.Inset>
+            {{! As a routed page is, through the application's outlet: no block params. }}
+            <RoutedPage />
+          </sidebar.Inset>
+        </SidebarProvider>
+      </template>,
+    )
+    const sidebar = new SidebarHarness('app')
+    const state = () => document.querySelector('[data-case="state"]')
+    assert.dom(state()).hasText('expanded desktop')
+    assert.dom(sidebar.trigger).hasAttribute('data-test-jn-owner', sidebar.element.id)
+    await sidebar.toggle()
+    assert.false(sidebar.isOpen, 'its Trigger is the provider’s')
+    assert.dom(state()).hasText('collapsed desktop', 'and its state follows')
+    await click('[data-case="toggle"]')
+    assert.true(sidebar.isOpen, 'toggleSidebar too')
     await a11yAudit()
   })
 

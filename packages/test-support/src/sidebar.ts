@@ -132,9 +132,10 @@ function sidebarOf(element: Element): Element | null {
 }
 
 /**
- * Drives a `<SidebarProvider>` from `@ember-joinery/ember` and the sidebar in it. It reads the
- * sidebar's state from the panel's `data-state` (on mobile, the sheet's), and acts as a user
- * does: the trigger, the rail, ⌘B (Ctrl+B), and on mobile, Escape or a press outside the sheet.
+ * Drives a `<SidebarProvider>` from `@ember-joinery/ember` and the sidebar in it. It reads
+ * whether the sidebar is open through ARIA, from its trigger's `aria-expanded` (without a
+ * trigger, from the panel's `data-state`, or on mobile the sheet's), and acts as a user does:
+ * the trigger, the rail, ⌘B (Ctrl+B), and on mobile, Escape or a press outside the sheet.
  *
  *   const sidebar = new SidebarHarness('app') // <SidebarProvider @name="app">
  *   await sidebar.toggle()
@@ -177,15 +178,22 @@ export class SidebarHarness extends Harness {
    * sheet is open. `null` for a sidebar that doesn't collapse.
    */
   get state(): 'expanded' | 'collapsed' | null {
-    if (this.isMobile) return this.isOpen ? 'expanded' : 'collapsed'
+    if (this.isMobile)
+      return this.sheet.content?.getAttribute('data-state') === 'open' ? 'expanded' : 'collapsed'
     const state = this.queryPart('sidebar')?.getAttribute('data-state')
     return state === 'expanded' || state === 'collapsed' ? state : null
   }
 
-  /** Whether it is open: the desktop panel expanded, or the mobile sheet open. */
+  /**
+   * Whether it is open: the desktop panel expanded, or the mobile sheet open. A screen reader
+   * hears it from the trigger's `aria-expanded`, so that is what it reads; with no trigger, the
+   * panel's `data-state` (on mobile, the sheet's).
+   */
   get isOpen(): boolean {
+    const expanded = this.queryPart('trigger')?.getAttribute('aria-expanded')
+    if (expanded === 'true' || expanded === 'false') return expanded === 'true'
     if (this.isMobile) return this.sheet.content?.getAttribute('data-state') === 'open'
-    return this.state === 'expanded'
+    return this.queryPart('sidebar')?.getAttribute('data-state') === 'expanded'
   }
 
   /**

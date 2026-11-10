@@ -251,6 +251,38 @@
 }
 
 /*
+ * Joinery's, for WCAG: a sidebar that has slid off the screen (`offcanvas`) hides what is in it,
+ * so the Tab key and assistive technology skip what nobody can see. Upstream's leaves it all
+ * focusable, off the screen. `visibility` waits out the slide on the way out (a transition keeps
+ * it visible until its end) and comes back at once on the way in, since an open sidebar's
+ * container transitions only upstream's properties. The rail stays, so a pointer can still open
+ * the sidebar from the screen's edge; it is out of the tab order already.
+ */
+:where(.jn-sidebar[data-collapsible='offcanvas']) > :where(.jn-sidebar-container) {
+  visibility: hidden;
+  transition-property: left, right, width, visibility;
+}
+
+:where(.jn-sidebar[data-collapsible='offcanvas']) :where(.jn-sidebar-rail) {
+  visibility: visible;
+}
+
+/*
+ * The trigger's `aria-expanded` is Joinery's: upstream's trigger has none. Every sheet's ghost
+ * Button rule gives `aria-expanded:` the look of an open menu's trigger (`bg-muted
+ * text-foreground`), which upstream's open sidebar never shows on its trigger. So an open
+ * sidebar's ghost trigger rests as a ghost Button does (preflight's transparent background and
+ * inherited colour, in base.css), and gets the ghost rule's hover back, which is the same in all
+ * eight sheets and which this rule would otherwise beat. `{{sidebar.trigger}}` gives your own
+ * element `jn-sidebar-trigger` too, so a ghost Button of yours rests the same way.
+ */
+:where(.jn-sidebar-trigger.jn-button-variant-ghost)[aria-expanded='true'] {
+  background-color: transparent;
+  color: inherit;
+  @apply hover:bg-muted hover:text-foreground dark:hover:bg-muted/50;
+}
+
+/*
  * SidebarSeparator renders upstream's Separator (apps/v4/registry/bases/radix/ui/separator.tsx),
  * whose inline utilities these are, but for `bg-border`, which the style sheet's
  * `jn-sidebar-separator` rule (`bg-sidebar-border`) replaces in upstream's cn() call. As in

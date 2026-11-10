@@ -66,7 +66,8 @@ export default AppSidebar
 Upstream's parts are separate components that find their provider through React's context
 (`useSidebar()`). Joinery's `SidebarProvider` yields them all, with its state, so a component of
 yours that renders part of the sidebar takes what it yields as an argument, as `AppSidebar`
-takes `@sidebar` here.
+takes `@sidebar` here. A template that can't be given it, such as a route's, rendered through
+the `{{outlet}}`, gets the same from [`<UseSidebar>`](#usesidebar).
 
 ## Composition
 
@@ -128,6 +129,11 @@ Always render the sidebar inside one.
 | `@mobileBreakpoint` | `number`                  | `768`             | The viewport width, in pixels, below which the sidebar is a sheet |
 | `@cookieName`       | `string \| false`         | `"sidebar_state"` | The cookie its open state is kept in; `false` for none            |
 | `@name`             | `string`                  |                   | Its name, for `SidebarHarness` (`data-test-jn-name`)              |
+
+`@mobileBreakpoint` is Joinery's (upstream's is a constant in its `use-mobile` hook), and it can
+only be 768 or wider. The desktop sidebar's CSS is upstream's, which shows it from Tailwind's `md`
+breakpoint (768px) up, so a narrower breakpoint would leave widths between the two with neither
+the sheet nor the sidebar.
 
 ### Width
 
@@ -222,6 +228,27 @@ Upstream's `useSidebar()` hook is what the provider yields, beside its parts:
 | `isMobile`      | `boolean`                   | Whether the sidebar is on mobile.             |
 | `toggleSidebar` | `() => void`                | Toggles the sidebar. Desktop and mobile.      |
 
+Upstream's hook works in any component under the provider. In Ember, a template the provider's
+block params don't reach (a route's, rendered through the application's `{{outlet}}`, or a
+component you'd rather not pass them to) uses `<UseSidebar>`, which yields the same parts and
+state from the nearest `SidebarProvider` around it, found through the DOM
+([`dom-context`](/primitives/dom-context.md)), as upstream's hook finds it through React's
+context. As upstream's hook does, it throws when there is none.
+
+```gts title="app/templates/inbox.gts"
+import { UseSidebar } from '@ember-joinery/ember'
+
+<template>
+  <UseSidebar as |sidebar|>
+    <header>
+      <sidebar.Trigger />
+      <h1>Inbox</h1>
+    </header>
+    {{if sidebar.isMobile "On a phone" "On a wide screen"}}
+  </UseSidebar>
+</template>
+```
+
 ## SidebarHeader
 
 Use the `Header` part to add a sticky header to the sidebar.
@@ -286,7 +313,9 @@ Use `@isActive` to mark a menu item as active.
 ```
 
 `@tooltip` gives it a tooltip, on the side, while the sidebar is collapsed to its icons (and
-never on mobile), as in the demo at the top of the page.
+never on mobile), as in the demo at the top of the page. Upstream's `tooltip` also takes an object
+of TooltipContent's props (`side`, `align`, `hidden`, `children`…); Joinery's takes the text
+only, and shows it on the right, centred, as upstream's does by default.
 
 ## SidebarMenuAction
 
@@ -340,7 +369,12 @@ the trigger, use the `trigger` modifier, or call `toggleSidebar`:
 ```
 
 The trigger tells assistive technology whether the sidebar is open (`aria-expanded`), which
-upstream's doesn't; `toggleSidebar` on your own button doesn't.
+upstream's doesn't; `toggleSidebar` on your own button doesn't. A ghost Button styles
+`aria-expanded` as an open menu's trigger, filled, which upstream's trigger never shows, so the
+trigger's own class, `jn-sidebar-trigger`, keeps a ghost trigger's resting look while the
+sidebar is open (its hover is the ghost Button's). The `trigger` modifier adds that class too, so
+a ghost Button of yours rests the same way; any other variant shows its `aria-expanded` look
+while the sidebar is open.
 
 ## SidebarRail
 
@@ -473,6 +507,7 @@ which toggles the sidebar. The modifiers render the classes and attributes their
 | Menu action      | `jn-sidebar-menu-action`                                                                 | `sidebar-menu-action`     | `data-show-on-hover`                                                 |
 | Submenu button   | `jn-sidebar-menu-sub-button`                                                             | `sidebar-menu-sub-button` | `data-size`, `data-active`, `data-test-jn="sidebar-menu-sub-button"` |
 | Trigger          | `jn-sidebar-trigger` and a Button's                                                      | `sidebar-trigger`         | `aria-expanded`                                                      |
+| Inset            | `jn-sidebar-inset`                                                                       | `sidebar-inset`           | no `data-sidebar`, as upstream's                                     |
 | Every other part | `jn-sidebar-<part>`                                                                      | `sidebar-<part>`          | `data-sidebar="<part>"`, as upstream's                               |
 
 The mobile sheet's `data-slot` is the Sheet's own (upstream's is `sidebar`): the Dialog
@@ -496,6 +531,13 @@ ways to toggle the sidebar.
   page's tab order goes through them.
 - The trigger has `aria-expanded`, so a screen reader hears whether the sidebar is open;
   upstream's doesn't. The rail has upstream's `aria-label` and `title`, "Toggle Sidebar".
+- Slid off the screen (`@collapsible="offcanvas"`, collapsed), the sidebar hides what is in it
+  (`visibility: hidden`, once the slide has finished), so the Tab key and screen readers skip
+  what nobody can see. Upstream's leaves its menu buttons, links and actions in the tab order,
+  off the screen, which fails WCAG 2.2's Focus Visible and Focus Not Obscured. Closing it while
+  focus is inside (with the shortcut, say) moves focus to the trigger first. The rail stays, so a
+  pointer can still open it from the screen's edge. Collapsed to its icons, it still shows them,
+  so they stay in the tab order.
 - On mobile the sidebar is a modal [Sheet](/components/sheet.md), named "Sidebar" and described
   ("Displays the mobile sidebar.") for screen readers: focus moves in, stays there and goes back,
   and the page behind is inert.
@@ -506,10 +548,14 @@ ways to toggle the sidebar.
 ## Testing
 
 `SidebarHarness` from `@ember-joinery/test-support` drives a `<SidebarProvider>`:
-`state`, `isOpen`, `isMobile`, `collapsible`, `variant`, `side`, the `panel`, `trigger`, `rail`,
-`inset` and mobile `sheet`, the `groupLabels` and `badges`, `menuButtons` and `menuSubButtons`
-(with their labels, and `menuButton(label)`), and `toggle()`, `open()`, `close()`,
-`toggleWithRail()`, `pressShortcut()` and, on mobile, `pressOutside()`.
+`state`, `isOpen` (read from the trigger's `aria-expanded`, as a screen reader hears it; without
+a trigger, from the panel's `data-state`), `isMobile`, `collapsible`, `variant`, `side`, the
+`panel`, its `container` (where your attributes go), `trigger`, `rail`, `inset` and mobile
+`sheet`, `elements(name)` (the sidebar's elements by upstream's `data-sidebar`, through any
+component between, such as a Collapsible), the `groupLabels` and `badges`, `menuButtons` and
+`menuSubButtons` (with their labels, and `menuButton(label)`), and `toggle()`, `open()`,
+`close()`, `toggleWithRail()`, `pressShortcut()`, `focusTrigger()` and, on mobile,
+`pressOutside()`.
 
 Menu buttons are components of their own (`data-test-jn="sidebar-menu-button"`), so one can be
 a Collapsible's or a Dropdown Menu's trigger too. `SidebarMenuButtonHarness` drives one:

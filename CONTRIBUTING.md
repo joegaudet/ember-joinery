@@ -523,7 +523,10 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   `docs-app/tests/acceptance/pages-test.ts` renders every page and audits it with axe, so a new
   page needs no list edited. A page's examples may repeat a landmark, as upstream's do (every
   Breadcrumb is a nav called `breadcrumb`), so its `landmark-unique` check covers the guide's
-  own landmarks and leaves the previews out; each example's own test audits it alone. Where a
+  own landmarks and leaves the previews out; each example's own test audits it alone. A block
+  preview (`@block={{true}}`) renders in a frame of its own, which axe doesn't enter from the
+  page, so the pages test checks that it rendered and audits only the frame around it: its
+  example's own test is what audits the block. Where a
   component keeps upstream's colours though they fall short of WCAG AA's contrast (see
   "Upstream's colours and AA"), it lists those elements, with the reason, in its own
   `docs-app/tests/acceptance/upstream-contrast/<component>.ts`: the pages test leaves them out

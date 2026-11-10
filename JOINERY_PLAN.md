@@ -647,7 +647,12 @@ workspace.
   winning. The Rich Text Editor's toolbar keeps each toggle's own `data-state` on top; a plain
   `<Toggle {{t.trigger}}>` in core doesn't, and whether it should is Joe's call.
 - **Where Sidebar parts from upstream, for WCAG.** Upstream's trigger toggles the sidebar without
-  saying whether it is open; Joinery's has `aria-expanded`. Upstream's menu button tooltips open
+  saying whether it is open; Joinery's has `aria-expanded`, and its class keeps a ghost
+  trigger from taking the ghost Button's `aria-expanded` fill, so it looks as upstream's does.
+  Upstream's offcanvas sidebar, slid off the screen, leaves its menu buttons, links and actions
+  in the tab order (WCAG 2.2's Focus Visible and Focus Not Obscured); Joinery's hides them once
+  the slide ends (`visibility: hidden`, but for the rail), and moves focus that was inside to the
+  trigger as it closes. Upstream's menu button tooltips open
   while the sidebar is expanded too, hidden, which repeats each label to a screen reader and
   takes the Escape that should close the mobile sheet; Joinery's stay closed then. The guide's
   `sidebar-menu-collapsible` makes each Collapsible the menu's `<li>` (as `sidebar-demo` does),

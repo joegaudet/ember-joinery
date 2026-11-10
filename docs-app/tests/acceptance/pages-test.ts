@@ -104,6 +104,7 @@ module('Acceptance | guide pages', function (hooks) {
         assert.dom(heading.querySelector('a.heading-anchor')).hasAttribute('href', `#${heading.id}`)
       }
       // Every <Example> on the page found its file and rendered it: a block, in its own frame.
+      // The audits below don't enter a block's frame; its example's own test audits it.
       for (const example of document.querySelectorAll('[data-test-example]')) {
         const name = example.getAttribute('data-test-example')!
         await waitUntil(() => !example.querySelector('.example-loading'), { timeout: 15000 })

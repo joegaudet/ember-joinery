@@ -5,10 +5,12 @@ import { get, hash } from '@ember/helper'
 import { on } from '@ember/modifier'
 import type { TOC } from '@ember/component/template-only'
 import type Owner from '@ember/owner'
+import { registerDestructor } from '@ember/destroyable'
 import type { WithBoundArgs } from '@glint/template'
 import { PanelLeft } from 'lucide'
 import { As, type TagName } from '@ember-joinery/primitives/as'
 import { controllable } from '@ember-joinery/primitives/controllable-state'
+import { Consume, Provide } from '@ember-joinery/primitives/dom-context'
 import { idFor } from '@ember-joinery/primitives/id'
 import type { NativeValueArgs } from '@ember-joinery/primitives/native-value'
 import { part, type PartModifier } from '@ember-joinery/primitives/part'
@@ -79,7 +81,7 @@ export function sidebarStateFromCookie(
 /**
  * A part's markup: its tag, its classes (upstream's semantic class, renamed `jn-`, and the
  * markers other rules look for, such as `group/menu-item`), upstream's `data-slot` and
- * `data-sidebar`, and its `data-test-jn-part`.
+ * `data-sidebar` (where upstream gives one), and its `data-test-jn-part`.
  *
  * Only a part that holds nothing of the caller's (a badge, the rail, the trigger) names the
  * provider as its owner (`data-test-jn-owner`), which keeps it the sidebar's inside another
@@ -93,7 +95,7 @@ interface PartSpec {
   readonly tag: keyof HTMLElementTagNameMap
   readonly class: string
   readonly slot: string
-  readonly sidebar: string
+  readonly sidebar: string | undefined
   readonly part: string
   readonly owned: boolean
 }
@@ -101,12 +103,12 @@ interface PartSpec {
 const spec = (
   tag: keyof HTMLElementTagNameMap,
   name: string,
-  options: { class?: string; owned?: boolean } = {},
+  options: { class?: string; owned?: boolean; sidebar?: false } = {},
 ): PartSpec => ({
   tag,
   class: options.class ?? `jn-sidebar-${name}`,
   slot: `sidebar-${name}`,
-  sidebar: name,
+  sidebar: options.sidebar === false ? undefined : name,
   part: name,
   owned: options.owned ?? false,
 })
@@ -125,7 +127,14 @@ const MENU_SUB = spec('ul', 'menu-sub')
 const MENU_SUB_ITEM = spec('li', 'menu-sub-item', {
   class: 'jn-sidebar-menu-sub-item group/menu-sub-item',
 })
-const INSET = spec('main', 'inset')
+// Upstream's SidebarInset has a `data-slot` and no `data-sidebar`.
+const INSET = spec('main', 'inset', { sidebar: false })
+
+/**
+ * Upstream's `cn-sidebar-trigger`, renamed. No sheet styles it; sidebar.css keeps an open
+ * sidebar's ghost trigger from taking the ghost Button's `aria-expanded` look.
+ */
+const TRIGGER_CLASS = 'jn-sidebar-trigger'
 
 /** A part's attributes, as its component renders them and its modifier sets them. */
 function partAttributes(part: PartSpec, owner: string): Record<string, string | undefined> {
@@ -191,7 +200,9 @@ export interface SidebarProviderSignature {
     keyboardShortcut?: string | false
     /**
      * The viewport width, in CSS pixels, below which the sidebar is a sheet. Default 768, as
-     * upstream's `use-mobile` hook.
+     * upstream's `use-mobile` hook. Make it 768 or wider: the desktop sidebar's CSS, as
+     * upstream's, shows it only from Tailwind's `md` breakpoint (768px) up, so below 768 it
+     * would leave a window between the two with neither sheet nor sidebar.
      */
     mobileBreakpoint?: number
     /**
@@ -242,11 +253,25 @@ export class SidebarProvider extends Component<SidebarProviderSignature> {
   /** The document the provider renders in, for its cookie (a preview's frame has its own). */
   #document: Document | undefined
 
+  /** The triggers rendered for it (`Trigger`, `{{sidebar.trigger}}`), for focus to go back to. */
+  #triggers = new Set<HTMLElement>()
+
+  /** @internal The desktop sidebar it renders, which says how it collapses. */
+  panel: { readonly collapsible: SidebarCollapsible } | undefined
+
   constructor(owner: Owner, args: SidebarProviderSignature['Args']) {
     super(owner, args)
     // The page's own width, so a sidebar first renders as it should; `setup` measures again in
     // the window the provider is in, which differs only inside a frame.
     this.viewportWidth = typeof window === 'undefined' ? Infinity : window.innerWidth
+  }
+
+  /**
+   * Whether there is a DOM to provide through, for `<UseSidebar>`: `<Provide>` makes its marker
+   * with `document`, which a server-side render may not have.
+   */
+  get hasDocument(): boolean {
+    return typeof document !== 'undefined'
   }
 
   /** The root's `id`, which its parts name as their owner. */
@@ -273,6 +298,7 @@ export class SidebarProvider extends Component<SidebarProviderSignature> {
 
   /** Opens (`true`) or closes (`false`) the desktop sidebar, and keeps that in the cookie. */
   setOpen = (open: boolean): void => {
+    if (!open) this.#keepFocus()
     this.openState.set(open)
     const name = this.args.cookieName ?? SIDEBAR_COOKIE_NAME
     const doc = this.#document ?? (typeof document === 'undefined' ? undefined : document)
@@ -280,6 +306,31 @@ export class SidebarProvider extends Component<SidebarProviderSignature> {
       doc.cookie = `${name}=${open}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
     }
   }
+
+  /**
+   * Closing, an offcanvas sidebar slides off the screen and hides what is in it (sidebar.css),
+   * so focus in it would be lost: it goes to a trigger first. The rail stays where it is, so
+   * focus on it does too.
+   */
+  #keepFocus(): void {
+    if (this.isMobile || this.panel?.collapsible !== 'offcanvas') return
+    const active = this.#document?.activeElement
+    const container = active?.closest('[data-slot="sidebar-container"]')
+    if (!active || !container || active.closest('[data-slot="sidebar-rail"]')) return
+    if (container.closest('[data-slot="sidebar-wrapper"]')?.id !== this.id) return
+    const trigger = [...this.#triggers].find(
+      element => element.isConnected && !container.contains(element),
+    )
+    trigger?.focus()
+  }
+
+  /** @internal Keeps a trigger's element, while it renders, for focus to go back to. */
+  registerTrigger: PartModifier = part(() => ({
+    element: element => {
+      this.#triggers.add(element)
+      return () => void this.#triggers.delete(element)
+    },
+  }))
 
   /** Opens (`true`) or closes (`false`) the mobile sheet. */
   setOpenMobile = (open: boolean): void => {
@@ -352,10 +403,19 @@ export class SidebarProvider extends Component<SidebarProviderSignature> {
     attributes: menuActionAttributes(options),
   }))
 
-  /** Makes your own element or component a trigger: it opens and closes the sidebar. */
+  /**
+   * Makes your own element or component a trigger: it opens and closes the sidebar, and says
+   * whether it is open (`aria-expanded`). It adds `jn-sidebar-trigger`, so a ghost Button keeps
+   * its resting look while the sidebar is open, as `Trigger` does.
+   */
   trigger: PartModifier = part(() => ({
+    class: TRIGGER_CLASS,
     attributes: triggerAttributes(this),
     on: { click: () => this.toggleSidebar() },
+    element: element => {
+      this.#triggers.add(element)
+      return () => void this.#triggers.delete(element)
+    },
   }))
 
   <template>
@@ -368,56 +428,14 @@ export class SidebarProvider extends Component<SidebarProviderSignature> {
       ...attributes
       {{this.setup}}
     >
-      {{yield
-        (hash
-          Sidebar=(component SidebarPanel sidebar=this)
-          Trigger=(component SidebarTrigger sidebar=this)
-          Rail=(component SidebarRail sidebar=this)
-          Inset=(component SidebarPart spec=INSET owner=this.id)
-          Input=(component SidebarInput sidebar=this)
-          Header=(component SidebarPart spec=HEADER owner=this.id)
-          Footer=(component SidebarPart spec=FOOTER owner=this.id)
-          Separator=(component SidebarSeparator sidebar=this)
-          Content=(component SidebarPart spec=CONTENT owner=this.id)
-          Group=(component SidebarPart spec=GROUP owner=this.id)
-          GroupLabel=(component SidebarPart spec=GROUP_LABEL owner=this.id)
-          GroupAction=(component SidebarPart spec=GROUP_ACTION owner=this.id)
-          GroupContent=(component SidebarPart spec=GROUP_CONTENT owner=this.id)
-          Menu=(component SidebarPart spec=MENU owner=this.id)
-          MenuItem=(component SidebarPart spec=MENU_ITEM owner=this.id)
-          MenuButton=(component SidebarMenuButton sidebar=this)
-          MenuAction=SidebarMenuAction
-          MenuBadge=(component SidebarPart spec=MENU_BADGE owner=this.id)
-          MenuSkeleton=(component SidebarMenuSkeleton sidebar=this)
-          MenuSub=(component SidebarPart spec=MENU_SUB owner=this.id)
-          MenuSubItem=(component SidebarPart spec=MENU_SUB_ITEM owner=this.id)
-          MenuSubButton=SidebarMenuSubButton
-          trigger=this.trigger
-          header=this.header
-          footer=this.footer
-          content=this.content
-          group=this.group
-          groupLabel=this.groupLabel
-          groupAction=this.groupAction
-          groupContent=this.groupContent
-          menu=this.menu
-          menuItem=this.menuItem
-          menuButton=asSidebarMenuButton
-          menuAction=this.menuAction
-          menuBadge=this.menuBadge
-          menuSub=this.menuSub
-          menuSubItem=this.menuSubItem
-          menuSubButton=asSidebarMenuSubButton
-          inset=this.inset
-          state=this.state
-          open=this.open
-          setOpen=this.setOpen
-          openMobile=this.openMobile
-          setOpenMobile=this.setOpenMobile
-          isMobile=this.isMobile
-          toggleSidebar=this.toggleSidebar
-        )
-      }}
+      {{#if this.hasDocument}}
+        {{! What upstream's components find through React's context: a routed page's <UseSidebar>. }}
+        <Provide @data={{this}} @key={{SidebarProvider}} @element={{false}}>
+          <SidebarParts @sidebar={{this}} as |sidebar|>{{yield sidebar}}</SidebarParts>
+        </Provide>
+      {{else}}
+        <SidebarParts @sidebar={{this}} as |sidebar|>{{yield sidebar}}</SidebarParts>
+      {{/if}}
     </div>
   </template>
 }
@@ -467,6 +485,15 @@ export interface SidebarSignature {
 }
 
 class SidebarPanel extends Component<SidebarSignature> {
+  constructor(owner: Owner, args: SidebarSignature['Args']) {
+    super(owner, args)
+    const sidebar = args.sidebar
+    sidebar.panel = this
+    registerDestructor(this, () => {
+      if (sidebar.panel === this) sidebar.panel = undefined
+    })
+  }
+
   get side(): SidebarSide {
     return this.args.side ?? 'left'
   }
@@ -565,7 +592,7 @@ const SidebarTrigger: TOC<SidebarTriggerSignature> = <template>
     <Button
       @variant="ghost"
       @size="icon-sm"
-      class="jn-sidebar-trigger"
+      class={{TRIGGER_CLASS}}
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
       aria-expanded={{get attributes "aria-expanded"}}
@@ -573,6 +600,7 @@ const SidebarTrigger: TOC<SidebarTriggerSignature> = <template>
       data-test-jn-owner={{@sidebar.id}}
       ...attributes
       {{on "click" @sidebar.toggleSidebar}}
+      {{@sidebar.registerTrigger}}
     >
       <Icon @icon={{if @icon @icon PanelLeft}} class="jn-rtl-flip" />
       <span {{visuallyHidden}}>{{if @label @label "Toggle Sidebar"}}</span>
@@ -784,8 +812,10 @@ export const asSidebarMenuButton: PartModifier<HTMLElement, SidebarMenuButtonOpt
 export interface SidebarMenuButtonSignature {
   Args: SidebarMenuButtonOptions & {
     /**
-     * A tooltip, shown on the side while the sidebar is collapsed (and not on mobile), for a
-     * sidebar that collapses to its icons.
+     * A tooltip, shown on the right, centred, while the sidebar is collapsed (and not on
+     * mobile), for a sidebar that collapses to its icons. Upstream's also takes an object of
+     * TooltipContent's props (`side`, `align`, `hidden`, `children`…); Joinery's takes the
+     * text only.
      */
     tooltip?: string
     /** The tag to render instead of `button`, such as `a` for a link (`@as="a" href="#"`). */
@@ -982,6 +1012,88 @@ const SidebarMenuSubButton: TOC<SidebarMenuSubButtonSignature> = <template>
 </template>
 
 // ----- What the provider yields ---------------------------------------------------------------
+
+interface SidebarPartsSignature {
+  Args: { sidebar: SidebarProvider }
+  Blocks: { default: [SidebarBlockParams] }
+}
+
+/** The parts and state a provider yields, and `<UseSidebar>` too, bound to the provider. */
+const SidebarParts: TOC<SidebarPartsSignature> = <template>
+  {{yield
+    (hash
+      Sidebar=(component SidebarPanel sidebar=@sidebar)
+      Trigger=(component SidebarTrigger sidebar=@sidebar)
+      Rail=(component SidebarRail sidebar=@sidebar)
+      Inset=(component SidebarPart spec=INSET owner=@sidebar.id)
+      Input=(component SidebarInput sidebar=@sidebar)
+      Header=(component SidebarPart spec=HEADER owner=@sidebar.id)
+      Footer=(component SidebarPart spec=FOOTER owner=@sidebar.id)
+      Separator=(component SidebarSeparator sidebar=@sidebar)
+      Content=(component SidebarPart spec=CONTENT owner=@sidebar.id)
+      Group=(component SidebarPart spec=GROUP owner=@sidebar.id)
+      GroupLabel=(component SidebarPart spec=GROUP_LABEL owner=@sidebar.id)
+      GroupAction=(component SidebarPart spec=GROUP_ACTION owner=@sidebar.id)
+      GroupContent=(component SidebarPart spec=GROUP_CONTENT owner=@sidebar.id)
+      Menu=(component SidebarPart spec=MENU owner=@sidebar.id)
+      MenuItem=(component SidebarPart spec=MENU_ITEM owner=@sidebar.id)
+      MenuButton=(component SidebarMenuButton sidebar=@sidebar)
+      MenuAction=SidebarMenuAction
+      MenuBadge=(component SidebarPart spec=MENU_BADGE owner=@sidebar.id)
+      MenuSkeleton=(component SidebarMenuSkeleton sidebar=@sidebar)
+      MenuSub=(component SidebarPart spec=MENU_SUB owner=@sidebar.id)
+      MenuSubItem=(component SidebarPart spec=MENU_SUB_ITEM owner=@sidebar.id)
+      MenuSubButton=SidebarMenuSubButton
+      trigger=@sidebar.trigger
+      header=@sidebar.header
+      footer=@sidebar.footer
+      content=@sidebar.content
+      group=@sidebar.group
+      groupLabel=@sidebar.groupLabel
+      groupAction=@sidebar.groupAction
+      groupContent=@sidebar.groupContent
+      menu=@sidebar.menu
+      menuItem=@sidebar.menuItem
+      menuButton=asSidebarMenuButton
+      menuAction=@sidebar.menuAction
+      menuBadge=@sidebar.menuBadge
+      menuSub=@sidebar.menuSub
+      menuSubItem=@sidebar.menuSubItem
+      menuSubButton=asSidebarMenuSubButton
+      inset=@sidebar.inset
+      state=@sidebar.state
+      open=@sidebar.open
+      setOpen=@sidebar.setOpen
+      openMobile=@sidebar.openMobile
+      setOpenMobile=@sidebar.setOpenMobile
+      isMobile=@sidebar.isMobile
+      toggleSidebar=@sidebar.toggleSidebar
+    )
+  }}
+</template>
+
+export interface UseSidebarSignature {
+  Blocks: { default: [SidebarBlockParams] }
+}
+
+/**
+ * Upstream's `useSidebar()`, for a component that isn't given the provider's block params: it
+ * yields what the nearest `<SidebarProvider>` around it does (its parts, their modifiers and
+ * its state). That is how a routed page, rendered through an `{{outlet}}` inside the
+ * application's provider, reaches the sidebar:
+ *
+ *   <UseSidebar as |sidebar|>
+ *     <sidebar.Trigger />
+ *     {{if sidebar.isMobile "On a phone" "On a wide screen"}}
+ *   </UseSidebar>
+ *
+ * As upstream's hook does, it throws when there is no provider around it.
+ */
+export const UseSidebar: TOC<UseSidebarSignature> = <template>
+  <Consume @key={{SidebarProvider}} as |context|>
+    <SidebarParts @sidebar={{context.data}} as |sidebar|>{{yield sidebar}}</SidebarParts>
+  </Consume>
+</template>
 
 type Part = WithBoundArgs<typeof SidebarPart, 'spec' | 'owner'>
 

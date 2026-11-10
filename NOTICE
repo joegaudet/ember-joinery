@@ -9,12 +9,14 @@ Its charts, @ember-joinery/chart, port recharts, which shadcn/ui's Chart wraps: 
 selection (getTicks, getEquidistantTicks), nice tick values (getNiceTickValues), text
 measurement (DOMUtils' getStringSize), cartesian layout (the plot area, scales, stacking, bar
 positions, tick lines), pie layout (computePieSectors, the pie's labels, polar label positions,
-inRangeOfSector) and tooltip placement (getTooltipTranslateXY), and its rectangle and sector
-paths (getRectanglePath, Sector). Its Drawer ports vaul, which shadcn/ui's Drawer is built on:
-vaul's behaviour in @ember-joinery/primitives' drawer, and vaul's style sheet, copied into
-@ember-joinery/ember's compiled CSS. Its Command ports cmdk, which shadcn/ui's Command is built
-on: cmdk's behaviour and its command score, in @ember-joinery/primitives' command. All of them
-are MIT licensed; their notices and licences follow.
+inRangeOfSector), polar layout (PolarUtils, the radar's points, the radial bars' sectors, the
+polar grid, axes and labels) and tooltip placement (getTooltipTranslateXY), and its rectangle,
+sector and polygon paths (getRectanglePath, Sector, getSectorPath, Polygon). Its Drawer ports
+vaul, which shadcn/ui's Drawer is built on: vaul's behaviour in @ember-joinery/primitives' drawer,
+and vaul's style sheet, copied into @ember-joinery/ember's compiled CSS. Its Command ports cmdk,
+which shadcn/ui's Command is built on: cmdk's behaviour and its command score, in
+@ember-joinery/primitives' command. All of them are MIT licensed; their notices and licences
+follow.
 
 --------------------------------------------------------------------------------
 shadcn/ui

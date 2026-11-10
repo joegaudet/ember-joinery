@@ -21,6 +21,13 @@
 @import '../../node_modules/@ember-joinery/ember/src/css/shadcn.css';
 
 /*
+ * tw-animate-css's enter and exit utilities (`animate-in`, `fade-in-0`, `slide-in-from-bottom-2`),
+ * which ui.shadcn.com imports as `tw-animate-css` and Questionnaire's animated example uses on
+ * its items. The guide takes the copy the ember package compiles its styles with.
+ */
+@import '../../node_modules/@ember-joinery/ember/node_modules/tw-animate-css/dist/tw-animate.css';
+
+/*
  * ui.shadcn.com's style variants (`style-lyra:ml-4` on collapsible-file-tree's content), as its
  * globals.css defines them, but on the `data-style` the frame's preview and the parity route's
  * stage carry, where upstream's previews carry a `style-<name>` class.

@@ -287,8 +287,9 @@ month, day and day button `data-test-jn-value` (its `yyyy-MM-dd`).
 
 That is the [APG date picker dialog](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/examples/datepicker-dialog/)'s
 grid, with react-day-picker's keys. A move skips disabled days, stops at `@startMonth` and
-`@endMonth`, and shows the month it lands in. One day is in the tab order: the focused day,
-else the one focused last, the selected day, today, or the month's first.
+`@endMonth`, and shows the month it lands in (with `@disableNavigation`, it stays in the months
+shown). One day is in the tab order: the focused day, else the one focused last, the selected
+day, today, or the month's first.
 
 ## Accessibility
 

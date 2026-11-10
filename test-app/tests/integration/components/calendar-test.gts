@@ -347,6 +347,67 @@ module('Integration | components | calendar', function (hooks) {
     await a11yAudit()
   })
 
+  test('@onDayClick hears every press; @onValueChange hears the day pressed too', async function (assert) {
+    const clicks: string[] = []
+    const details: string[] = []
+    const onDayClick = (date: Date, modifiers: { selected: boolean }) =>
+      clicks.push(`${isoDate(date)} ${modifiers.selected ? 'selected' : 'not selected'}`)
+    const onValueChange = (_value: CalendarValue, change: { date: Date }) =>
+      details.push(isoDate(change.date))
+    await render(
+      <template>
+        <Calendar
+          @mode="single"
+          @today={{TODAY}}
+          @defaultValue={{day "2026-01-05"}}
+          @onDayClick={{onDayClick}}
+          @onValueChange={{onValueChange}}
+        />
+      </template>,
+    )
+    const calendar = new CalendarHarness()
+    await calendar.select('2026-01-05')
+    await calendar.select('2026-01-06')
+    assert.deepEqual(clicks, ['2026-01-05 selected', '2026-01-06 not selected'])
+    assert.deepEqual(details, ['2026-01-05', '2026-01-06'])
+    assert.deepEqual(calendar.selected.map(isoDate), ['2026-01-06'])
+    assert.deepEqual(calendar.monthLabels, ['January 2026'])
+    await a11yAudit()
+  })
+
+  test('@hideNavigation, @hideWeekdays and @disableNavigation', async function (assert) {
+    await render(
+      <template>
+        <Calendar
+          @mode="single"
+          @today={{TODAY}}
+          @hideNavigation={{true}}
+          @hideWeekdays={{true}}
+          @name="bare"
+        />
+        <Calendar
+          @mode="single"
+          @today={{TODAY}}
+          @captionLayout="dropdown"
+          @disableNavigation={{true}}
+          @name="fixed"
+        />
+      </template>,
+    )
+    const bare = new CalendarHarness('bare')
+    assert.strictEqual(bare.queryPart('nav'), null)
+    assert.deepEqual(bare.weekdays, [])
+    const fixed = new CalendarHarness('fixed')
+    assert.false(fixed.canGoNext)
+    assert.false(fixed.canGoPrevious)
+    assert.dom(fixed.monthDropdown()).isDisabled()
+    await fixed.focus('2026-01-31')
+    await fixed.press('ArrowRight')
+    assert.strictEqual(fixed.caption, 'January 2026', 'the keys stay in the month shown')
+    assert.strictEqual(fixed.focusedDay, '2026-01-31')
+    await a11yAudit({ rules: { 'landmark-unique': { enabled: false } } })
+  })
+
   test('@modifiers and @modifiersClassNames mark days of your own', async function (assert) {
     const booked = [day('2026-01-20'), day('2026-01-21')]
     await render(

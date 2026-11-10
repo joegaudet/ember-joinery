@@ -1003,7 +1003,11 @@ export class CalendarState {
     const next = this.#nextFocus(by, direction, focused.date)
     if (!next) return
     const displayMonth = this.system.startOfMonth(next)
-    if (!this.displayMonths.some(month => isSameDay(month, displayMonth))) this.goToMonth(next)
+    if (!this.displayMonths.some(month => isSameDay(month, displayMonth))) {
+      // With @disableNavigation the month can't change, so focus stays where it is.
+      if (this.#args().disableNavigation) return
+      this.goToMonth(next)
+    }
     this.focused = { date: next, displayMonth }
   }
 

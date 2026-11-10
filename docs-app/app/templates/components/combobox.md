@@ -262,7 +262,9 @@ The `<input>` in an input group, with the chevron button at its end. Attributes
 (`placeholder`, `aria-invalid`, `class`…) go on the `<input>`; upstream puts its `className` on
 the group, which is `@groupClass` here (`@groupClass="w-full"`). `@showTrigger` (default `true`) shows the
 chevron, `@showClear` the clear button while there is a value, and `@disabled` disables the
-input and its buttons; its block holds addons. Upstream leaves the buttons unnamed; Joinery
+input and its buttons. Its block holds addons, and yields `Addon` (`as |g|`, then
+`<g.Addon @align="inline-start">`), Input Group's addon, which a press focuses the input
+from. Upstream leaves the buttons unnamed; Joinery
 names them (`@triggerLabel`, default `Show options`; `@clearLabel`, default `Clear`).
 
 ### c.Content

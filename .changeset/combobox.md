@@ -5,7 +5,8 @@
 ---
 
 `Combobox` is shadcn's Combobox, on Base UI's: `<Combobox @items={{…}} as |c|>` yields Input
-(in its input group, with `@showTrigger`, `@showClear`, and `@groupClass` for the group),
+(in its input group, with `@showTrigger`, `@showClear`, `@groupClass` for the group, and
+an `Addon` it yields for an icon beside the input),
 Trigger, TriggerIcon, Clear, Value, Content, List, Item, Group, Label, Collection, Empty,
 Separator, Chips, Chip and ChipsInput. Typing filters `@items` (an `Intl.Collator` match anywhere in the label, or your
 own `@filter`, or `@filter={{null}}` for results filtered elsewhere) and the arrow keys

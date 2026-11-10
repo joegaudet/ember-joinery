@@ -1,9 +1,9 @@
 import type { TOC } from '@ember/component/template-only'
 import { hash } from '@ember/helper'
 import { on } from '@ember/modifier'
-import type { WithBoundArgs } from '@glint/template'
+import type { ComponentLike, WithBoundArgs } from '@glint/template'
 import { Check, ChevronDown, X } from 'lucide'
-import type { TagName } from '@ember-joinery/primitives/as'
+import { As, type TagName } from '@ember-joinery/primitives/as'
 import type { Align, Side } from '@ember-joinery/primitives/anchor'
 import {
   Combobox as ComboboxPrimitive,
@@ -15,7 +15,11 @@ import type { PartModifier } from '@ember-joinery/primitives/part'
 import { buttonClasses } from './button.gts'
 import Icon, { type IconNode } from './icon.gts'
 import { inputClasses } from './input.gts'
-import { inputGroupAddonClasses, inputGroupButtonClasses } from './input-group.gts'
+import {
+  inputGroupAddonClasses,
+  inputGroupButtonClasses,
+  type InputGroupAddonOptions,
+} from './input-group.gts'
 
 // The classes of the buttons upstream renders as an `InputGroupButton` (ghost, `icon-xs`), and
 // as a `Button` (a chip's remove button): Button's, then the group's own. ComboboxInput renders
@@ -136,6 +140,41 @@ const ComboboxClear: TOC<ComboboxClearSignature> = <template>
 
 // ----- Inputs --------------------------------------------------------------------------------
 
+export interface ComboboxInputAddonSignature {
+  Args: InputGroupAddonOptions & {
+    /** The tag to render instead of `div`. */
+    as?: TagName
+  }
+  /** An icon or text beside the input. */
+  Blocks: { default: [] }
+  Element: HTMLElement
+}
+
+/**
+ * An addon in the combobox's input group, as upstream puts an `InputGroupAddon` inside
+ * `ComboboxInput`: Input Group's addon (`@align`, `inline-start` by default), whose press (not
+ * on a button in it) focuses the input. It renders the addon's markup and classes, as the group
+ * around it does (see `ComboboxInput`).
+ */
+const ComboboxInputAddon: TOC<ComboboxInputAddonSignature> = <template>
+  <As
+    @as={{@as}}
+    class={{inputGroupAddonClasses align=@align}}
+    role="group"
+    data-slot="input-group-addon"
+    data-align={{if @align @align "inline-start"}}
+    data-test-jn-part="addon"
+    {{on "click" focusInput}}
+    ...attributes
+  >{{yield}}</As>
+</template>
+
+/** What `<c.Input as |g|>` yields: an addon for the input group around the input. */
+export interface ComboboxInputParts {
+  /** Icons or text beside the input, upstream's `InputGroupAddon` (`@align`). */
+  Addon: ComponentLike<ComboboxInputAddonSignature>
+}
+
 export interface ComboboxInputSignature {
   Args: {
     /** Show the chevron button that opens the list. Default `true`. */
@@ -158,8 +197,11 @@ export interface ComboboxInputSignature {
     Trigger: ComboboxPrimitiveBlockParams['Trigger']
     Clear: ComboboxPrimitiveBlockParams['Clear']
   }
-  /** Addons after the input, as upstream's children: an icon at its start. */
-  Blocks: { default: [] }
+  /**
+   * Addons after the input, as upstream's children: `as |g|`, then `<g.Addon>` with an icon at
+   * its start.
+   */
+  Blocks: { default: [ComboboxInputParts] }
   /** The `<input>`: `placeholder`, `aria-invalid` and the rest go on it. */
   Element: HTMLInputElement
 }
@@ -219,7 +261,7 @@ const ComboboxInput: TOC<ComboboxInputSignature> = <template>
         </@Clear>
       {{/if}}
     </div>
-    {{yield}}
+    {{yield (hash Addon=ComboboxInputAddon)}}
   </div>
 </template>
 

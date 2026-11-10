@@ -460,7 +460,10 @@ Calendar (single, multiple and range; month and year dropdowns; locale-aware wee
 and Date Picker (popover, range, presets). Built so: Calendar's headless layer,
 `@ember-joinery/primitives/calendar`, replaces React DayPicker with its markup and options, and
 reads every name, number and week start from Intl in `@locale`; `@calendar` takes any calendar
-Intl knows (the Persian example's), worked out from Intl's own reading of each day.
+Intl knows (the Persian example's), worked out from Intl's own reading of each day. The Date
+Picker is upstream's composition of Popover and Calendar, with no component of its own;
+`DatePickerHarness` (a `PopoverHarness` that picks a day) drives it, and its page ports the
+eight examples upstream's references (the presets now show on the Calendar page only).
 
 ### Phase 8: App shell and utilities
 
@@ -633,6 +636,16 @@ workspace.
   whole words), so the Arabic and Persian headings differ from date-fns'. For WCAG, its week
   numbers leave off the `scope` upstream's `td`s carry, and the custom-days example names each
   day's price in its button. The pixels are upstream's.
+- **Where the Date Picker's examples part from upstream.** Upstream writes dates with date-fns'
+  `format`; with no date library, the examples write `PPP` from Intl, its ordinal suffix
+  included (`November 10th, 2026`), and the Arabic one in Intl's order (`10 نوفمبر 2026`,
+  where date-fns' is `نوفمبر 10, 2026`). The natural-language example keeps upstream's
+  `chrono-node`, a dependency of the guide only. Radix's Popover renders no element, so
+  upstream's trigger sits directly in its parent; Joinery's root is an element
+  (`display: contents`) between them, so the time example's button says `w-full`, which its
+  Field's `*:w-full` gives upstream's, and in the input examples the addon's `has-[>button]`
+  margin misses the calendar button, which sits 0.3rem further in (under the parity
+  threshold).
 - **Where Select and Combobox part from upstream, for WCAG.** Radix's open Select hides the rest
   of the page with `aria-hidden`, leaving the trigger focusable but hidden; Joinery's makes it
   inert, as a modal dialog does. Base UI's Combobox leaves its chevron, clear and chip remove

@@ -20,6 +20,11 @@ if (typeof module !== 'undefined') {
     launch_in_ci: ['Chrome'],
     launch_in_dev: ['Chrome'],
     browser_start_timeout: 120,
+    // The IncrementalEach page's audits of its 20,000 rows run as tasks of 5-7s each on a slow
+    // or shared machine, one after another. Testem's defaults drop a browser that misses a 5s
+    // heartbeat and fail the run if it isn't back within 10s, so a heartbeat landing in the
+    // first of them failed the run though every test passed. This sets both to 30s.
+    browser_disconnect_timeout: 30,
     ...(chrome && { browser_paths: { Chrome: chrome } }),
     browser_args: {
       Chrome: {

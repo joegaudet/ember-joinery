@@ -1,0 +1,64 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/trace.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="trace" in Trace */
+:where(.jn-trace) {
+  @apply flex w-full min-w-0 flex-col *:has-[>[data-slot=trace-line]]:flex *:has-[>[data-slot=trace-line]]:w-fit *:has-[>[data-slot=trace-line]]:max-w-full *:has-[>[data-slot=trace-line]]:min-w-0 *:has-[>[data-slot=trace-line]]:text-start *:has-[>[data-slot=trace-line]]:outline-none;
+}
+
+/* data-slot="trace-line" in TraceLine */
+:where(.jn-trace-line) {
+  @apply flex w-fit max-w-full min-w-0 items-center text-muted-foreground transition-colors in-[a,button]:cursor-pointer in-[a:hover,button:hover]:text-foreground data-[status=error]:text-destructive data-[status=error]:in-[a:hover,button:hover]:text-destructive data-[status=pending]:opacity-60 data-[status=running]:*:data-[slot=trace-title]:shimmer;
+}
+
+/* data-slot="trace-icon" in TraceIcon */
+:where(.jn-trace-icon) {
+  @apply flex shrink-0 items-center justify-center [&_svg]:pointer-events-none;
+}
+
+/* data-slot="trace-title" in TraceTitle */
+:where(.jn-trace-title) {
+  @apply min-w-0 truncate motion-reduce:shimmer-none;
+}
+
+/* data-slot="trace-description" in TraceDescription */
+:where(.jn-trace-description) {
+  @apply shrink-0 text-muted-foreground/70 tabular-nums;
+}
+
+/* data-slot="trace-collapsible" in TraceCollapsible */
+:where(.jn-trace-collapsible) {
+  @apply flex w-full min-w-0 flex-col;
+}
+
+/* data-slot="trace-collapsible-trigger" in TraceCollapsibleTrigger; keep on the element: group/trace-collapsible-trigger */
+:where(.jn-trace-collapsible-trigger) {
+  @apply flex w-fit max-w-full min-w-0 cursor-pointer items-center text-start text-muted-foreground transition-colors outline-none hover:text-foreground has-[[data-status=error]]:text-destructive;
+}
+
+/*
+ * in TraceCollapsibleTrigger, no slot to attach it to: transition-transform
+ * group-aria-expanded/trace-collapsible-trigger:rotate-90. Upstream gives them to the trigger's
+ * chevron, a TraceIcon (data-slot="trace-icon", whose own rules are above); Joinery's chevron
+ * also carries jn-trace-collapsible-trigger-icon for them, by hand. They come after the
+ * TraceIcon's own, as upstream's className does in its cn() call.
+ */
+:where(.jn-trace-collapsible-trigger-icon) {
+  @apply transition-transform group-aria-expanded/trace-collapsible-trigger:rotate-90;
+}
+
+/* data-slot="trace-collapsible-content" in TraceCollapsibleContent */
+:where(.jn-trace-collapsible-content) {
+  @apply min-w-0 overflow-hidden [--radix-accordion-content-height:var(--radix-collapsible-content-height)] data-open:animate-accordion-down data-closed:animate-accordion-up;
+}
+
+/* data-slot="trace-collapsible-content-inner" in TraceCollapsibleContent */
+:where(.jn-trace-collapsible-content-inner) {
+  @apply min-w-0 wrap-break-word text-muted-foreground;
+}

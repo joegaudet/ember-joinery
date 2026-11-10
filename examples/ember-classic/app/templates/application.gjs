@@ -18,6 +18,7 @@ import {
   sortFn_text,
   tableFeatures,
 } from '@ember-joinery/data-table'
+import { RichTextEditor } from '@ember-joinery/tiptap'
 import { anchorTo } from '@ember-joinery/primitives/anchor'
 import { dismissable } from '@ember-joinery/primitives/dismiss'
 import { topLayer } from '@ember-joinery/primitives/layer'
@@ -179,5 +180,7 @@ class Fruit extends Component {
     <FileUpload @name="attachments" @multiple={{true}} @label="Attachments" />
     {{! The data-table add-on, so this build covers TanStack Table's core. }}
     <Fruit />
+    {{! The tiptap add-on, so this build covers Tiptap and ProseMirror, and its toolbar's menus. }}
+    <RichTextEditor @name="notes" @label="Notes" @defaultValue="<p>Shipping today</p>" />
   </main>
 </template>

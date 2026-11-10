@@ -16,6 +16,7 @@ import {
   sortFn_text,
   tableFeatures,
 } from '@ember-joinery/data-table'
+import { RichTextEditor } from '@ember-joinery/tiptap'
 
 const install = 'pnpm add @ember-joinery/code-block'
 const slides = ['One', 'Two', 'Three']
@@ -97,5 +98,6 @@ class Fruit extends Component {
     </Carousel>
     <FileUpload @name="attachments" @multiple={{true}} @label="Attachments" />
     <Fruit />
+    <RichTextEditor @name="notes" @label="Notes" @defaultValue="<p>Shipping today</p>" />
   </main>
 </template>

@@ -9,6 +9,7 @@ import { CarouselHarness } from '@ember-joinery/carousel/test-support'
 import { DataTableHarness } from '@ember-joinery/data-table/test-support'
 import { CodeBlockHarness, setupClipboard } from '@ember-joinery/code-block/test-support'
 import { FileUploadHarness } from '@ember-joinery/file-upload/test-support'
+import { RichTextEditorHarness } from '@ember-joinery/tiptap/test-support'
 
 /** Every cascade layer the page's style sheets declare, in order. */
 function declaredLayers() {
@@ -140,6 +141,24 @@ module('Acceptance | smoke', function (hooks) {
     assert.deepEqual(fruit.column('name'), ['Apple', 'Banana', 'Cherry'], 'table-core sorted it')
     await fruit.sort('name')
     assert.deepEqual(fruit.column('name'), ['Cherry', 'Banana', 'Apple'])
+    await a11yAudit()
+  })
+
+  test('a Joinery RichTextEditor, on Tiptap, formats its document here', async function (assert) {
+    await visit('/')
+    const notes = new RichTextEditorHarness('notes')
+    assert.strictEqual(
+      getComputedStyle(notes.toolbar).borderBottomWidth,
+      '1px',
+      'joinery.css styles it',
+    )
+    assert.strictEqual(notes.html, '<p>Shipping today</p>', "Tiptap's StarterKit read it")
+    await notes.selectAll()
+    await notes.press('bold')
+    assert.true(notes.isActive('bold'))
+    assert.strictEqual(notes.html, '<p><strong>Shipping today</strong></p>')
+    await notes.setBlockType('Heading 2')
+    assert.strictEqual(notes.blockType, 'Heading 2', 'its text style menu works')
     await a11yAudit()
   })
 })

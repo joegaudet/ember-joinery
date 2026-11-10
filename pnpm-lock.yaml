@@ -261,6 +261,15 @@ importers:
       '@ember-joinery/test-support':
         specifier: workspace:*
         version: link:../../packages/test-support
+      '@ember-joinery/tiptap':
+        specifier: workspace:*
+        version: link:../../packages/tiptap
+      '@tiptap/core':
+        specifier: ^3.32.1
+        version: 3.32.1(@tiptap/pm@3.32.1)
+      '@tiptap/pm':
+        specifier: ^3.32.1
+        version: 3.32.1
       lucide:
         specifier: ^0.474.0
         version: 0.474.0
@@ -491,6 +500,15 @@ importers:
       '@ember-joinery/test-support':
         specifier: workspace:*
         version: link:../../packages/test-support
+      '@ember-joinery/tiptap':
+        specifier: workspace:*
+        version: link:../../packages/tiptap
+      '@tiptap/core':
+        specifier: ^3.32.1
+        version: 3.32.1(@tiptap/pm@3.32.1)
+      '@tiptap/pm':
+        specifier: ^3.32.1
+        version: 3.32.1
       lucide:
         specifier: ^0.474.0
         version: 0.474.0

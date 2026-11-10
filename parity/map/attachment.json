@@ -1,0 +1,10 @@
+{
+  "examples": {
+    "attachment-demo": "attachment-demo",
+    "attachment-image": "attachment-image",
+    "attachment-states": "attachment-states",
+    "attachment-sizes": "attachment-sizes",
+    "attachment-group": "attachment-group",
+    "attachment-trigger": "attachment-trigger"
+  }
+}

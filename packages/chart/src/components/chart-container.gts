@@ -7,6 +7,8 @@ import AreaChart from './area-chart.gts'
 import BarChart from './bar-chart.gts'
 import LineChart from './line-chart.gts'
 import PieChart from './pie-chart.gts'
+import RadarChart from './radar-chart.gts'
+import RadialBarChart from './radial-bar-chart.gts'
 import type { ChartConfig } from '../types.ts'
 
 /** What `ChartContainer` yields: the charts, each given the container's config. */
@@ -19,6 +21,13 @@ export interface ChartContainerParts {
   LineChart: WithBoundArgs<typeof LineChart, 'config' | 'inContainer' | 'initialDimension'>
   /** A pie chart: recharts' `PieChart`. */
   PieChart: WithBoundArgs<typeof PieChart, 'config' | 'inContainer' | 'initialDimension'>
+  /** A radar chart: recharts' `RadarChart`. */
+  RadarChart: WithBoundArgs<typeof RadarChart, 'config' | 'inContainer' | 'initialDimension'>
+  /** A radial bar chart: recharts' `RadialBarChart`. */
+  RadialBarChart: WithBoundArgs<
+    typeof RadialBarChart,
+    'config' | 'inContainer' | 'initialDimension'
+  >
 }
 
 export interface ChartContainerSignature {
@@ -88,6 +97,12 @@ export default class ChartContainer extends Component<ChartContainerSignature> {
           )
           PieChart=(component
             PieChart config=@config inContainer=true initialDimension=this.initialDimension
+          )
+          RadarChart=(component
+            RadarChart config=@config inContainer=true initialDimension=this.initialDimension
+          )
+          RadialBarChart=(component
+            RadialBarChart config=@config inContainer=true initialDimension=this.initialDimension
           )
         )
       }}

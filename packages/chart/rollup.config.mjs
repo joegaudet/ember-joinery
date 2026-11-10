@@ -14,6 +14,8 @@ const RECHARTS_PORTS = [
   'nice-ticks.ts',
   'paths.ts',
   'pie-chart.gts',
+  'polar-chart.gts',
+  'polar-geometry.ts',
   'polar.ts',
   'text-size.ts',
   'tick-interval.ts',
@@ -21,8 +23,8 @@ const RECHARTS_PORTS = [
 
 const RECHARTS_NOTICE = `/*!
  * @ember-joinery/chart ports recharts 3.8.0 (https://github.com/recharts/recharts): its tick
- * selection, nice tick values, text measurement, cartesian and pie layout, tooltip placement,
- * and rectangle and sector paths.
+ * selection, nice tick values, text measurement, cartesian, pie and polar layout, tooltip
+ * placement, and rectangle, sector and polygon paths.
  *
  * The MIT License (MIT). Copyright (c) 2015-present recharts
  *

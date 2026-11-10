@@ -14,6 +14,7 @@ import {
   pressEscape,
 } from '@ember-joinery/test-support'
 import { CarouselHarness } from '@ember-joinery/carousel/test-support'
+import { DataTableHarness } from '@ember-joinery/data-table/test-support'
 import { CodeBlockHarness, setupClipboard } from '@ember-joinery/code-block/test-support'
 import { FileUploadHarness } from '@ember-joinery/file-upload/test-support'
 
@@ -193,6 +194,19 @@ module('Acceptance | smoke', function (hooks) {
     )
     await attachments.remove('cv.pdf')
     assert.deepEqual(attachments.files, ['notes.txt'])
+    await a11yAudit()
+  })
+
+  test('a Joinery data table, on TanStack Table, sorts its rows here', async function (assert) {
+    await visit('/')
+    const fruit = new DataTableHarness('fruit')
+    assert.deepEqual(fruit.column('name'), ['Cherry', 'Apple', 'Banana'])
+    assert.true(fruit.table.element.classList.contains('jn-table'), "it is Joinery's Table")
+    await fruit.sort('name')
+    assert.strictEqual(fruit.sortOf('name'), 'ascending', 'aria-sort says so')
+    assert.deepEqual(fruit.column('name'), ['Apple', 'Banana', 'Cherry'], 'table-core sorted it')
+    await fruit.sort('name')
+    assert.deepEqual(fruit.column('name'), ['Cherry', 'Banana', 'Apple'])
     await a11yAudit()
   })
 })

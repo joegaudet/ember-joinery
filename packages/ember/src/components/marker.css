@@ -1,0 +1,23 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/marker.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* in markerVariants; keep on the element: group/marker */
+:where(.jn-marker) {
+  @apply relative flex w-full items-center;
+}
+
+/* data-slot="marker-icon" in MarkerIcon */
+:where(.jn-marker-icon) {
+  @apply shrink-0;
+}
+
+/* data-slot="marker-content" in MarkerContent */
+:where(.jn-marker-content) {
+  @apply min-w-0 wrap-break-word;
+}

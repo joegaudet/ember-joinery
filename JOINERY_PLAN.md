@@ -25,6 +25,18 @@ Deviations from the intake, and why:
 - **The base colours, corrected.** At the pinned commit, upstream's base colours
   (`registry/base-colors.ts`) are Neutral, Stone, Zinc, Mauve, Olive, Mist and Taupe; Gray and
   Slate are gone. Joinery ships those seven, ported from `registry/themes.ts`.
+- **Opt-in add-ons on Formwright's libraries** (added at Joe's request; extends decisions 3 and
+  23). Formwright's add-on packages wrap libraries that Joinery should also offer on their own:
+  shadcn-styled, as standalone Joinery components rather than Formwright controls. Each is an
+  add-on package of its own on the original library, built as Carousel and Code Block are (the
+  library as a dependency, styled with Joinery's tokens and style sheets in the look of the
+  nearest shadcn components, its harness at `<package>/test-support`, a guide page marked as an
+  opt-in add-on with its install step, and Formwright's guide examples for it ported as
+  standalone examples). Nothing in `@ember-joinery/ember`, `@ember-joinery/primitives` or
+  `@ember-joinery/test-support` imports one or lists its library, and the core packages build,
+  test and work without them. shadcn/ui has no counterparts, so they have no parity mappings.
+  Each lands as its own unit and adds its package to the layout and the inventory below; the
+  first is `@ember-joinery/file-upload`, on ember-file-upload.
 - **Clarified while building** (no decision changed). The generated `meta.json` covers every
   A–Z section of the guide (Components, Primitives, Charts, Blocks, Formwright and Reference),
   not only Components. The Guide section now says what "Autonomous execution" already did: the
@@ -110,6 +122,7 @@ ember-joinery/
     carousel/      @ember-joinery/carousel      embla-carousel                              (+ /test-support)
     data-table/    @ember-joinery/data-table    @tanstack/table-core                        (+ /test-support)
     code-block/    @ember-joinery/code-block    shiki highlighting, line numbers, diff, copy  (+ /test-support)
+    file-upload/   @ember-joinery/file-upload   ember-file-upload: drop zone, list, queue     (+ /test-support)
     formwright/    @ember-joinery/formwright    Formwright controls, Field layout, harnesses  (+ /test-support)
   test-app/        Vite Ember app: integration tests for every package; built into docs/site/demo/
   docs-app/        the Kolay guide → docs/site/guide/
@@ -281,6 +294,12 @@ That is 67 docs pages: Toast and Sonner are two pages for one component.
 | Scroller, Zoetrope, Hero, StickyFooter, Link (active-aware), ExternalLink, Heading (heading level), IncrementalEach, Shadowed                                                           | Components, with styled versions where shadcn has a counterpart                         | 8                   |
 | head, qp, service, store, body-class, link helper, proper-links, iframe, load, InViewport/viewport, on-resize/resize-observer, dom-context, narrowing/type utils                        | One subpath export each (`primitives/head`, `/qp`, …)                                   | 8                   |
 | test-support (a11y, dom, otp, rating, routing, zoetrope)                                                                                                                                | Folded into `@ember-joinery/test-support`                                               | with each feature   |
+
+### Opt-in add-ons on Formwright's libraries (Joe's request; see the deviations above)
+
+| Component   | What it is                                                                                                        | Package (library)               |
+| ----------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| File Upload | A drop zone, a file list (Items with previews and remove) and an upload queue with Progress, for one file or many | file-upload (ember-file-upload) |
 
 ### React-only dependencies replaced
 

@@ -7,6 +7,7 @@ import * as testSupport from '@ember-joinery/test-support'
 import { ButtonHarness, IconHarness } from '@ember-joinery/test-support'
 import { CarouselHarness } from '@ember-joinery/carousel/test-support'
 import { CodeBlockHarness, setupClipboard } from '@ember-joinery/code-block/test-support'
+import { FileUploadHarness } from '@ember-joinery/file-upload/test-support'
 
 /** Every cascade layer the page's style sheets declare, in order. */
 function declaredLayers() {
@@ -105,6 +106,26 @@ module('Acceptance | smoke', function (hooks) {
     await carousel.press('ArrowRight')
     assert.deepEqual(carousel.slidesInView, [2])
     assert.false(carousel.canScrollNext)
+    await a11yAudit()
+  })
+
+  test('a Joinery FileUpload, on ember-file-upload, takes and lists files here', async function (assert) {
+    await visit('/')
+    const attachments = new FileUploadHarness('attachments')
+    assert.strictEqual(
+      getComputedStyle(attachments.dropzone).borderTopStyle,
+      'dashed',
+      'joinery.css styles it',
+    )
+    await attachments.select(new File(['%PDF'], 'cv.pdf', { type: 'application/pdf' }))
+    await attachments.drop(new File(['…'], 'notes.txt', { type: 'text/plain' }))
+    assert.deepEqual(
+      attachments.files,
+      ['cv.pdf', 'notes.txt'],
+      "ember-file-upload's queue took them",
+    )
+    await attachments.remove('cv.pdf')
+    assert.deepEqual(attachments.files, ['notes.txt'])
     await a11yAudit()
   })
 })

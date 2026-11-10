@@ -235,6 +235,9 @@ importers:
       '@ember-joinery/ember':
         specifier: workspace:*
         version: link:../../packages/ember
+      '@ember-joinery/file-upload':
+        specifier: workspace:*
+        version: link:../../packages/file-upload
       '@ember-joinery/primitives':
         specifier: workspace:*
         version: link:../../packages/primitives
@@ -244,6 +247,9 @@ importers:
       lucide:
         specifier: ^0.474.0
         version: 0.474.0
+      tracked-built-ins:
+        specifier: ^4.0.0
+        version: 4.1.2(@babel/core@7.29.13)
     devDependencies:
       '@babel/core':
         specifier: ^7.29.7
@@ -459,12 +465,18 @@ importers:
       '@ember-joinery/ember':
         specifier: workspace:*
         version: link:../../packages/ember
+      '@ember-joinery/file-upload':
+        specifier: workspace:*
+        version: link:../../packages/file-upload
       '@ember-joinery/test-support':
         specifier: workspace:*
         version: link:../../packages/test-support
       lucide:
         specifier: ^0.474.0
         version: 0.474.0
+      tracked-built-ins:
+        specifier: ^4.0.0
+        version: 4.1.2(@babel/core@7.29.13)
     devDependencies:
       '@babel/core':
         specifier: ^7.29.7

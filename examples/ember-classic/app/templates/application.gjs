@@ -7,6 +7,7 @@ import { ArrowUp } from 'lucide'
 import { Button, Icon } from '@ember-joinery/ember'
 import { Carousel } from '@ember-joinery/carousel'
 import { CodeBlock, highlightedCode } from '@ember-joinery/code-block'
+import { FileUpload } from '@ember-joinery/file-upload'
 import { anchorTo } from '@ember-joinery/primitives/anchor'
 import { dismissable } from '@ember-joinery/primitives/dismiss'
 import { topLayer } from '@ember-joinery/primitives/layer'
@@ -118,5 +119,7 @@ const install = 'pnpm add @ember-joinery/code-block'
       <c.Previous />
       <c.Next />
     </Carousel>
+    {{! The file-upload add-on, so this build covers ember-file-upload, a v2 addon of its own. }}
+    <FileUpload @name="attachments" @multiple={{true}} @label="Attachments" />
   </main>
 </template>

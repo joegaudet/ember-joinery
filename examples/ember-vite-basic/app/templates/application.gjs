@@ -2,6 +2,7 @@ import { ArrowUp } from 'lucide'
 import { Button, Icon } from '@ember-joinery/ember'
 import { Carousel } from '@ember-joinery/carousel'
 import { CodeBlock, highlightedCode } from '@ember-joinery/code-block'
+import { FileUpload } from '@ember-joinery/file-upload'
 
 const install = 'pnpm add @ember-joinery/code-block'
 const slides = ['One', 'Two', 'Three']
@@ -35,5 +36,6 @@ const slides = ['One', 'Two', 'Three']
       <c.Previous />
       <c.Next />
     </Carousel>
+    <FileUpload @name="attachments" @multiple={{true}} @label="Attachments" />
   </main>
 </template>

@@ -646,6 +646,12 @@ workspace.
   (`data-[state=on]:bg-muted`). Joinery's parts do the same, the last to set an attribute
   winning. The Rich Text Editor's toolbar keeps each toggle's own `data-state` on top; a plain
   `<Toggle {{t.trigger}}>` in core doesn't, and whether it should is Joe's call.
+- **Where Sidebar parts from upstream, for WCAG.** Upstream's trigger toggles the sidebar without
+  saying whether it is open; Joinery's has `aria-expanded`. Upstream's menu button tooltips open
+  while the sidebar is expanded too, hidden, which repeats each label to a screen reader and
+  takes the Escape that should close the mobile sheet; Joinery's stay closed then. The guide's
+  `sidebar-menu-collapsible` makes each Collapsible the menu's `<li>` (as `sidebar-demo` does),
+  where upstream's puts a `<div>` straight inside the `<ul>`. The pixels are upstream's.
 
 ## Next steps
 

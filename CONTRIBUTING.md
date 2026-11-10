@@ -533,7 +533,11 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   with `<Example @name="…" />` (add `@title`, `@align="start"` where upstream's preview aligns
   it, and `@fullWidth={{true}}` where upstream shows it full width: the chart demo's
   `[&_.preview>div]:w-full`, the charts gallery's interactive and tooltip charts; map those with
-  `"fullWidth": true` too, so both parity stages widen them). Where upstream's
+  `"fullWidth": true` too, so both parity stages widen them; `@block={{true}}` for a whole
+  screen, which upstream previews as `type="block"` in an `<iframe>`, as the sidebar's: the
+  preview renders in a frame 600px tall, so its fixed parts, `svh` heights and breakpoints are
+  the frame's, and a component that measures its window (the Sidebar) measures the frame's).
+  Where upstream's
   `<ComponentPreview>` sizes its preview (`previewClassName`) or lets it overflow its frame
   (`className="overflow-visible"`), as `upstream/inventory.json` records, pass the same:
   `@previewClass="h-96"` puts upstream's classes on the preview (add each class to

@@ -169,6 +169,7 @@ export class MessageScrollerState {
   #autoscrollingToken: unknown = null
   #defaultScrollPositionApplied = false
   #itemCount = 0
+  #items: HTMLElement[] = []
   #firstItem: HTMLElement | null = null
   #lastScrollTop = 0
   #streamingTurn: HTMLElement | null = null
@@ -183,6 +184,7 @@ export class MessageScrollerState {
   #visibilityObserver: IntersectionObserver | null = null
   #visibilityWatchers = 0
   #mountScheduled = false
+  #contentRendered = false
   #destroyed = false
 
   readonly #stateFrame = new Frame()
@@ -279,7 +281,11 @@ export class MessageScrollerState {
   /** The content registers itself: its children are the rows. */
   setContent = (element: HTMLElement | null): void => {
     this.content = element
-    if (element) this.#scheduleMount()
+    if (element) {
+      // Its rows rendered with it, before any mutation could be observed.
+      this.#contentRendered = true
+      this.#scheduleMount()
+    }
   }
 
   /** The tail spacer registers itself: it makes room below an anchored turn. */
@@ -426,6 +432,17 @@ export class MessageScrollerState {
     const content = this.content
     if (!content || this.#destroyed) return
     const items = getMessageScrollerItems(content, this.spacer)
+    // Glimmer moves its own markers (the text nodes around a block) among the rows, which a
+    // childList observer reports though no row came or went. React's commits don't, so
+    // upstream reconciles on every report; here the rows must have changed first.
+    const previous = this.#items
+    if (
+      previous.length === items.length &&
+      previous.every((item, index) => item === items[index])
+    ) {
+      return
+    }
+    this.#items = items
     const previousItemCount = this.#itemCount
     const previousFirstItem = this.#firstItem
     this.#itemCount = items.length
@@ -961,11 +978,13 @@ export class MessageScrollerState {
     this.#afterRender(() => {
       this.#mountScheduled = false
       if (!this.content || !this.viewport) return
-      const items = getMessageScrollerItems(this.content, this.spacer)
-      if (this.#itemCount === 0 && items.length > 0) {
-        // The rows rendered with the content, before any mutation was seen.
+      // The content's rows first, as upstream's content does in its own layout effect, which
+      // runs before the provider's.
+      if (this.#contentRendered) {
+        this.#contentRendered = false
+        const applied = this.#defaultScrollPositionApplied
         this.handleContentChange()
-        if (this.#defaultScrollPositionApplied) return
+        if (!applied && this.#defaultScrollPositionApplied) return
       }
       if (this.#applyDefaultScrollPosition()) return
       if (this.#itemCount === 0) this.#clearPendingDefaultScroll()

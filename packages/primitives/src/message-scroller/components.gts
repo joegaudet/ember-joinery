@@ -388,7 +388,7 @@ export interface MessageScrollerProviderSignature<
  *       <s.Viewport>
  *         <s.Content>
  *           {{#each this.messages as |message|}}
- *             <s.Item @messageId={{message.id}} @scrollAnchor={{eq message.role "user"}}>…</s.Item>
+ *             <s.Item @messageId={{message.id}} @scrollAnchor={{this.isUser message}}>…</s.Item>
  *           {{/each}}
  *         </s.Content>
  *       </s.Viewport>

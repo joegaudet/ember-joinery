@@ -21,7 +21,7 @@ on a headless primitives layer, and each with a test harness.
   way users do, and check ARIA as they go.
 - **Accessible:** WCAG 2.2 AA, WAI-ARIA keyboard patterns, and right-to-left layouts.
 - **Opt-in add-ons** for the heavy parts: charts, carousel, data table, code block, file uploads,
-  and a [Formwright](https://joegaudet.com/ember-formwright/) bridge.
+  a rich-text editor, and a [Formwright](https://joegaudet.com/ember-formwright/) bridge.
 
 ```gts
 import { Dialog, Button, Input } from '@ember-joinery/ember'
@@ -56,6 +56,7 @@ import { Dialog, Button, Input } from '@ember-joinery/ember'
 | `@ember-joinery/data-table`   | Data table, on @tanstack/table-core                                                |
 | `@ember-joinery/code-block`   | Code block, on shiki                                                               |
 | `@ember-joinery/file-upload`  | File uploads (drop zone, file list, upload queue), on ember-file-upload            |
+| `@ember-joinery/tiptap`       | Rich-text editor with a formatting toolbar, on Tiptap                              |
 | `@ember-joinery/formwright`   | Joinery's inputs as [Formwright](https://joegaudet.com/ember-formwright/) controls |
 
 These will support Ember 6.12 LTS and 7.x, in Vite (Embroider) apps and classic ember-cli apps.
@@ -78,7 +79,8 @@ which shadcn/ui's Sonner wraps, its charts port [recharts](https://github.com/re
 [vaul](https://github.com/emilkowalski/vaul) (MIT, © Emil Kowalski), which shadcn/ui's Drawer is
 built on, and its Command follows [cmdk](https://github.com/dip/cmdk) (MIT, © Paco Coursey),
 which shadcn/ui's Command is built on, and ports its command score. Its file uploads are built on
-[ember-file-upload](https://github.com/adopted-ember-addons/ember-file-upload) (MIT). See
+[ember-file-upload](https://github.com/adopted-ember-addons/ember-file-upload) (MIT), and its
+rich-text editor on [Tiptap](https://github.com/ueberdosis/tiptap) (MIT, © Tiptap GmbH). See
 [NOTICE](NOTICE).
 
 ## License

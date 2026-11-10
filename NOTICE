@@ -16,8 +16,9 @@ vaul, which shadcn/ui's Drawer is built on: vaul's behaviour in @ember-joinery/p
 and vaul's style sheet, copied into @ember-joinery/ember's compiled CSS. Its Command ports cmdk,
 which shadcn/ui's Command is built on: cmdk's behaviour and its command score, in
 @ember-joinery/primitives' command. Its opt-in file uploads, @ember-joinery/file-upload, are built
-on ember-file-upload, a dependency of that package (nothing of it is ported). All of them are MIT
-licensed; their notices and licences follow.
+on ember-file-upload, and its opt-in rich-text editor, @ember-joinery/tiptap, on Tiptap, each a
+dependency of its package (nothing of either is ported). All of them are MIT licensed; their
+notices and licences follow.
 
 --------------------------------------------------------------------------------
 shadcn/ui
@@ -213,3 +214,33 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+--------------------------------------------------------------------------------
+Tiptap
+https://github.com/ueberdosis/tiptap
+
+A dependency of @ember-joinery/tiptap (@tiptap/starter-kit, with @tiptap/core and @tiptap/pm as
+its peers, ^3.32.1), whose RichTextEditor mounts Tiptap's Editor and runs its commands. Nothing
+of it is copied into Joinery. @tiptap/pm brings ProseMirror (MIT, © Marijn Haverbeke and others).
+
+MIT License
+
+Copyright (c) 2025, Tiptap GmbH
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

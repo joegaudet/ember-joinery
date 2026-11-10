@@ -1,5 +1,5 @@
 {
-  "$comment": "The Chart docs page's examples and the charts gallery (registry/new-york-v4/charts) map here. Not yet ported: chart-area-interactive and chart-pie-interactive, whose Select has landed; chart-area-interactive's chart port (91 days of data, stacked natural areas with gradients, tooltip and legend, and a time-range Select in the header) is left to a chart unit. The gallery's radar, radial and tooltip charts come with the chart units that port those charts, and are mapped here when they land. The gallery draws each chart in the new-york-v4 registry's Card, which none of Joinery's eight styles is, so a gallery chart's entry compares its chart's region ([data-slot=\"chart\"]) alone, at the default threshold: the card around it differs by design, and Card's own page compares Joinery's. The interactive examples are shown full width upstream (fullWidth), and compared whole, header and chart. chart-pie-legend has no footer, so on a plain stage its card shrinks to its title and its chart to nothing; the gallery's grid cell gives it a width, so it is stretched across both stages (fullWidth), and its chart compared.",
+  "$comment": "The Chart docs page's examples and the charts gallery (registry/new-york-v4/charts) map here. Not yet ported: chart-area-interactive, whose Select has landed; the chart port (91 days of data, stacked natural areas with gradients, tooltip and legend, and a time-range Select in the header) is left to a chart unit. The gallery's radar, radial and tooltip charts come with the chart units that port those charts, and are mapped here when they land. The gallery draws each chart in the new-york-v4 registry's Card, which none of Joinery's eight styles is, so a gallery chart's entry compares its chart's region ([data-slot=\"chart\"]) alone, at the default threshold: the card around it differs by design, and Card's own page compares Joinery's. The bar, line and area interactive examples are shown full width upstream (fullWidth), and compared whole, header and chart. chart-pie-legend and chart-pie-interactive have no footer, so on a plain stage each card shrinks to its header and its chart to nothing; the gallery's grid cell gives them a width, so they are stretched across both stages (fullWidth), and their chart compared, as the other pie charts' are.",
   "examples": {
     "chart-demo": {
       "example": "chart-demo",
@@ -182,6 +182,11 @@
     },
     "chart-pie-stacked": {
       "example": "chart-pie-stacked",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-interactive": {
+      "example": "chart-pie-interactive",
+      "fullWidth": true,
       "region": "[data-slot=\"chart\"]"
     }
   }

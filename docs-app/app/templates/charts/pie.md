@@ -59,8 +59,13 @@ and `cy`; it draws inside the pie, after its sectors.
 
 ## Pie Chart - Interactive
 
-Upstream's interactive pie chart picks its month with a Select, which hasn't landed in Joinery
-yet, so the example comes with it.
+A [Select](/components/select.md) in the card's header picks the month. The pie's `@shape` draws
+the chosen month's sector 10px further out with a ring past it, curried with the active index
+(`(component PieShape activeIndex=this.activeIndex)`), as upstream's `shape` callback closes over
+it, and the `Label`'s `@value` hands its `@content` that month's visitors. As with the legend
+example, the preview stretches the card across, which upstream's gallery cell does.
+
+<Example @name="chart-pie-interactive" @title="Pie Chart - Interactive" @fullWidth={{true}} />
 
 ## Testing
 

@@ -587,7 +587,9 @@ workspace.
 - **Where the menus part from Radix, for WCAG.** Radix's modal Dropdown Menu and Context Menu
   hide the rest of the page with `aria-hidden`, which leaves its buttons focusable but hidden (axe's
   `aria-hidden-focus`); Joinery's make it inert instead, as a modal dialog does. The pixels are
-  upstream's.
+  upstream's. Radix's Navigation Menu marks the focus proxy that sends Tab into an open content
+  `aria-hidden` though it is focusable, the same rule; Joinery's leaves that off (it is empty, and
+  passes focus on at once).
 - **An unattended build at this scale.** About 150–200 agent runs over several days. On a 4-CPU
   machine, two agents run at a time. The workflow journal lets a restarted session resume where
   it stopped.

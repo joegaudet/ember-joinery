@@ -385,6 +385,42 @@ module('Integration | primitives | navigation-menu', function (hooks) {
     await a11yAudit()
   })
 
+  test('vertical: ArrowRight on an open trigger enters its content, and the indicator moves down', async function (assert) {
+    await render(
+      <template>
+        <Styles />
+        <NavigationMenu @orientation="vertical" @defaultValue="b" as |n|>
+          <n.List class="nm-list" style="flex-direction: column">
+            <n.Item @value="a" as |item|>
+              <item.Trigger class="nm-trigger">A</item.Trigger>
+              <item.Content class="nm-content"><n.Link href="#a">Link A</n.Link></item.Content>
+            </n.Item>
+            <n.Item @value="b" as |item|>
+              <item.Trigger class="nm-trigger">B</item.Trigger>
+              <item.Content class="nm-content"><n.Link href="#b">Link B</n.Link></item.Content>
+            </n.Item>
+          </n.List>
+          <n.Indicator />
+          <n.Viewport class="nm-viewport" />
+        </NavigationMenu>
+      </template>,
+    )
+    const nav = new NavigationMenuHarness()
+    assert.dom(nav.element).hasAttribute('data-orientation', 'vertical')
+    assert.dom(nav.list).hasAttribute('data-orientation', 'vertical')
+    const b = nav.item('B')
+    assert.true(b.isOpen)
+    assert.dom(nav.indicator).hasAttribute('data-orientation', 'vertical')
+    assert.strictEqual(nav.indicator!.style.height, '30px')
+    assert.strictEqual(nav.indicator!.style.transform, 'translateY(30px)')
+    await focus(nav.trigger('A'))
+    await pressKey('ArrowDown')
+    assert.strictEqual(nav.focused, 'B', 'ArrowDown moves on to the next trigger')
+    await pressKey('ArrowRight')
+    assert.strictEqual(nav.focused, 'Link B', 'ArrowRight enters the open content')
+    await a11yAudit()
+  })
+
   test('right to left, the arrows flip and the motion follows the triggers', async function (assert) {
     const state = new State()
     await render(

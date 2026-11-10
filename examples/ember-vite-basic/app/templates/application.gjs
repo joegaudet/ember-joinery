@@ -17,9 +17,11 @@ import {
   tableFeatures,
 } from '@ember-joinery/data-table'
 import { RichTextEditor } from '@ember-joinery/tiptap'
+import { DatePicker } from '@ember-joinery/power-calendar'
 
 const install = 'pnpm add @ember-joinery/code-block'
 const slides = ['One', 'Two', 'Three']
+const due = new Date(2026, 2, 4)
 
 const features = tableFeatures({
   rowSortingFeature,
@@ -99,5 +101,6 @@ class Fruit extends Component {
     <FileUpload @name="attachments" @multiple={{true}} @label="Attachments" />
     <Fruit />
     <RichTextEditor @name="notes" @label="Notes" @defaultValue="<p>Shipping today</p>" />
+    <DatePicker @name="due" @defaultValue={{due}} @locale="en-US" />
   </main>
 </template>

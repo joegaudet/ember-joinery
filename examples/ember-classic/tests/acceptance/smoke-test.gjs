@@ -18,6 +18,7 @@ import { DataTableHarness } from '@ember-joinery/data-table/test-support'
 import { CodeBlockHarness, setupClipboard } from '@ember-joinery/code-block/test-support'
 import { FileUploadHarness } from '@ember-joinery/file-upload/test-support'
 import { RichTextEditorHarness } from '@ember-joinery/tiptap/test-support'
+import { DatePickerHarness } from '@ember-joinery/power-calendar/test-support'
 
 /** The app's disclosure, built on the primitives. */
 class DisclosureHarness extends Harness {
@@ -226,6 +227,26 @@ module('Acceptance | smoke', function (hooks) {
     assert.strictEqual(notes.html, '<p><strong>Shipping today</strong></p>')
     await notes.setBlockType('Heading 2')
     assert.strictEqual(notes.blockType, 'Heading 2', 'its text style menu works')
+    await a11yAudit()
+  })
+
+  test('a Joinery DatePicker, on ember-power-calendar, opens and chooses a day here', async function (assert) {
+    await visit('/')
+    const due = new DatePickerHarness('due')
+    assert.strictEqual(due.text, 'March 4, 2026')
+    assert.strictEqual(
+      getComputedStyle(due.trigger).borderTopStyle,
+      'solid',
+      'joinery.css styles it',
+    )
+    await due.open()
+    assert.strictEqual(due.calendar.month, 'March 2026', "ember-power-calendar's calendar")
+    assert.strictEqual(due.calendar.focusedDay, '2026-03-04')
+    await due.calendar.pressKey('ArrowRight')
+    assert.strictEqual(due.calendar.focusedDay, '2026-03-05')
+    await due.select('2026-04-10')
+    assert.strictEqual(due.text, 'April 10, 2026')
+    assert.false(due.isOpen)
     await a11yAudit()
   })
 })

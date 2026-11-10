@@ -19,6 +19,7 @@ import {
   tableFeatures,
 } from '@ember-joinery/data-table'
 import { RichTextEditor } from '@ember-joinery/tiptap'
+import { DatePicker } from '@ember-joinery/power-calendar'
 import { anchorTo } from '@ember-joinery/primitives/anchor'
 import { dismissable } from '@ember-joinery/primitives/dismiss'
 import { topLayer } from '@ember-joinery/primitives/layer'
@@ -96,6 +97,7 @@ class Tip extends Component {
 }
 
 const install = 'pnpm add @ember-joinery/code-block'
+const due = new Date(2026, 2, 4)
 
 const features = tableFeatures({
   rowSortingFeature,
@@ -182,5 +184,8 @@ class Fruit extends Component {
     <Fruit />
     {{! The tiptap add-on, so this build covers Tiptap and ProseMirror, and its toolbar's menus. }}
     <RichTextEditor @name="notes" @label="Notes" @defaultValue="<p>Shipping today</p>" />
+    {{! The power-calendar add-on, so this build covers ember-power-calendar, a v2 addon whose
+        service its own app tree carries, and ember-concurrency. }}
+    <DatePicker @name="due" @defaultValue={{due}} @locale="en-US" />
   </main>
 </template>

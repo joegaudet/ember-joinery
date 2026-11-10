@@ -262,6 +262,9 @@ importers:
       '@ember-joinery/file-upload':
         specifier: workspace:*
         version: link:../../packages/file-upload
+      '@ember-joinery/power-calendar':
+        specifier: workspace:*
+        version: link:../../packages/power-calendar
       '@ember-joinery/primitives':
         specifier: workspace:*
         version: link:../../packages/primitives
@@ -277,6 +280,9 @@ importers:
       '@tiptap/pm':
         specifier: ^3.32.1
         version: 3.32.1
+      ember-concurrency:
+        specifier: ^5.3.0
+        version: 5.3.0(@babel/core@7.29.13)(@glint/template@1.11.1)
       lucide:
         specifier: ^0.474.0
         version: 0.474.0
@@ -504,6 +510,9 @@ importers:
       '@ember-joinery/file-upload':
         specifier: workspace:*
         version: link:../../packages/file-upload
+      '@ember-joinery/power-calendar':
+        specifier: workspace:*
+        version: link:../../packages/power-calendar
       '@ember-joinery/test-support':
         specifier: workspace:*
         version: link:../../packages/test-support
@@ -516,6 +525,9 @@ importers:
       '@tiptap/pm':
         specifier: ^3.32.1
         version: 3.32.1
+      ember-concurrency:
+        specifier: ^5.3.0
+        version: 5.3.0(@babel/core@7.29.13)(@glint/template@1.11.1)
       lucide:
         specifier: ^0.474.0
         version: 0.474.0

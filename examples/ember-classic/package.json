@@ -15,11 +15,13 @@
     "@ember-joinery/data-table": "^1.0.0",
     "@ember-joinery/ember": "^1.0.0",
     "@ember-joinery/file-upload": "^1.0.0",
+    "@ember-joinery/power-calendar": "^1.0.0",
     "@ember-joinery/primitives": "^1.0.0",
     "@ember-joinery/test-support": "^1.0.0",
     "@ember-joinery/tiptap": "^1.0.0",
     "@tiptap/core": "^3.32.1",
     "@tiptap/pm": "^3.32.1",
+    "ember-concurrency": "^5.3.0",
     "lucide": "^0.474.0",
     "tracked-built-ins": "^4.0.0"
   },

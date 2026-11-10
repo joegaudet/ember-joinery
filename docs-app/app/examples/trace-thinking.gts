@@ -92,7 +92,8 @@ class ThinkingTrace extends Component<{ Args: { text: string; running: boolean }
 }
 
 export default class TraceThinking extends Component {
-  session = new ChatSession(chat, { messages: initialMessages, delayMs: 20 })
+  // As useChat()'s, the session ends with its component (owner: this), stopping a stream.
+  session = new ChatSession(chat, { messages: initialMessages, delayMs: 20, owner: this })
 
   get nextMessage(): ChatMessage | null {
     return chat.next(this.session.messages)

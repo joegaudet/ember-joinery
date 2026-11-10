@@ -196,3 +196,42 @@
     border-color: var(--border);
   }
 }
+
+/*
+ * Trace's chat examples (demo, thinking, tool calls) hold their messages in a column that isn't
+ * a Joinery part, `min-h-72 … py-6`, whose 288px take the padding in, as preflight's `border-box`
+ * sizing makes them in any Tailwind app. In content-box sizing the column would be 336px tall,
+ * which moves everything after it, so these examples alone get that sizing, as the chart
+ * tooltip demo does above.
+ */
+@layer guide {
+  :where(
+      [data-example='trace-demo'],
+      [data-example='trace-thinking'],
+      [data-example='trace-tool-calls'],
+      [data-parity='trace-demo'],
+      [data-parity='trace-thinking'],
+      [data-parity='trace-tool-calls']
+    )
+    :where(*),
+  :where(
+      [data-example='trace-demo'],
+      [data-example='trace-thinking'],
+      [data-example='trace-tool-calls'],
+      [data-parity='trace-demo'],
+      [data-parity='trace-thinking'],
+      [data-parity='trace-tool-calls']
+    )
+    :where(*)::before,
+  :where(
+      [data-example='trace-demo'],
+      [data-example='trace-thinking'],
+      [data-example='trace-tool-calls'],
+      [data-parity='trace-demo'],
+      [data-parity='trace-thinking'],
+      [data-parity='trace-tool-calls']
+    )
+    :where(*)::after {
+    box-sizing: border-box;
+  }
+}

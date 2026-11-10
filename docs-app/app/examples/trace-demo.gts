@@ -210,7 +210,8 @@ interface Reply {
 }
 
 export default class TraceDemo extends Component {
-  session = new ChatSession(chat, { messages: transcript, delayMs: 20 })
+  // As useChat()'s, the session ends with its component (owner: this), stopping a stream.
+  session = new ChatSession(chat, { messages: transcript, delayMs: 20, owner: this })
 
   replay = () => {
     this.session.setMessages([])

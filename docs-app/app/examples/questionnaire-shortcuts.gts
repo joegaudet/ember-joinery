@@ -34,17 +34,20 @@ export default class QuestionnaireShortcuts extends Component {
 
   <template>
     <div class="relative mx-auto flex h-full w-full max-w-md flex-col">
-      <NativeSelect
-        aria-label="Shortcut style"
-        class="absolute end-0 top-0"
-        @value={{if this.shortcuts this.shortcuts "none"}}
-        @onValueChange={{this.setShortcuts}}
-        as |s|
-      >
-        <s.Option @value="none">No shortcuts</s.Option>
-        <s.Option @value="letters">Letters</s.Option>
-        <s.Option @value="numbers">Numbers</s.Option>
-      </NativeSelect>
+      {{! Upstream puts className="absolute end-0 top-0" on NativeSelect, whose className styles
+          its wrapper; Joinery's NativeSelect gives its class to the select, so a div places it. }}
+      <div class="absolute end-0 top-0">
+        <NativeSelect
+          aria-label="Shortcut style"
+          @value={{if this.shortcuts this.shortcuts "none"}}
+          @onValueChange={{this.setShortcuts}}
+          as |s|
+        >
+          <s.Option @value="none">No shortcuts</s.Option>
+          <s.Option @value="letters">Letters</s.Option>
+          <s.Option @value="numbers">Numbers</s.Option>
+        </NativeSelect>
+      </div>
 
       <Questionnaire
         class="mt-auto"

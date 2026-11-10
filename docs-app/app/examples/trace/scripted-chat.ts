@@ -5,6 +5,7 @@
 // complete; a `ChatSession` sends the user's message and streams the reply in, part by part
 // and a word at a time, as `useChat()` does.
 import { tracked } from '@glimmer/tracking'
+import { registerDestructor } from '@ember/destroyable'
 import { buildWaiter } from '@ember/test-waiters'
 
 const waiter = buildWaiter('docs-app:trace-scripted-chat')
@@ -213,7 +214,9 @@ export function createChat(): ScriptedChat {
 
 /**
  * A conversation on screen, as `useChat()` gives one: its messages and status, a `send()` that
- * streams the scripted reply in after the user's message, and `setMessages()`.
+ * streams the scripted reply in after the user's message, and `setMessages()`. Given an
+ * `owner` (the example's component), it lives as long as that does: once the owner is destroyed,
+ * a reply that is streaming stops where it is, and so does the test waiter it holds.
  */
 export class ChatSession {
   @tracked messages: ChatMessage[]
@@ -222,11 +225,17 @@ export class ChatSession {
   /** The transport's delay between words, in milliseconds (upstream's `delayMs`). */
   readonly #delayMs: number
   #run = 0
+  /** The stream's pending waits, each with what ends it early. */
+  readonly #waits = new Map<ReturnType<typeof setTimeout>, () => void>()
 
-  constructor(chat: ScriptedChat, options: { messages: ChatMessage[]; delayMs: number }) {
+  constructor(
+    chat: ScriptedChat,
+    options: { messages: ChatMessage[]; delayMs: number; owner?: object },
+  ) {
     this.#chat = chat
     this.messages = options.messages
     this.#delayMs = options.delayMs
+    if (options.owner) registerDestructor(options.owner, this.stop)
   }
 
   /** Whether a reply is on its way. */
@@ -236,9 +245,22 @@ export class ChatSession {
 
   /** Replaces the messages, stopping a reply that is streaming. */
   setMessages = (messages: ChatMessage[]): void => {
-    this.#run += 1
+    this.stop()
     this.status = 'ready'
     this.messages = messages
+  }
+
+  /**
+   * Stops a reply that is streaming, leaving the messages and status as they are: the stream
+   * ends at once (its pending wait too) and writes nothing more.
+   */
+  stop = (): void => {
+    this.#run += 1
+    for (const [timer, end] of this.#waits) {
+      clearTimeout(timer)
+      end()
+    }
+    this.#waits.clear()
   }
 
   /** Sends a user message and streams the scripted reply in. */
@@ -251,7 +273,13 @@ export class ChatSession {
   }
 
   #wait(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms * chatTiming.scale))
+    return new Promise(resolve => {
+      const timer = setTimeout(() => {
+        this.#waits.delete(timer)
+        resolve()
+      }, ms * chatTiming.scale)
+      this.#waits.set(timer, resolve)
+    })
   }
 
   /** Puts the reply's parts back on screen after a change. */

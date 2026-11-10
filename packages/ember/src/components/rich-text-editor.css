@@ -1,0 +1,132 @@
+/*
+ * The parts of @ember-joinery/tiptap, an opt-in add-on (on Tiptap) that nothing in
+ * @ember-joinery/ember imports. Its rules live here, as every add-on's do, so joinery.css styles
+ * it with nothing more to import; an app without the add-on never renders these classes.
+ *
+ * Joinery's own: shadcn/ui has no rich-text editor, so nothing here is ported from upstream's
+ * style sheets. The parts borrow the nearest shadcn components instead, which keeps them in each
+ * style's look: the box is an Input Group (its classes, from every style sheet), the toolbar its
+ * block-start addon with a bottom border, as upstream's input-group-textarea example draws one,
+ * and the document an Input Group textarea. The toolbar's controls are a Dropdown Menu's ghost
+ * Button, Toggle Group items and ghost icon Buttons, with vertical Separators between the groups.
+ * What follows is only what those don't give: the box grows with its document, the toolbar wraps,
+ * and the document's own type, in the spirit of shadcn's Typography at an input's size.
+ */
+
+/* The box: an Input Group that is a column, whether or not it has a toolbar. */
+:where(.jn-rich-text-editor) {
+  @apply h-auto flex-col items-stretch;
+}
+
+:where(.jn-rich-text-editor[data-disabled='true']) {
+  @apply cursor-not-allowed opacity-50;
+}
+
+/* The toolbar: the Input Group's block-start addon, wrapping onto more lines when narrow. */
+:where(.jn-rich-text-editor-toolbar) {
+  @apply cursor-default flex-wrap gap-1 border-b;
+}
+
+:where(.jn-rich-text-editor-group) {
+  @apply flex items-center;
+}
+
+/* Undo and redo with nothing to undo or redo: still focusable, so the toolbar keeps them. */
+:where(.jn-rich-text-editor-toolbar [aria-disabled='true']) {
+  @apply opacity-50 hover:bg-transparent;
+}
+
+/* The document: an Input Group textarea's box, holding Tiptap's editable element. */
+:where(.jn-rich-text-editor-content) {
+  @apply cursor-text;
+}
+
+:where(.jn-rich-text-editor-document) {
+  @apply relative min-w-0 flex-1 wrap-anywhere whitespace-pre-wrap outline-none;
+}
+
+:where(.jn-rich-text-editor-document[contenteditable='false']) {
+  @apply cursor-default;
+}
+
+:where(.jn-rich-text-editor-document[aria-disabled='true']) {
+  @apply cursor-not-allowed;
+}
+
+/* The placeholder, while the document is one empty line, as a textarea's. */
+:where(.jn-rich-text-editor-document[data-empty])::before {
+  @apply pointer-events-none absolute text-muted-foreground content-[attr(data-placeholder)];
+}
+
+/* What the document holds. Joinery's base resets every margin inside a part, so set them here. */
+:where(.jn-rich-text-editor-document) > :where(* + *) {
+  @apply mt-2;
+}
+
+:where(.jn-rich-text-editor-document) :where(h1, h2, h3, h4, h5, h6) {
+  @apply font-semibold tracking-tight text-foreground;
+}
+
+:where(.jn-rich-text-editor-document) :where(h1) {
+  @apply text-2xl;
+}
+
+:where(.jn-rich-text-editor-document) :where(h2) {
+  @apply text-xl;
+}
+
+:where(.jn-rich-text-editor-document) :where(h3) {
+  @apply text-lg;
+}
+
+:where(.jn-rich-text-editor-document) :where(h4, h5, h6) {
+  @apply text-base;
+}
+
+:where(.jn-rich-text-editor-document) > :where(h1, h2, h3, h4, h5, h6):not(:first-child) {
+  @apply mt-4;
+}
+
+:where(.jn-rich-text-editor-document) :where(ul, ol) {
+  @apply ms-6;
+}
+
+:where(.jn-rich-text-editor-document) :where(ul) {
+  @apply list-disc;
+}
+
+:where(.jn-rich-text-editor-document) :where(ol) {
+  @apply list-decimal;
+}
+
+:where(.jn-rich-text-editor-document) :where(li + li, li > * + *) {
+  @apply mt-1;
+}
+
+:where(.jn-rich-text-editor-document) :where(blockquote) {
+  @apply border-s-2 ps-4 italic;
+}
+
+:where(.jn-rich-text-editor-document) :where(code) {
+  @apply rounded-sm bg-muted px-[0.3rem] py-[0.2rem] font-mono text-[0.875em];
+}
+
+:where(.jn-rich-text-editor-document) :where(pre) {
+  @apply overflow-x-auto rounded-md bg-muted px-3 py-2 font-mono text-[0.875em];
+}
+
+:where(.jn-rich-text-editor-document) :where(pre code) {
+  @apply bg-transparent p-0 text-[1em];
+}
+
+:where(.jn-rich-text-editor-document) :where(a) {
+  @apply font-medium text-primary underline underline-offset-4;
+}
+
+:where(.jn-rich-text-editor-document) :where(hr) {
+  @apply my-4 border-t;
+}
+
+:where(.jn-rich-text-editor-document) :where(strong) {
+  @apply font-semibold;
+}

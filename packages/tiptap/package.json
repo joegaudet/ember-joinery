@@ -1,0 +1,121 @@
+{
+  "name": "@ember-joinery/tiptap",
+  "version": "0.0.0",
+  "description": "A rich-text editor in shadcn/ui's look for Ember: a toolbar of toggles, a heading menu and tooltips over a Tiptap document, stored as HTML or JSON.",
+  "keywords": [
+    "ember-addon",
+    "ember",
+    "shadcn",
+    "rich-text",
+    "editor",
+    "wysiwyg",
+    "tiptap",
+    "prosemirror"
+  ],
+  "license": "MIT",
+  "author": "Joe Gaudet <joe@joegaudet.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joegaudet/ember-joinery.git",
+    "directory": "packages/tiptap"
+  },
+  "homepage": "https://joegaudet.com/ember-joinery/",
+  "bugs": "https://github.com/joegaudet/ember-joinery/issues",
+  "exports": {
+    ".": {
+      "types": "./declarations/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./declarations/*.d.ts",
+      "default": "./dist/*.js"
+    },
+    "./addon-main.js": "./addon-main.cjs"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "declarations/*"
+      ]
+    }
+  },
+  "files": [
+    "addon-main.cjs",
+    "declarations",
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "node ../../scripts/gen-barrels.mjs . && rm -rf declarations && rollup --config",
+    "start": "node ../../scripts/gen-barrels.mjs . && rm -rf declarations && rollup --config --watch",
+    "typecheck": "node ../../scripts/gen-barrels.mjs . && ember-tsc --noEmit",
+    "prepack": "node ../../scripts/gen-barrels.mjs . && rm -rf declarations && rollup --config"
+  },
+  "dependencies": {
+    "@ember-joinery/primitives": "workspace:*",
+    "@embroider/addon-shim": "^1.10.3",
+    "@tiptap/starter-kit": "^3.32.1",
+    "decorator-transforms": "^2.4.0",
+    "ember-modifier": "^4.3.0",
+    "lucide": "^0.474.0"
+  },
+  "peerDependencies": {
+    "@ember-joinery/ember": "workspace:^",
+    "@ember-joinery/test-support": "workspace:^",
+    "@ember/test-helpers": ">= 5.0.0",
+    "@glimmer/component": ">= 2.0.0",
+    "@tiptap/core": "^3.0.0",
+    "@tiptap/pm": "^3.0.0",
+    "ember-source": ">= 6.12.0"
+  },
+  "peerDependenciesMeta": {
+    "@ember-joinery/test-support": {
+      "optional": true
+    },
+    "@ember/test-helpers": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/plugin-transform-typescript": "^7.29.7",
+    "@babel/runtime": "^7.29.7",
+    "@ember-joinery/ember": "workspace:*",
+    "@ember-joinery/test-support": "workspace:*",
+    "@ember/library-tsconfig": "^3.0.0",
+    "@ember/test-helpers": "^5.7.0",
+    "@embroider/addon-dev": "^8.4.2",
+    "@glimmer/component": "^2.2.1",
+    "@glimmer/tracking": "^1.1.2",
+    "@glint/ember-tsc": "^1.14.2",
+    "@glint/template": "^1.9.0",
+    "@rollup/plugin-babel": "^7.1.0",
+    "@tiptap/core": "^3.32.1",
+    "@tiptap/pm": "^3.32.1",
+    "babel-plugin-ember-template-compilation": "^4.0.1",
+    "ember-source": "~7.3.0",
+    "rollup": "^4.64.6",
+    "typescript": "~6.0.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "ember": {
+    "edition": "octane"
+  },
+  "ember-addon": {
+    "version": 2,
+    "type": "addon",
+    "main": "addon-main.cjs"
+  },
+  "joinery": {
+    "barrels": [
+      "src",
+      "src/test-support"
+    ]
+  }
+}

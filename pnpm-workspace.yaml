@@ -23,6 +23,7 @@ overrides:
   '@ember-joinery/file-upload': 'workspace:*'
   '@ember-joinery/primitives': 'workspace:*'
   '@ember-joinery/test-support': 'workspace:*'
+  '@ember-joinery/tiptap': 'workspace:*'
   # Kolay pins an older @glint/template; one copy keeps template types compatible.
   '@glint/template': ^1.9.0
 

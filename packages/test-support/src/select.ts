@@ -4,6 +4,7 @@ import { pressKey, typeKeys } from './focus.ts'
 import { pressEscape, pressOutside, press } from './layers.ts'
 import { accessibleName, shownInTopLayer, text } from './-private/overlay.ts'
 import { controlDescription, controlLabel, isMarkedInvalid } from './-private/control.ts'
+import { isDisabled } from './-private/checkable.ts'
 
 /**
  * Drives a `<Select>` from `@ember-joinery/ember` or `@ember-joinery/primitives/select`: a
@@ -96,9 +97,9 @@ export class SelectHarness extends Harness {
     return content ? accessibleName(content) : ''
   }
 
-  /** Whether it is disabled. */
+  /** Whether it is disabled: the trigger's `disabled`, or `aria-disabled="true"` on your own element. */
   get isDisabled(): boolean {
-    return this.trigger.hasAttribute('data-disabled')
+    return isDisabled(this.trigger)
   }
 
   /** Whether the trigger is marked invalid with `aria-invalid`. */

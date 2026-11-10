@@ -216,7 +216,7 @@ assert.strictEqual(fruit.valueText, 'Banana')
 | `isOpen`, `isShown`, `position`, `side`        | Whether it is open and in the top layer, and where the list went   |
 | `value`, `valueText`, `isPlaceholder`          | The chosen value, what the trigger shows, and whether it's empty   |
 | `label`, `description`, `contentLabel`         | The trigger's accessible name and description, and the list's name |
-| `isDisabled`, `isInvalid`, `isRequired`        | From the trigger's attributes                                      |
+| `isDisabled`, `isInvalid`, `isRequired`        | From the trigger's `disabled` and ARIA                             |
 | `options`, `optionTexts`, `option(value)`      | The options' values and text, and one option's element             |
 | `highlighted`, `groups`, `optionsIn(group)`    | The focused option, the groups' labels, and a group's options      |
 | `isOptionSelected(v)`, `isOptionDisabled(v)`   | An option's state                                                  |

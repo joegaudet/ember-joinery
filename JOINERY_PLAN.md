@@ -36,8 +36,8 @@ Deviations from the intake, and why:
   `@ember-joinery/test-support` imports one or lists its library, and the core packages build,
   test and work without them. shadcn/ui has no counterparts, so they have no parity mappings.
   Each lands as its own unit and adds its package to the layout and the inventory below; the
-  first are `@ember-joinery/file-upload`, on ember-file-upload, and `@ember-joinery/tiptap`, on
-  Tiptap.
+  first are `@ember-joinery/file-upload`, on ember-file-upload, `@ember-joinery/tiptap`, on
+  Tiptap, and `@ember-joinery/power-calendar`, on ember-power-calendar.
 - **Clarified while building** (no decision changed). The generated `meta.json` covers every
   A–Z section of the guide (Components, Primitives, Charts, Blocks, Formwright and Reference),
   not only Components. The Guide section now says what "Autonomous execution" already did: the
@@ -125,6 +125,7 @@ ember-joinery/
     code-block/    @ember-joinery/code-block    shiki highlighting, line numbers, diff, copy  (+ /test-support)
     file-upload/   @ember-joinery/file-upload   ember-file-upload: drop zone, list, queue     (+ /test-support)
     tiptap/        @ember-joinery/tiptap        Tiptap: a rich-text editor and its toolbar    (+ /test-support)
+    power-calendar/ @ember-joinery/power-calendar ember-power-calendar: calendars, date pickers (+ /test-support)
     formwright/    @ember-joinery/formwright    Formwright controls, Field layout, harnesses  (+ /test-support)
   test-app/        Vite Ember app: integration tests for every package; built into docs/site/demo/
   docs-app/        the Kolay guide → docs/site/guide/
@@ -299,10 +300,12 @@ That is 67 docs pages: Toast and Sonner are two pages for one component.
 
 ### Opt-in add-ons on Formwright's libraries (Joe's request; see the deviations above)
 
-| Component        | What it is                                                                                                                                         | Package (library)               |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| File Upload      | A drop zone, a file list (Items with previews and remove) and an upload queue with Progress, for one file or many                                  | file-upload (ember-file-upload) |
-| Rich Text Editor | A document in an Input Group, under a toolbar: a text style Dropdown Menu, Toggle Groups for marks and blocks, undo and redo, Tooltips, Separators | tiptap (Tiptap)                 |
+| Component                                     | What it is                                                                                                                                         | Package (library)                     |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| File Upload                                   | A drop zone, a file list (Items with previews and remove) and an upload queue with Progress, for one file or many                                  | file-upload (ember-file-upload)       |
+| Rich Text Editor                              | A document in an Input Group, under a toolbar: a text style Dropdown Menu, Toggle Groups for marks and blocks, undo and redo, Tooltips, Separators | tiptap (Tiptap)                       |
+| Power Calendar (a day, a range, several days) | shadcn's Calendar drawn over ember-power-calendar's PowerCalendar, PowerCalendarRange, PowerCalendarMultiple                                       | power-calendar (ember-power-calendar) |
+| Power Date Picker, Power Date Range Picker    | A Power Calendar in a Popover, opened from an outlined Button or an Input Group's input                                                            | power-calendar (ember-power-calendar) |
 
 ### React-only dependencies replaced
 
@@ -320,7 +323,7 @@ That is 67 docs pages: Toast and Sonner are two pages for one component.
 
 ### Size
 
-10 packages; ~67 shadcn components, ~15 components only ember-primitives has, ~20 utilities;
+11 packages; ~67 shadcn components, ~15 components only ember-primitives has, ~20 utilities;
 ~95 harness classes. The docs pages reference 497 examples, the charts gallery has 70, and we
 port 4 of the 27 blocks. Every ported example becomes a guide example with its own harness test
 and axe audit, so about 570 example tests, plus the integration suite. `--require-complete`

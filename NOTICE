@@ -19,8 +19,11 @@ which shadcn/ui's Command is built on: cmdk's behaviour and its command score, i
 is built on: DayPicker's markup, classes, labels, selection and keyboard, in
 @ember-joinery/primitives' calendar. Its opt-in file uploads, @ember-joinery/file-upload, are
 built on ember-file-upload, and its opt-in rich-text editor, @ember-joinery/tiptap, on Tiptap,
-each a dependency of its package (nothing of either is ported). All of them are MIT licensed;
-their notices and licences follow.
+each a dependency of its package (nothing of either is ported). Its opt-in calendars and date
+pickers, @ember-joinery/power-calendar, are built on ember-power-calendar, a dependency of that
+package, whose Days components they subclass (nothing of it is copied), and their date library
+on Date and Intl is Formwright's. All of them are MIT licensed; their notices and licences
+follow.
 
 --------------------------------------------------------------------------------
 shadcn/ui
@@ -277,3 +280,21 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+--------------------------------------------------------------------------------
+ember-power-calendar
+https://github.com/ember-power-addons/ember-power-calendar
+
+A dependency of @ember-joinery/power-calendar (^2.0.1, with ember-concurrency as its peer), whose
+PowerCalendar, PowerCalendarRange and PowerCalendarMultiple the package's calendars render, and
+whose Days components it subclasses to draw shadcn's markup. Nothing of it is copied into Joinery.
+
+The MIT License (MIT)
+
+Copyright (c) 2026
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

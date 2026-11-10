@@ -105,21 +105,23 @@ layered CSS (it drops the one shadcn's `tailwind.css` keeps for a bare `.shimmer
 watch mode (`pnpm start` in the package), editing any CSS file under `src/` rebuilds them.
 
 An add-on (`packages/code-block`, `packages/carousel`, `packages/chart`, `packages/file-upload`,
-`packages/data-table` and `packages/tiptap`) is a v2 addon like `ember`, built with the same
-rollup config, around the heavy dependency it wraps (Shiki for Code Block, Embla for Carousel,
-d3's scales and shapes for Chart, ember-file-upload for File Upload, TanStack Table's
-`@tanstack/table-core` for Data Table, Tiptap for Rich Text Editor). Its harnesses are in
-`src/test-support/`, a barrel of their own and its
+`packages/data-table`, `packages/tiptap` and `packages/power-calendar`) is a v2 addon like
+`ember`, built with the same rollup config, around the heavy dependency it wraps (Shiki for Code
+Block, Embla for Carousel, d3's scales and shapes for Chart, ember-file-upload for File Upload,
+TanStack Table's `@tanstack/table-core` for Data Table, Tiptap for Rich Text Editor,
+ember-power-calendar for Power Calendar). Its harnesses are in `src/test-support/`, a barrel of
+their own and its
 `/test-support` subpath (`"barrels": ["src", "src/test-support"]`), and it takes
 `@ember-joinery/ember` and `@ember-joinery/test-support` as peers. It ships no CSS: upstream's
 style sheets, which `ember` ports whole, already style its parts, so its inline utilities go in
 `packages/ember/src/components/<name>.css` like any component's, and `joinery.css` styles the
 add-on with nothing more to import. An add-on on one of Formwright's libraries (File Upload, on
-ember-file-upload; Rich Text Editor, on Tiptap) has no upstream counterpart: its parts borrow the
-nearest shadcn components' classes, or render those components (the Rich Text Editor's Input
-Group, Toggle Groups and Dropdown Menu), and its own rules go in that file all the same
-(`file-upload.css`, `rich-text-editor.css`). Nothing in the core packages imports an add-on or
-lists its library.
+ember-file-upload; Rich Text Editor, on Tiptap; Power Calendar, on ember-power-calendar) has no
+upstream counterpart: its parts borrow the nearest shadcn components' classes, or render those
+components (the Rich Text Editor's Input Group, Toggle Groups and Dropdown Menu; Power Calendar
+draws shadcn's Calendar, and its rules are calendar.tsx's inline utilities), and its own rules
+go in that file all the same (`file-upload.css`, `rich-text-editor.css`, `power-calendar.css`).
+Nothing in the core packages imports an add-on or lists its library.
 
 ## Porting a component
 
@@ -601,10 +603,12 @@ and below `utilities`, so a class on a component overrides them. Its tests check
 Each app imports `tokens.css` and `joinery.css`, and the Tailwind one `tailwind.css` too, and
 renders a Button with a lucide icon, which its smoke test drives with `ButtonHarness`: that is
 what proves a classic app consumes `.gts` v2 addon components. The Vite and classic apps also
-render five add-ons: a Code Block, highlighted, which proves an add-on and the Shiki it loads on
+render six add-ons: a Code Block, highlighted, which proves an add-on and the Shiki it loads on
 demand build in both, a Carousel, which their smoke tests move with `CarouselHarness`, so an
 add-on with a dependency of its own (Embla) builds both ways too, a File Upload, which they
 fill with `FileUploadHarness`, so an add-on on another v2 addon (ember-file-upload, with its
 macros) does too, a data table, which they sort with `DataTableHarness` (TanStack Table's
-core reads `process.env.NODE_ENV`, which both builds replace), and a Rich Text Editor, which
-they format with `RichTextEditorHarness`, so an add-on on Tiptap and ProseMirror does too.
+core reads `process.env.NODE_ENV`, which both builds replace), a Rich Text Editor, which they
+format with `RichTextEditorHarness`, so an add-on on Tiptap and ProseMirror does too, and a
+DatePicker, which they open and choose a day in with `DatePickerHarness`, so an add-on on a v2
+addon whose app tree carries a service (ember-power-calendar) does too.

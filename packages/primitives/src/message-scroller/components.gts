@@ -205,7 +205,10 @@ function isActive(scroller: MessageScrollerState, direction: MessageScrollerDire
 /**
  * Makes an element (a Button of your own) the scroller's button: it scrolls to its edge, and
  * while there is nothing to scroll to it is `inert`, out of the tab order, and
- * `data-active="false"`, so it never leaves a stop for the keyboard. As a component, it is
+ * `data-active="false"`, so it never leaves a stop for the keyboard. While it is active, the
+ * element keeps a `tabindex` of its own. A click listener of yours that comes before it (as
+ * `{{on "click"}}` in `...attributes` does) runs first, and stops the scroll by calling
+ * `event.preventDefault()`, as upstream's `onClick` does. As a component, it is
  * `MessageScrollerButton`.
  */
 export const messageScrollerButton: PartModifier<HTMLElement, MessageScrollerButtonOptions> = part<
@@ -218,13 +221,15 @@ export const messageScrollerButton: PartModifier<HTMLElement, MessageScrollerBut
       'data-active': active ? 'true' : 'false',
       'data-direction': direction,
       inert: !active,
+      // Unset while active, so the element's own tabindex, if it has one, comes back.
       tabindex: active ? null : '-1',
       'data-test-jn-part': 'button',
       'data-test-jn-value': direction,
     },
     on: {
       click: (event: MouseEvent) => {
-        if (!isActive(scroller, direction)) return
+        // A listener of the caller's that ran first may have taken the click over.
+        if (event.defaultPrevented || !isActive(scroller, direction)) return
         ;(event.currentTarget as HTMLElement | null)?.blur()
         if (direction === 'start') scroller.scrollToStart({ behavior })
         else scroller.scrollToEnd({ behavior })

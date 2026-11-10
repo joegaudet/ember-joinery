@@ -2,6 +2,7 @@
 import type { TOC } from '@ember/component/template-only'
 import type { ComponentLike } from '@glint/template'
 import { ArrowDown } from 'lucide'
+import type { TagName } from '@ember-joinery/primitives/as'
 import {
   MessageScrollerConsumer,
   MessageScrollerContent as PrimitiveContent,
@@ -101,6 +102,8 @@ export interface MessageScrollerButtonSignature {
     label?: string
     /** Its name, for `ButtonHarness` (`data-test-jn-name`). */
     name?: string
+    /** The tag to render, as Button's `@as`. Default `button`. */
+    as?: TagName
   }
   /** Its content. Without a block, an arrow (pointing up for `start`) and its label. */
   Blocks: { default: [] }
@@ -121,6 +124,7 @@ function defaultLabel(label: string | undefined, direction: MessageScrollerDirec
 export const MessageScrollerButton: TOC<MessageScrollerButtonSignature> = <template>
   <MessageScrollerConsumer as |s|>
     <Button
+      @as={{@as}}
       @variant={{if @variant @variant "secondary"}}
       @size={{if @size @size "icon-sm"}}
       @name={{@name}}

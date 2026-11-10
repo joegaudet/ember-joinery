@@ -13,5 +13,7 @@ jumps to any row. It yields its styled parts (`Root`, `Viewport`, `Content`, `It
 `Visibility`), the commands (`scrollToMessage`, `scrollToEnd`, `scrollToStart`) and the scroll
 state (`scrollable`); the parts are exported on their own too (`MessageScroller`,
 `MessageScrollerItem`…). `@ember-joinery/primitives/message-scroller` is the headless scroller,
-`@shadcn/react`'s, with `MessageScrollerConsumer` and the `messageScrollerButton` modifier.
+`@shadcn/react`'s, with `MessageScrollerConsumer` and the `messageScrollerButton` modifier. Its
+button, as upstream's, keeps a `tabindex` of your own while it is active, and a click listener of
+yours runs first and can stop the scroll with `preventDefault()`; the styled one takes `@as`.
 `@ember-joinery/test-support` adds `MessageScrollerHarness`.

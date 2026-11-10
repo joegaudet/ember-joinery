@@ -63,9 +63,12 @@ viewport, so you don't hide the root:
 `MessageScrollerButton` is a `<button>` (`@as` for another tag). Without a block it shows its
 `@label`, "Scroll to end" (or "Scroll to start"). While there is nothing to scroll toward it is
 `inert`, out of the tab order and `data-active="false"`; style that state with `inert:` or
-`[data-active=false]`. The `messageScrollerButton` modifier makes your own element the button,
-given the scroller (`s.state`): `<Button {{messageScrollerButton scroller=s.state}}>`. That is how
-the styled button renders Joinery's Button.
+`[data-active=false]`. A `tabindex` of your own comes back while it is active, and a click
+listener of yours that comes before it (`{{on "click"}}` on the button) runs first and can stop
+the scroll with `event.preventDefault()`. The `messageScrollerButton` modifier makes your own
+element the button, given the scroller (`s.state`):
+`<Button {{messageScrollerButton scroller=s.state}}>`. That is how the styled button renders
+Joinery's Button.
 
 ### In a scaled ancestor
 

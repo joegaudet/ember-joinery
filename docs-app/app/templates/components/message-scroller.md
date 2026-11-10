@@ -541,9 +541,11 @@ It is inert and removed from the tab order when there is nothing to scroll towar
 | `@size`      | `Button` size      | `"icon-sm"`                                | The button size.                                                        |
 | `@label`     | `string`           | `"Scroll to end"` (or `"Scroll to start"`) | Its accessible name, without a block.                                   |
 | `@name`      | `string`           |                                            | Its name, for `ButtonHarness`.                                          |
+| `@as`        | tag name           | `button`                                   | The tag to render, as Button's `@as`.                                   |
 
 Without a block, it shows an arrow (pointing up for `start`) and its label for assistive
-technology.
+technology. A click listener of your own runs first, and `event.preventDefault()` in it stops the
+scroll, as upstream's `onClick` does. A `tabindex` of your own is kept while the button is active.
 
 ### MessageScrollerVisibility
 
@@ -604,7 +606,7 @@ assert.strictEqual(chat.itemTop('turn-3'), 64)
 | `scrollable`, `canScrollToStart`, `canScrollToEnd`  | The edges it says it can scroll toward (`data-scrollable`)                |
 | `isPendingScroll`, `isAutoscrolling`                | Its `data-pending-scroll` and `data-autoscrolling`                        |
 | `itemTop(id)`, `isItemVisible(id)`, `visibleIds`    | Where a row is below the viewport's top, in CSS pixels; which rows show   |
-| `button(direction)`, `isButtonActive(direction)`    | A scroll button, and whether it has somewhere to go                       |
+| `button(direction)`, `isButtonActive(direction)`    | A scroll button, and whether it can be used (active, not inert, tabbable) |
 | `clickButton(direction)`                            | Presses it and waits for the scroll                                       |
 | `scrollTo(top)`, `scrollBy(delta)`                  | Scroll as a reader's wheel does                                           |
 | `pressKey(key)`, `focus()`                          | A scroll key in the viewport, scrolling it as the browser would; focus it |

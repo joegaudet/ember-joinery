@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { render, settled } from '@ember/test-helpers'
+import { render } from '@ember/test-helpers'
 import { on } from '@ember/modifier'
 import { fn } from '@ember/helper'
 import { htmlSafe } from '@ember/template'
@@ -15,7 +15,7 @@ import {
   type MessageScrollerScrollAlign,
   type MessageScrollerScrollOptions,
 } from '@ember-joinery/primitives/message-scroller'
-import { MessageScrollerItem, MessageScrollerProvider } from '@ember-joinery/ember'
+import { Button, MessageScrollerItem, MessageScrollerProvider } from '@ember-joinery/ember'
 import { ButtonHarness, MessageScrollerHarness, tab } from '@ember-joinery/test-support'
 
 /** The commands the provider yields. */
@@ -56,6 +56,11 @@ class Transcript {
   row(id: string) {
     return this.rows.find(row => row.id === id)!
   }
+}
+
+/** Whether a click listener of the test's prevents the button's scroll. */
+class Switch {
+  @tracked stop = true
 }
 
 const join = (ids: string[]) => ids.join(',')
@@ -207,19 +212,40 @@ module('Integration | components | message-scroller', function (hooks) {
     await a11yAudit()
   })
 
-  test('"last-anchor" opens at the end when the last turn fits, or there is no anchor', async function (assert) {
+  test('"last-anchor" opens at the end when the last turn fits', async function (assert) {
     const transcript = new Transcript([...turn(1, 400), ...turn(2, 100)])
     transcript.defaultScrollPosition = 'last-anchor'
     await renderTranscript(transcript)
     const chat = new MessageScrollerHarness('chat')
     await chat.settle()
     assert.true(chat.isAtEnd, 'the last turn fits: it opens at the end')
+    assert.false(chat.isPendingScroll)
+    await a11yAudit()
+  })
 
-    transcript.rows = []
-    await settled()
-    transcript.rows = [new Row('m1', 400), new Row('m2', 400)]
+  test('"last-anchor" opens at the end when there is no anchor', async function (assert) {
+    const transcript = new Transcript([new Row('m1', 400), new Row('m2', 400), new Row('m3', 400)])
+    transcript.defaultScrollPosition = 'last-anchor'
+    await renderTranscript(transcript)
+    const chat = new MessageScrollerHarness('chat')
     await chat.settle()
-    assert.deepEqual(chat.messageIds, ['m1', 'm2'])
+    assert.deepEqual(chat.anchorIds, [], 'no row is an anchor')
+    assert.true(chat.maxScrollTop > 0, 'and there is somewhere to scroll')
+    assert.true(chat.isAtEnd, 'so it opens at the end')
+    assert.false(chat.isPendingScroll, 'shown once it is there')
+    await a11yAudit()
+  })
+
+  test('"last-anchor" applies once the first rows arrive, when they come after the render', async function (assert) {
+    const transcript = new Transcript()
+    transcript.defaultScrollPosition = 'last-anchor'
+    await renderTranscript(transcript)
+    const chat = new MessageScrollerHarness('chat')
+    await chat.settle()
+    assert.false(chat.isPendingScroll, 'an empty transcript is shown at once')
+    transcript.rows = [...turn(1, 200), ...turn(2, 400)]
+    await chat.settle()
+    assert.strictEqual(Math.round(chat.itemTop('u2')), PEEK, 'the last turn, 64px down')
     await a11yAudit()
   })
 
@@ -596,14 +622,13 @@ module('Integration | components | message-scroller', function (hooks) {
               </s.Viewport>
               <s.Button />
               <MessageScrollerConsumer as |api|>
-                <button
-                  type="button"
-                  data-test-own
+                <Button
+                  @name="own"
                   {{messageScrollerButton scroller=api.state behavior="auto"}}
-                >Jump to latest</button>
-                <button type="button" data-test-jump {{on "click" (fn jump api "u2")}}>
+                >Jump to latest</Button>
+                <Button @name="jump" {{on "click" (fn jump api "u2")}}>
                   Jump to the second turn
-                </button>
+                </Button>
               </MessageScrollerConsumer>
             </s.Root>
           </HeadlessProvider>
@@ -621,18 +646,108 @@ module('Integration | components | message-scroller', function (hooks) {
       .hasClass('jn-message-scroller-item', 'the styled item, inside the headless provider')
     const [headless] = chat.parts('button')
     assert.dom(headless).hasText('Scroll to end', 'the headless button shows its label')
+    const own = new ButtonHarness('own')
     assert
-      .dom('[data-test-own]')
+      .dom(own.element)
       .hasAttribute('data-active', 'true')
       .hasAttribute('data-direction', 'end')
-    await settled()
-    ;(document.querySelector('[data-test-jump]') as HTMLElement).click()
+      .hasAttribute('data-test-jn-part', 'button')
+    await new ButtonHarness('jump').click()
     await chat.settle()
     assert.strictEqual(Math.round(chat.itemTop('u2')), 0)
-    ;(document.querySelector('[data-test-own]') as HTMLElement).click()
+    await own.click()
     await chat.settle()
     assert.true(chat.isAtEnd, 'your own element as the button')
-    assert.dom('[data-test-own]').hasAttribute('data-active', 'false').hasAttribute('inert')
+    assert.dom(own.element).hasAttribute('data-active', 'false').hasAttribute('inert')
+    await a11yAudit()
+  })
+
+  test('the button takes @as, keeps a tabindex of your own while active, and a click of yours can stop it', async function (assert) {
+    const transcript = new Transcript([...turn(1, 200), ...turn(2, 400)])
+    transcript.defaultScrollPosition = 'start'
+    const state = new Switch()
+    const onClick = (event: MouseEvent) => {
+      if (state.stop) event.preventDefault()
+    }
+    await render(
+      <template>
+        <div style="height: 300px; width: 320px">
+          <MessageScrollerProvider @defaultScrollPosition="start" as |s|>
+            <s.Root @name="chat">
+              <s.Viewport>
+                <s.Content>
+                  {{#each transcript.rows key="id" as |row|}}
+                    <s.Item @messageId={{row.id}} style={{row.style}}>{{row.id}}</s.Item>
+                  {{/each}}
+                </s.Content>
+              </s.Viewport>
+              <s.Button
+                @as="div"
+                @name="jump"
+                @behavior="auto"
+                role="button"
+                tabindex="0"
+                {{on "click" onClick}}
+              />
+            </s.Root>
+          </MessageScrollerProvider>
+        </div>
+      </template>,
+    )
+    const chat = new MessageScrollerHarness('chat')
+    await chat.settle()
+    const button = new ButtonHarness('jump')
+    assert.strictEqual(button.element.tagName, 'DIV', '@as')
+    assert.dom(button.element).hasClass('jn-message-scroller-button')
+    assert.true(chat.isButtonActive())
+    assert.dom(button.element).hasAttribute('tabindex', '0', 'your own tabindex, while active')
+
+    await chat.clickButton()
+    assert.true(chat.isAtStart, 'your listener called preventDefault(): no scroll')
+    assert.true(chat.isButtonActive())
+
+    state.stop = false
+    await chat.clickButton()
+    assert.true(chat.isAtEnd, 'without it, the button scrolls')
+    assert.false(chat.isButtonActive())
+    assert.dom(button.element).hasAttribute('tabindex', '-1').hasAttribute('inert')
+
+    await chat.scrollTo(0)
+    assert.true(chat.isButtonActive())
+    assert.dom(button.element).hasAttribute('tabindex', '0', 'and yours comes back')
+    await a11yAudit()
+  })
+
+  test('the harness reads the button as inactive while it is inert or out of the tab order', async function (assert) {
+    const transcript = new Transcript([...turn(1, 200), ...turn(2, 400)])
+    await render(
+      <template>
+        <div style="height: 300px; width: 320px">
+          <MessageScrollerProvider @defaultScrollPosition="start" as |s|>
+            <s.Root @name="chat">
+              <s.Viewport>
+                <s.Content>
+                  {{#each transcript.rows key="id" as |row|}}
+                    <s.Item @messageId={{row.id}} style={{row.style}}>{{row.id}}</s.Item>
+                  {{/each}}
+                </s.Content>
+              </s.Viewport>
+              <s.Button />
+            </s.Root>
+          </MessageScrollerProvider>
+        </div>
+      </template>,
+    )
+    const chat = new MessageScrollerHarness('chat')
+    await chat.settle()
+    assert.true(chat.isButtonActive())
+    chat.element.setAttribute('inert', '')
+    assert.false(chat.isButtonActive(), 'inside something inert, it is out of reach')
+    chat.element.removeAttribute('inert')
+    chat.button().setAttribute('tabindex', '-1')
+    assert.false(chat.isButtonActive(), 'out of the tab order')
+    chat.button().removeAttribute('tabindex')
+    assert.true(chat.isButtonActive())
     await a11yAudit()
   })
 })

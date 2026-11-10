@@ -175,11 +175,17 @@ export class MessageScrollerHarness extends Harness {
   }
 
   /**
-   * Whether the button for that edge can be used: there is somewhere to go, so it is shown,
-   * and neither `inert` nor out of the tab order.
+   * Whether the button for that edge can be used: there is somewhere to go, so it is shown
+   * (`data-active`), and it is neither `inert` (nor inside something that is) nor out of the
+   * tab order, which is what a keyboard and assistive technology go by.
    */
   isButtonActive(direction: 'start' | 'end' = 'end'): boolean {
-    return this.button(direction).getAttribute('data-active') === 'true'
+    const button = this.button(direction)
+    return (
+      button.getAttribute('data-active') === 'true' &&
+      button.closest('[inert]') === null &&
+      button.getAttribute('tabindex') !== '-1'
+    )
   }
 
   /** Presses the button for that edge, as a reader would, and waits for the scroll to end. */

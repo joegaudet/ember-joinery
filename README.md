@@ -20,6 +20,8 @@ on a headless primitives layer, and each with a test harness.
 - **A harness for every component** (`@ember-joinery/test-support`). Tests drive components the
   way users do, and check ARIA as they go.
 - **Accessible:** WCAG 2.2 AA, WAI-ARIA keyboard patterns, and right-to-left layouts.
+- **Blocks:** shadcn's login, signup, dashboard and settings blocks, as tested guide pages to
+  copy into your app, and a live demo built from them.
 - **Opt-in add-ons** for the heavy parts: charts, carousel, data table, code block, file uploads,
   a rich-text editor, calendars and date pickers on ember-power-calendar, masked and phone
   inputs, and a [Formwright](https://joegaudet.com/ember-formwright/) bridge.

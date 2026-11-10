@@ -551,7 +551,11 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   own landmarks and leaves the previews out; each example's own test audits it alone. A block
   preview (`@block={{true}}`) renders in a frame of its own, which axe doesn't enter from the
   page, so the pages test checks that it rendered and audits only the frame around it: its
-  example's own test is what audits the block. Where a
+  example's own test is what audits the block. The Blocks section's pages each show one of
+  upstream's blocks (`registry/bases/radix/blocks`): its `page.tsx` is the example
+  (`dashboard-01.gts`), and its components are files in a folder of the same name beside it
+  (`dashboard-01/app-sidebar.gts`), which the Template tab shows after it. A form in a frame
+  that submits to nowhere is stopped there, as upstream's block pages reload. Where a
   component keeps upstream's colours though they fall short of WCAG AA's contrast (see
   "Upstream's colours and AA"), it lists those elements, with the reason, in its own
   `docs-app/tests/acceptance/upstream-contrast/<component>.ts`: the pages test leaves them out
@@ -633,6 +637,18 @@ the maintainer can change. When a change touches anything
 the site shows (packages, components, arguments, an API used in a snippet), update `docs/site/`
 in the same PR. `docs/social-card.html` is the source of `docs/site/social-card.png`; its header
 has the command that renders it.
+
+The demo is the guide's dashboard block (`docs-app/app/examples/dashboard-01`), with its
+settings block (`sidebar-13`) over it at `/settings`, copied into `test-app/app/components/demo`
+as an app copies a block in. `scripts/demo-blocks.test.mjs` fails when a copy differs from the
+guide's, but for the files the demo adapts to its routes, which it lists; change a block in the
+guide, then copy it again. The blocks lay themselves out with Tailwind's utilities, which
+`test-app/app/styles/demo.css` compiles from the demo's files alone, scoped to its root
+(`[data-jn-demo]`) and with Tailwind's theme as a reference, so the integration tests, which
+render outside it, still see Joinery as an app without Tailwind does. The app's application
+template is the demo, so an application test with routes of its own registers its own
+`template:application`. `test-app/tests/application/demo-test.gts` drives the demo with
+harnesses.
 
 ## The example apps
 

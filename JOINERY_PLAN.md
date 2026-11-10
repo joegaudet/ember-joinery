@@ -46,7 +46,9 @@ Deviations from the intake, and why:
   Pages source to GitHub Actions, which `pages.yml` needs, is listed among what stays with Joe.
   The naming proposal under "Risks and open items" is settled as the inventory already had it:
   ember-primitives' FormData `Form` is `NativeForm` (`@ember-joinery/primitives/native-form`),
-  and Formwright supplies `Form`.
+  and Formwright supplies `Form`. Of the 27 blocks, the four ported are `login-01`, `signup-01`,
+  `dashboard-01` and, for settings, `sidebar-13` (a sidebar in a settings dialog), the one
+  settings screen among them; the demo opens it over the dashboard, at `/settings`.
 
 **What we're copying:** [ui.shadcn.com](https://ui.shadcn.com/): every component, every example
 on its component pages, a subset of its blocks, and its theming. The source of truth is the code

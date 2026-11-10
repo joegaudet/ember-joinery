@@ -116,6 +116,25 @@ module('Integration | components | combobox', function (hooks) {
     await a11yAudit()
   })
 
+  test('the group keeps upstream’s w-auto over input-group.css’s w-full', async function (assert) {
+    await render(
+      <template>
+        <div style="display: flex; width: 600px">
+          <Combobox @name="framework" @items={{frameworks}} as |c|>
+            <c.Input placeholder="Select a framework" />
+            <c.Content>
+              <c.List as |item|><c.Item @value={{item}}>{{item}}</c.Item></c.List>
+            </c.Content>
+          </Combobox>
+        </div>
+      </template>,
+    )
+    const group = new ComboboxHarness('framework').part('input-group')
+    const width = (group as HTMLElement).offsetWidth
+    assert.true(width < 400, `as wide as its input and buttons, not its container (${width})`)
+    await a11yAudit()
+  })
+
   test('the popup and its items are styled, below the input, as wide as the group', async function (assert) {
     await render(
       <template>

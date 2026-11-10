@@ -15,15 +15,17 @@ import type { PartModifier } from '@ember-joinery/primitives/part'
 import { buttonClasses } from './button.gts'
 import Icon, { type IconNode } from './icon.gts'
 import { inputClasses } from './input.gts'
+import { inputGroupAddonClasses, inputGroupButtonClasses } from './input-group.gts'
 
 // The classes of the buttons upstream renders as an `InputGroupButton` (ghost, `icon-xs`), and
-// as a `Button` (a chip's remove button): Button's, then the group's own. Input Group hasn't
-// landed in Joinery yet, so ComboboxInput draws the input group's markup itself.
-const INPUT_GROUP_BUTTON = `${buttonClasses({ variant: 'ghost' })} jn-input-group-button jn-input-group-button-size-icon-xs`
+// as a `Button` (a chip's remove button): Button's, then the group's own. ComboboxInput renders
+// InputGroup's markup and classes (see it below), so input-group.css styles them.
+const INPUT_GROUP_BUTTON = inputGroupButtonClasses({ variant: 'ghost', size: 'icon-xs' })
 const TRIGGER_CLASSES = `${INPUT_GROUP_BUTTON} jn-combobox-trigger`
 const CLEAR_CLASSES = `${INPUT_GROUP_BUTTON} jn-combobox-clear`
 const CHIP_REMOVE_CLASSES = `${buttonClasses({ variant: 'ghost', size: 'icon-xs' })} jn-combobox-chip-remove`
 const INPUT_CLASSES = `${inputClasses()} jn-input-group-input`
+const ADDON_CLASSES = inputGroupAddonClasses({ align: 'inline-end' })
 
 /** A press on the addon (not on a button in it) focuses the input, as upstream's InputGroupAddon. */
 function focusInput(event: MouseEvent): void {
@@ -163,10 +165,14 @@ export interface ComboboxInputSignature {
 }
 
 /**
- * The text input, upstream's `ComboboxInput`: an input group (Input Group's markup) around the
- * input, with the chevron button (`@showTrigger`) and the clear button (`@showClear`) at its
- * end. Attributes go on the `<input>`, as upstream's other props do. Its `className` goes on the
- * group, but an Ember component has one `...attributes`: the group's classes are `@groupClass`.
+ * The text input, upstream's `ComboboxInput`: an input group around the input, with the chevron
+ * button (`@showTrigger`) and the clear button (`@showClear`) at its end. Attributes go on the
+ * `<input>`, as upstream's other props do. Its `className` goes on the group, but an Ember
+ * component has one `...attributes`: the group's classes are `@groupClass`.
+ *
+ * It renders InputGroup's markup and classes rather than `<InputGroup>`, as CommandInput does:
+ * InputGroup's `data-test-jn="input-group"` root would make the input and its buttons that
+ * group's parts, not the combobox's, so `ComboboxHarness` couldn't reach them.
  */
 const ComboboxInput: TOC<ComboboxInputSignature> = <template>
   <div
@@ -182,7 +188,7 @@ const ComboboxInput: TOC<ComboboxInputSignature> = <template>
       ...attributes
     />
     <div
-      class="jn-input-group-addon jn-input-group-addon-align-inline-end"
+      class={{ADDON_CLASSES}}
       role="group"
       data-slot="input-group-addon"
       data-align="inline-end"

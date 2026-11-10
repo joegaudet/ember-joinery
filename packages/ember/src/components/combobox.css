@@ -17,8 +17,14 @@
   @apply pointer-events-none;
 }
 
-/* in ComboboxInput */
-:where(.jn-combobox-input) {
+/*
+ * in ComboboxInput. NOTE: upstream passes `w-auto` to its InputGroup's cn(), after the group's
+ * own `w-full`, so tailwind-merge keeps `w-auto`. input-group.css comes after this file (A–Z)
+ * and gives every `.jn-input-group` its `w-full`, so here the rule names both classes to win, or
+ * every combobox would go full width (edited by hand). It is still in @layer joinery, under an
+ * app's own CSS and a utility class.
+ */
+.jn-combobox-input:where(.jn-input-group) {
   @apply w-auto;
 }
 

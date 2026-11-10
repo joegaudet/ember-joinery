@@ -24,6 +24,7 @@
     "@ember-joinery/carousel": "workspace:*",
     "@ember-joinery/chart": "workspace:*",
     "@ember-joinery/code-block": "workspace:*",
+    "@ember-joinery/data-table": "workspace:*",
     "@ember-joinery/ember": "workspace:*",
     "@ember-joinery/file-upload": "workspace:*",
     "@ember-joinery/primitives": "workspace:*",

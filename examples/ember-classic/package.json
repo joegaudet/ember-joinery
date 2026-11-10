@@ -12,6 +12,7 @@
   "dependencies": {
     "@ember-joinery/carousel": "^1.0.0",
     "@ember-joinery/code-block": "^1.0.0",
+    "@ember-joinery/data-table": "^1.0.0",
     "@ember-joinery/ember": "^1.0.0",
     "@ember-joinery/file-upload": "^1.0.0",
     "@ember-joinery/primitives": "^1.0.0",

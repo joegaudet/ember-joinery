@@ -8,6 +8,7 @@ overrides:
   '@ember-joinery/carousel': workspace:*
   '@ember-joinery/chart': workspace:*
   '@ember-joinery/code-block': workspace:*
+  '@ember-joinery/data-table': workspace:*
   '@ember-joinery/ember': workspace:*
   '@ember-joinery/file-upload': workspace:*
   '@ember-joinery/primitives': workspace:*
@@ -91,6 +92,9 @@ importers:
       '@ember-joinery/code-block':
         specifier: workspace:*
         version: link:../packages/code-block
+      '@ember-joinery/data-table':
+        specifier: workspace:*
+        version: link:../packages/data-table
       '@ember-joinery/ember':
         specifier: workspace:*
         version: link:../packages/ember
@@ -232,6 +236,9 @@ importers:
       '@ember-joinery/code-block':
         specifier: workspace:*
         version: link:../../packages/code-block
+      '@ember-joinery/data-table':
+        specifier: workspace:*
+        version: link:../../packages/data-table
       '@ember-joinery/ember':
         specifier: workspace:*
         version: link:../../packages/ember
@@ -462,6 +469,9 @@ importers:
       '@ember-joinery/code-block':
         specifier: workspace:*
         version: link:../../packages/code-block
+      '@ember-joinery/data-table':
+        specifier: workspace:*
+        version: link:../../packages/data-table
       '@ember-joinery/ember':
         specifier: workspace:*
         version: link:../../packages/ember
@@ -800,6 +810,82 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
 
+  packages/data-table:
+    dependencies:
+      '@ember-joinery/primitives':
+        specifier: workspace:*
+        version: link:../primitives
+      '@ember/test-waiters':
+        specifier: ^4.1.2
+        version: 4.1.2
+      '@embroider/addon-shim':
+        specifier: ^1.10.3
+        version: 1.11.0
+      '@tanstack/table-core':
+        specifier: 9.3.1
+        version: 9.3.1
+      decorator-transforms:
+        specifier: ^2.4.0
+        version: 2.4.0(@babel/core@7.29.13)
+      ember-modifier:
+        specifier: ^4.3.0
+        version: 4.3.0(@babel/core@7.29.13)
+      lucide:
+        specifier: ^0.474.0
+        version: 0.474.0
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.29.7
+        version: 7.29.13
+      '@babel/plugin-transform-typescript':
+        specifier: ^7.29.7
+        version: 7.29.9(@babel/core@7.29.13)
+      '@babel/runtime':
+        specifier: ^7.29.7
+        version: 7.29.13
+      '@ember-joinery/ember':
+        specifier: workspace:*
+        version: link:../ember
+      '@ember-joinery/test-support':
+        specifier: workspace:*
+        version: link:../test-support
+      '@ember/library-tsconfig':
+        specifier: ^3.0.0
+        version: 3.0.0
+      '@ember/test-helpers':
+        specifier: ^5.7.0
+        version: 5.8.0(@babel/core@7.29.13)
+      '@embroider/addon-dev':
+        specifier: ^8.4.2
+        version: 8.5.0(@glint/template@1.11.1)(rollup@4.68.0)
+      '@glimmer/component':
+        specifier: ^2.2.1
+        version: 2.2.1
+      '@glimmer/tracking':
+        specifier: ^1.1.2
+        version: 1.1.2
+      '@glint/ember-tsc':
+        specifier: ^1.14.2
+        version: 1.14.3(ember-source@7.3.1(@glimmer/component@2.2.1))(typescript@6.0.3)
+      '@glint/template':
+        specifier: ^1.9.0
+        version: 1.11.1
+      '@rollup/plugin-babel':
+        specifier: ^7.1.0
+        version: 7.1.0(@babel/core@7.29.13)(rollup@4.68.0)
+      babel-plugin-ember-template-compilation:
+        specifier: ^4.0.1
+        version: 4.0.1
+      ember-source:
+        specifier: ~7.3.0
+        version: 7.3.1(@glimmer/component@2.2.1)
+      rollup:
+        specifier: ^4.64.6
+        version: 4.68.0
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+
   packages/ember:
     dependencies:
       '@ember-joinery/primitives':
@@ -1052,6 +1138,9 @@ importers:
       '@ember-joinery/code-block':
         specifier: workspace:*
         version: link:../packages/code-block
+      '@ember-joinery/data-table':
+        specifier: workspace:*
+        version: link:../packages/data-table
       '@ember-joinery/ember':
         specifier: workspace:*
         version: link:../packages/ember
@@ -3101,6 +3190,13 @@ packages:
     resolution: {integrity: sha512-BCNiY0a1ZjdOHVqw7kyb7U72BwfMF3dfUuN+tQsLWky/J5JOI/r7abibglXfygrZhVO/3u3V+E25kkKTeMkXaQ==}
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
+
+  '@tanstack/store@0.11.2':
+    resolution: {integrity: sha512-sJ4mjol8uQsHV0gOJzzjwXfh2Fwm+Sz0+8deqiTm4jGbMdjzNSW+xZCFm0kUa870uhd8yi+DpKnZb5Kc4apa0Q==}
+
+  '@tanstack/table-core@9.3.1':
+    resolution: {integrity: sha512-zQvlxSNi2qGM3L4jh85Z6hqMfdIR5qOfD9KHOU32nuKFJGN0RlJ7UvV1lsPb1fPVhpFYI0VP3jJGxLdLDpTKjQ==}
+    engines: {node: '>=20'}
 
   '@tybys/wasm-util@0.10.4':
     resolution: {integrity: sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A==}
@@ -10485,6 +10581,12 @@ snapshots:
       '@tailwindcss/oxide': 4.3.5
       tailwindcss: 4.3.5
       vite: 8.3.6(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)
+
+  '@tanstack/store@0.11.2': {}
+
+  '@tanstack/table-core@9.3.1':
+    dependencies:
+      '@tanstack/store': 0.11.2
 
   '@tybys/wasm-util@0.10.4':
     dependencies:

@@ -514,7 +514,7 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   `<component>-<example>`, each exporting the example as its default export. Show one in a page
   with `<Example @name="…" />` (add `@title`, `@align="start"` where upstream's preview aligns
   it, and `@fullWidth={{true}}` where upstream shows it full width: the chart demo's
-  `[&_.preview>div]:w-full`, the charts gallery's interactive charts; map those with
+  `[&_.preview>div]:w-full`, the charts gallery's interactive and tooltip charts; map those with
   `"fullWidth": true` too, so both parity stages widen them). The frame has Preview, Template
   and Test tabs and a copy button. Above the preview, switchers show it in any of the eight
   styles, base colours and radii, light or dark, right to left, and in a 375, 768 or 1440px

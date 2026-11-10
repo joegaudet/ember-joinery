@@ -25,14 +25,17 @@ blocks). Each maps upstream example ids to the Joinery guide examples that port 
   so, so the theme that differs less isn't given the other's slack.
 - `fullWidth: true` stretches the example across both stages (`?fullWidth=true`), for one that
   upstream shows full width: the chart demo, whose preview has `[&_.preview>div]:w-full`, and
-  the charts gallery's interactive charts, in a cell the gallery's whole width. Centred on a
-  plain stage, an example with no width of its own shrinks to its content, and a chart in it to
-  nothing. The guide's `<Example @fullWidth={{true}}>` does the same in its preview.
+  the charts gallery's interactive charts, in a cell the gallery's whole width, and its tooltip
+  charts, whose cards have nothing but a chart and a header (a size container) to give them a
+  width. Centred on a plain stage, an example with no width of its own shrinks to its content,
+  and a chart in it to nothing. The guide's `<Example @fullWidth={{true}}>` does the same in its
+  preview.
 - `region`, a CSS selector, compares only the first element it matches on each page (its box,
   cropped from the whole page) instead of the whole example. The charts gallery's charts use
   `[data-slot="chart"]`: upstream draws each in the new-york-v4 registry's Card, which none of
   Joinery's styles is, so comparing the card would only measure that difference, and could hide
-  a broken chart under the threshold it needs.
+  a broken chart under the threshold it needs. The tooltip charts, full width, where that card
+  makes upstream's chart narrower, compare their tooltip (`.recharts-tooltip-wrapper`).
 - `skip` marks an example that can't be compared, with the reason. It still counts as mapped.
 
 An example shown on two pages is mapped once, in either page's file. `pnpm parity` checks every

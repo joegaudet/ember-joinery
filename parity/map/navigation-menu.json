@@ -1,0 +1,14 @@
+{
+  "examples": {
+    "navigation-menu-demo": {
+      "example": "navigation-menu-demo",
+      "threshold": 0.28,
+      "reason": "The Docs link has navigationMenuTriggerStyle() over the link's own classes. Upstream's cn() merges them with tailwind-merge, so the trigger's px-2.5 py-1.5 win over the link's p-2; in Joinery's style sheet the link rule comes after the trigger rule and its p-2 wins, so the link is 4px narrower, and the centred menu, its text only a few pixels tall, moves 2px. Everything else matches."
+    },
+    "navigation-menu-rtl": {
+      "example": "navigation-menu-rtl",
+      "threshold": 0.13,
+      "reason": "As navigation-menu-demo: the Docs link's padding is the link rule's p-2, not the trigger's px-2.5 py-1.5 that upstream's tailwind-merge keeps, so the centred menu moves 2px."
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "examples": {
+    "menubar-demo": "menubar-demo",
+    "menubar-checkbox": "menubar-checkbox",
+    "menubar-radio": "menubar-radio",
+    "menubar-submenu": "menubar-submenu",
+    "menubar-icons": "menubar-icons",
+    "menubar-rtl": "menubar-rtl"
+  }
+}

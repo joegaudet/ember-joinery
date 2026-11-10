@@ -58,3 +58,11 @@
 :where(.jn-navigation-menu-indicator-arrow) {
   @apply relative top-[60%] h-2 w-2 rotate-45;
 }
+
+/*
+ * NOTE: upstream's demo gives a link the trigger's look (`navigationMenuTriggerStyle()`), and its
+ * cn() merges the two with tailwind-merge, so where they conflict the trigger's utilities win:
+ * its px-2.5 py-1.5 over the link's p-2, in Nova. Here both are the style sheet's rules, and the
+ * link's comes after the trigger's, so the link's padding wins. A rule here can't reach the
+ * trigger's padding, which each style sets differently, so such a link keeps the link's.
+ */

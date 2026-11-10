@@ -104,11 +104,11 @@ properties`): the build fails on any other unlayered rule, which would beat an a
 layered CSS (it drops the one shadcn's `tailwind.css` keeps for a bare `.shimmer` class). In
 watch mode (`pnpm start` in the package), editing any CSS file under `src/` rebuilds them.
 
-An add-on (`packages/code-block`, `packages/carousel`, `packages/chart` and
-`packages/file-upload`, and the data table to come) is a v2 addon like `ember`, built with the
-same rollup config, around the heavy dependency it wraps (Shiki for Code Block, Embla for
-Carousel, d3's scales and shapes for Chart, ember-file-upload for File Upload). Its
-harnesses are in `src/test-support/`, a barrel of their own and its
+An add-on (`packages/code-block`, `packages/carousel`, `packages/chart`, `packages/file-upload`
+and `packages/data-table`) is a v2 addon like `ember`, built with the same rollup config, around
+the heavy dependency it wraps (Shiki for Code Block, Embla for Carousel, d3's scales and shapes
+for Chart, ember-file-upload for File Upload, TanStack Table's `@tanstack/table-core` for Data
+Table). Its harnesses are in `src/test-support/`, a barrel of their own and its
 `/test-support` subpath (`"barrels": ["src", "src/test-support"]`), and it takes
 `@ember-joinery/ember` and `@ember-joinery/test-support` as peers. It ships no CSS: upstream's
 style sheets, which `ember` ports whole, already style its parts, so its inline utilities go in
@@ -596,8 +596,9 @@ and below `utilities`, so a class on a component overrides them. Its tests check
 Each app imports `tokens.css` and `joinery.css`, and the Tailwind one `tailwind.css` too, and
 renders a Button with a lucide icon, which its smoke test drives with `ButtonHarness`: that is
 what proves a classic app consumes `.gts` v2 addon components. The Vite and classic apps also
-render three add-ons: a Code Block, highlighted, which proves an add-on and the Shiki it loads on
+render four add-ons: a Code Block, highlighted, which proves an add-on and the Shiki it loads on
 demand build in both, a Carousel, which their smoke tests move with `CarouselHarness`, so an
-add-on with a dependency of its own (Embla) builds both ways too, and a File Upload, which they
+add-on with a dependency of its own (Embla) builds both ways too, a File Upload, which they
 fill with `FileUploadHarness`, so an add-on on another v2 addon (ember-file-upload, with its
-macros) does too.
+macros) does too, and a data table, which they sort with `DataTableHarness` (TanStack Table's
+core reads `process.env.NODE_ENV`, which both builds replace).

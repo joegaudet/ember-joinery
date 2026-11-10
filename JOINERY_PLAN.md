@@ -460,7 +460,10 @@ StickyFooter, Link, ExternalLink, Heading, IncrementalEach and Shadowed. All the
 
 Each in its own package, with its example app in CI. Carousel's headless part, the `{{embla}}`
 modifier, ships in `@ember-joinery/carousel` rather than as a primitive, so `primitives` takes no
-Embla dependency.
+Embla dependency. Upstream's Data Table is a guide, not a component, so `@ember-joinery/data-table`
+is what that guide builds with in Ember: `createTable()` (TanStack Table v9's `table-core` on
+reactivity bindings over autotracking, upstream's `useTable`), `FlexRender`, and `DataTable`, the
+element around a table whose yielded modifiers mark its parts for `DataTableHarness`.
 
 ### Phase 10: Charts
 
@@ -602,6 +605,11 @@ workspace.
   owner of the newest rendered `<Toaster>`, and `setupToaster(hooks)` points it at each test's
   owner through `globalThis.JOINERY_TOAST_OWNER`, as `JOINERY_ANCHOR_FALLBACK` does for anchoring.
 - Classic apps need ember-auto-import ≥ 2 to consume `.gts` v2 addons; the classic example proves it.
+- **Where the data table parts from upstream, for WCAG.** Upstream's sortable header says
+  nothing of its sort but for its button's name; Joinery's `dt.head` puts it in `aria-sort` on the
+  header cell, as the APG's sortable table does. Upstream's actions column has an empty header
+  cell (axe's `empty-table-header`), which the guide's examples name with visually hidden text.
+  The pixels are upstream's.
 - **Where Select and Combobox part from upstream, for WCAG.** Radix's open Select hides the rest
   of the page with `aria-hidden`, leaving the trigger focusable but hidden; Joinery's makes it
   inert, as a modal dialog does. Base UI's Combobox leaves its chevron, clear and chip remove

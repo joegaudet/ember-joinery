@@ -174,6 +174,8 @@ export class SelectContentState {
       // The viewport may have padding, so scroll to its edges for the first and last items.
       if (candidate === first && viewport) viewport.scrollTop = 0
       if (candidate === last && viewport) viewport.scrollTop = viewport.scrollHeight
+      // The viewport's scroll event comes a frame later: the scroll buttons follow now.
+      this.measureScroll()
       if (focusFirst([candidate], { preventScroll: true })) return
     }
   }
@@ -824,9 +826,11 @@ class SelectScrollButton extends Component<SelectScrollButtonSignature> {
     const state = this.state
     const viewport = state?.viewport.current
     const item = state?.selectedItem?.element
-    if (!viewport || !item) return
+    if (!state || !viewport || !item) return
     const step = item.offsetHeight
     viewport.scrollTop += this.args.direction === 'up' ? -step : step
+    // As in `focusFirst`: don't wait a frame for the scroll event to show the other button.
+    state.measureScroll()
   }
 
   start = (): void => {
@@ -851,7 +855,10 @@ class SelectScrollButton extends Component<SelectScrollButtonSignature> {
     if (active instanceof HTMLElement && this.args.select.items.some(i => i.element === active)) {
       active.scrollIntoView({ block: 'nearest' })
     }
-    queueMicrotask(() => state?.scrollButtonShown())
+    queueMicrotask(() => {
+      state?.measureScroll()
+      state?.scrollButtonShown()
+    })
     return () => this.stop()
   })
 

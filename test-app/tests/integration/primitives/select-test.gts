@@ -487,12 +487,16 @@ module('Integration | primitives | select', function (hooks) {
     await waitUntil(() => viewport.scrollTop > 0, { timeout: 2000 })
     await triggerEvent(down, 'pointerleave', { pointerType: 'mouse' })
     assert.true(viewport.scrollTop > 0, `it scrolled (${viewport.scrollTop})`)
-    await settled()
+    // The viewport's scroll event comes a frame later, which `settled()` doesn't wait for: the
+    // buttons follow a scroll the select makes itself as it makes it.
     assert.true(select.canScrollUp, 'and now there is something above')
     await pressKey('End')
     assert.dom(select.option('pineapple')).isFocused()
-    await settled()
     assert.false(select.canScrollDown, 'at the bottom, nothing below')
+    await pressKey('Home')
+    assert.dom(select.option('apple')).isFocused()
+    assert.false(select.canScrollUp, 'back at the top, nothing above')
+    assert.true(select.canScrollDown, 'and more below again')
     await a11yAudit()
   })
 

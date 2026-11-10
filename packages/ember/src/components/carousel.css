@@ -98,11 +98,3 @@
 :where(.jn-carousel-next[data-orientation='vertical']) {
   @apply -bottom-12 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 rotate-90;
 }
-
-/*
- * The arrows point along the slides, so right to left they turn round: upstream marks them
- * `cn-rtl-flip`, which its right-to-left build makes `rtl:rotate-180`.
- */
-:where(.jn-carousel-previous, .jn-carousel-next) :where(.jn-rtl-flip) {
-  @apply rtl:rotate-180;
-}

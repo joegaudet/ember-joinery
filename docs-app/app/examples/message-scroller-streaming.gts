@@ -141,24 +141,27 @@ export default class MessageScrollerStreaming extends Component {
           </card.Content>
           <card.Footer class="flex-col gap-2">
             <form class="w-full" {{on "submit" this.send}}>
-              <InputGroup as |g|>
-                <div class="h-14 w-full px-3 py-2.5">
-                  <span
-                    class="line-clamp-2 opacity-60 data-[status=ready]:opacity-100"
-                    data-status={{this.session.status}}
-                  >
-                    {{#if this.session.nextMessage}}
-                      {{getMessageText this.session.nextMessage}}
-                    {{else}}
-                      <span class="text-muted-foreground">
-                        No messages queued. Reset the stream.
-                      </span>
-                    {{/if}}
-                  </span>
-                </div>
-                {{! Upstream's DropdownMenu sits inside the addon and renders no element;
-                  Joinery's root is an element, so the menu goes around the addon. }}
-                <DropdownMenu as |m|>
+              {{! Upstream's DropdownMenu sits inside the addon and renders no element.
+                Joinery's root is an element (display: contents), which inside the addon would
+                take the addon out of the group's children and lose the group's
+                :has(>[data-align=block-end]) column layout, so the menu goes around the whole
+                group, and m.trigger still makes the 'Add files' button its trigger. }}
+              <DropdownMenu as |m|>
+                <InputGroup as |g|>
+                  <div class="h-14 w-full px-3 py-2.5">
+                    <span
+                      class="line-clamp-2 opacity-60 data-[status=ready]:opacity-100"
+                      data-status={{this.session.status}}
+                    >
+                      {{#if this.session.nextMessage}}
+                        {{getMessageText this.session.nextMessage}}
+                      {{else}}
+                        <span class="text-muted-foreground">
+                          No messages queued. Reset the stream.
+                        </span>
+                      {{/if}}
+                    </span>
+                  </div>
                   <g.Addon @align="block-end" class="pt-1">
                     <g.Button
                       aria-label="Add files"
@@ -180,27 +183,27 @@ export default class MessageScrollerStreaming extends Component {
                       <span class="sr-only">Send</span>
                     </g.Button>
                   </g.Addon>
-                  <m.Content @align="start" @side="top" class="w-44">
-                    <m.Item>
-                      <Icon @icon={{Paperclip}} />
-                      Add Photos &amp; Files
-                    </m.Item>
-                    <m.Separator />
-                    <m.Item>
-                      <Icon @icon={{ImageIcon}} />
-                      Create Image
-                    </m.Item>
-                    <m.Item>
-                      <Icon @icon={{Telescope}} />
-                      Deep Research
-                    </m.Item>
-                    <m.Item>
-                      <Icon @icon={{Globe}} />
-                      Web Search
-                    </m.Item>
-                  </m.Content>
-                </DropdownMenu>
-              </InputGroup>
+                </InputGroup>
+                <m.Content @align="start" @side="top" class="w-44">
+                  <m.Item>
+                    <Icon @icon={{Paperclip}} />
+                    Add Photos &amp; Files
+                  </m.Item>
+                  <m.Separator />
+                  <m.Item>
+                    <Icon @icon={{ImageIcon}} />
+                    Create Image
+                  </m.Item>
+                  <m.Item>
+                    <Icon @icon={{Telescope}} />
+                    Deep Research
+                  </m.Item>
+                  <m.Item>
+                    <Icon @icon={{Globe}} />
+                    Web Search
+                  </m.Item>
+                </m.Content>
+              </DropdownMenu>
             </form>
           </card.Footer>
         </Card>

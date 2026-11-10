@@ -5,6 +5,7 @@ import { a11yAudit } from 'ember-a11y-testing/test-support'
 import {
   ButtonHarness,
   EmptyHarness,
+  InputGroupHarness,
   MessageHarness,
   MessageScrollerHarness,
 } from '@ember-joinery/test-support'
@@ -14,6 +15,19 @@ import MessageScrollerStreaming from 'docs-app/examples/message-scroller-streami
 /** The button with this accessible name. */
 const button = (label: string) => ButtonHarness.findAll().find(button => button.label === label)!
 
+/**
+ * Whether the composer stacks its block-end addon below its 56px text (a column, as upstream's
+ * does), rather than squeezing both into one row.
+ */
+function composerStacks(): boolean {
+  const composer = new InputGroupHarness()
+  const addon = composer.addon('block-end')
+  return (
+    getComputedStyle(composer.element).flexDirection === 'column' &&
+    composer.element.offsetHeight >= 56 + addon.offsetHeight
+  )
+}
+
 module('Example | message-scroller-streaming', function (hooks) {
   setupRenderingTest(hooks)
   // The reply streams in at once, with no delay between its words.
@@ -22,6 +36,7 @@ module('Example | message-scroller-streaming', function (hooks) {
 
   test('autoScroll follows the reply at the live edge, and leaves a reader who scrolled up alone', async function (assert) {
     await render(<template><MessageScrollerStreaming /></template>)
+    assert.true(composerStacks(), 'the composer lays its buttons out below its text')
     assert.true(new EmptyHarness().exists)
     assert.true(button('Reset stream').isDisabled, 'nothing to reset yet')
 

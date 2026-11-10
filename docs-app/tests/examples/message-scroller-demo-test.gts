@@ -6,6 +6,7 @@ import {
   ButtonHarness,
   DropdownMenuHarness,
   EmptyHarness,
+  InputGroupHarness,
   MessageHarness,
   MessageScrollerHarness,
 } from '@ember-joinery/test-support'
@@ -18,6 +19,31 @@ const near = (actual: number, expected: number) => Math.abs(actual - expected) <
 /** The button with this accessible name. */
 const button = (label: string) => ButtonHarness.findAll().find(button => button.label === label)!
 
+/**
+ * Whether the composer stacks its block-end addon below its 56px text (a column, as upstream's
+ * does), rather than squeezing both into one row.
+ */
+function composerStacks(): boolean {
+  const composer = new InputGroupHarness()
+  const addon = composer.addon('block-end')
+  return (
+    getComputedStyle(composer.element).flexDirection === 'column' &&
+    composer.element.offsetHeight >= 56 + addon.offsetHeight
+  )
+}
+
+/**
+ * The composer's menu. Its trigger, the "Add files" button, sits inside the InputGroup (the
+ * menu goes around the whole group, so the group keeps its block-end addon as a child), which
+ * makes the button the group's in the component tree: this page object points the menu's
+ * harness at it.
+ */
+class ComposerMenu extends DropdownMenuHarness {
+  override get trigger(): HTMLElement {
+    return button('Add files').element
+  }
+}
+
 module('Example | message-scroller-demo', function (hooks) {
   setupRenderingTest(hooks)
   // The reply streams in at once, with no delay between its words.
@@ -26,6 +52,7 @@ module('Example | message-scroller-demo', function (hooks) {
 
   test('a new chat: send streams a scripted reply, and the next turn settles near the top', async function (assert) {
     await render(<template><MessageScrollerDemo /></template>)
+    assert.true(composerStacks(), 'the composer lays its buttons out below its text')
     assert.true(new EmptyHarness().exists, 'it opens empty')
     assert.dom('[data-status]').includesText("I'm building a chat for our app")
 
@@ -51,7 +78,7 @@ module('Example | message-scroller-demo', function (hooks) {
       'the new turn, with the previous reply peeking above it',
     )
 
-    const menu = new DropdownMenuHarness()
+    const menu = new ComposerMenu()
     await menu.open()
     assert.deepEqual(menu.items, [
       'Add Photos & Files',

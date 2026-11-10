@@ -11,6 +11,7 @@ import { CodeBlockHarness, setupClipboard } from '@ember-joinery/code-block/test
 import { FileUploadHarness } from '@ember-joinery/file-upload/test-support'
 import { RichTextEditorHarness } from '@ember-joinery/tiptap/test-support'
 import { DatePickerHarness } from '@ember-joinery/power-calendar/test-support'
+import { MaskedInputHarness, PhoneInputHarness } from '@ember-joinery/maskito/test-support'
 
 /** Every cascade layer the page's style sheets declare, in order. */
 function declaredLayers() {
@@ -180,6 +181,22 @@ module('Acceptance | smoke', function (hooks) {
     await due.select('2026-04-10')
     assert.strictEqual(due.text, 'April 10, 2026')
     assert.false(due.isOpen)
+    await a11yAudit()
+  })
+
+  test('a Joinery MaskedInput and PhoneInput, on Maskito, mask what is typed here', async function (assert) {
+    await visit('/')
+    const date = new MaskedInputHarness('date')
+    assert.strictEqual(getComputedStyle(date.control).height, '32px', 'joinery.css styles it')
+    await date.typeText('31122024')
+    assert.strictEqual(date.value, '31/12/2024', "@maskito/kit's date mask shaped it")
+
+    const phone = new PhoneInputHarness('phone')
+    assert.strictEqual(phone.country, 'GB')
+    await phone.typeText('7400123456')
+    assert.strictEqual(phone.value, '+44 7400 123456', "@maskito/phone's mask shaped it")
+    await phone.selectCountry('FR')
+    assert.strictEqual(phone.country, 'FR', 'and its country picker, a Select, chose another')
     await a11yAudit()
   })
 })

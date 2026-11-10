@@ -19,6 +19,7 @@
     "@ember-joinery/data-table": "^1.0.0",
     "@ember-joinery/ember": "^1.0.0",
     "@ember-joinery/file-upload": "^1.0.0",
+    "@ember-joinery/maskito": "^1.0.0",
     "@ember-joinery/power-calendar": "^1.0.0",
     "@ember-joinery/test-support": "^1.0.0",
     "@ember-joinery/tiptap": "^1.0.0",

@@ -18,10 +18,12 @@ import {
 } from '@ember-joinery/data-table'
 import { RichTextEditor } from '@ember-joinery/tiptap'
 import { DatePicker } from '@ember-joinery/power-calendar'
+import { MaskedInput, PhoneInput, dateMask } from '@ember-joinery/maskito'
 
 const install = 'pnpm add @ember-joinery/code-block'
 const slides = ['One', 'Two', 'Three']
 const due = new Date(2026, 2, 4)
+const date = dateMask()
 
 const features = tableFeatures({
   rowSortingFeature,
@@ -102,5 +104,7 @@ class Fruit extends Component {
     <Fruit />
     <RichTextEditor @name="notes" @label="Notes" @defaultValue="<p>Shipping today</p>" />
     <DatePicker @name="due" @defaultValue={{due}} @locale="en-US" />
+    <MaskedInput @name="date" @mask={{date}} aria-label="Date" placeholder="dd/mm/yyyy" />
+    <PhoneInput @name="phone" @defaultCountry="GB" aria-label="Phone" />
   </main>
 </template>

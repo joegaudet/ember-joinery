@@ -321,6 +321,16 @@ module('Integration | components | rich-text-editor', function (hooks) {
 
     await body.setBlockType('Paragraph')
     assert.strictEqual(body.html, '<p>Release notes</p>')
+
+    await body.setContent('<p>One</p><p>Two</p>')
+    await body.selectAll()
+    await body.setBlockType('Heading 3')
+    assert.strictEqual(body.html, '<h3>One</h3><h3>Two</h3>', 'it styles every block selected')
+    await body.selectAll()
+    assert.strictEqual(body.blockType, 'Heading 3', 'and shows the style they share')
+    await body.setContent('<h3>One</h3><p>Two</p>')
+    await body.selectAll()
+    assert.strictEqual(body.blockType, 'Text style', 'blocks of two styles show none')
     await a11yAudit()
   })
 

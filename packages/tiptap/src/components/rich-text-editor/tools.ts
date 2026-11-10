@@ -1,4 +1,5 @@
 import type { ChainedCommands, Editor } from '@tiptap/core'
+import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import {
   Bold,
   Code,
@@ -239,12 +240,30 @@ export function blockTypeShortcut(type: BlockType): Key[] {
   return ['Mod', 'Alt', type === 'paragraph' ? '0' : type.slice('heading-'.length)]
 }
 
-/** The text style at the cursor: a paragraph, a heading of a level, or `null` (a code block). */
+/** A textblock's text style, or `null` for one that has none (a code block). */
+function blockTypeOf(node: ProseMirrorNode): BlockType | null {
+  if (node.type.name === 'paragraph') return 'paragraph'
+  if (node.type.name === 'heading') return `heading-${node.attrs['level'] as HeadingLevel}`
+  return null
+}
+
+/**
+ * The text style at the cursor, or of every block the selection covers: a paragraph, a heading
+ * of a level, or `null` in a code block or across blocks of different styles. Empty blocks in a
+ * selection (StarterKit's last empty paragraph, after Ctrl+A) don't count, unless all are empty.
+ */
 export function currentBlockType(editor: Editor): BlockType | null {
-  for (const level of [1, 2, 3, 4, 5, 6] as const) {
-    if (editor.isActive('heading', { level })) return `heading-${level}`
-  }
-  return editor.isActive('paragraph') ? 'paragraph' : null
+  const { selection, doc } = editor.state
+  if (selection.empty) return blockTypeOf(selection.$from.parent)
+  const blocks: ProseMirrorNode[] = []
+  doc.nodesBetween(selection.from, selection.to, node => {
+    if (!node.isTextblock) return true
+    blocks.push(node)
+    return false
+  })
+  const filled = blocks.filter(block => block.content.size > 0)
+  const types = new Set((filled.length ? filled : blocks).map(blockTypeOf))
+  return types.size === 1 ? [...types][0]! : null
 }
 
 /** Applies a text style to the blocks at the cursor. */

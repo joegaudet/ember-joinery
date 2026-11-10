@@ -6,7 +6,7 @@ import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { ChevronsUpDown } from 'lucide'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
-import { Button, Collapsible, Icon } from '@ember-joinery/ember'
+import { Button, Collapsible, FieldGroup, Icon } from '@ember-joinery/ember'
 import { ButtonHarness, CollapsibleHarness, tab } from '@ember-joinery/test-support'
 
 module('Integration | components | collapsible', function (hooks) {
@@ -169,6 +169,31 @@ module('Integration | components | collapsible', function (hooks) {
     assert.dom('a[href="#more"]').isFocused()
     await details.close()
     assert.dom(details.trigger).isFocused('closing moves focus nowhere else')
+    await a11yAudit()
+  })
+
+  test('the harness finds content inside another component through aria-controls', async function (assert) {
+    // Upstream's settings panel puts its CollapsibleContent inside a FieldGroup, whose root is
+    // the content's nearest component root, so the part lookup alone can't reach it.
+    await render(
+      <template>
+        <Collapsible @name="settings" as |c|>
+          <FieldGroup>
+            <c.Content>Two more radii</c.Content>
+          </FieldGroup>
+          <c.Trigger>More</c.Trigger>
+        </Collapsible>
+      </template>,
+    )
+    const settings = new CollapsibleHarness('settings')
+    assert.dom(settings.content).hasAttribute('data-slot', 'collapsible-content')
+    assert.true(settings.controlsContent)
+    assert.false(settings.isShown)
+    assert.strictEqual(settings.text, '')
+
+    await settings.open()
+    assert.true(settings.isShown)
+    assert.strictEqual(settings.text, 'Two more radii')
     await a11yAudit()
   })
 

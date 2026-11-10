@@ -79,8 +79,9 @@ Without `@open` it keeps its own state; `@defaultOpen={{true}}` starts it open.
 
 ## Settings Panel
 
-Use a trigger button to reveal additional settings. Upstream's example is a Card of Field and
-Input controls; it comes with Field, which hasn't landed in Joinery yet.
+Use a trigger button to reveal additional settings.
+
+<Example @name="collapsible-settings" @title="Settings Panel" />
 
 ## File Tree
 
@@ -176,20 +177,20 @@ assert.true(order.isOpen)
 assert.strictEqual(order.text, '100 Market St, San Francisco')
 ```
 
-| Member            | What it is                                              |
-| ----------------- | ------------------------------------------------------- |
-| `trigger`         | The trigger's element                                   |
-| `content`         | The content's element (there, `hidden`, while closed)   |
-| `isOpen`          | Whether it is open, from the trigger's `aria-expanded`  |
-| `isShown`         | Whether the content shows: open, or still animating out |
-| `isDisabled`      | Whether the trigger can't open or close it              |
-| `label`           | The trigger's accessible name                           |
-| `text`            | The content's text, `''` while closed                   |
-| `controlsContent` | Whether the trigger's `aria-controls` names the content |
-| `toggle()`        | Clicks the trigger                                      |
-| `open()`          | Opens it, unless it is open                             |
-| `close()`         | Closes it, unless it is closed                          |
-| `focus()`         | Focuses the trigger                                     |
+| Member            | What it is                                                                                                                                    |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `trigger`         | The trigger's element                                                                                                                         |
+| `content`         | The content's element (there, `hidden`, while closed); inside another component (a `FieldGroup`), the one the trigger's `aria-controls` names |
+| `isOpen`          | Whether it is open, from the trigger's `aria-expanded`                                                                                        |
+| `isShown`         | Whether the content shows: open, or still animating out                                                                                       |
+| `isDisabled`      | Whether the trigger can't open or close it                                                                                                    |
+| `label`           | The trigger's accessible name                                                                                                                 |
+| `text`            | The content's text, `''` while closed                                                                                                         |
+| `controlsContent` | Whether the trigger's `aria-controls` names the content                                                                                       |
+| `toggle()`        | Clicks the trigger                                                                                                                            |
+| `open()`          | Opens it, unless it is open                                                                                                                   |
+| `close()`         | Closes it, unless it is closed                                                                                                                |
+| `focus()`         | Focuses the trigger                                                                                                                           |
 
 ## Upstream
 

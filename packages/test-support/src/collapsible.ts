@@ -24,9 +24,18 @@ export class CollapsibleHarness extends Harness {
     return this.part('trigger')
   }
 
-  /** The content's element, which is there (`hidden`) while closed. `null` before it renders. */
+  /**
+   * The content's element, which is there (`hidden`) while closed. `null` before it renders.
+   * Content that sits inside another component, as in a `FieldGroup` (upstream's settings
+   * panel), is that component's part as far as the tree goes, so it is found through the
+   * element the trigger's `aria-controls` names instead.
+   */
   get content(): HTMLElement | null {
-    return this.queryPart('content')
+    const own = this.queryPart('content')
+    if (own) return own
+    const id = this.queryPart('trigger')?.getAttribute('aria-controls')
+    const controlled = id ? this.element.ownerDocument.getElementById(id) : null
+    return controlled?.getAttribute('data-test-jn-part') === 'content' ? controlled : null
   }
 
   /** Whether it is open, from the trigger's `aria-expanded`. */

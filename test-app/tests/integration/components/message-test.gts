@@ -177,6 +177,7 @@ module('Integration | components | message', function (hooks) {
               </Avatar>
             </m.Avatar>
             <m.Content>
+              <m.Header>Me</m.Header>
               <Bubble as |b|><b.Content>Deploying to prod real quick.</b.Content></Bubble>
               <m.Footer>Delivered</m.Footer>
             </m.Content>
@@ -206,6 +207,11 @@ module('Integration | components | message', function (hooks) {
       'group-data-[align=end]/message:justify-end',
     )
     assert.strictEqual(getComputedStyle(message.footer).alignSelf, 'flex-end')
+    assert.strictEqual(
+      getComputedStyle(message.header).alignSelf,
+      'flex-end',
+      'every part of the content, the header too: *:data-slot:self-end',
+    )
 
     state.align = 'start'
     await settled()

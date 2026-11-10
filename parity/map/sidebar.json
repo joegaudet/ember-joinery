@@ -1,0 +1,6 @@
+{
+  "$comment": "sidebar-demo is the docs page's one example. The page also shows upstream's other sidebar-* examples in apps/v4/examples/radix (sidebar-controlled, -footer, -group, -group-action, -group-collapsible, -header, -menu, -menu-action, -menu-badge, -menu-collapsible, -menu-sub, -rsc and -rtl), which its docs page doesn't, so the inventory doesn't list them and there is nothing upstream to compare them with.",
+  "examples": {
+    "sidebar-demo": "sidebar-demo"
+  }
+}

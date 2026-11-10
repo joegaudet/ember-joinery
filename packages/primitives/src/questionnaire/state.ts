@@ -7,6 +7,7 @@ import { tracked } from '@glimmer/tracking'
 import { isDestroyed, isDestroying } from '@ember/destroyable'
 import { renderSettled } from '@ember/renderer'
 import { buildWaiter } from '@ember/test-waiters'
+import { isDevelopingApp, macroCondition } from '@embroider/macros'
 import Modifier from 'ember-modifier'
 import { ControllableState } from '../controllable-state.ts'
 import { getDirection } from '../direction.gts'
@@ -15,6 +16,8 @@ import { part, type PartModifier, type PartSpec } from '../part.ts'
 import {
   answerKeyShortcuts,
   byDocumentOrder,
+  collectionDefinitionWarnings,
+  collectionRegistrationWarnings,
   hasInputValue,
   initialItemName,
   isRadioTarget,
@@ -23,11 +26,15 @@ import {
   shortcutKeys,
   shortcutsByChoiceValue,
   type QuestionnaireItemDefinition,
+  type QuestionnaireItemRegistration,
   type QuestionnaireItemStatus,
   type QuestionnaireShortcutMode,
 } from './utils.ts'
 
 const waiter = buildWaiter('@ember-joinery/primitives:questionnaire')
+
+/** A controlled input whose selection hasn't been put in step with its value yet. */
+const NOT_SYNCED = Symbol('not synced')
 
 /**
  * Runs `callback` once the current render is over, holding the test waiter till then, unless
@@ -93,9 +100,16 @@ export class QuestionnaireState {
   readonly #items = new Set<QuestionnaireItemState>()
   /** Bumped after items come or go, so what depends on them renders again. */
   @tracked revision = 0
+  /**
+   * The first item, taken without a word while the state, uncontrolled, has named none of its
+   * own yet (no `@items` and no `@defaultItem`, before the items render), as upstream does.
+   */
+  @tracked private settledOn: string | null = null
   #bumping = false
   #pendingFocus: PendingFocus | null = null
   #lastActive: string | null | undefined = undefined
+  /** The development warnings last logged, so each is logged once while it holds. */
+  #warned = new Set<string>()
   /** The form, once rendered. */
   element: HTMLFormElement | null = null
 
@@ -114,7 +128,8 @@ export class QuestionnaireState {
   /**
    * Put it on the form with the active item's name (`{{q.focusEffect q.activeName}}`): after
    * the questionnaire moves, it focuses the item it moved to (or, when it moved to report an
-   * invalid one, that item's first answer), as upstream's layout effect does.
+   * invalid one, that item's first answer), as upstream's layout effect does. In development,
+   * it also warns where `@items` and the rendered items part, as upstream's effect does.
    */
   readonly focusEffect: typeof Modifier<{
     Element: HTMLElement
@@ -152,6 +167,7 @@ export class QuestionnaireState {
       Args: { Positional: [string | null] }
     }> {
       override modify(_element: HTMLElement, [name]: [string | null]): void {
+        questionnaire.#warnAboutCollection()
         questionnaire.#afterActiveRendered(name)
       }
     }
@@ -231,14 +247,40 @@ export class QuestionnaireState {
   }
 
   /**
-   * The active item's name. Where the state names no item it steps through (nothing yet, or
-   * an item that is now disabled), the first stands in, as upstream moves to it.
+   * The active item's name. Where the state names no item it steps through (nothing yet, an
+   * unknown one, or one that is now disabled), the first stands in for the render, and then
+   * the questionnaire moves to it (see `#moveToFirst`).
    */
   get activeName(): string | null {
-    const name = this.active.value
+    const name = this.#held
     const names = this.names
     if (!names.length) return name
     return name !== null && names.includes(name) ? name : names[0]!
+  }
+
+  /** The name the state holds: `@item`, the questionnaire's own, or the first it settled on. */
+  get #held(): string | null {
+    const name = this.active.value
+    return name === null && !this.active.isControlled ? this.settledOn : name
+  }
+
+  /**
+   * Where the state names an item it doesn't step through, moves to the first, as upstream's
+   * layout effect does: without a word while it has named none of its own, else as `setItem`
+   * would, so `@onItemChange` hears it (a host that controls `@item` gets the first) and the
+   * item takes focus once it shows.
+   */
+  #moveToFirst(): void {
+    const names = this.names
+    const first = names[0]
+    const held = this.#held
+    if (first === undefined || (held !== null && names.includes(held))) return
+    if (held === null && !this.active.isControlled) {
+      this.settledOn = first
+      return
+    }
+    this.#pendingFocus = { name: first, target: 'item' }
+    this.active.set(first)
   }
 
   /** The active item's position from 0, or -1 with none. */
@@ -349,10 +391,19 @@ export class QuestionnaireState {
     })
   }
 
-  /** After a render with a new active item: focus it, as upstream's layout effect. */
+  /**
+   * After a render with a new active item: focus it, as upstream's layout effect. Where the
+   * first only stands in for the item the state holds, move to it first (`#moveToFirst`).
+   */
   #afterActiveRendered(name: string | null): void {
+    // Read here, so the effect runs again once the state holds the first, which it already shows.
+    const held = this.#held
     const previous = this.#lastActive
     this.#lastActive = name
+    if (name !== null && held !== name) {
+      afterRender(this.#owner, () => this.#moveToFirst())
+      return
+    }
     if (previous === undefined) return
     const pending = this.#pendingFocus
     if (pending && pending.name === name) {
@@ -367,6 +418,57 @@ export class QuestionnaireState {
     if (this.active.isControlled && previous !== name) {
       this.#pendingFocus = null
       afterRender(this.#owner, () => this.itemNamed(name)?.focus())
+    }
+  }
+
+  // ----- Development warnings ----------------------------------------------------------------
+
+  /** The rendered items, disabled ones too, in document order, as upstream registers them. */
+  get registrations(): QuestionnaireItemRegistration[] {
+    void this.revision
+    return [...this.#items].sort(byDocumentOrder).map(item => ({
+      name: item.name,
+      disabled: item.disabled,
+      required: item.required,
+      choices: item.controls
+        .filter(answer => answer instanceof QuestionnaireChoiceState)
+        .map(choice => ({ value: choice.value, disabled: choice.ownDisabled })),
+    }))
+  }
+
+  /**
+   * Where `@items` (and `@defaultItem`) and the rendered items part: duplicate names, an unknown
+   * `@defaultItem`, an item or a choice on one side only, and shortcuts that won't match.
+   * None without `@items`.
+   */
+  get collectionWarnings(): string[] {
+    const definitions = this.definitions
+    if (!definitions) return []
+    return [
+      ...collectionDefinitionWarnings(definitions, this.#options.defaultItem?.()),
+      ...collectionRegistrationWarnings(definitions, this.registrations, this.shortcuts),
+    ]
+  }
+
+  /**
+   * In development, logs each new collection warning with `console.warn` (`[Questionnaire] …`),
+   * as upstream does outside production: Ember's `warn()` is silent wherever an app loads
+   * Ember's production build of `@ember/debug`, so it isn't used. It reads them now, so the
+   * effect that calls it runs again when they could change, and logs them once the render (and
+   * the items' registration) is over, as upstream's microtask does. Production builds leave it
+   * out (`isDevelopingApp()`).
+   */
+  #warnAboutCollection(): void {
+    if (macroCondition(isDevelopingApp())) {
+      void this.collectionWarnings
+      afterRender(this.#owner, () => {
+        const warnings = new Set(this.element ? this.collectionWarnings : [])
+        for (const warning of warnings) {
+          if (this.#warned.has(warning)) continue
+          console.warn(`[Questionnaire] ${warning}`)
+        }
+        this.#warned = warnings
+      })
     }
   }
 
@@ -721,6 +823,22 @@ export class QuestionnaireItemState {
       return !this.skipped && answer.controlledChecked
     }
     return (this.selection ?? this.#defaults).includes(answer.id)
+  }
+
+  /**
+   * @internal Puts a controlled answer's selection in step with its value, as upstream's
+   * `syncControlledAnswerSelection`: selected, it is no longer skipped; deselected, it leaves
+   * the rest as they are.
+   */
+  syncSelection(answer: QuestionnaireAnswerState, selected: boolean): void {
+    if (selected) {
+      this.select(answer, true)
+      return
+    }
+    const current = this.selection ?? this.#defaults
+    if (!current.includes(answer.id)) return
+    this.selection = current.filter(id => id !== answer.id)
+    this.reportStatus()
   }
 
   /** Selects or deselects an answer, as someone choosing it does. It is no longer skipped. */
@@ -1215,6 +1333,8 @@ export class QuestionnaireInputState extends QuestionnaireAnswerState {
   readonly #options: QuestionnaireInputOptions
   /** Whether it has text, once someone has typed; `null` while it shows its default. */
   @tracked typedFilled: boolean | null = null
+  /** The controlled value its selection was last put in step with (`NOT_SYNCED` before that). */
+  #synced: string | undefined | typeof NOT_SYNCED = NOT_SYNCED
 
   /** Put it on the `<input>`, with `{{nativeValue}}` for its value. */
   readonly input: PartModifier<HTMLInputElement>
@@ -1247,16 +1367,42 @@ export class QuestionnaireInputState extends QuestionnaireAnswerState {
     return Boolean(this.element?.hasAttribute('name')) && hasInputValue(this.element?.value)
   }
 
-  /** Hears the text change: selects it while it has text, as typing an answer does. */
+  /**
+   * Hears the text change: selects it while it has text, as typing an answer does. A controlled
+   * one only tells `@onValueChange`: its selection follows the value it is given back.
+   */
   onValueChange = (value: string): void => {
     this.#options.onValueChange?.()?.(value)
+    if (this.isControlled) return
     const filled = hasInputValue(value)
     this.typedFilled = filled
     this.item.select(this, filled)
   }
 
+  /**
+   * A controlled input is the answer while its value has text: from the first render, and
+   * again each time the value changes (typed and passed back, or set by its host), as
+   * upstream's layout effect has it. A choice picked since leaves it unselected until then.
+   */
+  #syncControlled(): void {
+    const value = this.#options.value?.()
+    if (value === this.#synced) return
+    this.#synced = value
+    afterRender(this, () => {
+      if (this.isControlled) this.item.syncSelection(this, this.filled)
+    })
+  }
+
   reset(): void {
     this.typedFilled = null
+    if (this.isControlled) {
+      // The item's reset clears its selection; put the controlled value's back, as upstream's
+      // effect does on a reset.
+      this.#synced = NOT_SYNCED
+      afterRender(this, () => {
+        if (this.isControlled) this.item.syncSelection(this, this.filled)
+      })
+    }
     // An input that wasn't the answer is outside the form, which can't reset it.
     const element = this.element
     if (element && !this.isControlled) {
@@ -1269,6 +1415,7 @@ export class QuestionnaireInputState extends QuestionnaireAnswerState {
 
   /** What the `<input>` renders. */
   inputSpec(): PartSpec<HTMLInputElement> {
+    if (this.isControlled) this.#syncControlled()
     const item = this.item
     const disabled = this.isDisabled
     const selected = this.isSelected

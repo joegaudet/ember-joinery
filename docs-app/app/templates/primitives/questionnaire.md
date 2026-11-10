@@ -91,8 +91,10 @@ The arguments are the styled Questionnaire's; see its
 | `q.Item`          | `Title` (`legend`), `Description` (`p`), `Choices`, `Choice`, `Input`, `Error`, and the `title` and `description` modifiers |
 | `i.Choice`        | `Input` (the radio or checkbox), `Label` (`span`), `Shortcut` (`span`), and `isChecked`, `type`, `shortcut`                 |
 
-Every part but the inputs takes `@as` for another tag, and attributes. The state attributes are
-upstream's (`data-status`, `data-checked`, `data-type`, `data-shortcut`, `data-visible`…).
+Every part takes `@as` for another tag (the root, a `form`; an item, a `fieldset`; a choice, a
+`label`; the freeform `Input`, an `input`; the navigation buttons, a `button`), and attributes,
+but a choice's own radio or checkbox (`c.Input`). The state attributes are upstream's
+(`data-status`, `data-checked`, `data-type`, `data-shortcut`, `data-visible`…).
 
 ## Testing
 

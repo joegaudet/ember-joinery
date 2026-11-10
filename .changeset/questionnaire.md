@@ -9,8 +9,11 @@ multiple-choice, freeform and skippable questions, with progress, validation (it
 through `@invalid` and `@message`), navigation buttons that show where they apply, letter or
 number shortcuts, the keyboard of upstream's (arrows between answers and items, flipped right to
 left; `Enter` and `Meta+Enter` to confirm), a controlled or uncontrolled active item
-(`@item`, `@defaultItem`, `@onItemChange`), controlled or default answers, and a reset that puts
-them back. Its behaviour is `@ember-joinery/primitives/questionnaire`, @shadcn/react's headless
+(`@item`, `@defaultItem`, `@onItemChange`; an item that no longer applies gives way to the
+first, and `@onItemChange` hears it), controlled or default answers (a freeform `Input` takes
+`@value` and `@onValueChange`), a reset that puts them back, development warnings where `@items`
+and the rendered items part, `@as` on every part, and the navigation buttons as modifiers
+(`{{q.next}}`). Its behaviour is `@ember-joinery/primitives/questionnaire`, @shadcn/react's headless
 Questionnaire, whose state classes put their parts on any element, so a card's or a dialog's
 title can be the question (`{{i.title}}`). `@ember-joinery/test-support` adds
 `QuestionnaireHarness`.

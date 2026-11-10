@@ -1046,4 +1046,287 @@ module('Integration | components | questionnaire', function (hooks) {
     assert.true(q.canSubmit)
     await a11yAudit()
   })
+
+  test('a controlled freeform answer: @value and @onValueChange, and the host has the last word', async function (assert) {
+    const submissions = new Submissions()
+    const items = [{ name: 'approach', required: true }]
+    class State {
+      @tracked text = 'Pair with the team'
+      changes: string[] = []
+      setText = (text: string) => {
+        this.changes.push(text)
+        this.text = text.toLowerCase()
+      }
+    }
+    const state = new State()
+    await render(
+      <template>
+        <Questionnaire @name="q" @items={{items}} @onSubmit={{submissions.submit}} as |q|>
+          <q.Item @name="approach" @required={{true}} as |i|>
+            <i.Title>Approach</i.Title>
+            <i.Choices>
+              <i.Choice @value="incremental">Small steps</i.Choice>
+              <i.Input
+                aria-label="Another approach"
+                @value={{state.text}}
+                @onValueChange={{state.setText}}
+              />
+            </i.Choices>
+          </q.Item>
+          <q.Actions><q.Submit /></q.Actions>
+        </Questionnaire>
+      </template>,
+    )
+    const q = new QuestionnaireHarness('q')
+    assert.strictEqual(q.input()!.value, 'Pair with the team', 'it shows @value')
+    assert
+      .dom(q.input())
+      .hasAttribute('name', 'approach', 'a value with text is the answer from the first render')
+    assert.strictEqual(q.status(), 'answered')
+
+    await q.choose('incremental')
+    assert.dom(q.input()).doesNotHaveAttribute('name', 'a fixed answer takes over')
+    assert.strictEqual(q.input()!.value, 'Pair with the team', 'its text stays')
+
+    await q.fillIn('Ship It')
+    assert.deepEqual(state.changes, ['Ship It'], '@onValueChange hears the typing')
+    assert.strictEqual(q.input()!.value, 'ship it', 'it shows what the host passed back')
+    assert.false(q.isChecked('incremental'), 'the new value is the answer again')
+    assert.dom(q.input()).hasAttribute('name', 'approach')
+    await q.submit()
+    assert.deepEqual(submissions.last, { approach: ['ship it'] })
+
+    state.text = ''
+    await settled()
+    assert.dom(q.input()).doesNotHaveAttribute('name', 'the host clearing it clears the answer')
+    assert.strictEqual(q.status(), 'unanswered')
+
+    state.text = 'Later'
+    await settled()
+    assert.strictEqual(q.input()!.value, 'Later')
+    assert
+      .dom(q.input())
+      .hasAttribute('name', 'approach', 'the host filling it makes it the answer')
+    assert.strictEqual(q.status(), 'answered')
+    await a11yAudit()
+  })
+
+  test('an active item that no longer applies gives way to the first, and @onItemChange hears it', async function (assert) {
+    class State {
+      @tracked item = 'unknown'
+      @tracked twoApplies = true
+      changes: string[] = []
+      setItem = (item: string) => {
+        this.changes.push(item)
+        this.item = item
+      }
+      get items(): QuestionnaireItemDefinition[] {
+        return [{ name: 'one' }, { name: 'two', disabled: !this.twoApplies }]
+      }
+    }
+    const state = new State()
+    await render(
+      <template>
+        <Questionnaire
+          @name="q"
+          @items={{state.items}}
+          @item={{state.item}}
+          @onItemChange={{state.setItem}}
+          as |q|
+        >
+          <q.Item @name="one" as |i|>
+            <i.Title>One</i.Title>
+            <i.Choices><i.Choice @value="a">A</i.Choice></i.Choices>
+          </q.Item>
+          <q.Item @name="two" @disabled={{if state.twoApplies false true}} as |i|>
+            <i.Title>Two</i.Title>
+            <i.Choices><i.Choice @value="b">B</i.Choice></i.Choices>
+          </q.Item>
+          <q.Actions><q.Previous /><q.Skip /><q.Next /><q.Submit /></q.Actions>
+        </Questionnaire>
+      </template>,
+    )
+    const q = new QuestionnaireHarness('q')
+    assert.deepEqual(state.changes, ['one'], 'an unknown @item: the host is told of the first')
+    assert.strictEqual(state.item, 'one')
+    assert.strictEqual(q.activeItem, 'one')
+    assert.true(q.isItemFocused('one'), 'and it takes focus, as upstream moves to it')
+
+    await q.choose('a')
+    await q.next()
+    assert.strictEqual(state.item, 'two')
+    state.twoApplies = false
+    await settled()
+    assert.deepEqual(state.changes, ['one', 'two', 'one'], 'the active item disabled: the first')
+    assert.strictEqual(q.activeItem, 'one')
+    await a11yAudit()
+  })
+
+  test('without @items or @defaultItem, it starts on the first rendered item without a word', async function (assert) {
+    const changes: string[] = []
+    const onItemChange = (item: string) => changes.push(item)
+    await render(
+      <template>
+        <Questionnaire @name="q" @onItemChange={{onItemChange}} as |q|>
+          <q.Item @name="first" as |i|>
+            <i.Title>First</i.Title>
+            <i.Choices><i.Choice @value="a">A</i.Choice></i.Choices>
+          </q.Item>
+          <q.Item @name="second" as |i|>
+            <i.Title>Second</i.Title>
+            <i.Choices><i.Choice @value="b">B</i.Choice></i.Choices>
+          </q.Item>
+          <q.Actions><q.Skip /><q.Next /></q.Actions>
+        </Questionnaire>
+      </template>,
+    )
+    const q = new QuestionnaireHarness('q')
+    assert.strictEqual(q.activeItem, 'first')
+    assert.deepEqual(changes, [], 'nothing to tell: it named no item of its own')
+    assert.false(q.isFocused(), 'and it takes no focus')
+    await q.skip()
+    assert.deepEqual(changes, ['second'])
+    await a11yAudit()
+  })
+
+  test('in development, it warns where @items and the rendered items part, once each', async function (assert) {
+    const warnings: string[] = []
+    const original = console.warn
+    console.warn = (...args: unknown[]) => warnings.push(args.map(String).join(' '))
+    const items: QuestionnaireItemDefinition[] = [
+      { name: 'one', choices: [{ value: 'a' }, { value: 'b' }] },
+      { name: 'two', choices: [{ value: 'x' }, { value: 'x' }] },
+      { name: 'two' },
+      { name: 'ghost' },
+    ]
+    try {
+      await render(
+        <template>
+          <Questionnaire
+            @name="q"
+            @items={{items}}
+            @defaultItem="missing"
+            @shortcuts="letters"
+            as |q|
+          >
+            <q.Item @name="one" @required={{true}} as |i|>
+              <i.Title>One</i.Title>
+              <i.Choices>
+                <i.Choice @value="b">B</i.Choice>
+                <i.Choice @value="a">A</i.Choice>
+              </i.Choices>
+            </q.Item>
+            <q.Item @name="two" as |i|>
+              <i.Title>Two</i.Title>
+              <i.Choices>
+                <i.Choice @value="x">X</i.Choice>
+                <i.Choice @value="y">Y</i.Choice>
+              </i.Choices>
+            </q.Item>
+            <q.Item @name="extra" as |i|>
+              <i.Title>Extra</i.Title>
+              <i.Choices><i.Choice @value="z">Z</i.Choice></i.Choices>
+            </q.Item>
+          </Questionnaire>
+        </template>,
+      )
+      await new QuestionnaireHarness('q').choose('b')
+    } finally {
+      console.warn = original
+    }
+    const logged = (text: string) => warnings.filter(warning => warning.includes(text)).length
+    for (const text of [
+      'Item name "two" is defined more than once.',
+      'Choice value "x" is defined more than once in item "two".',
+      '@defaultItem "missing" does not identify an enabled item.',
+      'Item "one" has different required values in @items and its Item.',
+      'Choice order for item "one" differs between @items and the rendered Choices.',
+      'Rendered choice "y" in item "two" is missing from @items and will not receive a shortcut.',
+      'Item "ghost" is defined in @items but has no rendered Item.',
+      'Rendered item "extra" is missing from @items and is excluded from the questionnaire.',
+    ]) {
+      assert.strictEqual(logged(text), 1, text)
+    }
+    assert.true(
+      warnings.every(warning => warning.includes('[Questionnaire]')),
+      'each says where it comes from',
+    )
+    await a11yAudit()
+  })
+
+  test('@as on every part, and the navigation buttons as modifiers on your own elements', async function (assert) {
+    const items = [{ name: 'one' }, { name: 'two' }]
+    await render(
+      <template>
+        <Questionnaire @name="q" @as="form" @items={{items}} as |q|>
+          <q.Item @name="one" @as="section" role="group" aria-labelledby="as-one" as |i|>
+            <i.Title @as="h3" id="as-one">One</i.Title>
+            <i.Choices @as="section">
+              <i.Choice @value="a" @as="label">A</i.Choice>
+            </i.Choices>
+          </q.Item>
+          <q.Item @name="two" as |i|>
+            <i.Title>Two</i.Title>
+            <i.Choices>
+              <i.Choice @value="b">B</i.Choice>
+              <i.Input @as="textarea" aria-label="Another answer" />
+            </i.Choices>
+          </q.Item>
+          <q.Actions>
+            <q.Previous @as="span" />
+            <button type="button" {{q.skip size="sm"}}>Not now</button>
+            <button type="button" {{q.next variant="secondary" size="sm"}}>Continue</button>
+            <q.Submit />
+          </q.Actions>
+        </Questionnaire>
+      </template>,
+    )
+    const q = new QuestionnaireHarness('q')
+    assert.dom(q.form).hasTagName('form')
+    assert.dom(q.item('one')).hasTagName('section').hasClass('jn-questionnaire-item')
+    assert.dom(q.item('one').querySelector('[data-test-jn-part="title"]')).hasTagName('h3')
+    assert.dom(q.item('one').querySelector('[data-test-jn-part="choices"]')).hasTagName('section')
+    assert.dom(q.input('two')).hasTagName('textarea').hasClass('jn-questionnaire-input')
+
+    const previous = q.button('previous')
+    assert
+      .dom(previous)
+      .hasTagName('span')
+      .hasClass('jn-button')
+      .hasClass('jn-questionnaire-previous')
+    assert.false(q.canGoBack, 'hidden on the first item, as a button would be')
+
+    const next = q.button('next')
+    assert
+      .dom(next)
+      .hasClass('jn-button')
+      .hasClass('jn-button-variant-secondary')
+      .hasClass('jn-button-size-sm')
+      .hasClass('jn-questionnaire-next')
+      .hasAttribute('data-slot', 'questionnaire-next')
+      .hasAttribute('data-variant', 'secondary')
+      .hasAttribute('data-size', 'sm')
+      .hasAttribute('aria-keyshortcuts', 'Enter')
+      .hasText('Continue')
+    assert
+      .dom(q.button('skip'))
+      .hasClass('jn-button-variant-outline', 'Skip keeps its default variant')
+      .hasClass('jn-questionnaire-skip')
+
+    await q.choose('a')
+    await click(next)
+    assert.strictEqual(q.activeItem, 'two', 'the modifier moves on, as Next does')
+    assert.false(q.isShown('next'), 'and hides on the last item')
+    assert.true(q.canGoBack)
+    await click(previous)
+    assert.strictEqual(q.activeItem, 'one')
+    await click(q.button('skip'))
+    assert.strictEqual(q.activeItem, 'two', 'skipped')
+    assert.strictEqual(q.status('one'), 'skipped')
+
+    await q.fillIn('Something else')
+    assert.strictEqual(q.status('two'), 'answered', 'the textarea is the answer')
+    assert.dom(q.input('two')).hasAttribute('name', 'two')
+    await a11yAudit()
+  })
 })

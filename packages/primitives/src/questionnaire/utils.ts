@@ -105,3 +105,128 @@ export function shortcutsByChoiceValue(
   }
   return map
 }
+
+/**
+ * A rendered item, as the development warnings compare it with `@items`: its name, its own
+ * `@disabled` and `@required`, and its fixed answers in document order, each with its own
+ * `@disabled` (upstream's `ItemRegistration`).
+ */
+export interface QuestionnaireItemRegistration {
+  name: string
+  disabled: boolean
+  required: boolean
+  choices: readonly { value: string; disabled: boolean }[]
+}
+
+/**
+ * What is wrong with `@items` and `@defaultItem` on their own: upstream's
+ * `getCollectionDefinitionWarnings`, its messages in Joinery's terms.
+ */
+export function collectionDefinitionWarnings(
+  items: readonly QuestionnaireItemDefinition[],
+  defaultItem: string | undefined,
+): string[] {
+  const warnings: string[] = []
+  const names = new Set<string>()
+  for (const item of items) {
+    if (names.has(item.name)) warnings.push(`Item name "${item.name}" is defined more than once.`)
+    names.add(item.name)
+    const values = new Set<string>()
+    for (const choice of item.choices ?? []) {
+      if (values.has(choice.value)) {
+        warnings.push(
+          `Choice value "${choice.value}" is defined more than once in item "${item.name}".`,
+        )
+      }
+      values.add(choice.value)
+    }
+  }
+  if (defaultItem) {
+    const named = items.find(item => item.name === defaultItem)
+    if (!named || named.disabled) {
+      warnings.push(
+        `@defaultItem "${defaultItem}" does not identify an enabled item. The first enabled item will be used instead.`,
+      )
+    }
+  }
+  return warnings
+}
+
+/**
+ * Where the rendered items and choices part from `@items`: upstream's
+ * `getCollectionRegistrationWarnings`, its messages in Joinery's terms.
+ */
+export function collectionRegistrationWarnings(
+  items: readonly QuestionnaireItemDefinition[],
+  registrations: readonly QuestionnaireItemRegistration[],
+  shortcuts: QuestionnaireShortcutMode | null,
+): string[] {
+  const warnings: string[] = []
+  const rendered = new Map(registrations.map(registration => [registration.name, registration]))
+  for (const definition of items) {
+    const registration = rendered.get(definition.name)
+    if (!registration) {
+      if (!definition.disabled) {
+        warnings.push(`Item "${definition.name}" is defined in @items but has no rendered Item.`)
+      }
+      continue
+    }
+    if (registration.disabled !== Boolean(definition.disabled)) {
+      warnings.push(
+        `Item "${definition.name}" has different disabled values in @items and its Item.`,
+      )
+    }
+    if (registration.required !== Boolean(definition.required)) {
+      warnings.push(
+        `Item "${definition.name}" has different required values in @items and its Item.`,
+      )
+    }
+    const defined = definition.choices ?? []
+    const definedByValue = new Map(defined.map(choice => [choice.value, choice]))
+    const renderedByValue = new Map(registration.choices.map(choice => [choice.value, choice]))
+    for (const choice of defined) {
+      const renderedChoice = renderedByValue.get(choice.value)
+      if (!renderedChoice) {
+        warnings.push(
+          `Choice "${choice.value}" is defined for item "${definition.name}" but has no rendered Choice.`,
+        )
+        continue
+      }
+      if (renderedChoice.disabled !== Boolean(choice.disabled)) {
+        warnings.push(
+          `Choice "${choice.value}" in item "${definition.name}" has different disabled values in @items and its Choice.`,
+        )
+      }
+    }
+    if (!shortcuts) continue
+    for (const choice of registration.choices) {
+      if (!definedByValue.has(choice.value)) {
+        warnings.push(
+          `Rendered choice "${choice.value}" in item "${definition.name}" is missing from @items and will not receive a shortcut.`,
+        )
+      }
+    }
+    const definedOrder = defined.filter(choice => !choice.disabled).map(choice => choice.value)
+    const renderedOrder = registration.choices
+      .filter(choice => !choice.disabled)
+      .map(choice => choice.value)
+    const sameChoices =
+      definedOrder.length > 0 &&
+      definedOrder.length === renderedOrder.length &&
+      definedOrder.every(value => renderedOrder.includes(value))
+    if (sameChoices && definedOrder.some((value, index) => value !== renderedOrder[index])) {
+      warnings.push(
+        `Choice order for item "${definition.name}" differs between @items and the rendered Choices.`,
+      )
+    }
+  }
+  const defined = new Set(items.map(item => item.name))
+  for (const registration of registrations) {
+    if (!registration.disabled && !defined.has(registration.name)) {
+      warnings.push(
+        `Rendered item "${registration.name}" is missing from @items and is excluded from the questionnaire.`,
+      )
+    }
+  }
+  return warnings
+}

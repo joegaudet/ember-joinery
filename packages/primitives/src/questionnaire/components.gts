@@ -188,6 +188,8 @@ export interface QuestionnaireChoiceSignature {
     disabled?: boolean
     /** Called as it is checked or unchecked, with the `change` event. */
     onCheckedChange?: (checked: boolean, event: Event) => void
+    /** The tag to render instead of `label`. */
+    as?: TagName
     /** @internal Bound by the item. */
     item: QuestionnaireItemState
   }
@@ -215,7 +217,7 @@ export class QuestionnaireChoice extends Component<QuestionnaireChoiceSignature>
   })
 
   <template>
-    <label ...attributes {{this.choice.choice}}>
+    <As @as={{@as}} @tag="label" ...attributes {{this.choice.choice}}>
       {{yield
         (hash
           Input=(component QuestionnaireChoiceInput choice=this.choice)
@@ -227,7 +229,7 @@ export class QuestionnaireChoice extends Component<QuestionnaireChoiceSignature>
           choice=this.choice
         )
       }}
-    </label>
+    </As>
   </template>
 }
 
@@ -241,6 +243,8 @@ export interface QuestionnaireInputSignature {
     onValueChange?: (value: string) => void
     /** Whether it can't be typed in. */
     disabled?: boolean
+    /** The tag to render instead of `input`, such as a custom element. */
+    as?: TagName
     /** @internal Bound by the item. */
     item: QuestionnaireItemState
   }
@@ -261,16 +265,31 @@ export class QuestionnaireInput extends Component<QuestionnaireInputSignature> {
   })
 
   <template>
-    <input
-      type="text"
-      ...attributes
-      {{this.answer.input}}
-      {{nativeValue
-        value=@value
-        defaultValue=@defaultValue
-        onValueChange=this.answer.onValueChange
-      }}
-    />
+    {{! Through As only for another tag: on 6.12, As is a classic component, with a block. }}
+    {{#if @as}}
+      <As
+        @as={{@as}}
+        @tag="input"
+        ...attributes
+        {{this.answer.input}}
+        {{nativeValue
+          value=@value
+          defaultValue=@defaultValue
+          onValueChange=this.answer.onValueChange
+        }}
+      />
+    {{else}}
+      <input
+        type="text"
+        ...attributes
+        {{this.answer.input}}
+        {{nativeValue
+          value=@value
+          defaultValue=@defaultValue
+          onValueChange=this.answer.onValueChange
+        }}
+      />
+    {{/if}}
   </template>
 }
 
@@ -318,6 +337,8 @@ export interface QuestionnaireItemSignature {
     invalid?: boolean
     /** Called with its status whenever that changes. */
     onStatusChange?: (status: QuestionnaireItemStatus) => void
+    /** The tag to render instead of `fieldset`. */
+    as?: TagName
     /** @internal Bound by the questionnaire. */
     questionnaire: QuestionnaireState
   }
@@ -340,7 +361,7 @@ export class QuestionnaireItem extends Component<QuestionnaireItemSignature> {
   })
 
   <template>
-    <fieldset ...attributes {{this.item.item}}>
+    <As @as={{@as}} @tag="fieldset" ...attributes {{this.item.item}}>
       {{yield
         (hash
           Title=(component QuestionnaireTitle part=this.item.title)
@@ -358,7 +379,7 @@ export class QuestionnaireItem extends Component<QuestionnaireItemSignature> {
           item=this.item
         )
       }}
-    </fieldset>
+    </As>
   </template>
 }
 
@@ -368,6 +389,8 @@ export interface QuestionnaireNavigationSignature {
     label?: string
     /** Whether it is disabled (it never disables itself). */
     disabled?: boolean
+    /** The tag to render instead of `button`. */
+    as?: TagName
     /** @internal Bound by the questionnaire. */
     part: PartModifier<HTMLButtonElement, { disabled?: boolean }>
     /** @internal Bound by the questionnaire. */
@@ -383,9 +406,9 @@ export interface QuestionnaireNavigationSignature {
  * Skip on an optional one, Next before the last, Submit on the last.
  */
 export const QuestionnaireNavigation: TOC<QuestionnaireNavigationSignature> = <template>
-  <button type="button" ...attributes {{@part disabled=@disabled}}>
+  <As @as={{@as}} @tag="button" type="button" ...attributes {{@part disabled=@disabled}}>
     {{~#if (has-block)}}{{yield}}{{else}}{{if @label @label @defaultLabel}}{{/if~}}
-  </button>
+  </As>
 </template>
 
 /** What `<Questionnaire>` yields. */
@@ -440,6 +463,8 @@ export interface QuestionnaireSignature {
     onReset?: (event: Event) => void
     /** Its name, for `QuestionnaireHarness` (`data-test-jn-name`). */
     name?: string
+    /** The tag to render instead of `form`. Keep it a form: it submits and resets as one. */
+    as?: TagName
   }
   Blocks: { default: [QuestionnaireYield] }
   Element: HTMLFormElement
@@ -476,7 +501,9 @@ export class Questionnaire extends Component<QuestionnaireSignature> {
   })
 
   <template>
-    <form
+    <As
+      @as={{@as}}
+      @tag="form"
       data-test-jn="questionnaire"
       data-test-jn-name={{@name}}
       ...attributes
@@ -503,6 +530,6 @@ export class Questionnaire extends Component<QuestionnaireSignature> {
           questionnaire=this.questionnaire
         )
       }}
-    </form>
+    </As>
   </template>
 }

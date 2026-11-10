@@ -1,3 +1,4 @@
+import { uniqueId } from '@ember/helper'
 import { Card, Questionnaire, toast } from '@ember-joinery/ember'
 
 const items = [
@@ -26,7 +27,8 @@ function handleSubmit(event: SubmitEvent) {
 <template>
   {{!-- Upstream renders each title as a CardTitle (render={<CardTitle />}); here the card's
       title takes the questionnaire title's part with {{i.title}}, and the item names itself
-      by its id, as upstream's aria-labelledby does. --}}
+      by its id, as upstream's aria-labelledby does. Each id is unique to this instance, as
+      upstream's React.useId() is. --}}
   <Questionnaire
     class="mx-auto max-w-md"
     @defaultItem="task"
@@ -35,70 +37,72 @@ function handleSubmit(event: SubmitEvent) {
     @onSubmit={{handleSubmit}}
     as |q|
   >
-    <Card as |c|>
-      <q.Item aria-labelledby="questionnaire-card-task" @name="task" @required={{true}} as |i|>
-        <c.Header>
-          <c.Title id="questionnaire-card-task" {{i.title}}>
-            What should the agent work on?
-          </c.Title>
-          <c.Description {{i.description}}>
-            Choose the task that should be handled next.
-          </c.Description>
-          <c.Action>
-            <q.Progress />
-          </c.Action>
-        </c.Header>
-        <c.Content>
-          <i.Choices>
-            <i.Choice @value="fix">
-              Fix the failing tests
-            </i.Choice>
-            <i.Choice @value="refactor">
-              Refactor the data layer
-            </i.Choice>
-            <i.Choice @value="docs">
-              Update the integration guide
-            </i.Choice>
-          </i.Choices>
-          <i.Error />
-        </c.Content>
-      </q.Item>
+    {{#let (uniqueId) (uniqueId) as |taskTitleId outputTitleId|}}
+      <Card as |c|>
+        <q.Item aria-labelledby={{taskTitleId}} @name="task" @required={{true}} as |i|>
+          <c.Header>
+            <c.Title id={{taskTitleId}} {{i.title}}>
+              What should the agent work on?
+            </c.Title>
+            <c.Description {{i.description}}>
+              Choose the task that should be handled next.
+            </c.Description>
+            <c.Action>
+              <q.Progress />
+            </c.Action>
+          </c.Header>
+          <c.Content>
+            <i.Choices>
+              <i.Choice @value="fix">
+                Fix the failing tests
+              </i.Choice>
+              <i.Choice @value="refactor">
+                Refactor the data layer
+              </i.Choice>
+              <i.Choice @value="docs">
+                Update the integration guide
+              </i.Choice>
+            </i.Choices>
+            <i.Error />
+          </c.Content>
+        </q.Item>
 
-      <q.Item aria-labelledby="questionnaire-card-output" @name="output" @required={{true}} as |i|>
-        <c.Header>
-          <c.Title id="questionnaire-card-output" {{i.title}}>
-            What should the final handoff include?
-          </c.Title>
-          <c.Description {{i.description}}>
-            Pick the level of detail needed for review.
-          </c.Description>
-          <c.Action>
-            <q.Progress />
-          </c.Action>
-        </c.Header>
-        <c.Content>
-          <i.Choices>
-            <i.Choice @value="summary">
-              Summary only
-            </i.Choice>
-            <i.Choice @value="files">
-              Summary and changed files
-            </i.Choice>
-            <i.Choice @value="review">
-              Full review handoff
-            </i.Choice>
-          </i.Choices>
-          <i.Error />
-        </c.Content>
-      </q.Item>
+        <q.Item aria-labelledby={{outputTitleId}} @name="output" @required={{true}} as |i|>
+          <c.Header>
+            <c.Title id={{outputTitleId}} {{i.title}}>
+              What should the final handoff include?
+            </c.Title>
+            <c.Description {{i.description}}>
+              Pick the level of detail needed for review.
+            </c.Description>
+            <c.Action>
+              <q.Progress />
+            </c.Action>
+          </c.Header>
+          <c.Content>
+            <i.Choices>
+              <i.Choice @value="summary">
+                Summary only
+              </i.Choice>
+              <i.Choice @value="files">
+                Summary and changed files
+              </i.Choice>
+              <i.Choice @value="review">
+                Full review handoff
+              </i.Choice>
+            </i.Choices>
+            <i.Error />
+          </c.Content>
+        </q.Item>
 
-      <c.Footer>
-        <q.Actions class="w-full">
-          <q.Previous />
-          <q.Next>Next</q.Next>
-          <q.Submit>Create task</q.Submit>
-        </q.Actions>
-      </c.Footer>
-    </Card>
+        <c.Footer>
+          <q.Actions class="w-full">
+            <q.Previous />
+            <q.Next>Next</q.Next>
+            <q.Submit>Create task</q.Submit>
+          </q.Actions>
+        </c.Footer>
+      </Card>
+    {{/let}}
   </Questionnaire>
 </template>

@@ -251,7 +251,9 @@ Each item and answer lists the keys it answers to in `aria-keyshortcuts`.
 
 The behaviour comes from the primitives' [Questionnaire](/primitives/questionnaire.md); the
 styled parts take the same arguments, and the navigation buttons also take Button's `@size` and
-`@variant`. `q.Actions` is a styled-only layout helper.
+`@variant`. `q.Actions` is a styled-only layout helper. Every part takes `@as`, the tag to render
+instead of its own (upstream's `render`), and the parts you'd put on your own element have a
+modifier too.
 
 ### Questionnaire
 
@@ -268,33 +270,45 @@ A native `<form>` (with `novalidate`), so answers are read with `FormData`.
 | `@onSubmit`     | `(event: SubmitEvent) => void`  |           | Called when every item is valid and the form submits            |
 | `@onReset`      | `(event: Event) => void`        |           | Called on a reset, before the answers go back to their defaults |
 | `@name`         | `string`                        |           | Its name, for `QuestionnaireHarness`                            |
+| `@as`           | `string`                        | `form`    | The tag to render. Keep it a form: it submits and resets as one |
 
-It yields `Progress`, `Item`, `Actions`, `Previous`, `Skip`, `Next`, `Submit`, the `actions`
-modifier, and `activeItem`, `current`, `total`, `first` and `last`. The form has `data-current`,
-`data-total`, `data-first`, `data-last` and `data-shortcuts`.
+It yields `Progress`, `Item`, `Actions`, `Previous`, `Skip`, `Next`, `Submit`, the `actions`,
+`previous`, `skip`, `next` and `submit` modifiers, and `activeItem`, `current`, `total`, `first`
+and `last`. The form has `data-current`, `data-total`, `data-first`, `data-last` and
+`data-shortcuts`.
+
+Where `@item` (or `@defaultItem`) names an item it doesn't step through, an unknown one or one
+that is now disabled, it moves to the first and calls `@onItemChange` with it, as upstream does,
+so a host that controls `@item` follows. In development it also warns, as upstream does, where
+`@items` and the rendered items part: a name defined twice, an unknown `@defaultItem`, an item or
+a choice on one side only, and choices whose shortcuts won't match.
 
 ### Progress
 
 A `div` with `role="progressbar"`, `aria-valuenow` and the rest, live (`aria-live="polite"`), in
 small muted figures. It reads `Question 2 of 3`; a block replaces what it shows, and gets
-`current`, `total`, `first` and `last`. `@label` names it (default `Questionnaire progress`) and
-`@formatValue` writes its words (`(current, total) => string`).
+`current`, `total`, `first` and `last`. `@label` names it (default `Questionnaire progress`),
+`@formatValue` writes its words (`(current, total) => string`) and `@as` changes its tag.
 
 ### Item
 
-| Argument          | Type                                        | Default | What it does                                                       |
-| ----------------- | ------------------------------------------- | ------- | ------------------------------------------------------------------ |
-| `@name`           | `string`                                    |         | Its answers' name in the form, and the item's in `@items`, `@item` |
-| `@required`       | `boolean`                                   | `false` | Whether it must be answered; it can't be skipped                   |
-| `@multiple`       | `boolean`                                   | `false` | Whether it takes several fixed answers (checkboxes)                |
-| `@disabled`       | `boolean`                                   | `false` | Whether it doesn't apply: passed over and not submitted            |
-| `@invalid`        | `boolean`                                   | `false` | Whether your own validation found it invalid                       |
-| `@onStatusChange` | `(status: QuestionnaireItemStatus) => void` |         | Called as it becomes `unanswered`, `answered` or `skipped`         |
+| Argument          | Type                                        | Default    | What it does                                                       |
+| ----------------- | ------------------------------------------- | ---------- | ------------------------------------------------------------------ |
+| `@name`           | `string`                                    |            | Its answers' name in the form, and the item's in `@items`, `@item` |
+| `@required`       | `boolean`                                   | `false`    | Whether it must be answered; it can't be skipped                   |
+| `@multiple`       | `boolean`                                   | `false`    | Whether it takes several fixed answers (checkboxes)                |
+| `@disabled`       | `boolean`                                   | `false`    | Whether it doesn't apply: passed over and not submitted            |
+| `@invalid`        | `boolean`                                   | `false`    | Whether your own validation found it invalid                       |
+| `@onStatusChange` | `(status: QuestionnaireItemStatus) => void` |            | Called as it becomes `unanswered`, `answered` or `skipped`         |
+| `@as`             | `string`                                    | `fieldset` | The tag to render                                                  |
 
 A `fieldset`, hidden and inert unless active, with `data-active`, `data-status`, `data-required`,
 `data-multiple`, `data-invalid` and `data-disabled`. It yields `Title`, `Description`,
 `Choices`, `Choice`, `ChoiceDescription`, `Input` and `Error`, the `title` and `description`
 modifiers for your own elements, and `name`, `status`, `isActive` and `isInvalid`.
+
+`Title` (a `legend`), `Description` (a `p`) and `Choices` (a `div`) take `@as`, the tag to
+render instead.
 
 An optional item that is unanswered isn't valid either: it is left by answering it or skipping
 it, so its error says `Choose an answer or skip this question.`
@@ -311,28 +325,35 @@ block is its text; `i.ChoiceDescription` is a second, muted line.
 | `@defaultChecked`  | `boolean`                                  | Whether it starts checked                    |
 | `@disabled`        | `boolean`                                  | Whether it can't be chosen                   |
 | `@onCheckedChange` | `(checked: boolean, event: Event) => void` | Called as it changes (upstream's `onChange`) |
+| `@as`              | `string`                                   | The tag to render. Default `label`           |
 
 It has `data-checked` or `data-unchecked`, `data-type`, `data-shortcut` and `data-invalid`.
 
 ### Input
 
 A text `<input>` for another answer: `@value`, `@defaultValue`, `@onValueChange` and `@disabled`,
-and a `type` attribute for another kind of text. It is the item's answer while it has text and
-was the last answer given: only then does it have the item's `name` and belong to the form.
+a `type` attribute for another kind of text, and `@as` for another tag (a custom element of
+yours). Pass `@value` with `@onValueChange` to control its text. It is the item's answer while
+it has text and was the last answer given: only then does it have the item's `name` and belong
+to the form.
 
 ### Error
 
 A `p`, hidden until the item is invalid, then an alert the item's `aria-describedby` names. Its
 text is the block, else `@message`, else `Choose an answer to continue.` (or, for an optional
-item, `Choose an answer or skip this question.`).
+item, `Choose an answer or skip this question.`). `@as` changes its tag.
 
 ### Previous, Skip, Next and Submit
 
 Buttons that look like Buttons (`@variant`, default `outline` for Previous and Skip and
 `default` for Next and Submit; `@size`, default `default`), each shown only where it applies and
 hidden and inert otherwise. `@disabled` disables one; `@label` or a block replaces its text
-(default `Previous`, `Skip`, `Next`, `Submit`). Each has `data-status` (the active item's),
-`data-visible` or `data-hidden`, and Next and Submit `aria-keyshortcuts="Enter"`.
+(default `Previous`, `Skip`, `Next`, `Submit`), and `@as` its tag. Each has `data-status` (the
+active item's), `data-visible` or `data-hidden`, and Next and Submit `aria-keyshortcuts="Enter"`.
+
+To make your own element or component one of them, with its look and behaviour, use the
+questionnaire's `previous`, `skip`, `next` or `submit` modifier, which takes `disabled`,
+`variant` and `size`: `<LinkTo {{q.previous}}>`, `<span {{q.next variant="secondary"}}>`.
 
 ### Data attributes
 

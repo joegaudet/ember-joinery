@@ -158,6 +158,8 @@ export interface QuestionnaireChoiceSignature {
      * Calling `preventDefault()` on the event keeps the questionnaire from taking the change.
      */
     onCheckedChange?: (checked: boolean, event: Event) => void
+    /** The tag to render instead of `label`. */
+    as?: TagName
     /** @internal Bound by the item. */
     item: QuestionnaireItemState
   }
@@ -183,7 +185,9 @@ class QuestionnaireChoice extends Component<QuestionnaireChoiceSignature> {
   })
 
   <template>
-    <label
+    <As
+      @as={{@as}}
+      @tag="label"
       class="jn-questionnaire-choice group/questionnaire-choice"
       data-slot="questionnaire-choice"
       ...attributes
@@ -220,7 +224,7 @@ class QuestionnaireChoice extends Component<QuestionnaireChoiceSignature> {
         data-slot="questionnaire-choice-shortcut"
         {{this.choice.shortcutKey}}
       >{{this.choice.shortcut}}</span>
-    </label>
+    </As>
   </template>
 }
 
@@ -234,6 +238,8 @@ export interface QuestionnaireInputSignature {
     onValueChange?: (value: string) => void
     /** Whether it can't be typed in. */
     disabled?: boolean
+    /** The tag to render instead of `input` (inside its wrapper), such as a custom element. */
+    as?: TagName
     /** @internal Bound by the item. */
     item: QuestionnaireItemState
   }
@@ -243,7 +249,8 @@ export interface QuestionnaireInputSignature {
 /**
  * A freeform answer, yielded as `i.Input`: a text field beside the fixed answers, for another
  * answer. Name it with `aria-label` or a visible label: a placeholder is not a label. A class
- * or attribute you give it goes on the `<input>`, inside its wrapper, as upstream's does.
+ * or attribute you give it goes on the `<input>`, inside its wrapper, as upstream's does, and
+ * so does `@as`.
  */
 class QuestionnaireInput extends Component<QuestionnaireInputSignature> {
   answer = new QuestionnaireInputState(this.args.item, {
@@ -258,18 +265,35 @@ class QuestionnaireInput extends Component<QuestionnaireInputSignature> {
       class="jn-questionnaire-input-wrapper group/questionnaire-input"
       data-slot="questionnaire-input-wrapper"
     >
-      <input
-        type="text"
-        class="jn-questionnaire-input"
-        data-slot="questionnaire-input"
-        ...attributes
-        {{this.answer.input}}
-        {{nativeValue
-          value=@value
-          defaultValue=@defaultValue
-          onValueChange=this.answer.onValueChange
-        }}
-      />
+      {{! Through As only for another tag: on 6.12, As is a classic component, with a block. }}
+      {{#if @as}}
+        <As
+          @as={{@as}}
+          @tag="input"
+          class="jn-questionnaire-input"
+          data-slot="questionnaire-input"
+          ...attributes
+          {{this.answer.input}}
+          {{nativeValue
+            value=@value
+            defaultValue=@defaultValue
+            onValueChange=this.answer.onValueChange
+          }}
+        />
+      {{else}}
+        <input
+          type="text"
+          class="jn-questionnaire-input"
+          data-slot="questionnaire-input"
+          ...attributes
+          {{this.answer.input}}
+          {{nativeValue
+            value=@value
+            defaultValue=@defaultValue
+            onValueChange=this.answer.onValueChange
+          }}
+        />
+      {{/if}}
     </div>
   </template>
 }
@@ -368,6 +392,8 @@ export interface QuestionnaireItemSignature {
     invalid?: boolean
     /** Called with its status whenever that changes. */
     onStatusChange?: (status: QuestionnaireItemStatus) => void
+    /** The tag to render instead of `fieldset`. */
+    as?: TagName
     /** @internal Bound by the questionnaire. */
     questionnaire: QuestionnaireState
   }
@@ -404,7 +430,9 @@ class QuestionnaireItem extends Component<QuestionnaireItemSignature> {
   )
 
   <template>
-    <fieldset
+    <As
+      @as={{@as}}
+      @tag="fieldset"
       class="jn-questionnaire-item"
       data-slot="questionnaire-item"
       ...attributes
@@ -427,7 +455,7 @@ class QuestionnaireItem extends Component<QuestionnaireItemSignature> {
           isInvalid=this.item.invalid
         )
       }}
-    </fieldset>
+    </As>
   </template>
 }
 
@@ -443,24 +471,73 @@ const ACTIONS = {
  */
 export const QuestionnaireActions: TOC<StaticPartSignature> = staticPart(ACTIONS)
 
+/** Which navigation button: Previous, Skip, Next or Submit. */
+type NavigationKind = 'previous' | 'skip' | 'next' | 'submit'
+
+/** Each navigation button's default text and Button variant, as upstream's. */
+const NAVIGATION: Record<NavigationKind, { label: string; variant: ButtonVariant }> = {
+  previous: { label: 'Previous', variant: 'outline' },
+  skip: { label: 'Skip', variant: 'outline' },
+  next: { label: 'Next', variant: 'default' },
+  submit: { label: 'Submit', variant: 'default' },
+}
+
+/** What a navigation button takes, as arguments or as its modifier's named arguments. */
+export interface QuestionnaireNavigationOptions {
+  /** Whether it is disabled (it never disables itself). */
+  disabled?: boolean
+  /** The Button variant it looks like. Default `outline` for Previous and Skip, `default` for Next and Submit. */
+  variant?: ButtonVariant
+  /** The Button size it is. Default `default`. */
+  size?: ButtonSize
+}
+
+/** A navigation button's Button variant and size, from its options, else its defaults. */
+function navigationLook(
+  kind: NavigationKind,
+  { variant, size }: QuestionnaireNavigationOptions,
+): { variant: ButtonVariant; size: ButtonSize } {
+  return { variant: variant ?? NAVIGATION[kind].variant, size: size ?? 'default' }
+}
+
+/** A navigation button's classes: a Button's, then its own, as upstream's `cn()` has them. */
+function navigationClasses(kind: NavigationKind, options: QuestionnaireNavigationOptions): string {
+  return `${buttonClasses(navigationLook(kind, options))} jn-questionnaire-${kind}`
+}
+
+/**
+ * What a navigation button's modifier renders on your own element: the classes and data
+ * attributes the component renders, and the headless part's behaviour.
+ */
+function navigationSpec(
+  questionnaire: QuestionnaireState,
+  kind: NavigationKind,
+  options: QuestionnaireNavigationOptions,
+): PartSpec<HTMLElement> {
+  const spec = questionnaire.navigationSpec(kind, { disabled: options.disabled })
+  const look = navigationLook(kind, options)
+  return {
+    ...(spec as PartSpec<HTMLElement>),
+    class: navigationClasses(kind, options),
+    attributes: {
+      ...spec.attributes,
+      'data-slot': `questionnaire-${kind}`,
+      'data-size': look.size,
+      'data-variant': look.variant,
+    },
+  }
+}
+
 export interface QuestionnaireNavigationSignature {
-  Args: {
+  Args: QuestionnaireNavigationOptions & {
     /** Its text. Default `Previous`, `Skip`, `Next` or `Submit`. A block replaces it. */
     label?: string
-    /** Whether it is disabled (it never disables itself). */
-    disabled?: boolean
-    /** The Button variant it looks like. Default `outline` for Previous and Skip, `default` for Next and Submit. */
-    variant?: ButtonVariant
-    /** The Button size it is. Default `default`. */
-    size?: ButtonSize
+    /** The tag to render instead of `button`. */
+    as?: TagName
     /** @internal Bound by the questionnaire. */
     part: PartModifier<HTMLButtonElement, { disabled?: boolean }>
     /** @internal Bound by the questionnaire. */
-    kind: 'previous' | 'skip' | 'next' | 'submit'
-    /** @internal Bound by the questionnaire. */
-    defaultLabel: string
-    /** @internal Bound by the questionnaire. */
-    defaultVariant: ButtonVariant
+    kind: NavigationKind
   }
   Blocks: { default: [] }
   Element: HTMLButtonElement
@@ -473,30 +550,32 @@ export interface QuestionnaireNavigationSignature {
  * before the last, Submit on the last.
  */
 class QuestionnaireNavigation extends Component<QuestionnaireNavigationSignature> {
-  get variant(): ButtonVariant {
-    return this.args.variant ?? this.args.defaultVariant
-  }
-
-  get size(): ButtonSize {
-    return this.args.size ?? 'default'
+  get look(): { variant: ButtonVariant; size: ButtonSize } {
+    return navigationLook(this.args.kind, this.args)
   }
 
   get classes(): string {
-    return `${buttonClasses({ variant: this.variant, size: this.size })} jn-questionnaire-${this.args.kind}`
+    return navigationClasses(this.args.kind, this.args)
+  }
+
+  get defaultLabel(): string {
+    return NAVIGATION[this.args.kind].label
   }
 
   <template>
-    <button
+    <As
+      @as={{@as}}
+      @tag="button"
       type="button"
       class={{this.classes}}
       data-slot="questionnaire-{{@kind}}"
-      data-size={{this.size}}
-      data-variant={{this.variant}}
+      data-size={{this.look.size}}
+      data-variant={{this.look.variant}}
       ...attributes
       {{@part disabled=@disabled}}
     >
-      {{~#if (has-block)}}{{yield}}{{else}}{{if @label @label @defaultLabel}}{{/if~}}
-    </button>
+      {{~#if (has-block)}}{{yield}}{{else}}{{if @label @label this.defaultLabel}}{{/if~}}
+    </As>
   </template>
 }
 
@@ -509,27 +588,26 @@ export interface QuestionnaireYield {
   /** Lays out the navigation buttons. */
   Actions: typeof QuestionnaireActions
   /** Goes back an item. */
-  Previous: WithBoundArgs<
-    typeof QuestionnaireNavigation,
-    'part' | 'kind' | 'defaultLabel' | 'defaultVariant'
-  >
+  Previous: WithBoundArgs<typeof QuestionnaireNavigation, 'part' | 'kind'>
   /** Skips an optional item. */
-  Skip: WithBoundArgs<
-    typeof QuestionnaireNavigation,
-    'part' | 'kind' | 'defaultLabel' | 'defaultVariant'
-  >
+  Skip: WithBoundArgs<typeof QuestionnaireNavigation, 'part' | 'kind'>
   /** Moves on, once the item is valid. */
-  Next: WithBoundArgs<
-    typeof QuestionnaireNavigation,
-    'part' | 'kind' | 'defaultLabel' | 'defaultVariant'
-  >
+  Next: WithBoundArgs<typeof QuestionnaireNavigation, 'part' | 'kind'>
   /** Submits the form, on the last item. */
-  Submit: WithBoundArgs<
-    typeof QuestionnaireNavigation,
-    'part' | 'kind' | 'defaultLabel' | 'defaultVariant'
-  >
+  Submit: WithBoundArgs<typeof QuestionnaireNavigation, 'part' | 'kind'>
   /** Makes your own element the actions' grid. */
   actions: PartModifier
+  /**
+   * Makes your own element or component Previous, with its look and behaviour:
+   * `<LinkTo {{q.previous}}>`. It takes `disabled`, `variant` and `size`, as `q.Previous` does.
+   */
+  previous: PartModifier<HTMLElement, QuestionnaireNavigationOptions>
+  /** Makes your own element Skip: `<span {{q.skip}}>`. */
+  skip: PartModifier<HTMLElement, QuestionnaireNavigationOptions>
+  /** Makes your own element Next: `<span {{q.next variant="secondary"}}>`. */
+  next: PartModifier<HTMLElement, QuestionnaireNavigationOptions>
+  /** Makes your own element Submit. It submits the form, so put it on a submit button. */
+  submit: PartModifier<HTMLElement, QuestionnaireNavigationOptions>
   /** The active item's name. */
   activeItem: string | null
   /** The active item's position, from 1. */
@@ -567,6 +645,8 @@ export interface QuestionnaireSignature {
     onReset?: (event: Event) => void
     /** Its name, for `QuestionnaireHarness` (`data-test-jn-name`). */
     name?: string
+    /** The tag to render instead of `form`. Keep it a form: it submits and resets as one. */
+    as?: TagName
   }
   Blocks: { default: [QuestionnaireYield] }
   Element: HTMLFormElement
@@ -609,8 +689,22 @@ export default class Questionnaire extends Component<QuestionnaireSignature> {
 
   actions: PartModifier = staticPartModifier(ACTIONS)
 
+  /** The navigation buttons as modifiers, for your own element. */
+  previous = this.#navigation('previous')
+  skip = this.#navigation('skip')
+  next = this.#navigation('next')
+  submit = this.#navigation('submit')
+
+  #navigation(kind: NavigationKind): PartModifier<HTMLElement, QuestionnaireNavigationOptions> {
+    return part<HTMLElement, QuestionnaireNavigationOptions>(named =>
+      navigationSpec(this.questionnaire, kind, named),
+    )
+  }
+
   <template>
-    <form
+    <As
+      @as={{@as}}
+      @tag="form"
       class="jn-questionnaire"
       data-slot="questionnaire"
       data-test-jn="questionnaire"
@@ -625,34 +719,16 @@ export default class Questionnaire extends Component<QuestionnaireSignature> {
           Item=(component QuestionnaireItem questionnaire=this.questionnaire)
           Actions=QuestionnaireActions
           Previous=(component
-            QuestionnaireNavigation
-            part=this.questionnaire.previous
-            kind="previous"
-            defaultLabel="Previous"
-            defaultVariant="outline"
+            QuestionnaireNavigation part=this.questionnaire.previous kind="previous"
           )
-          Skip=(component
-            QuestionnaireNavigation
-            part=this.questionnaire.skip
-            kind="skip"
-            defaultLabel="Skip"
-            defaultVariant="outline"
-          )
-          Next=(component
-            QuestionnaireNavigation
-            part=this.questionnaire.next
-            kind="next"
-            defaultLabel="Next"
-            defaultVariant="default"
-          )
-          Submit=(component
-            QuestionnaireNavigation
-            part=this.questionnaire.submit
-            kind="submit"
-            defaultLabel="Submit"
-            defaultVariant="default"
-          )
+          Skip=(component QuestionnaireNavigation part=this.questionnaire.skip kind="skip")
+          Next=(component QuestionnaireNavigation part=this.questionnaire.next kind="next")
+          Submit=(component QuestionnaireNavigation part=this.questionnaire.submit kind="submit")
           actions=this.actions
+          previous=this.previous
+          skip=this.skip
+          next=this.next
+          submit=this.submit
           activeItem=this.questionnaire.activeName
           current=this.questionnaire.current
           total=this.questionnaire.total
@@ -660,6 +736,6 @@ export default class Questionnaire extends Component<QuestionnaireSignature> {
           last=this.questionnaire.last
         )
       }}
-    </form>
+    </As>
   </template>
 }

@@ -45,7 +45,7 @@ const isoRange = (range: unknown) => {
 
 const MARCH_4 = new Date(2026, 2, 4)
 
-module('Integration | components | date-picker', function (hooks) {
+module('Integration | components | power-date-picker', function (hooks) {
   setupRenderingTest(hooks)
 
   test('it renders an outlined Button showing the date, or the placeholder', async function (assert) {

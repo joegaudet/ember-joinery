@@ -303,7 +303,10 @@ small muted figures. It reads `Question 2 of 3`; a block replaces what it shows,
 | `@as`             | `string`                                    | `fieldset` | The tag to render                                                  |
 
 A `fieldset`, hidden and inert unless active, with `data-active`, `data-status`, `data-required`,
-`data-multiple`, `data-invalid` and `data-disabled`. It yields `Title`, `Description`,
+`data-multiple`, `data-invalid` and `data-disabled`. Its `aria-describedby` names its
+descriptions, then its error while it is invalid, and its `aria-keyshortcuts` lists the keys it
+answers to; both keep your own (`<q.Item aria-describedby="hint">`), as upstream merges them: your
+ids after the item's, your keys before its own. It yields `Title`, `Description`,
 `Choices`, `Choice`, `ChoiceDescription`, `Input` and `Error`, the `title` and `description`
 modifiers for your own elements, and `name`, `status`, `isActive` and `isInvalid`.
 

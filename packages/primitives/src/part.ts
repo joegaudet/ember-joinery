@@ -4,6 +4,23 @@ import { registerDestructor } from '@ember/destroyable'
 /** An attribute's value in a part: `true` sets it empty, and `false`, `null` or `undefined` leave it off. */
 export type AttributeValue = string | number | boolean | null | undefined
 
+/**
+ * An attribute that merges with the element's own value instead of replacing it: given that
+ * value (`null` for none), it returns the part's. A list of ids or keys (`aria-describedby`,
+ * `aria-keyshortcuts`) keeps the caller's with `own => joinTokens(own, mine)`, and it is asked
+ * again whenever either side changes.
+ */
+export type AttributeMerge = (own: string | null) => AttributeValue
+
+/**
+ * Joins space-separated token lists, leaving out empty ones and repeats: what an
+ * `AttributeMerge` returns for an id or key list. `undefined` when nothing is left.
+ */
+export function joinTokens(...lists: (string | null | undefined)[]): string | undefined {
+  const all = new Set(lists.flatMap(list => (list ? list.split(/\s+/).filter(Boolean) : [])))
+  return [...all].join(' ') || undefined
+}
+
 /** Event listeners by event name, as `{ click: …, keydown: … }`. */
 export type PartListeners = {
   [K in keyof HTMLElementEventMap]?: (event: HTMLElementEventMap[K]) => void
@@ -15,9 +32,10 @@ export interface PartSpec<E extends Element = HTMLElement> {
    * The part's attributes: its ARIA (`aria-expanded`, `aria-controls`), `role`, `id`,
    * `data-state`, `data-slot` and `data-test-jn-part`. They are kept up to date, they win over
    * the element's own (even when those re-render), and an attribute the part stops setting goes
-   * back to the element's own value. Put classes in `class`, not here.
+   * back to the element's own value. Put classes in `class`, not here. A function instead of a
+   * value merges with the element's own (see `AttributeMerge`).
    */
-  attributes?: Readonly<Record<string, AttributeValue>>
+  attributes?: Readonly<Record<string, AttributeValue | AttributeMerge>>
   /**
    * Classes to add, space separated. They go next to the element's own, and stay when the
    * element's own `class` re-renders.
@@ -169,6 +187,8 @@ export function part<
     #attributes = new Map<string, string>()
     /** For each attribute the part sets, the element's own value (`null` for none), kept current. */
     #originals = new Map<string, string | null>()
+    /** The attributes the part merges with the element's own, and how. */
+    #merges = new Map<string, AttributeMerge>()
     /** The classes the part wants now. */
     #wanted = new Set<string>()
     /** The classes the part added (the element didn't have them of its own). */
@@ -204,21 +224,47 @@ export function part<
             this.#addClasses(element)
             continue
           }
-          const value = this.#attributes.get(name)
-          if (value === undefined) continue
+          const merge = this.#merges.get(name)
+          if (!merge && !this.#attributes.has(name)) continue
           const own = element.getAttribute(name)
+          if (merge) {
+            // The element's own changed: merge the part's with it again.
+            const merged = normalize(merge(own))
+            if (merged === null) {
+              this.#attributes.delete(name)
+              this.#originals.delete(name)
+              continue
+            }
+            this.#attributes.set(name, merged)
+          }
+          const value = this.#attributes.get(name)!
           this.#originals.set(name, own)
           if (own !== value) element.setAttribute(name, value)
         }
       })
     }
 
-    #applyAttributes(element: E, attributes: Readonly<Record<string, AttributeValue>>): void {
+    #applyAttributes(
+      element: E,
+      attributes: Readonly<Record<string, AttributeValue | AttributeMerge>>,
+    ): void {
       const wanted = new Map<string, string>()
+      const merges = new Map<string, AttributeMerge>()
       for (const [name, value] of Object.entries(attributes)) {
-        const normalized = normalize(value)
+        let resolved: AttributeValue
+        if (typeof value === 'function') {
+          merges.set(name, value)
+          const own = this.#originals.has(name)
+            ? (this.#originals.get(name) ?? null)
+            : element.getAttribute(name)
+          resolved = value(own)
+        } else {
+          resolved = value
+        }
+        const normalized = normalize(resolved)
         if (normalized !== null) wanted.set(name, normalized)
       }
+      this.#merges = merges
 
       for (const [name, original] of this.#originals) {
         if (wanted.has(name)) continue
@@ -288,6 +334,7 @@ export function part<
       this.#handlers.clear()
       this.#attributes.clear()
       this.#originals.clear()
+      this.#merges.clear()
       this.#wanted.clear()
       this.#classes.clear()
     }

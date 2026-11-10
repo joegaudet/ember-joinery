@@ -46,7 +46,8 @@ const items = [
 - **The items** are `<fieldset>`s, hidden and inert unless active. `@items` names them in order
   (with `required`, `disabled` and each item's `choices`, for the shortcuts), so progress and the
   buttons are right from the first render; without it, the rendered items are stepped through in
-  document order. Moving to an item focuses it.
+  document order. Moving to an item focuses it. An item's `aria-describedby` and
+  `aria-keyshortcuts` keep the ones you give it, merged with its own.
 - **An item's status** is `unanswered`, `answered` or `skipped`. A required item must be
   answered; an optional one must be answered or skipped. `@onStatusChange` hears each change.
 - **A choice** is a `<label>` around its `<input>` (a radio, or a checkbox in a `@multiple`

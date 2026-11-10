@@ -5,7 +5,7 @@ import { on } from '@ember/modifier'
 import { LinkTo } from '@ember/routing'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
-import { part } from '@ember-joinery/primitives/part'
+import { joinTokens, part } from '@ember-joinery/primitives/part'
 import {
   FxPrimitiveDisclosure,
   FxPrimitiveDisclosureHarness,
@@ -195,6 +195,46 @@ module('Integration | primitives | part', function (hooks) {
     state.titled = false
     await settled()
     assert.dom('span').hasAttribute('title', 'Third')
+    await a11yAudit()
+  })
+
+  test("an attribute given as a function merges with the element's own", async function (assert) {
+    class State {
+      @tracked mine: string | undefined = 'part-hint'
+      @tracked own = 'caller-hint'
+    }
+    const state = new State()
+    const described = part(() => {
+      const mine = state.mine
+      return { attributes: { 'aria-describedby': own => joinTokens(mine, own) } }
+    })
+
+    await render(
+      <template>
+        <p id="part-hint">From the part.</p>
+        <p id="caller-hint">From the caller.</p>
+        <p id="other-hint">From the caller, later.</p>
+        <span aria-describedby={{state.own}} {{described}}>Text</span>
+      </template>,
+    )
+    assert.dom('span').hasAttribute('aria-describedby', 'part-hint caller-hint', 'both, in order')
+
+    state.own = 'other-hint'
+    await settled()
+    assert
+      .dom('span')
+      .hasAttribute('aria-describedby', 'part-hint other-hint', "the element's own re-rendered")
+
+    state.mine = undefined
+    await settled()
+    assert.dom('span').hasAttribute('aria-describedby', 'other-hint', 'only the own left')
+
+    state.mine = 'part-hint other-hint'
+    await settled()
+    assert
+      .dom('span')
+      .hasAttribute('aria-describedby', 'part-hint other-hint', 'joinTokens drops repeats')
+    assert.strictEqual(joinTokens(null, undefined, ''), undefined, 'nothing at all: no attribute')
     await a11yAudit()
   })
 

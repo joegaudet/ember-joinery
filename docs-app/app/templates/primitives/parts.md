@@ -67,6 +67,10 @@ How a part meets the element's own attributes:
 
 - The part's attributes win, except `class`, which adds to the element's classes. An attribute
   the part stops setting goes back to the element's own value.
+- An attribute given as a function merges with the element's own instead:
+  `'aria-describedby': own => joinTokens(this.descriptionId, own)` keeps the caller's ids after
+  the part's, and is asked again whenever either changes. `joinTokens()`, from the same module,
+  joins space-separated lists without repeats (`undefined` when nothing is left).
 - Both hold when the element's own attributes re-render. LinkTo re-renders its `class` (for
   `active`) on every route change, and `title={{this.title}}` changes with its value: the part
   puts its own classes and attributes back, and keeps the element's new value for when it

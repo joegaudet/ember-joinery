@@ -12,7 +12,7 @@ import Modifier from 'ember-modifier'
 import { ControllableState } from '../controllable-state.ts'
 import { getDirection } from '../direction.gts'
 import { idFor } from '../id.ts'
-import { part, type PartModifier, type PartSpec } from '../part.ts'
+import { joinTokens, part, type PartModifier, type PartSpec } from '../part.ts'
 import {
   answerKeyShortcuts,
   byDocumentOrder,
@@ -1030,15 +1030,21 @@ export class QuestionnaireItemState {
     )
   }
 
-  /** What the fieldset renders: hidden and inert unless active, and its state. */
+  /**
+   * What the fieldset renders: hidden and inert unless active, and its state. A caller's own
+   * `aria-describedby` and `aria-keyshortcuts` are kept, as upstream merges them: the item's
+   * descriptions and errors come before the caller's ids, and the caller's keys before its own.
+   */
   itemSpec(): PartSpec<HTMLFieldSetElement> {
     const active = this.isActive
     const invalid = this.invalid
+    const describedBy = this.describedBy
+    const keyShortcuts = this.keyShortcuts
     return {
       attributes: {
-        'aria-describedby': this.describedBy,
+        'aria-describedby': own => joinTokens(describedBy, own),
         'aria-invalid': invalid ? 'true' : undefined,
-        'aria-keyshortcuts': this.keyShortcuts,
+        'aria-keyshortcuts': own => joinTokens(own, keyShortcuts),
         disabled: this.disabled,
         hidden: !active,
         inert: !active,

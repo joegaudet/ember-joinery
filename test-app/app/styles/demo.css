@@ -1,0 +1,33 @@
+/*
+ * The live demo's layout. Its pages are the guide's blocks, which lay themselves out with
+ * Tailwind's utilities, as upstream's do, so this compiles those utilities from the demo's own
+ * files (`source(none)` turns the scan of everything else off). This app is the test suite too,
+ * so nothing here reaches past the demo's root (`[data-jn-demo]`): the utilities are scoped to
+ * it, and Tailwind's theme is a reference (`theme(reference)`), which each utility reads with
+ * its value as the fallback, so `:root` gets none of its variables. A component a test renders
+ * outside the demo looks as it does in an app without Tailwind. There is no preflight, and the
+ * utilities sit in `@layer utilities`, above Joinery's, so a class on a component overrides its
+ * style, as in the guide. `tailwind.css` maps the theme's tokens, as in a Tailwind app.
+ */
+@import 'tailwindcss/theme.css' layer(theme) theme(reference);
+@import '@ember-joinery/ember/tailwind.css';
+
+@layer utilities {
+  @scope ([data-jn-demo]) {
+    @tailwind utilities source(none);
+  }
+}
+
+/*
+ * Tailwind's spacing step, for the demo alone: the dashboard counts its `--sidebar-width` and
+ * `--header-height` in it (`calc(var(--spacing) * 72)`), and Joinery's menus slide in by it, as
+ * in a Tailwind app.
+ */
+@layer theme {
+  [data-jn-demo] {
+    --spacing: 0.25rem;
+  }
+}
+
+@source '../components/demo';
+@source '../templates';

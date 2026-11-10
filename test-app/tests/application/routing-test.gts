@@ -33,6 +33,8 @@ module('Application | test-support | setupRouting', function (hooks) {
 
   test('a rootURL', async function (assert) {
     const router = setupRouting(this.owner, function () {}, { rootURL: '/the-root/' })
+    // The app's own application template is the live demo, which links to the demo's routes.
+    this.owner.register('template:application', <template>{{outlet}}</template>)
     await visit('/')
     assert.strictEqual(router.rootURL, '/the-root/')
     assert.strictEqual(router.urlFor('index'), '/the-root/')
@@ -55,6 +57,8 @@ module('Rendering | test-support | setupRouting', function (hooks) {
     const router = setupRouting(this.owner, function () {
       this.route('shop')
     })
+    // The app's own application template is the live demo, which links to the demo's routes.
+    this.owner.register('template:application', <template>{{outlet}}</template>)
     await router.transitionTo('/shop?color=red')
     await render(
       <template>

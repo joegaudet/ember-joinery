@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import { extensions, classicEmberSupport, ember } from '@embroider/vite'
 import { babel } from '@rollup/plugin-babel'
+import tailwindcss from '@tailwindcss/vite'
 
 /**
  * `JOINERY_ANCHOR_FALLBACK=1` at build time forces the Floating UI fallback in place of CSS
@@ -33,6 +34,8 @@ export default defineConfig({
   plugins: [
     classicEmberSupport(),
     ember(),
+    // The demo's layout utilities (app/styles/demo.css), scoped to the demo.
+    tailwindcss(),
     babel({ babelHelpers: 'runtime', extensions }),
     anchorFallback(),
   ],

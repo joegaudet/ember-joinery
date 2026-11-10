@@ -6,4 +6,8 @@ export default class Router extends EmberRouter {
   rootURL = config.rootURL
 }
 
-Router.map(function () {})
+// The live demo: the dashboard at /, and the settings dialog over it at /settings. The route
+// is `preferences`, so a test's own `settings` routes don't pick up its template and controller.
+Router.map(function () {
+  this.route('preferences', { path: '/settings' })
+})

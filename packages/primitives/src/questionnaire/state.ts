@@ -588,8 +588,8 @@ export class QuestionnaireItemState {
   readonly #owner: object
   readonly #options: QuestionnaireItemOptions
   readonly #answers = new Set<QuestionnaireAnswerState>()
-  readonly #descriptions = new Set<string>()
-  readonly #errors = new Set<string>()
+  readonly #descriptions = new Set<Element>()
+  readonly #errors = new Set<Element>()
   /** Bumped after answers, descriptions or errors come or go. */
   @tracked revision = 0
   #bumping = false
@@ -628,16 +628,26 @@ export class QuestionnaireItemState {
     this.error = part(() => this.errorSpec())
   }
 
-  /** Registers the element's id (giving it one when it has none) for `aria-describedby`. */
-  #describe(element: Element, ids: Set<string>): () => void {
-    if (!element.id) element.id = idFor(element, 'questionnaire')
-    const id = element.id
-    ids.add(id)
+  /**
+   * Registers an element for `aria-describedby`. Its id is read once the render is over, so an
+   * id another part gives it (a dialog's description has the dialog's) is the one named; one
+   * with none then gets an id of its own.
+   */
+  #describe(element: Element, elements: Set<Element>): () => void {
+    elements.add(element)
     this.bump()
     return () => {
-      ids.delete(id)
+      elements.delete(element)
       this.bump()
     }
+  }
+
+  /** The ids of the registered elements, giving one with none an id of its own. */
+  #ids(elements: Set<Element>): string[] {
+    return [...elements].map(element => {
+      if (!element.id) element.id = idFor(element, 'questionnaire')
+      return element.id
+    })
   }
 
   get name(): string {
@@ -881,7 +891,7 @@ export class QuestionnaireItemState {
   /** The ids its `aria-describedby` names: its descriptions, and its errors while invalid. */
   get describedBy(): string | undefined {
     void this.revision
-    const ids = [...this.#descriptions, ...(this.invalid ? this.#errors : [])]
+    const ids = [...this.#ids(this.#descriptions), ...(this.invalid ? this.#ids(this.#errors) : [])]
     return ids.join(' ') || undefined
   }
 

@@ -30,6 +30,18 @@ export type QuestionnaireButton = 'previous' | 'skip' | 'next' | 'submit'
 export class QuestionnaireHarness extends Harness {
   static override component = 'questionnaire'
 
+  /**
+   * This questionnaire's parts named `part`, in document order: those inside its form and not
+   * in a questionnaire nested in it. Unlike `parts()`, it counts parts inside another
+   * component (a Card, a Dialog's header) that the questionnaire's parts sit in.
+   */
+  own<E extends HTMLElement = HTMLElement>(part: string): E[] {
+    const form = this.element
+    return [...form.querySelectorAll<E>(`[data-test-jn-part="${part}"]`)].filter(
+      element => element.closest('[data-test-jn="questionnaire"]') === form,
+    )
+  }
+
   /** The `<form>`. */
   get form(): HTMLFormElement {
     return this.element as HTMLFormElement
@@ -42,18 +54,22 @@ export class QuestionnaireHarness extends Harness {
 
   /** Each item's `@name`, in document order. */
   get itemNames(): string[] {
-    return this.values('item')
+    return this.own('item').map(item => item.getAttribute('data-test-jn-value')!)
   }
 
   /** An item's `<fieldset>`: the active one by default. Throws when there is none. */
   item(name: string | null = this.activeItem): HTMLFieldSetElement {
     if (name === null) throw new Error(`Joinery harness: ${this} shows no item`)
-    return this.part<HTMLFieldSetElement>('item', name)
+    const item = this.own<HTMLFieldSetElement>('item').find(
+      element => element.getAttribute('data-test-jn-value') === name,
+    )
+    if (!item) throw new Error(`Joinery harness: no item "${name}" in ${this}`)
+    return item
   }
 
   /** The name of the item that shows, or `null`. */
   get activeItem(): string | null {
-    const active = this.parts('item').find(item => !item.hidden)
+    const active = this.own('item').find(item => !item.hidden)
     return active?.getAttribute('data-test-jn-value') ?? null
   }
 
@@ -100,7 +116,7 @@ export class QuestionnaireHarness extends Harness {
 
   #within(name: string | null, part: string): HTMLElement[] {
     const item = this.item(name)
-    return this.parts(part).filter(element => item.contains(element))
+    return this.own(part).filter(element => item.contains(element))
   }
 
   /** An item's question. */
@@ -179,7 +195,7 @@ export class QuestionnaireHarness extends Harness {
 
   /** The progress that shows (one may sit in each item, as in a card's header). */
   get progress(): HTMLElement {
-    const progress = this.parts('progress').find(shown)
+    const progress = this.own('progress').find(shown)
     if (!progress) throw new Error(`Joinery harness: ${this} shows no progress`)
     return progress
   }
@@ -201,12 +217,14 @@ export class QuestionnaireHarness extends Harness {
 
   /** A navigation button. */
   button(kind: QuestionnaireButton): HTMLButtonElement {
-    return this.part<HTMLButtonElement>(kind)
+    const button = this.own<HTMLButtonElement>(kind)[0]
+    if (!button) throw new Error(`Joinery harness: no "${kind}" button in ${this}`)
+    return button
   }
 
   /** Whether a navigation button shows (each shows only where it applies). */
   isShown(kind: QuestionnaireButton): boolean {
-    const button = this.queryPart<HTMLButtonElement>(kind)
+    const button = this.own<HTMLButtonElement>(kind)[0]
     return Boolean(button && shown(button))
   }
 

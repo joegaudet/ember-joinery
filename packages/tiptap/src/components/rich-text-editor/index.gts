@@ -71,7 +71,11 @@ export interface RichTextEditorSignature {
     describedBy?: string
     /** The toolbar's and the text styles' names, each with an English default. */
     labels?: Partial<RichTextLabels>
-    /** Called once with the Tiptap editor, when it is made, for anything the toolbar doesn't do. */
+    /**
+     * Called once with the Tiptap editor, when it is made (before it is mounted, as the component
+     * is constructed), for anything the toolbar doesn't do. Keep it; don't set tracked state the
+     * template has read in it.
+     */
     onCreate?: (editor: Editor) => void
     /** Its name, for `RichTextEditorHarness` (`data-test-jn-name`). */
     name?: string

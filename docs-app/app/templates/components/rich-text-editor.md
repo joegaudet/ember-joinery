@@ -89,7 +89,8 @@ to the document; Escape sends it back to the trigger.
 
 `@starterKit` takes StarterKit's options (`{ heading: { levels: [2, 3] }, link: false }`) and
 `@extensions` more Tiptap extensions, after StarterKit; both are read once, when the editor is
-made. `@onCreate` hands over the Tiptap editor, for commands the toolbar doesn't have.
+made. `@onCreate` hands over the Tiptap editor as the component is made, before it is mounted,
+for commands the toolbar doesn't have.
 
 ```gts
 import Highlight from '@tiptap/extension-highlight'

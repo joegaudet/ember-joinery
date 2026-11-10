@@ -19,6 +19,7 @@ overrides:
   '@ember-joinery/chart': 'workspace:*'
   '@ember-joinery/code-block': 'workspace:*'
   '@ember-joinery/ember': 'workspace:*'
+  '@ember-joinery/file-upload': 'workspace:*'
   '@ember-joinery/primitives': 'workspace:*'
   '@ember-joinery/test-support': 'workspace:*'
   # Kolay pins an older @glint/template; one copy keeps template types compatible.

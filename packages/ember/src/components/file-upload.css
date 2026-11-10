@@ -1,0 +1,70 @@
+/*
+ * The parts of @ember-joinery/file-upload, an opt-in add-on (on ember-file-upload) that nothing in
+ * @ember-joinery/ember imports. Its rules live here, as every add-on's do, so joinery.css styles
+ * it with nothing more to import; an app without the add-on never renders these classes.
+ *
+ * Joinery's own: shadcn/ui has no file upload, so nothing here is ported from upstream's style
+ * sheets. The parts borrow the nearest shadcn components instead, which keeps them in each style's
+ * look: the zone's content is Empty's header, media, title and description (their classes, from
+ * every style sheet), and each file is an outlined small Item, with Button and Progress. The zone
+ * is the box File Drop draws (a dashed --input border, --primary while files are dragged over it,
+ * Nova's focus ring while its input has focus), and the file's media is the Item's image box, on
+ * --muted, holding an image's preview or an icon for the file's kind.
+ */
+
+:where(.jn-file-upload) {
+  @apply flex w-full min-w-0 flex-col gap-3;
+}
+
+:where(.jn-file-upload-dropzone) {
+  @apply relative flex w-full flex-col rounded-lg border border-dashed border-input text-center text-sm text-balance transition-colors outline-none hover:bg-muted/50 has-[:focus-visible]:border-ring has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50 data-dragging:border-primary data-dragging:bg-primary/5 data-invalid:border-destructive data-invalid:has-[:focus-visible]:ring-destructive/20 dark:bg-input/30 dark:data-invalid:has-[:focus-visible]:ring-destructive/40;
+}
+
+:where(.jn-file-upload-dropzone[data-disabled]) {
+  @apply cursor-not-allowed opacity-50 hover:bg-transparent;
+}
+
+:where(.jn-file-upload-dropzone-label) {
+  @apply flex w-full cursor-pointer flex-col items-center justify-center p-6;
+}
+
+:where(.jn-file-upload-dropzone[data-disabled] .jn-file-upload-dropzone-label) {
+  @apply cursor-not-allowed;
+}
+
+:where(.jn-file-upload-input) {
+  @apply sr-only;
+}
+
+:where(.jn-file-upload-rejected) {
+  @apply -mt-3 px-6 pb-5 text-xs text-destructive;
+}
+
+:where(.jn-file-upload-file-media) {
+  @apply bg-muted text-muted-foreground group-data-[state=error]/item:bg-destructive/10 group-data-[state=error]/item:text-destructive [&_svg:not([class*='size-'])]:size-4;
+}
+
+:where(.jn-file-upload-file-content) {
+  @apply min-w-0;
+}
+
+:where(.jn-file-upload-file-title) {
+  @apply max-w-full;
+}
+
+:where(.jn-file-upload-file-name) {
+  @apply min-w-0 truncate;
+}
+
+:where(.jn-file-upload-file[data-state='error']) {
+  @apply border-destructive/30;
+}
+
+:where(.jn-file-upload-file[data-state='error'] .jn-file-upload-file-description) {
+  @apply text-destructive;
+}
+
+/* Progress fills from the inline start here: Joinery's own, so it needn't keep upstream's ltr fill. */
+:where(.jn-file-upload-progress) {
+  @apply w-full rtl:rotate-180;
+}

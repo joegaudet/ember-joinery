@@ -146,6 +146,11 @@ export interface ComboboxInputSignature {
     triggerLabel?: string
     /** What the clear button is called. Default `Clear`. */
     clearLabel?: string
+    /**
+     * Classes for the input group around the input, where upstream's `className` goes
+     * (`@groupClass="w-full"`); `class` goes on the `<input>`.
+     */
+    groupClass?: string
     /** @internal The primitive's parts, bound by the combobox. */
     Input: ComboboxPrimitiveBlockParams['Input']
     Trigger: ComboboxPrimitiveBlockParams['Trigger']
@@ -160,12 +165,12 @@ export interface ComboboxInputSignature {
 /**
  * The text input, upstream's `ComboboxInput`: an input group (Input Group's markup) around the
  * input, with the chevron button (`@showTrigger`) and the clear button (`@showClear`) at its
- * end. Attributes go on the `<input>`, as upstream's other props do (its `className` goes on the
- * group, but an Ember component has one `...attributes`).
+ * end. Attributes go on the `<input>`, as upstream's other props do. Its `className` goes on the
+ * group, but an Ember component has one `...attributes`: the group's classes are `@groupClass`.
  */
 const ComboboxInput: TOC<ComboboxInputSignature> = <template>
   <div
-    class="group/input-group jn-input-group jn-combobox-input"
+    class="group/input-group jn-input-group jn-combobox-input {{@groupClass}}"
     role="group"
     data-slot="input-group"
     data-test-jn-part="input-group"

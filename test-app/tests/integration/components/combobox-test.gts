@@ -84,6 +84,38 @@ module('Integration | components | combobox', function (hooks) {
     await a11yAudit()
   })
 
+  test('@groupClass goes on the group, where upstream’s className does; class on the input', async function (assert) {
+    await render(
+      <template>
+        <style>
+          .wide-group {
+            width: 300px;
+          }
+          .own-input {
+            letter-spacing: 2px;
+          }
+        </style>
+        <Combobox @name="framework" @items={{frameworks}} as |c|>
+          <c.Input @groupClass="wide-group" class="own-input" placeholder="Select a framework" />
+          <c.Content>
+            <c.List as |item|><c.Item @value={{item}}>{{item}}</c.Item></c.List>
+          </c.Content>
+        </Combobox>
+      </template>,
+    )
+    const combobox = new ComboboxHarness('framework')
+    const group = combobox.part('input-group')
+    assert.dom(group).hasClass('wide-group').hasClass('jn-combobox-input')
+    assert
+      .dom(combobox.input)
+      .hasClass('own-input')
+      .hasClass('jn-input')
+      .doesNotHaveClass('wide-group')
+    assert.strictEqual(getComputedStyle(group).width, '300px', 'it beats the group’s w-auto')
+    assert.strictEqual(getComputedStyle(combobox.input!).letterSpacing, '2px')
+    await a11yAudit()
+  })
+
   test('the popup and its items are styled, below the input, as wide as the group', async function (assert) {
     await render(
       <template>

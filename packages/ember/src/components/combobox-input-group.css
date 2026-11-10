@@ -7,6 +7,14 @@
  * Scoped to the combobox's group. The group's `w-full` is left out: upstream's ComboboxInput
  * gives it `w-auto` (combobox.css), which tailwind-merge puts in its place. The file sorts
  * before combobox.css, so that rule comes after these, as upstream's class order has it.
+ *
+ * Hand-off, for whichever of Combobox and Input Group integrates second: ComboboxInput then
+ * renders the real InputGroup and this file is deleted. Keep `w-auto` winning when you do.
+ * input-group.css has an unscoped `:where(.jn-input-group) { @apply … w-full … }`, and the
+ * build orders component CSS A–Z, so it comes after combobox.css and its `w-full` would beat
+ * the combobox's `w-auto`: every combobox would go full width. Skip the combobox's group in that
+ * rule (`:where(.jn-input-group:not(.jn-combobox-input))`, with a NOTE) or move the `w-auto`
+ * after it; combobox parity (combobox-demo and the rest) catches a miss.
  */
 
 /* data-slot="input-group" in InputGroup; keep on the element: group/input-group */

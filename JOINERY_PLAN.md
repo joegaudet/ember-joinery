@@ -588,8 +588,11 @@ workspace.
   inert, as a modal dialog does. Base UI's Combobox leaves its chevron, clear and chip remove
   buttons unnamed and gives its separator `role="separator"`, which a listbox may not hold;
   Joinery's name the buttons (an argument with an English default each) and hide the separator
-  from assistive technology. Upstream's examples leave their comboboxes unlabelled, so the
-  guide's add `aria-label`. The pixels are upstream's.
+  from assistive technology. Upstream's examples leave their comboboxes unlabelled. The
+  guide's Select examples add `aria-label` to the trigger. Most of its Combobox examples keep
+  upstream's markup, whose input its placeholder names; only `combobox-multiple`'s chips input
+  (which has no placeholder) and `combobox-popup`'s trigger (a combobox its text doesn't name)
+  add one. The pixels are upstream's.
 
 ## Next steps
 

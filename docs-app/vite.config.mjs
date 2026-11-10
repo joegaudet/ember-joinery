@@ -38,5 +38,14 @@ export default defineConfig({
   optimizeDeps: {
     // Kolay injects its virtual modules at runtime.
     exclude: ['kolay'],
+    // With Kolay left out of pre-bundling, so are its dependencies, and the dev server sends them
+    // to the browser as they are. Two in its markdown pipeline are CommonJS, which a browser can't
+    // import: `debug` (micromark's development build imports it) and `extend` (from unified).
+    // Without these lines every guide page fails to render under `pnpm guide:start`; builds,
+    // including the test builds, bundle them and never had the problem.
+    include: [
+      'kolay > remark-parse > mdast-util-from-markdown > micromark > debug',
+      'kolay > unified > extend',
+    ],
   },
 })

@@ -71,8 +71,7 @@ Use `@position` on `s.Content` to control alignment. When `@position="item-align
 the popup positions so the selected item appears over the trigger. When `@position="popper"`,
 the popup aligns to the trigger edge.
 
-Upstream's example, `select-align-item`, toggles between the two with a Switch in a Field, so it
-comes with Field. Both positions are tested in Joinery's own suite.
+<Example @name="select-align-item" @title="Align Item With Trigger" />
 
 ## Groups
 
@@ -104,7 +103,10 @@ Add the `data-invalid` attribute to the `Field` component and the `aria-invalid`
 </Field>
 ```
 
-Upstream's example, `select-invalid`, is a Field, so it comes with Field.
+<Example @name="select-invalid" @title="Invalid" />
+
+Upstream's `FieldLabel` names nothing; the example's names the trigger (`for` and the trigger's
+`id`), as a combobox must be named.
 
 ## RTL
 

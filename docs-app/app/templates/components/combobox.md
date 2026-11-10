@@ -189,8 +189,9 @@ Use `c.Group` and `c.Separator` to group items.
 
 ## Custom Items
 
-You can render a custom component inside `c.Item`. Upstream's example, `combobox-custom`,
-renders an Item in each, so it comes with Item.
+You can render a custom component inside `c.Item`.
+
+<Example @name="combobox-custom" @title="Custom Items" />
 
 ## Invalid
 
@@ -220,15 +221,18 @@ You can trigger the combobox from a button or any other component with the `trig
 
 ## Input Group
 
-You can add an addon to the combobox by putting an `InputGroupAddon` inside `c.Input`.
-Upstream's example, `combobox-input-group`, comes with Input Group.
+You can add an addon to the combobox by putting the `Addon` that `c.Input` yields (upstream's
+`InputGroupAddon`) inside it: `<c.Input as |g|><g.Addon>…</g.Addon></c.Input>`.
+
+<Example @name="combobox-input-group" @title="Input Group" />
 
 ## RTL
 
 Joinery's components take their direction from the nearest `dir` (see
 [Direction](/primitives/direction.md)): the chevron and the check marks move to the left, and
-the arrow keys between chips flip. Upstream's example, `combobox-rtl`, is in a Field, so it
-comes with Field.
+the arrow keys between chips flip.
+
+<Example @name="combobox-rtl" @title="RTL" @dir="rtl" @align="start" />
 
 ## API Reference
 

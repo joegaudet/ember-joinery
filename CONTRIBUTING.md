@@ -224,10 +224,12 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    variant (after upstream's `.style-<name>` wrapper), which `build-css.mjs` declares in every
    style's compile and which matches only in that style's: `@variant style-nova { @apply
 rounded-md; }`. Trace's rule for a trigger inside an overlay's root is one, with a test in
-   `scripts/build-css.test.mjs` that holds the copy to the sheets. So is a sheet's responsive
-   utility that an inline one would otherwise beat: upstream's Tailwind emits `sm:min-h-8` after
-   `min-h-11`, but here the sheet comes first and a media query adds no weight, so
-   Questionnaire's action row restates each sheet's `sm:min-h-*` after its inline rule.
+   `scripts/build-css.test.mjs` that holds the copy to the sheets, and Input Group's margin for a
+   button in an addon's overlay root another, with one in `scripts/input-group-css.test.mjs`
+   (see "Through an overlay's root" below). So is a sheet's responsive utility that an inline one
+   would otherwise beat: upstream's Tailwind emits `sm:min-h-8` after `min-h-11`, but here the
+   sheet comes first and a media query adds no weight, so Questionnaire's action row restates
+   each sheet's `sm:min-h-*` after its inline rule.
 
    The script reads one file, so where a part renders another upstream component
    (ItemSeparator and ButtonGroupSeparator render Separator), that component's inline
@@ -302,9 +304,9 @@ menus) render no element, so upstream's trigger is its parent's child, and a rul
 writes for that child (a Field's `*:w-full`, an Input Group addon's `has-[>button]` margin)
 reaches it. Joinery's root is an element with `display: contents` (its `data-test-jn` names
 it), which such a rule reaches instead, so restate the rule one root down, by hand, at its
-weight: `select.css` does for a Field's, and `input-group.css` for an addon's, each style's
-under the `style-<name>` variant `build-css.mjs` declares, with a test in
-`scripts/input-group-css.test.mjs` that holds the copy to the sheets.
+weight: `select.css` does for a Field's, `trace.css` for a trigger around a Trace's line, and
+`input-group.css` for an addon's, each style's utilities under its `style-<name>` variant (see
+"Porting a component", step 3), with a test that holds the copy to the sheets.
 
 **Your own element.** Every part takes `@as`, a tag (`<Button @as="a" href="/login">`), through
 `As`. For a component of the caller's own, such as `LinkTo`, there is a part modifier made with

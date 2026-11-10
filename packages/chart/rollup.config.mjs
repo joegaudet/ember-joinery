@@ -13,14 +13,16 @@ const RECHARTS_PORTS = [
   'cartesian-chart.gts',
   'nice-ticks.ts',
   'paths.ts',
+  'pie-chart.gts',
+  'polar.ts',
   'text-size.ts',
   'tick-interval.ts',
 ].map(file => fileURLToPath(new URL(`./src/-private/${file}`, import.meta.url)))
 
 const RECHARTS_NOTICE = `/*!
  * @ember-joinery/chart ports recharts 3.8.0 (https://github.com/recharts/recharts): its tick
- * selection, nice tick values, text measurement, cartesian layout, tooltip placement and
- * rectangle path.
+ * selection, nice tick values, text measurement, cartesian and pie layout, tooltip placement,
+ * and rectangle and sector paths.
  *
  * The MIT License (MIT). Copyright (c) 2015-present recharts
  *

@@ -58,9 +58,11 @@ export interface TooltipPayloadItem {
 
 /** One entry of a legend, as recharts hands it to the legend's content. */
 export interface LegendPayloadItem {
-  /** The series' `@name`, or its data key. */
+  /** The series' `@name`, or its data key; a pie's sector's name. */
   value: string
   dataKey?: DataKey
+  /** A pie's sector's row, which `nameKey` reads. */
+  payload?: Record<string, unknown>
   color?: string
   /** `none` hides the entry. */
   type?: string
@@ -136,23 +138,37 @@ export interface ChartLegendContentArgs {
   payload?: readonly LegendPayloadItem[]
   verticalAlign?: 'top' | 'middle' | 'bottom'
   config?: ChartConfig
+  /** The legend's own `@class`, as recharts hands its content the legend's `className`. */
+  class?: string
 }
 
 export type {
   AreaSignature,
   AxisArgs,
+  BarShapeSignature,
   BarSignature,
   CartesianGridSignature,
+  CellSignature,
   ChartLegendSignature,
   ChartTooltipSignature,
   DotArgs,
   DotOption,
+  LabelContentSignature,
   LabelListSignature,
   LabelPosition,
+  LabelSignature,
   LineSignature,
+  PieLabelProps,
+  PieLabelSignature,
+  PieShapeSignature,
+  PieSignature,
+  RectangleProps,
+  SectorProps,
   SeriesArgs,
   XAxisSignature,
   YAxisSignature,
 } from './-private/parts.gts'
+export type { PieChartParts, PieChartSignature } from './-private/pie-chart.gts'
+export type { PolarLabelPosition, PolarViewBox } from './-private/polar.ts'
 export type { CurveType } from './-private/paths.ts'
 export type { CartesianChartSignature, CartesianChartParts } from './-private/cartesian-chart.gts'

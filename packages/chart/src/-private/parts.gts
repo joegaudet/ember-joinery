@@ -1,7 +1,8 @@
 /*
- * The parts a cartesian chart yields: its axes, grid, series, tooltip and legend. Each renders
- * nothing where it is written; it registers with the chart, which reads its arguments and draws
- * it in recharts' layer order (grid, areas, bars, lines, axes, dots, labels).
+ * The parts a chart yields: a cartesian chart's axes, grid and series, a pie chart's pies, and
+ * every chart's tooltip and legend. Each renders nothing where it is written; it registers with
+ * the chart, which reads its arguments and draws it in recharts' layer order (grid, areas, bars,
+ * lines, axes, dots, labels; pies, then their labels).
  */
 import Component from '@glimmer/component'
 import { hash } from '@ember/helper'
@@ -10,6 +11,7 @@ import type { ComponentLike, WithBoundArgs } from '@glint/template'
 import { Registry } from './registry.ts'
 import type { CurveType } from './paths.ts'
 import type { DataKey, DomainBound } from './cartesian.ts'
+import type { PolarLabelPosition, PolarViewBox } from './polar.ts'
 import type { TickInterval } from './tick-interval.ts'
 import type {
   ChartLegendContentArgs,
@@ -26,7 +28,7 @@ export interface ChartRegistrar {
 
 /** Every part a chart reads. */
 export type ChartPart =
-  XAxis | YAxis | CartesianGrid | Area | Line | Bar | ChartTooltip | ChartLegend
+  XAxis | YAxis | CartesianGrid | Area | Line | Bar | Pie | ChartTooltip | ChartLegend
 
 interface PartArgs {
   /** The chart it belongs to; the chart's yield passes it. */
@@ -207,11 +209,20 @@ export interface SeriesParts {
   LabelList: WithBoundArgs<typeof LabelList, 'series'>
 }
 
+/** What a bar series yields: its label list, and a `Cell` per bar. */
+export interface BarParts extends SeriesParts {
+  /** One bar's attributes (its `@fill`), in the order of the rows: recharts' `Cell`. */
+  Cell: WithBoundArgs<typeof Cell, 'series'>
+}
+
 abstract class Series<S extends { Args: SeriesArgs }> extends Part<S> {
   readonly labels = new Registry<LabelList>()
+  readonly cells = new Registry<Cell>()
 
   registerLabel = (label: LabelList): void => this.labels.add(label)
   unregisterLabel = (label: LabelList): void => this.labels.remove(label)
+  registerCell = (cell: Cell): void => this.cells.add(cell)
+  unregisterCell = (cell: Cell): void => this.cells.remove(cell)
 }
 
 export interface AreaSignature {
@@ -268,6 +279,38 @@ export class Line extends Series<LineSignature> {
   <template>{{yield (hash LabelList=(component LabelList series=this))}}</template>
 }
 
+/**
+ * What a bar's `@shape` is handed as `@props`, as recharts hands its `shape` function: the
+ * bar's rectangle, its attributes, and the row it came from. Pass it on to `Rectangle`.
+ */
+export interface RectangleProps {
+  x: number
+  y: number
+  width: number
+  height: number
+  /** The corners' radius: one for all four, or `[topLeft, topRight, bottomRight, bottomLeft]`. */
+  radius?: number | readonly number[]
+  fill?: string
+  fillOpacity?: number | string
+  stroke?: string
+  strokeWidth?: number | string
+  /** The bar's row. */
+  index: number
+  /** Its value. */
+  value: unknown
+  /** The row it came from (with its `Cell`'s attributes over it). */
+  payload: Record<string, string | number | null | undefined>
+  dataKey: DataKey
+  /** Whether the tooltip shows its row. */
+  isActive: boolean
+}
+
+/** A bar's `@shape`: a component that draws each bar, handed its `@props` and `@index`. */
+export interface BarShapeSignature {
+  Args: { props: RectangleProps; index: number }
+  Element: Element
+}
+
 export interface BarSignature {
   Args: SeriesArgs & {
     fill?: string
@@ -279,21 +322,31 @@ export interface BarSignature {
     /** The bar's width, instead of an equal share of the band. */
     barSize?: number
     maxBarSize?: number
+    /**
+     * Draws each bar: a component handed `@props` (its rectangle, attributes and row) and
+     * `@index`, as recharts' `shape` function is. `Rectangle` draws one. Default a `Rectangle`.
+     */
+    shape?: ComponentLike<BarShapeSignature>
   }
-  Blocks: { default: [SeriesParts] }
+  Blocks: { default: [BarParts] }
 }
 
 /** A bar for each row: recharts' `Bar`. */
 export class Bar extends Series<BarSignature> {
   readonly kind = 'bar'
 
-  <template>{{yield (hash LabelList=(component LabelList series=this))}}</template>
+  <template>
+    {{yield (hash LabelList=(component LabelList series=this) Cell=(component Cell series=this))}}
+  </template>
 }
 
 // ---------------------------------------------------------------------------------------------
 // Labels
 
-/** Where a label sits against its point or bar. */
+/**
+ * Where a label sits against its point or bar, or (in a pie) its sector: `outside`, `center`,
+ * `centerTop`, `centerBottom`, or `middle` (the default), in the middle of the sector's ring.
+ */
 export type LabelPosition =
   | 'top'
   | 'bottom'
@@ -305,6 +358,7 @@ export type LabelPosition =
   | 'insideRight'
   | 'insideTop'
   | 'insideBottom'
+  | PolarLabelPosition
 
 export interface LabelListSignature {
   Args: {
@@ -312,13 +366,19 @@ export interface LabelListSignature {
     series: { registerLabel(label: LabelList): void; unregisterLabel(label: LabelList): void }
     /** The key of each label's value in the row. Default: the series' own value. */
     dataKey?: DataKey
-    /** Where each label sits. Default `top` for a line or area, `center` for a bar. */
+    /**
+     * Where each label sits. Default `top` for a line or area, `center` for a bar, `middle`
+     * for a pie's sector.
+     */
     position?: LabelPosition
     /** The space between a label and its point. Default 5. */
     offset?: number
     /** Formats each label's value. */
     formatter?: (value: never) => unknown
+    /** The labels' fill. Default the bar's or sector's own fill (its row's or `Cell`'s), else grey. */
     fill?: string
+    fillOpacity?: number | string
+    stroke?: string
     fontSize?: number | string
     /** Classes for each label's `<text>`, such as `fill-foreground`. */
     class?: string
@@ -335,6 +395,249 @@ export class LabelList extends Component<LabelListSignature> {
   override willDestroy(): void {
     super.willDestroy()
     this.args.series.unregisterLabel(this)
+  }
+
+  <template></template>
+}
+
+// ---------------------------------------------------------------------------------------------
+// Cells
+
+export interface CellSignature {
+  Args: {
+    /** The bar or pie it belongs to; the series' yield passes it. */
+    series: { registerCell(cell: Cell): void; unregisterCell(cell: Cell): void }
+    fill?: string
+    fillOpacity?: number | string
+    stroke?: string
+    strokeWidth?: number | string
+  }
+}
+
+/**
+ * One bar's or sector's attributes, over its series': recharts' `Cell`. Write one per row, in
+ * the rows' order:
+ *
+ *   {{#each chartData as |row|}}
+ *     <bar.Cell @fill={{if (isPositive row.visitors) "var(--chart-1)" "var(--chart-2)"}} />
+ *   {{/each}}
+ */
+export class Cell extends Component<CellSignature> {
+  constructor(owner: Owner, args: CellSignature['Args']) {
+    super(owner, args)
+    args.series.registerCell(this)
+  }
+
+  override willDestroy(): void {
+    super.willDestroy()
+    this.args.series.unregisterCell(this)
+  }
+
+  /** The attributes it lays over its bar or sector's row. */
+  get attributes(): Record<string, unknown> {
+    const { fill, fillOpacity, stroke, strokeWidth } = this.args
+    const attributes: Record<string, unknown> = {}
+    if (fill !== undefined) attributes['fill'] = fill
+    if (fillOpacity !== undefined) attributes['fillOpacity'] = fillOpacity
+    if (stroke !== undefined) attributes['stroke'] = stroke
+    if (strokeWidth !== undefined) attributes['strokeWidth'] = strokeWidth
+    return attributes
+  }
+
+  <template></template>
+}
+
+// ---------------------------------------------------------------------------------------------
+// Pies
+
+/**
+ * What a pie's `@shape` is handed as `@props`, as recharts hands its `shape` function: the
+ * sector's geometry, its attributes and its row. Pass it on to `Sector`.
+ */
+export interface SectorProps {
+  cx: number
+  cy: number
+  innerRadius: number
+  outerRadius: number
+  startAngle: number
+  endAngle: number
+  midAngle: number
+  cornerRadius?: number | string
+  fill?: string
+  fillOpacity?: number | string
+  stroke?: string
+  strokeWidth?: number | string
+  /** The sector's row. */
+  index: number
+  value: number
+  /** The row's name (the pie's `@nameKey`), or its index. */
+  name: unknown
+  /** Its share of the pie, from 0 to 1. */
+  percent: number
+  /** The row it came from (with its `Cell`'s attributes over it). */
+  payload: Record<string, string | number | null | undefined>
+  dataKey: DataKey
+  /** Whether the tooltip shows it. */
+  isActive: boolean
+}
+
+/** A pie's `@shape`: a component that draws each sector, handed its `@props` and `@index`. */
+export interface PieShapeSignature {
+  Args: { props: SectorProps; index: number }
+  Element: Element
+}
+
+/** What a pie's `@label` component is handed as `@props`: where the label goes, and its sector. */
+export interface PieLabelProps extends Omit<SectorProps, 'isActive'> {
+  /** Where the text goes, past the sector's edge. */
+  x: number
+  y: number
+  /** `start` on the right of the pie, `end` on its left. */
+  textAnchor: 'start' | 'middle' | 'end'
+  /** recharts' label props have none; here for upstream's examples, which pass it on. */
+  dominantBaseline?: string
+}
+
+/** A pie's `@label` component: draws a sector's label, handed its `@props` and `@index`. */
+export interface PieLabelSignature {
+  Args: { props: PieLabelProps; index: number }
+  Element: Element
+}
+
+/** What a pie yields: labels for its sectors, a label for the pie, and a `Cell` per sector. */
+export interface PieParts {
+  /** Labels on each sector: recharts' `LabelList`. */
+  LabelList: WithBoundArgs<typeof LabelList, 'series'>
+  /** A label for the pie, such as the total in a donut's hole: recharts' `Label`. */
+  Label: WithBoundArgs<typeof Label, 'pie'>
+  /** One sector's attributes (its `@fill`), in the order of the rows: recharts' `Cell`. */
+  Cell: WithBoundArgs<typeof Cell, 'series'>
+}
+
+export interface PieSignature {
+  Args: PartArgs & {
+    /** The rows, one sector each. Default the chart's `@data`. */
+    data?: readonly unknown[]
+    /** The key (or function) of each row's value. Default `value`. */
+    dataKey?: DataKey
+    /** The key (or function) of each row's name, for the tooltip and legend. Default `name`. */
+    nameKey?: DataKey
+    /** The pie's name, where a row has none. */
+    name?: string
+    /** The centre, in pixels or a percentage of the plot area. Default `50%`. */
+    cx?: number | string
+    cy?: number | string
+    /** The hole's radius (a donut), in pixels or a percentage of the largest. Default 0. */
+    innerRadius?: number | string
+    /** The pie's radius, in pixels or a percentage of the largest. Default `80%`. */
+    outerRadius?: number | string
+    /** The angles it starts and ends at, in degrees counter-clockwise from 3 o'clock. Default 0 and 360. */
+    startAngle?: number
+    endAngle?: number
+    /** The gap between sectors, in degrees. Default 0. */
+    paddingAngle?: number
+    /** The smallest angle a sector with a value gets. Default 0. */
+    minAngle?: number
+    /** Rounds the sectors' corners. */
+    cornerRadius?: number | string
+    /** The sectors' fill where the row and its `Cell` give none. Default `#808080`. */
+    fill?: string
+    fillOpacity?: number | string
+    /** The line between sectors. Default `#fff` (the chart's CSS makes it transparent). */
+    stroke?: string
+    strokeWidth?: number | string
+    /**
+     * A label past each sector's edge, with a line to it: true for its value, or a component
+     * handed `@props` (where the label goes, and the sector) and `@index`. Default none.
+     */
+    label?: boolean | ComponentLike<PieLabelSignature>
+    /** Whether each label has a line to its sector. Default true. */
+    labelLine?: boolean
+    /** Draws each sector: a component handed `@props` and `@index`. `Sector` draws one. */
+    shape?: ComponentLike<PieShapeSignature>
+    /** The legend's icon type; `none` leaves the pie out of the legend. Default `rect`. */
+    legendType?: string
+    /** `none` leaves the pie out of the tooltip. */
+    tooltipType?: string
+    /** Lays the pie out but doesn't draw it. */
+    hide?: boolean
+  }
+  Blocks: { default: [PieParts] }
+}
+
+/** A pie, a sector for each row: recharts' `Pie`. */
+export class Pie extends Part<PieSignature> {
+  readonly kind = 'pie'
+  readonly labels = new Registry<LabelList>()
+  readonly cells = new Registry<Cell>()
+  readonly textLabels = new Registry<Label>()
+
+  registerLabel = (label: LabelList): void => this.labels.add(label)
+  unregisterLabel = (label: LabelList): void => this.labels.remove(label)
+  registerCell = (cell: Cell): void => this.cells.add(cell)
+  unregisterCell = (cell: Cell): void => this.cells.remove(cell)
+  registerTextLabel = (label: Label): void => this.textLabels.add(label)
+  unregisterTextLabel = (label: Label): void => this.textLabels.remove(label)
+
+  <template>
+    {{yield
+      (hash
+        LabelList=(component LabelList series=this)
+        Label=(component Label pie=this)
+        Cell=(component Cell series=this)
+      )
+    }}
+  </template>
+}
+
+/** What a `Label`'s `@content` is handed. */
+export interface LabelContentSignature {
+  Args: {
+    /** The chart's ring: its centre (`cx`, `cy`), radii and angles. */
+    viewBox: PolarViewBox
+    /** The label's `@value`. */
+    value?: unknown
+    /** The label's `@offset`. */
+    offset: number
+    /** The label's `@position`. */
+    position: PolarLabelPosition
+  }
+  Element: Element
+}
+
+export interface LabelSignature {
+  Args: {
+    /** The pie it belongs to; the pie's yield passes it. */
+    pie: { registerTextLabel(label: Label): void; unregisterTextLabel(label: Label): void }
+    /** The text to show. */
+    value?: string | number
+    /**
+     * Draws the label instead: a component handed `@viewBox` (the chart's ring, its centre at
+     * `cx`, `cy`), as recharts' `content` function is handed it. It draws inside the pie.
+     */
+    content?: ComponentLike<LabelContentSignature>
+    /** Where `@value` sits against the chart's ring. Default `middle`, as recharts'. */
+    position?: PolarLabelPosition
+    /** The space between the label and the ring's edge, for `outside`. Default 5. */
+    offset?: number
+    /** Classes for the text. */
+    class?: string
+    /** The text's fill. Default grey (`#808080`). */
+    fill?: string
+    fontSize?: number | string
+  }
+}
+
+/** A label for a pie, such as the total in a donut's hole: recharts' `Label`. */
+export class Label extends Component<LabelSignature> {
+  constructor(owner: Owner, args: LabelSignature['Args']) {
+    super(owner, args)
+    args.pie.registerTextLabel(this)
+  }
+
+  override willDestroy(): void {
+    super.willDestroy()
+    this.args.pie.unregisterTextLabel(this)
   }
 
   <template></template>
@@ -388,6 +691,8 @@ export interface ChartLegendSignature {
     align?: 'left' | 'center' | 'right'
     /** `horizontal` (default) or `vertical`. */
     layout?: 'horizontal' | 'vertical'
+    /** Classes for the legend, handed to its content as `@class`, as recharts' `className`. */
+    class?: string
   }
 }
 

@@ -141,6 +141,8 @@ export interface SeriesSettings {
   baseValue?: number | 'dataMin' | 'dataMax'
   barSize?: number
   maxBarSize?: number
+  /** Whether a bar draws with its own `@shape`, which may draw something where a bar is empty. */
+  hasCustomShape?: boolean
 }
 
 /** A point of a series, with the value it shows and the row it came from. */
@@ -840,6 +842,8 @@ export function cartesianGeometry(input: CartesianInput): CartesianGeometry {
           if (!Number.isFinite(high) || !Number.isFinite(low)) return
           const valueStart = valueScale(low)
           const valueEnd = valueScale(high)
+          // recharts leaves out a bar with no length (a zero), unless it has a shape of its own.
+          if ((valueStart === valueEnd || position.size === 0) && !settings.hasCustomShape) return
           const bandStart = start + position.offset
           const background =
             layout === 'horizontal'

@@ -14,8 +14,11 @@ export interface ChartPoint {
 export interface ChartSeriesInfo {
   /** Its data key. */
   key: string
-  type: 'area' | 'bar' | 'line'
-  /** Each drawn point (a bar's top-left corner), in the chart's pixels. */
+  type: 'area' | 'bar' | 'line' | 'pie'
+  /**
+   * Each drawn point, in the chart's pixels: a bar's top-left corner, a sector's middle (where
+   * its tooltip points).
+   */
   points: ChartPoint[]
   /** A line's or area's curve, as the path's `d`. */
   path: string | null
@@ -160,7 +163,8 @@ export class ChartHarness extends Harness {
       const type = element.getAttribute('data-series-type') as ChartSeriesInfo['type']
       const curve = element.querySelector('.recharts-area-curve, .recharts-line-curve')
       const area = element.querySelector('.recharts-area-area')
-      const painted = area ?? curve ?? element.querySelector('.recharts-rectangle')
+      const painted =
+        area ?? curve ?? element.querySelector('.recharts-rectangle, .recharts-sector')
       return {
         key: element.getAttribute('data-test-jn-value') ?? '',
         type,
@@ -188,6 +192,18 @@ export class ChartHarness extends Harness {
     )
   }
 
+  /** A pie's sectors, as `<path>` elements, in its rows' order. */
+  sectors(key: string): SVGPathElement[] {
+    return Array.from(
+      this.seriesFor(key).element.querySelectorAll<SVGPathElement>('[data-test-jn-part="sector"]'),
+    )
+  }
+
+  /** A pie's sectors' names (each row's `@nameKey`, or its index). */
+  sectorNames(key: string): string[] {
+    return this.sectors(key).map(sector => sector.getAttribute('data-test-jn-value') ?? '')
+  }
+
   /** A series' dots (circles, or the custom dots it draws). */
   dots(key: string): Element[] {
     const group = this.surface.querySelector(
@@ -196,13 +212,30 @@ export class ChartHarness extends Harness {
     return group ? Array.from(group.children) : []
   }
 
-  /** A series' labels' text (`LabelList`). */
+  /**
+   * A series' labels' text: its first `LabelList`, or a pie's `@label`s. `labelLists(key)` has
+   * every list.
+   */
   labels(key: string): string[] {
+    return this.labelLists(key)[0] ?? []
+  }
+
+  /** The text of each of a series' label lists (a pie's `@label`s count as one), in order. */
+  labelLists(key: string): string[][] {
+    return Array.from(
+      this.surface.querySelectorAll(`[data-test-jn-part="labels"][data-test-jn-value="${key}"]`),
+    ).map(group =>
+      Array.from(group.querySelectorAll('text')).map(text => collapse(text.textContent)),
+    )
+  }
+
+  /** The lines from a pie's sectors to their `@label`s. */
+  labelLines(key: string): SVGPathElement[] {
     const group = this.surface.querySelector(
       `[data-test-jn-part="labels"][data-test-jn-value="${key}"]`,
     )
     return group
-      ? Array.from(group.querySelectorAll('text')).map(text => collapse(text.textContent))
+      ? Array.from(group.querySelectorAll<SVGPathElement>('[data-test-jn-part="label-line"]'))
       : []
   }
 
@@ -239,13 +272,31 @@ export class ChartHarness extends Harness {
     return value ? value.split(' ').map(Number) : []
   }
 
-  /** Moves the pointer over row `index` (its category), which shows the tooltip there. */
-  async hover(index: number): Promise<void> {
-    const coordinate = this.categories[index]
-    if (coordinate === undefined) throw new Error(`${this} has no row ${index}`)
+  /** Whether it is a pie chart, whose tooltip points at sectors rather than rows. */
+  get isPie(): boolean {
+    return this.wrapper.getAttribute('data-layout') === 'centric'
+  }
+
+  /**
+   * Moves the pointer over row `index` (its category), which shows the tooltip there. In a pie
+   * chart, over the middle of sector `index` of the pie for `key` (the first pie by default).
+   */
+  async hover(index: number, key?: string): Promise<void> {
     const wrapper = this.wrapper
     const rect = wrapper.getBoundingClientRect()
     const scale = wrapper.offsetWidth ? rect.width / wrapper.offsetWidth : 1
+    if (this.isPie) {
+      const pie = key ? this.seriesFor(key) : this.series[0]
+      const point = pie?.points[index]
+      if (!point) throw new Error(`${this} has no sector ${index}`)
+      await triggerEvent(wrapper, 'mousemove', {
+        clientX: Math.round(rect.left + point.x * scale),
+        clientY: Math.round(rect.top + point.y * scale),
+      })
+      return
+    }
+    const coordinate = this.categories[index]
+    if (coordinate === undefined) throw new Error(`${this} has no row ${index}`)
     const plot = this.plot
     const vertical = wrapper.getAttribute('data-layout') === 'vertical'
     // Mouse events carry whole pixels: round to one, kept inside the plot area so a row on its
@@ -269,7 +320,7 @@ export class ChartHarness extends Harness {
     await triggerEvent(this.wrapper, 'mouseleave')
   }
 
-  /** Focuses the chart, as Tab does: the tooltip shows the first row. */
+  /** Focuses the chart, as Tab does: the tooltip shows the first row (or a pie's first sector). */
   async focus(): Promise<void> {
     await focus(this.surface)
   }
@@ -279,7 +330,10 @@ export class ChartHarness extends Harness {
     await blur(this.surface)
   }
 
-  /** Presses a key on the focused chart: `ArrowRight`/`ArrowLeft` move the tooltip, `Enter` toggles it. */
+  /**
+   * Presses a key on the focused chart: `ArrowRight`/`ArrowLeft` move the tooltip a row (or a
+   * sector), `Enter` toggles it.
+   */
   async press(key: 'ArrowRight' | 'ArrowLeft' | 'Enter'): Promise<void> {
     await pressKey(key)
   }

@@ -37,6 +37,7 @@ import {
   type StackOffset,
 } from './cartesian.ts'
 import { areaPath, linePath, rectanglePath } from './paths.ts'
+import Rectangle from '../components/rectangle.gts'
 import { dotFor, type DotRender } from './dots.ts'
 import {
   Area,
@@ -47,11 +48,13 @@ import {
   Line,
   XAxis,
   YAxis,
+  type BarShapeSignature,
   type ChartPart,
   type ChartRegistrar,
   type DotArgs,
   type LabelList,
   type LabelPosition,
+  type RectangleProps,
 } from './parts.gts'
 import ChartTooltipContent from '../components/chart-tooltip-content.gts'
 import ChartLegendContent from '../components/chart-legend-content.gts'
@@ -147,20 +150,10 @@ interface DrawnSeries {
   stroke?: string
   strokeWidth?: string | number
   strokeDasharray?: string
-  bars: {
-    d: string
-    fill?: string
-    fillOpacity?: string | number
-    stroke?: string
-    strokeWidth?: string | number
-    x: number
-    y: number
-    width: number
-    height: number
-    radius: string
-    index: number
-    value: string
-  }[]
+  /** Each bar's props, as its shape (a `Rectangle`, or the bar's `@shape`) is handed them. */
+  bars: RectangleProps[]
+  /** A bar series' `@shape`. */
+  shape?: ComponentLike<BarShapeSignature>
   dots: DotRender[]
   labels: DrawnLabel[]
 }
@@ -168,9 +161,10 @@ interface DrawnSeries {
 interface DrawnLabel {
   key: string
   class: string
-  fill: string
+  fillOpacity?: string | number
+  stroke?: string
   fontSize?: string | number
-  items: { x: number; y: number; text: string; anchor: string; dy: string }[]
+  items: { x: number; y: number; text: string; anchor: string; dy: string; fill: string }[]
 }
 
 const INITIAL_DIMENSION = { width: -1, height: -1 }
@@ -194,6 +188,12 @@ function keyOf(dataKey: unknown): string {
 
 function round(value: number): number {
   return Math.round(value * 1000) / 1000
+}
+
+/** A row's own `fill` (or its Cell's), where it has one. */
+function entryFill(payload: unknown): string | undefined {
+  const fill = (payload as Record<string, unknown> | undefined)?.['fill']
+  return typeof fill === 'string' ? fill : undefined
 }
 
 /** recharts' `getLegendItemColor`: the stroke, where there is one, else the fill. */
@@ -278,7 +278,7 @@ function labelPlacement(
  * size is the element's layout size (`offsetWidth`, as a ResizeObserver reports it), not its
  * box on screen, which a CSS transform scales.
  */
-function observeSize(
+export function observeSize(
   context: object,
   element: HTMLElement,
   callback: (size: { width: number; height: number }) => void,
@@ -289,6 +289,74 @@ function observeSize(
     callback({ width: entry.contentRect.width, height: entry.contentRect.height })
   observer.observe(element, onEntry)
   return () => observer.unobserve(element, onEntry)
+}
+
+/**
+ * Where recharts' tooltip box goes: beside the point it shows (`coordinate`), kept inside the
+ * plot area, and hidden until it has been measured.
+ */
+export function tooltipStyleFor(options: {
+  visible: boolean
+  coordinate: { x: number; y: number } | null | undefined
+  box: { width: number; height: number } | null | undefined
+  plot: { left: number; top: number; width: number; height: number } | undefined
+  tooltip: ChartTooltip | undefined
+}): SafeString {
+  const { visible, coordinate, box, plot, tooltip } = options
+  const base = 'pointer-events: none; position: absolute; top: 0px; left: 0px;'
+  if (!visible || !coordinate || !box || !plot || !tooltip) {
+    return htmlSafe(`visibility: hidden; ${base}`)
+  }
+  const offset = num(tooltip.args.offset, 10)
+  const x = tooltipTranslate({
+    coordinate: coordinate.x,
+    offset,
+    tooltipSize: box.width,
+    viewBoxStart: plot.left,
+    viewBoxSize: plot.width,
+    allowEscape: false,
+    reverse: false,
+  })
+  const y = tooltipTranslate({
+    coordinate: coordinate.y,
+    offset,
+    tooltipSize: box.height,
+    viewBoxStart: plot.top,
+    viewBoxSize: plot.height,
+    allowEscape: false,
+    reverse: false,
+  })
+  const animate = tooltip.args.isAnimationActive !== false
+  return htmlSafe(
+    `visibility: visible; ${base}${animate ? ' transition: transform 400ms;' : ''} transform: translate(${x}px, ${y}px);`,
+  )
+}
+
+/** Where recharts' legend box goes: across the chart's foot (or wherever its arguments put it). */
+export function legendStyleFor(
+  size: { width: number; height: number },
+  margin: Required<Margin>,
+  legend: ChartLegend,
+  measured: { width: number; height: number } | null,
+): SafeString {
+  const layout = legend.args.layout ?? 'horizontal'
+  const align = legend.args.align ?? 'center'
+  const verticalAlign = legend.args.verticalAlign ?? 'bottom'
+  const width = layout === 'horizontal' ? `${size.width - margin.left - margin.right}px` : 'auto'
+  const box = measured ?? { width: 0, height: 0 }
+  const horizontal =
+    align === 'center' && layout === 'vertical'
+      ? `left: ${(size.width - box.width) / 2}px;`
+      : align === 'right'
+        ? `right: ${margin.right}px;`
+        : `left: ${margin.left}px;`
+  const vertical =
+    verticalAlign === 'middle'
+      ? `top: ${(size.height - box.height) / 2}px;`
+      : verticalAlign === 'bottom'
+        ? `bottom: ${margin.bottom}px;`
+        : `top: ${margin.top}px;`
+  return htmlSafe(`position: absolute; width: ${width}; height: auto; ${horizontal} ${vertical}`)
 }
 
 interface SurfaceSignature {
@@ -448,16 +516,13 @@ const Surface: TOC<SurfaceSignature> = <template>
                   {{#each bar.bars as |rectangle|}}
                     <g class="recharts-layer recharts-bar-rectangle">
                       <g class="recharts-layer recharts-inactive-bar">
-                        <path
-                          class="recharts-rectangle"
-                          fill={{rectangle.fill}}
-                          fill-opacity={{rectangle.fillOpacity}}
-                          stroke={{rectangle.stroke}}
-                          stroke-width={{rectangle.strokeWidth}}
-                          d={{rectangle.d}}
-                          data-test-jn-part="bar"
-                          data-test-jn-value={{rectangle.value}}
-                        ></path>
+                        {{#if bar.shape}}
+                          {{#let bar.shape as |Shape|}}
+                            <Shape @props={{rectangle}} @index={{rectangle.index}} />
+                          {{/let}}
+                        {{else}}
+                          <Rectangle @props={{rectangle}} />
+                        {{/if}}
                       </g>
                     </g>
                   {{/each}}
@@ -650,7 +715,9 @@ const Surface: TOC<SurfaceSignature> = <template>
                   x={{item.x}}
                   y={{item.y}}
                   text-anchor={{item.anchor}}
-                  fill={{list.fill}}
+                  fill={{item.fill}}
+                  fill-opacity={{list.fillOpacity}}
+                  stroke={{list.stroke}}
                   font-size={{list.fontSize}}
                   data-test-jn-part="label"
                 ><tspan x={{item.x}} dy={{item.dy}}>{{item.text}}</tspan></text>
@@ -663,11 +730,22 @@ const Surface: TOC<SurfaceSignature> = <template>
     {{#if @chart.legendPart}}
       <div class="recharts-legend-wrapper" style={{@chart.legendStyle}} {{@chart.measureLegend}}>
         {{#let @chart.legendContent as |Content|}}
-          <Content
-            @payload={{@chart.legendPayload}}
-            @verticalAlign={{@chart.legendVerticalAlign}}
-            @config={{@chart.args.config}}
-          />
+          {{! The legend's @class goes to its content only when given, so it can't override a
+              class curried into the content. }}
+          {{#if @chart.legendPart.args.class}}
+            <Content
+              @payload={{@chart.legendPayload}}
+              @verticalAlign={{@chart.legendVerticalAlign}}
+              @config={{@chart.args.config}}
+              @class={{@chart.legendPart.args.class}}
+            />
+          {{else}}
+            <Content
+              @payload={{@chart.legendPayload}}
+              @verticalAlign={{@chart.legendVerticalAlign}}
+              @config={{@chart.args.config}}
+            />
+          {{/if}}
         {{/let}}
       </div>
     {{/if}}
@@ -884,6 +962,7 @@ export default class CartesianChart
       baseValue: part instanceof Area ? part.args.baseValue : undefined,
       barSize: part instanceof Bar ? part.args.barSize : undefined,
       maxBarSize: part instanceof Bar ? part.args.maxBarSize : undefined,
+      hasCustomShape: part instanceof Bar && part.args.shape !== undefined,
     }
   }
 
@@ -1021,30 +1100,48 @@ export default class CartesianChart
     )
   }
 
-  drawLabels(part: Area | Bar | Line, geometry: SeriesGeometry): DrawnLabel[] {
+  drawLabels(
+    part: Area | Bar | Line,
+    geometry: SeriesGeometry,
+    bars: readonly RectangleProps[],
+  ): DrawnLabel[] {
     return part.labels.items.map((label: LabelList, i) => {
       const args = label.args
       const offset = num(args.offset, 5)
       const position = args.position ?? (part instanceof Bar ? 'center' : 'top')
+      // A bar's label takes the bar's own fill (its row's or its Cell's), as recharts' does; a
+      // point's has none. Without one, recharts' Text is grey.
       const boxes =
         part instanceof Bar
-          ? geometry.bars.map(bar => ({ box: bar, payload: bar.payload, value: bar.value }))
+          ? geometry.bars.map((bar, index) => ({
+              box: bar,
+              payload: bar.payload,
+              value: bar.value,
+              fill: entryFill(bars[index]?.payload),
+            }))
           : geometry.points
               .filter(point => point.x !== null && point.y !== null)
               .map(point => ({
                 box: { x: point.x!, y: point.y!, width: 0, height: 0 },
                 payload: point.payload,
                 value: point.value,
+                fill: undefined,
               }))
       return {
         key: `label-${i}`,
-        class: ['recharts-text', args.class].filter(Boolean).join(' '),
-        fill: args.fill ?? '#808080',
+        // recharts' Label is `recharts-label` unless given a class, which replaces it.
+        class: `recharts-text ${args.class ?? 'recharts-label'}`,
+        fillOpacity: args.fillOpacity,
+        stroke: args.stroke,
         fontSize: args.fontSize,
-        items: boxes.map(({ box, payload, value }) => {
+        items: boxes.map(({ box, payload, value, fill }) => {
           const raw = args.dataKey !== undefined ? valueOf(payload, args.dataKey) : value
           const shown = args.formatter ? args.formatter(raw as never) : raw
-          return { ...labelPlacement(box, position, offset), text: String(shown ?? '') }
+          return {
+            ...labelPlacement(box, position, offset),
+            text: String(shown ?? ''),
+            fill: args.fill ?? fill ?? '#808080',
+          }
         }),
       }
     })
@@ -1069,32 +1166,47 @@ export default class CartesianChart
           .join(' '),
         bars: [],
         dots: [],
-        labels: settings.hide ? [] : this.drawLabels(part, drawn),
+        labels: [],
       }
       if (settings.hide) return base
       if (part instanceof Bar) {
         const args = part.args
-        const radius = args.radius ?? 0
+        const cells = part.cells.items
+        // Each bar is the bar's attributes, then its row's (a `fill` in the data) and its
+        // Cell's over them, as recharts spreads the row and the cell over the bar's props.
+        const bars = drawn.bars.map((bar): RectangleProps => {
+          const payload = {
+            ...(bar.payload as RectangleProps['payload']),
+            ...(cells[bar.index]?.attributes as RectangleProps['payload'] | undefined),
+          }
+          return {
+            x: bar.x,
+            y: bar.y,
+            width: bar.width,
+            height: bar.height,
+            radius: args.radius ?? 0,
+            fill: entryFill(payload) ?? args.fill,
+            fillOpacity: (payload['fillOpacity'] as string | undefined) ?? args.fillOpacity,
+            stroke: (payload['stroke'] as string | undefined) ?? args.stroke,
+            strokeWidth: (payload['strokeWidth'] as string | undefined) ?? args.strokeWidth,
+            index: bar.index,
+            value: bar.value,
+            payload,
+            dataKey: settings.dataKey,
+            // Without recharts' `activeBar`, which Joinery doesn't have, a bar is never active.
+            isActive: false,
+          }
+        })
         return {
           ...base,
           points: drawn.bars.map(bar => `${round(bar.x)},${round(bar.y)}`).join(' '),
           fill: args.fill,
-          bars: drawn.bars.map(bar => ({
-            d: rectanglePath(bar.x, bar.y, bar.width, bar.height, radius),
-            fill: args.fill,
-            fillOpacity: args.fillOpacity,
-            stroke: args.stroke,
-            strokeWidth: args.strokeWidth,
-            x: round(bar.x),
-            y: round(bar.y),
-            width: round(bar.width),
-            height: round(bar.height),
-            radius: Array.isArray(radius) ? radius.join(',') : String(radius),
-            index: bar.index,
-            value: String(bar.value ?? ''),
-          })),
+          bars,
+          shape: args.shape,
+          labels: this.drawLabels(part, drawn, bars),
         }
       }
+      base.labels = this.drawLabels(part, drawn, [])
       const curveType = part.args.type ?? 'linear'
       const connectNulls = part.args.connectNulls ?? false
       const curvePath = linePath(drawn.points, curveType, this.layout, connectNulls)
@@ -1315,38 +1427,13 @@ export default class CartesianChart
   }
 
   get tooltipStyle(): SafeString {
-    const base = 'pointer-events: none; position: absolute; top: 0px; left: 0px;'
-    const coordinate = this.activeCoordinate
-    const box = this.tooltipBox
-    const geometry = this.geometry
-    if (!this.tooltipVisible || !coordinate || !box || !geometry) {
-      return htmlSafe(`visibility: hidden; ${base}`)
-    }
-    const tooltip = this.tooltipPart!
-    const offset = num(tooltip.args.offset, 10)
-    const { offset: plot } = geometry
-    const x = tooltipTranslate({
-      coordinate: coordinate.x,
-      offset,
-      tooltipSize: box.width,
-      viewBoxStart: plot.left,
-      viewBoxSize: plot.width,
-      allowEscape: false,
-      reverse: false,
+    return tooltipStyleFor({
+      visible: this.tooltipVisible,
+      coordinate: this.activeCoordinate,
+      box: this.tooltipBox,
+      plot: this.geometry?.offset,
+      tooltip: this.tooltipPart,
     })
-    const y = tooltipTranslate({
-      coordinate: coordinate.y,
-      offset,
-      tooltipSize: box.height,
-      viewBoxStart: plot.top,
-      viewBoxSize: plot.height,
-      allowEscape: false,
-      reverse: false,
-    })
-    const animate = tooltip.args.isAnimationActive !== false
-    return htmlSafe(
-      `visibility: visible; ${base}${animate ? ' transition: transform 400ms;' : ''} transform: translate(${x}px, ${y}px);`,
-    )
   }
 
   /** Measures the tooltip's box each time what it shows changes (its arguments). */
@@ -1497,27 +1584,7 @@ export default class CartesianChart
   }
 
   get legendStyle(): SafeString {
-    const size = this.size!
-    const legend = this.legendPart!
-    const margin = this.margin
-    const layout = legend.args.layout ?? 'horizontal'
-    const align = legend.args.align ?? 'center'
-    const verticalAlign = legend.args.verticalAlign ?? 'bottom'
-    const width = layout === 'horizontal' ? `${size.width - margin.left - margin.right}px` : 'auto'
-    const box = this.legendBox ?? { width: 0, height: 0 }
-    const horizontal =
-      align === 'center' && layout === 'vertical'
-        ? `left: ${(size.width - box.width) / 2}px;`
-        : align === 'right'
-          ? `right: ${margin.right}px;`
-          : `left: ${margin.left}px;`
-    const vertical =
-      verticalAlign === 'middle'
-        ? `top: ${(size.height - box.height) / 2}px;`
-        : verticalAlign === 'bottom'
-          ? `bottom: ${margin.bottom}px;`
-          : `top: ${margin.top}px;`
-    return htmlSafe(`position: absolute; width: ${width}; height: auto; ${horizontal} ${vertical}`)
+    return legendStyleFor(this.size!, this.margin, this.legendPart!, this.legendBox)
   }
 
   measureLegend = modifier((element: HTMLElement) =>

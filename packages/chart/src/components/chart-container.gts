@@ -6,6 +6,7 @@ import ChartStyle from './chart-style.gts'
 import AreaChart from './area-chart.gts'
 import BarChart from './bar-chart.gts'
 import LineChart from './line-chart.gts'
+import PieChart from './pie-chart.gts'
 import type { ChartConfig } from '../types.ts'
 
 /** What `ChartContainer` yields: the charts, each given the container's config. */
@@ -16,6 +17,8 @@ export interface ChartContainerParts {
   BarChart: WithBoundArgs<typeof BarChart, 'config' | 'inContainer' | 'initialDimension'>
   /** A line chart: recharts' `LineChart`. */
   LineChart: WithBoundArgs<typeof LineChart, 'config' | 'inContainer' | 'initialDimension'>
+  /** A pie chart: recharts' `PieChart`. */
+  PieChart: WithBoundArgs<typeof PieChart, 'config' | 'inContainer' | 'initialDimension'>
 }
 
 export interface ChartContainerSignature {
@@ -82,6 +85,9 @@ export default class ChartContainer extends Component<ChartContainerSignature> {
           )
           LineChart=(component
             LineChart config=@config inContainer=true initialDimension=this.initialDimension
+          )
+          PieChart=(component
+            PieChart config=@config inContainer=true initialDimension=this.initialDimension
           )
         )
       }}

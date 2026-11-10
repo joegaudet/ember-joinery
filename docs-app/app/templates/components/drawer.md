@@ -2,9 +2,10 @@
 
 A drawer component for Ember.
 
-Upstream's first example moves a daily activity goal over a bar chart drawn with recharts,
-which comes with Chart; Chart hasn't landed in Joinery yet. The examples below show the drawer
-with Buttons, text and a form.
+<Example @name="drawer-demo" @title="Drawer" />
+
+Its bar chart is a [Chart](/components/chart.md)'s `BarChart`, from `@ember-joinery/chart`, where
+upstream's is recharts'.
 
 ## About
 
@@ -100,8 +101,11 @@ which in the frame's width presets is an `<iframe>` that wide, so pick 375 to se
 Joinery's styles use logical properties, so a drawer lays itself out right to left inside any
 element with `dir="rtl"` (see [Direction](/primitives/direction.md)): its text starts on the
 right, and `left` and `right` are the inline start and end, as the ported styles place them. A
-`left` drawer is on the right, right to left, and slides and drags from there. Upstream's
-example is its first, in Arabic, with its bar chart; it comes with Chart.
+`left` drawer is on the right, right to left, and slides and drags from there. The example is
+the first one's, in Arabic, with its chart's x-axis reversed (`@reversed={{true}}`) so the bars
+run from the right.
+
+<Example @name="drawer-rtl" @title="RTL" @dir="rtl" />
 
 ## More from Vaul
 

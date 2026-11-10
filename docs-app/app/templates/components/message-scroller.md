@@ -338,7 +338,7 @@ including controls rendered outside the `MessageScroller` frame.
 
 ```gts
 <MessageScrollerProvider as |s|>
-  <Button {{on "click" (fn s.scrollToMessage "intro")}}>Back to the start</Button>
+  <Button {{on "click" (fn s.scrollToMessage "intro" (hash behavior="smooth"))}}>Back to the start</Button>
   {{! s.scrollToEnd, s.scrollToStart }}
 </MessageScrollerProvider>
 ```

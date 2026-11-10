@@ -58,6 +58,9 @@ class Transcript {
   }
 }
 
+const join = (ids: string[]) => ids.join(',')
+const jump = (scroller: Commands, messageId: string) => void scroller.scrollToMessage(messageId)
+
 /** A user's turn (an anchor) and the reply after it. */
 const turn = (n: number, reply: number) => [new Row(`u${n}`, 60, true), new Row(`a${n}`, reply)]
 
@@ -458,7 +461,7 @@ module('Integration | components | message-scroller', function (hooks) {
             <p data-test-state>{{if s.scrollable.start "up"}} {{if s.scrollable.end "down"}}</p>
             <s.Visibility as |v|>
               <p data-test-current>{{v.currentAnchorId}}</p>
-              <p data-test-visible>{{v.visibleMessageIds}}</p>
+              <p data-test-visible>{{join v.visibleMessageIds}}</p>
             </s.Visibility>
             <s.Root @name="chat">
               <s.Viewport>
@@ -598,7 +601,7 @@ module('Integration | components | message-scroller', function (hooks) {
                   data-test-own
                   {{messageScrollerButton scroller=api.state behavior="auto"}}
                 >Jump to latest</button>
-                <button type="button" data-test-jump {{on "click" (fn api.scrollToMessage "u2")}}>
+                <button type="button" data-test-jump {{on "click" (fn jump api "u2")}}>
                   Jump to the second turn
                 </button>
               </MessageScrollerConsumer>

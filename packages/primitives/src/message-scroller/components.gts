@@ -394,7 +394,7 @@ export interface MessageScrollerProviderSignature<
  *       </s.Viewport>
  *       <s.Button />
  *     </s.Root>
- *     <button type="button" {{on "click" (fn s.scrollToMessage "intro")}}>Back to the start</button>
+ *     <button type="button" {{on "click" (fn s.scrollToMessage "intro" (hash behavior="smooth"))}}>Back to the start</button>
  *   </MessageScrollerProvider>
  *
  * The parts are also exported on their own (`MessageScrollerItem`), for a component of yours

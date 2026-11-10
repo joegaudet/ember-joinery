@@ -102,6 +102,42 @@
   @apply grid min-h-11 w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center;
 }
 
+/*
+ * The action row's height from `sm` up (edited by hand). Each sheet gives the row a responsive
+ * `sm:min-h-*`, which upstream's inline `min-h-11` doesn't override: tailwind-merge keeps both,
+ * since their variants differ, and Tailwind emits a `sm:` utility after every unprefixed one, so
+ * the sheet's wins from 640px up (Nova's row is 32px there, 44px below). Here the sheet comes
+ * first and a media query adds no weight, so the inline rule above would win at every width.
+ * This restates each sheet's after it, under the `style-<name>` variant build-css.mjs declares
+ * (scripts/build-css.test.mjs checks the copy against the sheets).
+ */
+:where(.jn-questionnaire-actions) {
+  @variant style-luma {
+    @apply sm:min-h-9;
+  }
+  @variant style-lyra {
+    @apply sm:min-h-8;
+  }
+  @variant style-maia {
+    @apply sm:min-h-9;
+  }
+  @variant style-mira {
+    @apply sm:min-h-7;
+  }
+  @variant style-nova {
+    @apply sm:min-h-8;
+  }
+  @variant style-rhea {
+    @apply sm:min-h-8;
+  }
+  @variant style-sera {
+    @apply sm:min-h-10;
+  }
+  @variant style-vega {
+    @apply sm:min-h-9;
+  }
+}
+
 /* data-slot="questionnaire-previous" in QuestionnairePrevious */
 :where(.jn-questionnaire-previous) {
   @apply col-start-1 row-start-1 min-h-11 justify-self-start sm:min-h-0;

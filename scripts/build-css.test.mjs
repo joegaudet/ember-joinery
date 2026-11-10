@@ -185,3 +185,25 @@ test("trace.css restates each sheet's utilities for a line's wrapper, through an
     assert.deepStrictEqual(copy[1].split(/\s+/), expected, `trace.css matches the ${style} sheet`)
   }
 })
+
+test("questionnaire.css restates each sheet's responsive height for the action row, after the inline rule", () => {
+  const read = file => readFileSync(join(repoRoot, 'packages/ember/src', file), 'utf8')
+  const questionnaire = read('components/questionnaire.css')
+  const inline = questionnaire.indexOf('@apply grid min-h-11 w-full')
+  assert.ok(inline > 0, 'questionnaire.css has the inline rule for the action row')
+  const blocks = questionnaire.slice(inline)
+  for (const style of styles()) {
+    const sheet = read(`styles/${style}.css`)
+    const rule = /^:where\(\.jn-questionnaire-actions\) \{\s*@apply ([^;]+);/m.exec(sheet)
+    assert.ok(rule, `the ${style} sheet has a rule for the action row`)
+    const expected = rule[1].split(/\s+/).filter(utility => /^[a-z0-9-]+:min-h-/.test(utility))
+    assert.ok(expected.length > 0, `the ${style} sheet gives the action row a responsive height`)
+    const copy = new RegExp(`@variant style-${style} \\{\\s*@apply ([^;]+);`).exec(blocks)
+    assert.ok(copy, `questionnaire.css has a style-${style} block after the inline rule`)
+    assert.deepStrictEqual(
+      copy[1].split(/\s+/),
+      expected,
+      `questionnaire.css matches the ${style} sheet`,
+    )
+  }
+})

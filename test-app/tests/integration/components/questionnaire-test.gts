@@ -289,6 +289,15 @@ module('Integration | components | questionnaire', function (hooks) {
     const actions = getComputedStyle(q.form.querySelector('[data-slot="questionnaire-actions"]')!)
     assert.strictEqual(actions.display, 'grid')
     assert.strictEqual(actions.columnGap, '8px', 'gap-2')
+    assert.true(
+      window.matchMedia('(width >= 40rem)').matches,
+      'the suite runs at a desktop width (testem opens a 1440px window)',
+    )
+    assert.strictEqual(
+      px(actions.minHeight),
+      32,
+      "from sm up, the sheet's sm:min-h-8 beats the inline min-h-11, as in upstream's class order",
+    )
     const previous = q.button('previous').getBoundingClientRect()
     const next = q.button('next').getBoundingClientRect()
     assert.ok(previous.left < next.left, 'Previous at the start, Next at the end')
@@ -686,6 +695,23 @@ module('Integration | components | questionnaire', function (hooks) {
       </template>,
     )
     const q = new QuestionnaireHarness('q')
+    assert.strictEqual(q.activeItem, 'two', 'between the first and last: Previous and Next show')
+    const actions = q.form
+      .querySelector('[data-slot="questionnaire-actions"]')!
+      .getBoundingClientRect()
+    const previous = q.button('previous').getBoundingClientRect()
+    const next = q.button('next').getBoundingClientRect()
+    assert.ok(previous.width > 0 && next.width > 0, 'both buttons show')
+    assert.ok(
+      previous.left > next.right,
+      'the grid mirrors: Previous on the right, Next on its left',
+    )
+    assert.ok(
+      Math.abs(actions.right - previous.right) < 1,
+      'Previous at the inline start, the right edge',
+    )
+    assert.ok(Math.abs(next.left - actions.left) < 1, 'Next at the inline end, the left edge')
+
     await q.choose('yes')
     await focus(q.item())
     assert.true(
@@ -697,8 +723,6 @@ module('Integration | components | questionnaire', function (hooks) {
     await q.press('ArrowRight')
     await q.press('ArrowRight')
     assert.strictEqual(q.activeItem, 'one', 'ArrowRight goes back')
-    const previous = q.button('next').getBoundingClientRect()
-    assert.ok(previous.width > 0)
     const row = getComputedStyle(q.choice('yes'))
     assert.strictEqual(row.textAlign, 'start')
     await a11yAudit()

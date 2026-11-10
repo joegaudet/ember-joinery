@@ -224,7 +224,10 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    variant (after upstream's `.style-<name>` wrapper), which `build-css.mjs` declares in every
    style's compile and which matches only in that style's: `@variant style-nova { @apply
 rounded-md; }`. Trace's rule for a trigger inside an overlay's root is one, with a test in
-   `scripts/build-css.test.mjs` that holds the copy to the sheets.
+   `scripts/build-css.test.mjs` that holds the copy to the sheets. So is a sheet's responsive
+   utility that an inline one would otherwise beat: upstream's Tailwind emits `sm:min-h-8` after
+   `min-h-11`, but here the sheet comes first and a media query adds no weight, so
+   Questionnaire's action row restates each sheet's `sm:min-h-*` after its inline rule.
 
    The script reads one file, so where a part renders another upstream component
    (ItemSeparator and ButtonGroupSeparator render Separator), that component's inline

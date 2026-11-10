@@ -1,9 +1,11 @@
 {
-  "$comment": "Waiting for components that haven't landed: empty-avatar and empty-avatar-group (Avatar), empty-input-group (Input Group). The unit that lands the last of each one's components ports it onto the Empty page and maps it here.",
+  "$comment": "Waiting for components that haven't landed: empty-input-group (Input Group). The unit that lands it ports it onto the Empty page and maps it here.",
   "examples": {
     "empty-demo": "empty-demo",
     "empty-outline": "empty-outline",
     "empty-background": "empty-background",
+    "empty-avatar": "empty-avatar",
+    "empty-avatar-group": "empty-avatar-group",
     "empty-rtl": "empty-rtl"
   }
 }

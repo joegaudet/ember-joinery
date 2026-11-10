@@ -69,12 +69,15 @@ Use the `bg-*` and `bg-gradient-*` utilities to add a background to the empty st
 
 ## Avatar
 
-Use `e.Media` to display an avatar in the empty state. Upstream's example comes with Avatar.
+Use `e.Media` to display an avatar in the empty state.
+
+<Example @name="empty-avatar" @title="Avatar" />
 
 ## Avatar Group
 
-Use `e.Media` to display an avatar group in the empty state. Upstream's example comes with
-Avatar.
+Use `e.Media` to display an avatar group in the empty state.
+
+<Example @name="empty-avatar-group" @title="Avatar Group" />
 
 ## InputGroup
 

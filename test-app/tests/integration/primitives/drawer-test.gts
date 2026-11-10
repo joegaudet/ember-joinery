@@ -770,7 +770,11 @@ module('Integration | primitives | drawer', function (hooks) {
     outer.finishAnimations()
     const matrix = new DOMMatrixReadOnly(getComputedStyle(outer.content!).transform)
     assert.strictEqual(matrix.a, 1, 'which comes forward again, at full size')
-    assert.strictEqual(outer.offset, 0, 'and back in place')
+    // As vaul's does, 500ms after the nested drawer closes the parent reads its translate and
+    // pins it (with no transition). Its 0.5s transition started a frame or so after that timer
+    // did, so when the timer fires first it reads the transition's last hundredths of a pixel
+    // (-0.0001px in CI), and finishAnimations() has nothing left to finish.
+    assert.ok(Math.abs(outer.offset) < 0.1, `and back in place (${outer.offset}px)`)
     await a11yAudit()
   })
 

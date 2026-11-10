@@ -1,7 +1,7 @@
 {
-  "$comment": "Joinery ports four of upstream's blocks (registry/bases/radix/blocks): login-01, signup-01, dashboard-01, and sidebar-13, the settings dialog. Each renders as a page of its own on both stages, from the top. Blocks are never required by --require-complete.",
+  "$comment": "Joinery ports four of upstream's blocks (registry/bases/radix/blocks): login-01, signup-01, dashboard-01, and sidebar-13, the settings dialog. Each renders as a page of its own on both stages, from the top. dashboard-01 compares its sidebar alone: the page is taller than the viewport, and the full-page screenshot narrows the window to a pixel for a moment, which Joinery's page sees and upstream's doesn't, so its chart takes the window for a phone and switches to the last 7 days, as upstream's effect would; and its section cards' titles keep the Card title's leading-snug under text-2xl and text-3xl, which upstream's tailwind-merge drops, so they stand 5px taller. Blocks are never required by --require-complete.",
   "examples": {
-    "dashboard-01": "dashboard-01",
+    "dashboard-01": { "example": "dashboard-01", "region": "[data-slot=\"sidebar-container\"]" },
     "login-01": "login-01",
     "sidebar-13": "sidebar-13",
     "signup-01": "signup-01"

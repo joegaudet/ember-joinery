@@ -11,6 +11,7 @@ overrides:
   '@ember-joinery/data-table': workspace:*
   '@ember-joinery/ember': workspace:*
   '@ember-joinery/file-upload': workspace:*
+  '@ember-joinery/maskito': workspace:*
   '@ember-joinery/power-calendar': workspace:*
   '@ember-joinery/primitives': workspace:*
   '@ember-joinery/test-support': workspace:*
@@ -1076,6 +1077,91 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
 
+  packages/maskito:
+    dependencies:
+      '@ember-joinery/primitives':
+        specifier: workspace:*
+        version: link:../primitives
+      '@ember/test-waiters':
+        specifier: ^4.1.2
+        version: 4.1.2
+      '@embroider/addon-shim':
+        specifier: ^1.10.3
+        version: 1.11.0
+      '@maskito/core':
+        specifier: ^5.6.1
+        version: 5.6.1
+      '@maskito/kit':
+        specifier: ^5.6.1
+        version: 5.6.1(@maskito/core@5.6.1)
+      '@maskito/phone':
+        specifier: ^5.6.1
+        version: 5.6.1(@maskito/core@5.6.1)(@maskito/kit@5.6.1(@maskito/core@5.6.1))(libphonenumber-js@1.13.16)
+      decorator-transforms:
+        specifier: ^2.4.0
+        version: 2.4.0(@babel/core@7.29.13)
+      ember-modifier:
+        specifier: ^4.3.0
+        version: 4.3.0(@babel/core@7.29.13)
+      libphonenumber-js:
+        specifier: ^1.13.15
+        version: 1.13.16
+      lucide:
+        specifier: ^0.474.0
+        version: 0.474.0
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.29.7
+        version: 7.29.13
+      '@babel/plugin-transform-typescript':
+        specifier: ^7.29.7
+        version: 7.29.9(@babel/core@7.29.13)
+      '@babel/runtime':
+        specifier: ^7.29.7
+        version: 7.29.13
+      '@ember-joinery/ember':
+        specifier: workspace:*
+        version: link:../ember
+      '@ember-joinery/test-support':
+        specifier: workspace:*
+        version: link:../test-support
+      '@ember/library-tsconfig':
+        specifier: ^3.0.0
+        version: 3.0.0
+      '@ember/test-helpers':
+        specifier: ^5.7.0
+        version: 5.8.0(@babel/core@7.29.13)
+      '@embroider/addon-dev':
+        specifier: ^8.4.2
+        version: 8.5.0(@glint/template@1.11.1)(rollup@4.68.0)
+      '@glimmer/component':
+        specifier: ^2.2.1
+        version: 2.2.1
+      '@glimmer/tracking':
+        specifier: ^1.1.2
+        version: 1.1.2
+      '@glint/ember-tsc':
+        specifier: ^1.14.2
+        version: 1.14.3(ember-source@7.3.1(@glimmer/component@2.2.1))(typescript@6.0.3)
+      '@glint/template':
+        specifier: ^1.9.0
+        version: 1.11.1
+      '@rollup/plugin-babel':
+        specifier: ^7.1.0
+        version: 7.1.0(@babel/core@7.29.13)(rollup@4.68.0)
+      babel-plugin-ember-template-compilation:
+        specifier: ^4.0.1
+        version: 4.0.1
+      ember-source:
+        specifier: ~7.3.0
+        version: 7.3.1(@glimmer/component@2.2.1)
+      rollup:
+        specifier: ^4.64.6
+        version: 4.68.0
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+
   packages/power-calendar:
     dependencies:
       '@ember-joinery/primitives':
@@ -1352,6 +1438,9 @@ importers:
       '@ember-joinery/file-upload':
         specifier: workspace:*
         version: link:../packages/file-upload
+      '@ember-joinery/maskito':
+        specifier: workspace:*
+        version: link:../packages/maskito
       '@ember-joinery/power-calendar':
         specifier: workspace:*
         version: link:../packages/power-calendar
@@ -2734,6 +2823,21 @@ packages:
 
   '@marijn/find-cluster-break@1.0.4':
     resolution: {integrity: sha512-Wy0V7+SGUjnF9/TkiM1hKVDPj7jKXduPNboMVtHTA8dySMURWqfg/JZ9E2Sq8JgSJmkl7k7Qe9FLeMSrSraWmQ==}
+
+  '@maskito/core@5.6.1':
+    resolution: {integrity: sha512-P5XKR1wwkTLagzyH79ZE6TfQI20IR+eHeP8hoKrfqlr99luLo1QYTux9OFPvIH+o2GGzCkIBbgwYaquunZlC1Q==}
+
+  '@maskito/kit@5.6.1':
+    resolution: {integrity: sha512-iFGbJpXkagGzLPgxnneTZaV5YAUfSNBAc+y3SgdSYWY4fGJpZvzwVTLmHIngyEHPsd0VzIV9DcXKuzFnIkZfiA==}
+    peerDependencies:
+      '@maskito/core': ^5.6.1
+
+  '@maskito/phone@5.6.1':
+    resolution: {integrity: sha512-DCykm1dEuz+S0ANHeDFC+y5Knt0mTVGfS/kLyA3bJs+yOOkJBVpe08yisrQTcY/ZJBwu9jDKH7EJ+DAoIpRR6A==}
+    peerDependencies:
+      '@maskito/core': ^5.6.1
+      '@maskito/kit': ^5.6.1
+      libphonenumber-js: '>=1.0.0'
 
   '@napi-rs/wasm-runtime@1.2.7':
     resolution: {integrity: sha512-zJccwplOAbgfZju95IUHazLnx9RAPtPN2YGJXI6UbrgeaR9QfPjGrQL6ERkSAtnVCA4Q+83ApGyaX5zdpCaKkQ==}
@@ -6342,6 +6446,9 @@ packages:
 
   lezer-glimmer@2.0.3:
     resolution: {integrity: sha512-f8iv3pfuQmhUxa6csy6YX8aLBtaqh0ImfER1k7jjT4/QCRi5ZnFQTLaZOkUbwuPy0BGrmSoCvXGChODFgQsaCw==}
+
+  libphonenumber-js@1.13.16:
+    resolution: {integrity: sha512-tIOCM9yx2Go6d5/ZANe0K+G4AZek1Ymx81HxQpf19Sri4zMP95eQbKdnUGHAvFQ4nx0PeLhFqvAfisTADXj3tQ==}
 
   lightningcss-android-arm64@1.33.0:
     resolution: {integrity: sha512-gEpRTalKdosp4Bb8qWtc2iOgE5SeIHlpS1up9bFq2wAyYhl1UdTObYiHe98zEM9SQvSoqQZ1IQD0JNpg3Ml5pg==}
@@ -10543,6 +10650,18 @@ snapshots:
       yaml: 2.9.1
 
   '@marijn/find-cluster-break@1.0.4': {}
+
+  '@maskito/core@5.6.1': {}
+
+  '@maskito/kit@5.6.1(@maskito/core@5.6.1)':
+    dependencies:
+      '@maskito/core': 5.6.1
+
+  '@maskito/phone@5.6.1(@maskito/core@5.6.1)(@maskito/kit@5.6.1(@maskito/core@5.6.1))(libphonenumber-js@1.13.16)':
+    dependencies:
+      '@maskito/core': 5.6.1
+      '@maskito/kit': 5.6.1(@maskito/core@5.6.1)
+      libphonenumber-js: 1.13.16
 
   '@napi-rs/wasm-runtime@1.2.7(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
     dependencies:
@@ -14858,6 +14977,8 @@ snapshots:
       '@lezer/html': 1.3.13
       '@lezer/javascript': 1.5.6
       '@lezer/lr': 1.4.12
+
+  libphonenumber-js@1.13.16: {}
 
   lightningcss-android-arm64@1.33.0:
     optional: true

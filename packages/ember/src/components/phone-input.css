@@ -1,0 +1,52 @@
+/*
+ * The parts of @ember-joinery/maskito's PhoneInput, an opt-in add-on (on Maskito) that nothing in
+ * @ember-joinery/ember imports. Its rules live here, as every add-on's do, so joinery.css styles
+ * it with nothing more to import; an app without the add-on never renders these classes.
+ *
+ * Joinery's own: shadcn/ui has no phone input, so nothing here is ported from upstream's style
+ * sheets. The parts borrow the nearest shadcn components instead, which keeps them in each style's
+ * look: the field is an Input Group (its classes, from every style sheet), the country picker is
+ * a ghost Input Group Button opening a Select's content in the popper position, and each country
+ * is a Select item, its calling code muted as in upstream's button-group-select example. The masked
+ * Input (MaskedInput) is Input itself, so it needs no rules of its own.
+ */
+
+/* The flag, an emoji, sized to the text beside it. */
+:where(.jn-phone-input-flag) {
+  @apply text-base leading-none;
+}
+
+:where(.jn-phone-input-calling-code) {
+  @apply tabular-nums;
+}
+
+/* The trigger sits in the addon as Input Group's buttons do; its chevron is muted, as Select's. */
+:where(.jn-phone-input-trigger) {
+  @apply text-foreground;
+}
+
+:where(.jn-phone-input-chevron) {
+  @apply text-muted-foreground;
+}
+
+/*
+ * Wide enough for a country's name and calling code, and no taller than a long list needs. At
+ * select.css's popper rules' weight and one more (`:not(template)`, 0,0,1), since select.css comes
+ * after this file and its content's max height is the space left on the page.
+ */
+:where(.jn-phone-input-content):not(template) {
+  @apply max-h-72 w-72;
+}
+
+:where(.jn-phone-input-item-name) {
+  @apply truncate;
+}
+
+:where(.jn-phone-input-item-code) {
+  @apply text-muted-foreground tabular-nums;
+}
+
+/* A number reads left to right in any language; right to left, it sits at the field's start. */
+:where(.jn-input-group:dir(rtl) > .jn-phone-input-input) {
+  text-align: right;
+}

@@ -27,6 +27,7 @@
     "@ember-joinery/data-table": "workspace:*",
     "@ember-joinery/ember": "workspace:*",
     "@ember-joinery/file-upload": "workspace:*",
+    "@ember-joinery/maskito": "workspace:*",
     "@ember-joinery/power-calendar": "workspace:*",
     "@ember-joinery/primitives": "workspace:*",
     "@ember-joinery/test-support": "workspace:*",

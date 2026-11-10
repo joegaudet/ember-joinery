@@ -327,7 +327,7 @@ That is 67 docs pages: Toast and Sonner are two pages for one component.
 
 ### Size
 
-11 packages; ~67 shadcn components, ~15 components only ember-primitives has, ~20 utilities;
+12 packages; ~67 shadcn components, ~15 components only ember-primitives has, ~20 utilities;
 ~95 harness classes. The docs pages reference 497 examples, the charts gallery has 70, and we
 port 4 of the 27 blocks. Every ported example becomes a guide example with its own harness test
 and axe audit, so about 570 example tests, plus the integration suite. `--require-complete`

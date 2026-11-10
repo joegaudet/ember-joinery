@@ -1,7 +1,7 @@
-// What Radix's DropdownMenu and ContextMenu share, its `Menu`: a menu's content (focus, keys,
+// What Radix's DropdownMenu, ContextMenu and Menubar share, its `Menu`: a menu's content (focus, keys,
 // typeahead and the pointer's grace area on the way to a submenu), its items, checkbox and radio
-// items, labels, groups and separators, and its submenus. dropdown-menu.gts and context-menu.gts
-// are the public modules; this file is bundled into them.
+// items, labels, groups and separators, and its submenus. dropdown-menu.gts, context-menu.gts and
+// menubar.gts are the public modules; this file is bundled into them.
 //
 // The parts find each other through the DOM rather than through what binds them: an item is the
 // item of the nearest `role="menu"` above it (a submenu's content is rendered inside its
@@ -82,8 +82,8 @@ export interface MenuLevel {
 }
 
 /**
- * What every part of a menu reads from its root: a dropdown menu, a context menu, or (later) a
- * menubar's menu. dropdown-menu.gts and context-menu.gts each implement it.
+ * What every part of a menu reads from its root: a dropdown menu, a context menu, or a
+ * menubar's menu. dropdown-menu.gts, context-menu.gts and menubar.gts each implement it.
  */
 export interface MenuRoot extends MenuLevel {
   /** The root's id, which its contents name as their owner (`data-test-jn-owner`). */
@@ -96,6 +96,13 @@ export interface MenuRoot extends MenuLevel {
   readonly cssName: string
   /** Whether the user is using the keyboard, as Radix's root tracks it. */
   readonly isUsingKeyboard: boolean
+  /**
+   * Whether focus stays on the root content when it opens, though the keyboard is in use: a
+   * menubar's menu moves focus to its first item only when its trigger's keys opened it, as
+   * Radix's MenubarContent's `onEntryFocus` decides (ArrowRight to the next menu leaves focus on
+   * the menu itself). A submenu ignores it.
+   */
+  readonly preventsEntryFocus?: boolean
   /** Closes the whole menu, as selecting an item does. */
   close(): void
 }
@@ -291,6 +298,7 @@ export class MenuContentState {
    */
   #onFocusIn(event: FocusEvent): void {
     if (event.target !== this.element || !this.root.isUsingKeyboard) return
+    if (this.level === this.root && this.root.preventsEntryFocus) return
     this.focusEdge()
   }
 

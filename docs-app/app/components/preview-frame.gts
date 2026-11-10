@@ -41,6 +41,20 @@ function copyStyles(into: Document): Promise<void> {
 }
 
 /**
+ * Keeps the frame on its page when a form in the example submits to nowhere. A form with no
+ * `action` submits to its document's address, which for the frame is `about:srcdoc`: the frame
+ * would navigate away and show nothing. Upstream's block pages, each in a frame of their own
+ * address, reload instead, so a login form's submit leaves the block as it was; this does the
+ * same for the guide's. A form with an `action`, or `method="dialog"`, goes on as it would.
+ */
+function stayPut(event: Event): void {
+  // The frame's own HTMLFormElement, which `instanceof` on the page's wouldn't recognise.
+  const form = event.target as HTMLFormElement | null
+  if (!form || form.hasAttribute('action') || form.method === 'dialog') return
+  event.preventDefault()
+}
+
+/**
  * An example at a given viewport width. The preview renders inside an `<iframe>` that wide, so
  * the example's breakpoints (`sm:`, `md:`) and its components' respond to that width, as they
  * would on a phone or a tablet. The block renders into the frame's body (Glimmer's
@@ -70,6 +84,7 @@ export default class PreviewFrame extends Component<PreviewFrameSignature> {
         })
         observer.observe(doc.body)
       }
+      doc.addEventListener('submit', stayPut)
       this.body = doc.body
       done()
     }
@@ -78,6 +93,7 @@ export default class PreviewFrame extends Component<PreviewFrameSignature> {
     void waitForPromise(loaded)
     return () => {
       iframe.removeEventListener('load', onLoad)
+      iframe.contentDocument?.removeEventListener('submit', stayPut)
       observer?.disconnect()
       done()
     }

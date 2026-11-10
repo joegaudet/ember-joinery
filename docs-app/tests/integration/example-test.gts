@@ -396,6 +396,22 @@ module('Integration | <Example>', function (hooks) {
     await a11yAudit()
   })
 
+  test("a form in the frame that submits to nowhere doesn't empty it", async function (assert) {
+    await render(<template><Example @name="login-01" @title="Login" @block={{true}} /></template>)
+    await waitUntil(() => find('iframe')?.contentDocument?.querySelector('form'))
+    const frame = find('iframe') as HTMLIFrameElement
+    const doc = frame.contentDocument!
+    const form = doc.querySelector('form')!
+    for (const input of form.querySelectorAll('input')) input.value = 'm@example.com'
+    let prevented = false
+    doc.addEventListener('submit', event => (prevented = event.defaultPrevented))
+    form.requestSubmit()
+    assert.true(prevented, 'the submit stops at the frame')
+    assert.strictEqual(frame.contentDocument, doc, 'the frame keeps its page')
+    assert.dom(doc.querySelector('[data-slot="card"]')).exists('and the block in it')
+    await a11yAudit()
+  })
+
   test('a missing example says so instead of failing the page', async function (assert) {
     await render(<template><Example @name="no-such-example" /></template>)
     assert.dom('.example-missing[role="alert"]').includesText('no-such-example')

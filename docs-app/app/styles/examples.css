@@ -169,3 +169,15 @@
     box-sizing: border-box;
   }
 }
+
+/*
+ * The data table's examples draw a border round the table on a plain element
+ * (`overflow-hidden rounded-md border`), which on ui.shadcn.com takes `--border` from shadcn's
+ * base layer (`* { border-color: var(--border) }`). Joinery's parts get that colour from
+ * joinery.css; this gives it to those examples' own elements, below the utilities as above.
+ */
+@layer guide {
+  :where([data-example|='data-table'], [data-parity|='data-table']) :where(*) {
+    border-color: var(--border);
+  }
+}

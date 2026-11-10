@@ -78,8 +78,7 @@ import { InputOTP, REGEXP_ONLY_DIGITS_AND_CHARS } from '@ember-joinery/ember'
 </template>
 ```
 
-Upstream's example, digits only in a Field with a label, comes with Field. The
-[Four Digits](#four-digits) and [Alphanumeric](#alphanumeric) examples below use patterns too.
+<Example @name="input-otp-pattern" @title="Pattern" />
 
 ## Separator
 
@@ -119,8 +118,7 @@ Use `REGEXP_ONLY_DIGITS_AND_CHARS` to accept both letters and numbers.
 
 ## Form
 
-Upstream's example, a "Verify your login" [Card](/components/card.md) with a resend
-[Button](/components/button.md) and a verification code in a Field, comes with Field.
+<Example @name="input-otp-form" @title="Form" />
 
 ## RTL
 
@@ -129,7 +127,9 @@ with `dir="rtl"` (see [Direction](/primitives/direction.md)), and each group's r
 follow. The arrow keys follow the slots: `ArrowLeft` selects the next character, on the left,
 and `ArrowRight` the one before. input-otp leaves the arrows to the browser, which moves through
 the code as the left-to-right run of digits it is, the wrong way across slots that run right
-to left. Upstream's right-to-left example, in a Field with an Arabic label, comes with Field.
+to left.
+
+<Example @name="input-otp-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 

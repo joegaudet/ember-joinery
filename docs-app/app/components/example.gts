@@ -44,6 +44,21 @@ interface ExampleSignature {
      * content. The parity map's `fullWidth` does the same on both parity stages.
      */
     fullWidth?: boolean
+    /**
+     * Upstream's `previewClassName`, as its docs page gives it: Tailwind classes on the preview
+     * itself, such as its height (`h-96`, for a menu that opens below the example).
+     * examples.css compiles the ones the pages use (its `@source inline()`), and the guide's
+     * unit tests check each against upstream/inventory.json. The parity stages leave them out,
+     * so the screenshots compare the examples themselves (parity/README.md).
+     */
+    previewClass?: string
+    /**
+     * `visible` where upstream's frame doesn't clip the preview (its
+     * `className="overflow-visible"`): a part that hangs below the example without being in the
+     * top layer, as a navigation menu's viewport does, shows in full, over what follows the
+     * frame, instead of being cut off at its edge.
+     */
+    overflow?: 'visible'
   }
 }
 
@@ -202,7 +217,13 @@ export class Example extends Component<ExampleSignature> {
   }
 
   <template>
-    <figure class="example" id={{this.id}} data-test-example={{@name}} ...attributes>
+    <figure
+      class="example"
+      id={{this.id}}
+      data-test-example={{@name}}
+      data-overflow={{@overflow}}
+      ...attributes
+    >
       <figcaption class="example-bar">
         <span class="example-title">{{if @title @title @name}}</span>
         <div class="example-tabs" role="tablist" aria-label="Example views">
@@ -300,7 +321,7 @@ export class Example extends Component<ExampleSignature> {
                 <PreviewFrame @width={{this.width}} @title={{this.frameTitle}}>
                   {{#each this.themeKey key="@identity"}}
                     <div
-                      class="example-preview guide-stage {{if this.dark 'dark'}}"
+                      class="example-preview guide-stage {{if this.dark 'dark'}} {{@previewClass}}"
                       data-example={{@name}}
                       data-align={{if @align @align "center"}}
                       data-full-width={{if @fullWidth "true"}}
@@ -316,7 +337,7 @@ export class Example extends Component<ExampleSignature> {
             {{else}}
               {{#each this.themeKey key="@identity"}}
                 <div
-                  class="example-preview guide-stage {{if this.dark 'dark'}}"
+                  class="example-preview guide-stage {{if this.dark 'dark'}} {{@previewClass}}"
                   data-example={{@name}}
                   data-align={{if @align @align "center"}}
                   data-full-width={{if @fullWidth "true"}}

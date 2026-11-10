@@ -446,6 +446,26 @@
     box-shadow: 0 18px 50px -30px rgb(163 72 10 / 0.4);
   }
 
+  /*
+   * `@overflow="visible"`, as upstream's `overflow-visible` on a frame: what overflows the
+   * preview (a navigation menu's viewport, which hangs below its list and isn't in the top
+   * layer) shows over what follows the frame instead of being cut off. With nothing clipped to
+   * the frame's rounded corners, the parts at its corners round their own.
+   */
+  .example[data-overflow='visible'] {
+    overflow: visible;
+  }
+
+  .example[data-overflow='visible'] > .example-bar {
+    border-start-start-radius: 15px;
+    border-start-end-radius: 15px;
+  }
+
+  .example[data-overflow='visible'] > .example-panel > :last-child {
+    border-end-start-radius: 15px;
+    border-end-end-radius: 15px;
+  }
+
   .example-bar {
     display: flex;
     flex-wrap: wrap;

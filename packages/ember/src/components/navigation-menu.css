@@ -39,15 +39,11 @@
   @apply absolute top-full start-0 isolate z-50 flex justify-center;
 }
 
-/*
- * data-slot="navigation-menu-viewport" in NavigationMenuViewport. Upstream's list starts with
- * `origin-top-center`, which isn't a Tailwind utility (ui.shadcn.com's build drops it, so its
- * viewport scales from the default origin, its centre); `@apply` would fail on it, so it is left
- * out here.
- */
+/* data-slot="navigation-menu-viewport" in NavigationMenuViewport */
 :where(.jn-navigation-menu-viewport) {
   @apply relative mt-1.5 h-(--radix-navigation-menu-viewport-height) w-full overflow-hidden md:w-(--radix-navigation-menu-viewport-width);
 }
+/* NOTE: upstream's list also has origin-top-center, which Tailwind has no utility for: it styles nothing on ui.shadcn.com, and @apply would fail on it, so it is left out. */
 
 /* data-slot="navigation-menu-indicator" in NavigationMenuIndicator */
 :where(.jn-navigation-menu-indicator) {
@@ -58,11 +54,3 @@
 :where(.jn-navigation-menu-indicator-arrow) {
   @apply relative top-[60%] h-2 w-2 rotate-45;
 }
-
-/*
- * NOTE: upstream's demo gives a link the trigger's look (`navigationMenuTriggerStyle()`), and its
- * cn() merges the two with tailwind-merge, so where they conflict the trigger's utilities win:
- * its px-2.5 py-1.5 over the link's p-2, in Nova. Here both are the style sheet's rules, and the
- * link's comes after the trigger's, so the link's padding wins. A rule here can't reach the
- * trigger's padding, which each style sets differently, so such a link keeps the link's.
- */

@@ -50,6 +50,14 @@
 @source '../examples';
 
 /*
+ * The classes the pages give a preview with `<Example @previewClass="…">`, upstream's
+ * `previewClassName` (the Navigation Menu page's `h-96`). The pages themselves aren't scanned,
+ * since every word of their prose would become a utility; add a page's classes here, and
+ * docs-app/tests/unit/preview-classes-test.ts checks that each one is.
+ */
+@source inline('h-96');
+
+/*
  * Typography's examples are upstream's own markup: bare headings, paragraphs, a list, a
  * blockquote and a table, styled with nothing but utility classes. On ui.shadcn.com, as in any
  * Tailwind app (the only kind those classes work in), they sit on Tailwind's preflight and the

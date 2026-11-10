@@ -98,7 +98,11 @@ and the token mapping, none of it emitted),
 then, in `@layer joinery`, `src/css/base.css` (the radius scale, and the share of Tailwind's
 preflight upstream's parts rely on, scoped to `[data-slot]`), the ported sheet, and every
 component's own CSS (`src/components/**/*.css`, A–Z). The script writes that entry itself, so a
-component's CSS file needs no list edited. Everything it ships is in that layer, but for what
+component's CSS file needs no list edited. Between the sheet and the components' CSS it puts the
+`MERGED` rules (listed in the script): where upstream gives one element two semantic classes
+and its tailwind-merge lets the earlier rule's utilities beat the later's (a Navigation Menu
+link with `navigationMenuTriggerStyle()` takes the trigger's padding), the winning class's rule
+from that style's sheet is repeated for an element with both. Everything it ships is in that layer, but for what
 Tailwind emits for the rules to use (`@property` registrations, keyframes, `@layer
 properties`): the build fails on any other unlayered rule, which would beat an app's own
 layered CSS (it drops the one shadcn's `tailwind.css` keeps for a bare `.shimmer` class). In
@@ -176,7 +180,10 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    writes utility classes inline in the component. For those, run
    `node scripts/extract-classes.mjs <name> --out packages/ember/src/components/<name>.css`: it
    writes them as `@apply` rules, which the build puts after the style sheet's rules. Keep its
-   output whole, because the order is upstream's. Upstream's
+   output whole, because the order is upstream's. A class Tailwind has no utility for
+   (navigation-menu's `origin-top-center`) styles nothing on ui.shadcn.com and would fail
+   `@apply`, so the script asks Tailwind, set up as the build is, and leaves each such class out
+   under a `NOTE`. Upstream's
    registry build (shadcn's `transformStyle`) swaps each semantic class for its style rule's
    utilities, and of two conflicting classes the later wins. Where the rule's utilities land
    depends on the call:
@@ -526,7 +533,14 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   with `<Example @name="…" />` (add `@title`, `@align="start"` where upstream's preview aligns
   it, and `@fullWidth={{true}}` where upstream shows it full width: the chart demo's
   `[&_.preview>div]:w-full`, the charts gallery's interactive and tooltip charts; map those with
-  `"fullWidth": true` too, so both parity stages widen them). The frame has Preview, Template
+  `"fullWidth": true` too, so both parity stages widen them). Where upstream's
+  `<ComponentPreview>` sizes its preview (`previewClassName`) or lets it overflow its frame
+  (`className="overflow-visible"`), as `upstream/inventory.json` records, pass the same:
+  `@previewClass="h-96"` puts upstream's classes on the preview (add each class to
+  `@source inline()` in `docs-app/app/styles/examples.css`, which compiles them), and
+  `@overflow="visible"` stops the frame clipping a part that hangs below the example outside the
+  top layer, as a navigation menu's viewport does. `docs-app/tests/unit/preview-classes-test.ts`
+  checks both against the inventory; the parity stages leave them out. The frame has Preview, Template
   and Test tabs and a copy button. Above the preview, switchers show it in any of the eight
   styles, base colours and radii, light or dark, right to left, and in a 375, 768 or 1440px
   viewport (an `<iframe>` that wide, so the breakpoints respond). The guide loads every style,

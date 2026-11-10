@@ -2,7 +2,7 @@
 
 A collection of links for navigating websites.
 
-<Example @name="navigation-menu-demo" @title="Navigation Menu" />
+<Example @name="navigation-menu-demo" @title="Navigation Menu" @previewClass="h-96" @overflow="visible" />
 
 ## Installation
 
@@ -59,7 +59,8 @@ NavigationMenu (as |n|)
 │   │       └── n.Link
 │   └── n.Item
 │       └── n.Link
-└── n.Indicator
+├── n.Indicator
+└── n.Viewport (with @viewport={{false}})
 ```
 
 ## Link Component
@@ -85,10 +86,9 @@ import { NavigationMenu, navigationMenuTriggerStyle } from '@ember-joinery/ember
 </template>
 ```
 
-Upstream merges the two looks with tailwind-merge, so the trigger's padding wins over the
-link's; in Joinery both are style sheet rules, and the link's padding wins (in Nova, 8px all
-round rather than the trigger's 10px by 6px). Give the link a padding class of your own where it
-matters.
+Upstream merges the two looks with tailwind-merge, so where they conflict the trigger's wins:
+its padding over the link's (in Nova, 10px by 6px rather than 8px all round). Joinery's styles
+do the same for an element with both classes.
 
 ## RTL
 
@@ -97,7 +97,7 @@ Joinery's components take their direction from the nearest `dir` (see
 link, the viewport starts at the right, and the contents slide in from the side their triggers
 are on.
 
-<Example @name="navigation-menu-rtl" @title="RTL" @dir="rtl" />
+<Example @name="navigation-menu-rtl" @title="RTL" @dir="rtl" @previewClass="h-96" @overflow="visible" />
 
 ## API Reference
 
@@ -117,7 +117,8 @@ are on.
 | `@as`                | `string`                     | `nav`        | The tag to render                                                  |
 
 It renders a `<nav aria-label="Main">` (give it an `aria-label` of your own where a page has
-more than one) and yields `{ List, Item, Link, Indicator, link, value, isOpen, setValue }`.
+more than one) and yields `{ List, Item, Link, Indicator, Viewport, link, value, isOpen,
+setValue }`.
 
 ### n.List and n.Item
 
@@ -129,7 +130,9 @@ Content, trigger, value, isOpen }`.
 
 A `<button>` (`@as` for another tag) with a chevron after its text that turns while its content
 is open; `@icon` replaces it, and `@disabled` keeps it shut. `{{item.trigger}}` makes your own
-element the trigger, with the Trigger's classes and attributes.
+element the trigger, with the Trigger's classes and attributes (the chevron is yours). While its
+content is open, the item puts the focus proxy and the `aria-owns` after it, as the Trigger has
+them: keep it the item's only element besides its content.
 
 ### item.Content
 
@@ -153,6 +156,12 @@ as upstream's function does.
 
 A small arrow under the open trigger, as wide as it and moved along to it (`data-state` is
 `visible` while a content is open); `@forceMount` keeps it rendered.
+
+### n.Viewport
+
+The panel the contents show in, below the list, sized to the open one. The menu renders one
+itself; with `@viewport={{false}}`, `<n.Viewport />` places one where you put it, as upstream's
+`NavigationMenuViewport`. `@forceMount` keeps it rendered while nothing is open.
 
 ### Data attributes
 

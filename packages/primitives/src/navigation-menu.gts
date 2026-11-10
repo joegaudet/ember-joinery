@@ -476,6 +476,29 @@ interface TriggerSignature {
 }
 
 /**
+ * Triggers whose Trigger component renders their focus proxy, right after them. An item renders
+ * one at its end for any other: a trigger of the caller's own (`{{item.trigger}}`).
+ */
+const proxiedTriggers = new WeakSet<Element>()
+
+const rendersOwnProxy = functionModifier((element: HTMLElement) => {
+  proxiedTriggers.add(element)
+  return () => proxiedTriggers.delete(element)
+})
+
+/**
+ * What follows an open trigger: the focus proxy, which sends Tab into the content (and Shift+Tab
+ * from what comes after into its end), and with a Viewport an `aria-owns`, which puts the
+ * content after the trigger for assistive technology.
+ */
+const FocusProxy: TOC<{ Args: { item: NavigationMenuItem } }> = <template>
+  <span tabindex="0" data-test-jn-part="focus-proxy" {{visuallyHidden}} {{@item.focusProxy}} />
+  {{#if @item.root.hasViewport}}
+    <span aria-owns={{@item.contentId}} />
+  {{/if}}
+</template>
+
+/**
  * A `<button>` that opens its item's content. While it is open, a focus proxy after it sends
  * Tab into the content, and (with a Viewport) an `aria-owns` puts the content after it for
  * assistive technology, wherever it is rendered.
@@ -487,12 +510,10 @@ const NavigationMenuTrigger: TOC<TriggerSignature> = <template>
     disabled={{@disabled}}
     ...attributes
     {{@item.trigger disabled=@disabled}}
+    {{rendersOwnProxy}}
   >{{yield}}</As>
   {{#if @item.isOpen}}
-    <span tabindex="0" data-test-jn-part="focus-proxy" {{visuallyHidden}} {{@item.focusProxy}} />
-    {{#if @item.root.hasViewport}}
-      <span aria-owns={{@item.contentId}} />
-    {{/if}}
+    <FocusProxy @item={{@item}} />
   {{/if}}
 </template>
 
@@ -875,6 +896,18 @@ export class NavigationMenuItem extends Component<NavigationMenuItemSignature> {
     return withLook(spec, this.args.triggerLook)
   })
 
+  /**
+   * Whether the item renders its trigger's focus proxy (and `aria-owns`) itself, at its end:
+   * while it is open, for a trigger of the caller's own (`<a {{item.trigger}}>`). The Trigger
+   * component renders its own, right after it. At the item's end, after a trigger that is its
+   * only content, it does the same: in the viewport's case the item holds nothing else, and
+   * without one, the content between them is taken out of the tab order as focus leaves it.
+   */
+  get rendersFocusProxy(): boolean {
+    const trigger = this.triggerRef.value
+    return this.isOpen && trigger !== null && !proxiedTriggers.has(trigger)
+  }
+
   /** The focus proxy after an open trigger: Tab onto it goes into the content. */
   focusProxy = part<HTMLElement>(() => ({
     attributes: {},
@@ -912,6 +945,9 @@ export class NavigationMenuItem extends Component<NavigationMenuItemSignature> {
           isOpen=this.isOpen
         )
       }}
+      {{#if this.rendersFocusProxy}}
+        <FocusProxy @item={{this}} />
+      {{/if}}
     </As>
   </template>
 }

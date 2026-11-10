@@ -10,8 +10,10 @@ content on a click, or when the pointer rests on it (at once while another was j
 contents show in a viewport below the list that takes the open one's size and slides each in
 from its trigger's side (`data-motion`), or below their own triggers with `@viewport={{false}}`.
 Tab goes from an open trigger into its links and on, and the arrow keys, Home and End move
-between triggers and links. `n.Indicator` follows the open trigger, and
-`navigationMenuTriggerStyle()` gives a link the trigger's look. Its state is
+between triggers and links, for a trigger of your own (`{{item.trigger}}`) as for `item.Trigger`.
+`n.Indicator` follows the open trigger, `n.Viewport` places the viewport yourself with
+`@viewport={{false}}`, and `navigationMenuTriggerStyle()` gives a link the trigger's look, its
+padding over the link's, as upstream's tailwind-merge gives it. Its state is
 `@value`/`@defaultValue`/`@onValueChange`. `@ember-joinery/primitives/navigation-menu` is the
 headless one, with `List`, `Item`, `Link`, `Indicator` and `Viewport`, and
 `@ember-joinery/test-support` adds `NavigationMenuHarness`.

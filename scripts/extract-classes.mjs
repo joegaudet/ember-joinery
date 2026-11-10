@@ -69,9 +69,16 @@
 //
 // The rules' physical sides are made logical, as port-styles.mjs does to the sheets (see
 // rtl.mjs), so they hold right to left too; the checks above run on upstream's own classes.
+//
+// A class Tailwind has no utility for (navigation-menu's `origin-top-center`) styles nothing on
+// ui.shadcn.com, whose Tailwind build skips it, but `@apply` fails on it. The script asks
+// Tailwind, set up as the build compiles the styles (packages/ember's src/css/setup.css, so
+// shadcn's variants and the theme's colours count), and leaves each such class out of its rule
+// under a NOTE, so the output can be kept whole.
 
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
-import { basename, join, resolve } from 'node:path'
+import { createRequire } from 'node:module'
+import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { twMerge } from 'cn'
 import ts from 'typescript'
@@ -79,6 +86,66 @@ import { logicalClasses } from './rtl.mjs'
 import { PATHS, checkoutDir, repoRoot } from './upstream.mjs'
 
 const MARKER = /^(group|peer)(\/[\w-]+)?$/
+
+/**
+ * What `unknownUtilities` asks: the Tailwind packages/ember builds with, and the setup it
+ * compiles the styles with.
+ */
+export const TAILWIND_SETUP = {
+  tailwind: join(repoRoot, 'packages', 'ember', 'node_modules', 'tailwindcss', 'package.json'),
+  setup: join(repoRoot, 'packages', 'ember', 'src', 'css', 'setup.css'),
+}
+
+/** The `package.json` of `name`, from the nearest `node_modules` at or above `dir`. */
+function packageJson(name, dir) {
+  for (let at = dir; ; at = dirname(at)) {
+    const candidate = join(at, 'node_modules', name, 'package.json')
+    if (existsSync(candidate)) return candidate
+    if (dirname(at) === at) throw new Error(`extract-classes: can't find ${name} from ${dir}`)
+  }
+}
+
+/** Reads a style sheet `@import`ed from `base`, as Tailwind's design system asks for one. */
+async function loadStylesheet(id, base) {
+  let path
+  if (id.startsWith('.') || id.startsWith('/')) {
+    path = resolve(base, id)
+  } else {
+    // A package's CSS, through its exports (`style`, as tw-animate-css has) or by path.
+    const name = id
+      .split('/')
+      .slice(0, id.startsWith('@') ? 2 : 1)
+      .join('/')
+    const manifest = packageJson(name, base)
+    const json = JSON.parse(readFileSync(manifest, 'utf8'))
+    const subpath = id.slice(name.length)
+    const exported = json.exports?.[subpath ? `.${subpath}` : '.']
+    const file =
+      typeof exported === 'string'
+        ? exported
+        : (exported?.style ?? exported?.default ?? (subpath ? subpath.slice(1) : json.style))
+    path = resolve(dirname(manifest), file)
+  }
+  return { path, base: dirname(path), content: readFileSync(path, 'utf8') }
+}
+
+/**
+ * The classes among `candidates` that Tailwind has no utility for, set up as the build compiles
+ * the styles (TAILWIND_SETUP), so shadcn's own variants (`data-open:`) and utilities
+ * (`no-scrollbar`) and the theme's colours (`bg-popover`) all count.
+ */
+export async function unknownUtilities(candidates) {
+  // packages/ember's own Tailwind, as its package resolves it.
+  const require = createRequire(join(dirname(TAILWIND_SETUP.setup), '..', '..', 'package.json'))
+  const { __unstable__loadDesignSystem: loadDesignSystem } = require('tailwindcss')
+  const system = await loadDesignSystem(readFileSync(TAILWIND_SETUP.setup, 'utf8'), {
+    base: dirname(TAILWIND_SETUP.setup),
+    loadStylesheet,
+  })
+  const list = [...new Set(candidates)]
+  const css = system.candidatesToCss(list)
+  return new Set(list.filter((_candidate, index) => !css[index]))
+}
 
 /** The semantic classes transformStyle keeps on the element for its other transforms. */
 export const KEPT = new Set([
@@ -715,9 +782,10 @@ function transformNotes(entry, sheets) {
  * The inline utilities as CSS: one `@apply` rule per class string that has a slot, with the
  * markers and anything conditional or slot-less left as comments for the component to handle.
  * Entries that went through `findOverrides` also get the `:not()` rules and NOTEs it calls for.
- * `sheets: null` says the style sheets weren't there to check against.
+ * `sheets: null` says the style sheets weren't there to check against. A class in `unknown`
+ * (from `unknownUtilities`) stays out of every rule, under a NOTE.
  */
-export function renderCss(entries, { name, commit, sheets } = {}) {
+export function renderCss(entries, { name, commit, sheets, unknown = new Set() } = {}) {
   const lines = [
     '/*',
     ` * Inline utilities from ${PATHS.ui}/${name}.tsx${commit ? ` (shadcn-ui/ui@${commit.slice(0, 7)})` : ''},`,
@@ -776,10 +844,16 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
     for (const { utility, by, every } of overridden) {
       if (every) moved.set(utility, [...new Set([...(moved.get(utility) ?? []), by])].sort())
     }
-    const kept = entry.utilities.filter(utility => !moved.has(utility))
+    const kept = entry.utilities.filter(utility => !moved.has(utility) && !unknown.has(utility))
+    const dropped = entry.utilities.filter(utility => unknown.has(utility))
     lines.push(`/* ${describe(entry)}${notes.length ? `; ${notes.join('; ')}` : ''} */`)
     if (kept.length)
       lines.push(`${scope}:where(${subject}) {`, `  @apply ${logicalClasses(kept.join(' '))};`, '}')
+    if (dropped.length) {
+      lines.push(
+        `/* NOTE: upstream's list also has ${dropped.join(', ')}, which Tailwind has no utility for: ${plural(dropped.length, 'it styles', 'they style')} nothing on ui.shadcn.com, and @apply would fail on ${plural(dropped.length, 'it', 'them')}, so ${plural(dropped.length, 'it is', 'they are')} left out. */`,
+      )
+    }
     lines.push(...warnings)
     for (const { utility, by, styles } of overridden.filter(o => !o.every)) {
       lines.push(
@@ -788,6 +862,7 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
     }
     const groups = new Map()
     for (const [utility, classes] of moved) {
+      if (unknown.has(utility)) continue
       const key = classes.join(' ')
       groups.set(key, [...(groups.get(key) ?? []), utility])
     }
@@ -805,7 +880,7 @@ export function renderCss(entries, { name, commit, sheets } = {}) {
   return `${lines.join('\n')}\n`
 }
 
-function main(argv) {
+async function main(argv) {
   const flag = name => argv.includes(name)
   const option = name => {
     const index = argv.indexOf(name)
@@ -837,16 +912,24 @@ function main(argv) {
   }
   const extracted = extractClasses(readFileSync(file, 'utf8'), basename(file))
   const entries = sheets ? findOverrides(extracted, sheets) : extracted
+  let unknown
+  if (existsSync(TAILWIND_SETUP.tailwind)) {
+    unknown = await unknownUtilities(entries.flatMap(entry => entry.utilities))
+  } else {
+    console.error(
+      "extract-classes: packages/ember's Tailwind is missing (`pnpm install`), so classes Tailwind doesn't know are not left out",
+    )
+  }
   const output = flag('--json')
     ? `${JSON.stringify(entries, null, 2)}\n`
-    : renderCss(entries, { name: name ?? basename(file, '.tsx'), commit, sheets })
+    : renderCss(entries, { name: name ?? basename(file, '.tsx'), commit, sheets, unknown })
   if (option('--out')) writeFileSync(resolve(option('--out')), output)
   else process.stdout.write(output)
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    main(process.argv.slice(2))
+    await main(process.argv.slice(2))
   } catch (error) {
     console.error(error.message)
     process.exitCode = 1

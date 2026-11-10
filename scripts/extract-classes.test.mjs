@@ -1,6 +1,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { existsSync } from 'node:fs'
 import {
+  TAILWIND_SETUP,
   exclusive,
   extractClasses,
   findOverrides,
@@ -10,6 +12,7 @@ import {
   sheetRules,
   sizeMarker,
   splitClasses,
+  unknownUtilities,
 } from './extract-classes.mjs'
 
 const BUTTON = `
@@ -524,3 +527,41 @@ function Title() {
   assert.doesNotMatch(css, /^:where\(\.jn-rtl-flip\)/m, 'no rule moves every jn-rtl-flip icon')
   assert.doesNotMatch(css, /jn-separator\)/, 'an icon with no utilities needs no rule')
 })
+
+test("renderCss leaves out a class Tailwind doesn't know, under a NOTE, so the file stays whole", () => {
+  const entries = extractClasses(
+    'const x = cva("cn-x relative origin-top-center mt-1 hover:origin-top-center", { variants: {} })\n',
+  )
+  const css = renderCss(entries, {
+    name: 'x',
+    unknown: new Set(['origin-top-center', 'hover:origin-top-center']),
+  })
+  assert.match(css, /:where\(\.jn-x\) \{\n {2}@apply relative mt-1;\n\}/)
+  assert.match(
+    css,
+    /\/\* NOTE: upstream's list also has origin-top-center, hover:origin-top-center, which Tailwind has no utility for: they style nothing on ui\.shadcn\.com, [^*]*they are left out\. \*\//,
+  )
+  assert.doesNotMatch(css, /@apply[^;]*origin-top-center/, 'never @applied: the build would fail')
+
+  const all = renderCss(entries, { name: 'x' })
+  assert.match(all, /@apply relative origin-top-center mt-1 hover:origin-top-center;/, 'unchecked')
+})
+
+test(
+  "unknownUtilities asks Tailwind, with the build's own setup, which classes it has no utility for",
+  { skip: !existsSync(TAILWIND_SETUP.tailwind) && 'install the packages first' },
+  async () => {
+    const unknown = await unknownUtilities([
+      'origin-top-center',
+      'origin-top',
+      'data-open:bg-muted/50',
+      'group-data-[viewport=false]/navigation-menu:top-full',
+      'bg-popover',
+      'h-(--radix-navigation-menu-viewport-height)',
+      'no-scrollbar',
+      'zoom-in-90',
+      'ps-2',
+    ])
+    assert.deepEqual([...unknown], ['origin-top-center'])
+  },
+)

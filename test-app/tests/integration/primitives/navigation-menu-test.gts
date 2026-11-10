@@ -255,6 +255,98 @@ module('Integration | primitives | navigation-menu', function (hooks) {
     await a11yAudit()
   })
 
+  test('a trigger of your own, with the modifier, has the focus proxy and aria-owns too', async function (assert) {
+    await render(
+      <template>
+        <Styles />
+        <NavigationMenu class="nm-root" as |n|>
+          <n.List class="nm-list">
+            <n.Item @value="start" as |item|>
+              <button type="button" class="nm-trigger" {{item.trigger}}>Getting started</button>
+              <item.Content class="nm-content">
+                <n.Link href="#intro">Introduction</n.Link>
+                <n.Link href="#install">Installation</n.Link>
+              </item.Content>
+            </n.Item>
+            <n.Item @value="components" as |item|>
+              <item.Trigger class="nm-trigger">Components</item.Trigger>
+              <item.Content class="nm-content"><n.Link href="#tabs">Tabs</n.Link></item.Content>
+            </n.Item>
+          </n.List>
+          <n.Viewport class="nm-viewport" />
+        </NavigationMenu>
+      </template>,
+    )
+    const nav = new NavigationMenuHarness()
+    const start = nav.item('Getting started')
+    await start.openWithKeyboard()
+    await settled()
+    assert.true(start.isOpen)
+    const item = start.trigger.closest('li')!
+    assert
+      .dom('[data-test-jn-part="focus-proxy"]', item)
+      .exists({ count: 1 }, 'the item renders the proxy, after the trigger')
+    assert
+      .dom(`[aria-owns="${start.content!.id}"]`, item)
+      .exists('and owns the content after it, for assistive technology')
+    await tab()
+    assert.strictEqual(nav.focused, 'Introduction', 'Tab goes into the content')
+    await tab()
+    await tab()
+    assert.strictEqual(nav.focused, 'Components', 'and out to the next trigger')
+    await tab({ shift: true })
+    assert.strictEqual(nav.focused, 'Installation', 'Shift+Tab goes back in, at its end')
+    await a11yAudit()
+
+    await nav.item('Components').open()
+    assert
+      .dom('[data-test-jn-part="focus-proxy"]', nav.element)
+      .exists({ count: 1 }, 'only the open trigger’s, which its Trigger renders')
+    assert.strictEqual(
+      nav.trigger('Components').nextElementSibling?.getAttribute('data-test-jn-part'),
+      'focus-proxy',
+      'right after it',
+    )
+    await a11yAudit()
+  })
+
+  test('without a viewport, Tab goes through a modifier trigger’s content and on', async function (assert) {
+    await render(
+      <template>
+        <Styles />
+        <NavigationMenu as |n|>
+          <n.List class="nm-list">
+            <n.Item as |item|>
+              <button type="button" class="nm-trigger" {{item.trigger}}>Learn</button>
+              <item.Content class="nm-content">
+                <n.Link href="#a">A</n.Link>
+                <n.Link href="#b">B</n.Link>
+              </item.Content>
+            </n.Item>
+            <n.Item><n.Link href="#docs">Docs</n.Link></n.Item>
+          </n.List>
+        </NavigationMenu>
+      </template>,
+    )
+    const nav = new NavigationMenuHarness()
+    const learn = nav.item('Learn')
+    for (const round of ['first', 'second']) {
+      await learn.openWithKeyboard()
+      await settled()
+      assert.dom(`[aria-owns]`, nav.element).doesNotExist('nothing to re-parent')
+      await tab()
+      assert.strictEqual(nav.focused, 'A', `${round} time: Tab goes into the content`)
+      await tab()
+      await tab()
+      assert.strictEqual(nav.focused, 'Docs', 'and on past it')
+      await tab({ shift: true })
+      assert.strictEqual(nav.focused, 'B', 'Shift+Tab goes back in, at its end')
+      await nav.pressEscape()
+      assert.false(learn.isOpen)
+    }
+    await a11yAudit()
+  })
+
   test('ArrowDown on an open trigger enters its content; the arrows move between triggers and links', async function (assert) {
     const state = new State()
     await render(<template><Menu @state={{state}} /></template>)

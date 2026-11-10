@@ -208,7 +208,10 @@ interface ViewportSignature {
   Element: HTMLDivElement
 }
 
-/** The panel every content shows in, below the list, sized to the open content. */
+/**
+ * The panel every content shows in, below the list, sized to the open content. The root renders
+ * one; with `@viewport={{false}}`, `<n.Viewport />` places one yourself.
+ */
 const NavigationMenuViewport: TOC<ViewportSignature> = <template>
   <div class="jn-navigation-menu-viewport-wrapper">
     <@Part
@@ -232,6 +235,11 @@ export interface NavigationMenuBlockParams {
   Link: WithBoundArgs<typeof NavigationMenuLink, 'Part'>
   /** A small arrow under the open trigger. */
   Indicator: WithBoundArgs<typeof NavigationMenuIndicator, 'Part'>
+  /**
+   * The panel the contents show in, for placing it yourself with `@viewport={{false}}` (the
+   * root renders one below the list otherwise).
+   */
+  Viewport: WithBoundArgs<typeof NavigationMenuViewport, 'Part'>
   /** Makes your own element a link, styled as one: `<LinkTo @route="docs" {{n.link}}>`. */
   link: PartModifier<HTMLElement, NavigationMenuLinkOptions>
   /** The open item's value, or `''`. */
@@ -303,6 +311,7 @@ const NavigationMenu: TOC<NavigationMenuSignature> = <template>
         Item=(component NavigationMenuItem Part=n.Item)
         Link=(component NavigationMenuLink Part=n.Link)
         Indicator=(component NavigationMenuIndicator Part=n.Indicator)
+        Viewport=(component NavigationMenuViewport Part=n.Viewport)
         link=n.link
         value=n.value
         isOpen=n.isOpen

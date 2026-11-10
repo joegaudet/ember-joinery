@@ -36,8 +36,9 @@ whenever it isn't Nova, the route's default. When it has rendered and its fonts 
 The stage is not the docs page's preview box. On ui.shadcn.com, a `<ComponentPreview>` can also
 size and pad that box with `previewClassName` (`h-96 p-0`, or the Accordion page's
 `*:data-[slot=accordion]:max-w-sm`), and style its frame with `className` (the chart demo's
-`theme-blue`). The inventory records both for each example, for the guide's example frames, but
-neither side of the comparison applies them: both stages are the same plain box, so the
+`theme-blue`). The inventory records both for each example, for the guide's example frames
+(`<Example @previewClass="h-96" @overflow="visible">` on the Navigation Menu page), but neither
+side of the comparison applies them: both stages are the same plain box, so the
 screenshots compare the examples themselves. So an example can look narrower or taller on
 ui.shadcn.com than it does here (the Accordion examples are 512px wide here and 384px there).
 The one exception is width: an example upstream shows full width (the chart demo's

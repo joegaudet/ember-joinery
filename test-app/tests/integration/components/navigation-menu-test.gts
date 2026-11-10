@@ -1,7 +1,7 @@
 import { module, test } from 'qunit'
 import type { TOC } from '@ember/component/template-only'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { render } from '@ember/test-helpers'
+import { render, settled } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
 import { NavigationMenu, navigationMenuTriggerStyle } from '@ember-joinery/ember'
@@ -28,7 +28,7 @@ function finishAnimations(element: Element) {
 }
 
 /** Upstream's demo, cut down: two triggers with contents of their own width, and a link. */
-const Demo: TOC<{ Args: { viewport?: boolean } }> = <template>
+const Demo: TOC<{ Args: { viewport?: boolean; indicator?: boolean } }> = <template>
   <NavigationMenu @viewport={{@viewport}} @name="site" as |n|>
     <n.List>
       <n.Item @value="start" as |item|>
@@ -52,8 +52,14 @@ const Demo: TOC<{ Args: { viewport?: boolean } }> = <template>
         <n.Link href="#docs" class={{(navigationMenuTriggerStyle)}}>Docs</n.Link>
       </n.Item>
     </n.List>
+    {{#if @indicator}}
+      <n.Indicator />
+    {{/if}}
   </NavigationMenu>
 </template>
+
+/** An element's classes, in order, to compare two elements' as sets. */
+const classes = (element: Element) => [...element.classList].sort()
 
 module('Integration | components | navigation-menu', function (hooks) {
   setupRenderingTest(hooks)
@@ -137,6 +143,15 @@ module('Integration | components | navigation-menu', function (hooks) {
     assert.strictEqual(trigger.borderTopLeftRadius, '10px', 'rounded-lg')
     assert.strictEqual(px(trigger.fontSize), 14, 'text-sm')
     assert.strictEqual(trigger.fontWeight, '500', 'font-medium')
+    const docs = getComputedStyle(nav.listLink('Docs'))
+    assert.strictEqual(
+      docs.paddingInlineStart,
+      '10px',
+      'a link with navigationMenuTriggerStyle() takes the trigger’s px-2.5, as tailwind-merge gives it upstream',
+    )
+    assert.strictEqual(docs.paddingTop, '6px', 'and its py-1.5, over the link’s p-2')
+    assert.strictEqual(docs.height, '36px', 'h-9')
+    assert.strictEqual(docs.fontWeight, '500', 'font-medium')
     const icon = start.trigger.querySelector('svg')!
     assert.strictEqual(getComputedStyle(icon).width, '12px', 'its chevron is size-3')
     assert.strictEqual(getComputedStyle(icon).marginInlineStart, '4px', 'ms-1')
@@ -223,6 +238,160 @@ module('Integration | components | navigation-menu', function (hooks) {
       start.trigger.offsetHeight + 6,
       'below its trigger (top-full), 6px off',
     )
+    await a11yAudit()
+  })
+
+  test('the trigger and link modifiers render what Trigger and Link do', async function (assert) {
+    await render(
+      <template>
+        <NavigationMenu as |n|>
+          <n.List>
+            <n.Item @value="mine" as |item|>
+              <button type="button" {{item.trigger}}>Mine</button>
+              <item.Content>
+                <a href="#own" {{n.link}}>Own link</a>
+                <n.Link href="#theirs">Their link</n.Link>
+              </item.Content>
+            </n.Item>
+            <n.Item @value="start" as |item|>
+              <item.Trigger>Getting started</item.Trigger>
+              <item.Content><n.Link href="#intro">Introduction</n.Link></item.Content>
+            </n.Item>
+          </n.List>
+        </NavigationMenu>
+      </template>,
+    )
+    const nav = new NavigationMenuHarness()
+    const mine = nav.item('Mine')
+    const trigger = nav.trigger('Getting started')
+    assert.deepEqual(classes(mine.trigger), classes(trigger), 'the Trigger’s classes')
+    assert.dom(mine.trigger).hasAttribute('data-slot', 'navigation-menu-trigger')
+    const own = getComputedStyle(mine.trigger)
+    assert.strictEqual(own.height, '36px', 'styled as one: h-9')
+    assert.strictEqual(own.paddingInlineStart, '10px', 'px-2.5')
+    await a11yAudit()
+
+    await mine.openWithKeyboard()
+    await settled()
+    const link = mine.link('Own link')
+    assert.deepEqual(classes(link), classes(mine.link('Their link')), 'the Link’s classes')
+    assert.dom(link).hasAttribute('data-slot', 'navigation-menu-link')
+    assert.strictEqual(getComputedStyle(link).paddingTop, '8px', 'styled as one: p-2')
+    await tab()
+    assert.strictEqual(nav.focused, 'Own link', 'Tab goes from your trigger into its content')
+    await a11yAudit()
+  })
+
+  test('the indicator: a small arrow under the open trigger, as wide as it', async function (assert) {
+    await render(
+      <template>
+        <div style="position: fixed; top: 100px; left: 100px; width: 1000px">
+          <Demo @indicator={{true}} />
+        </div>
+      </template>,
+    )
+    const nav = new NavigationMenuHarness()
+    assert.strictEqual(nav.indicator, null, 'not rendered while nothing is open')
+    const start = nav.item('Getting started')
+    await start.open()
+    finishAnimations(nav.element)
+    const indicator = nav.indicator!
+    assert
+      .dom(indicator)
+      .hasClass('jn-navigation-menu-indicator')
+      .hasAttribute('data-slot', 'navigation-menu-indicator')
+      .hasAttribute('data-state', 'visible')
+      .hasAttribute('aria-hidden', 'true')
+    assert.strictEqual(indicator.parentElement, nav.list.parentElement, 'in the list’s track')
+    const style = getComputedStyle(indicator)
+    assert.strictEqual(style.display, 'flex')
+    assert.strictEqual(style.height, '6px', 'h-1.5')
+    assert.strictEqual(style.overflow, 'hidden')
+    assert.strictEqual(style.alignItems, 'flex-end', 'items-end')
+    assert.strictEqual(indicator.offsetTop, nav.list.parentElement!.offsetHeight, 'top-full')
+    assert.strictEqual(indicator.offsetWidth, start.trigger.offsetWidth, 'as wide as the trigger')
+    const arrow = indicator.querySelector('.jn-navigation-menu-indicator-arrow')!
+    const a = getComputedStyle(arrow)
+    assert.strictEqual(a.width, '8px', 'w-2')
+    assert.strictEqual(a.height, '8px', 'h-2')
+    assert.strictEqual(a.rotate, '45deg', 'rotate-45')
+    assert.strictEqual(a.backgroundColor, token('--border'), 'bg-border')
+    await a11yAudit()
+
+    const components = nav.item('Components')
+    await components.open()
+    assert.strictEqual(
+      indicator.style.transform,
+      `translateX(${components.trigger.offsetLeft}px)`,
+      'moved along to the open trigger',
+    )
+    await a11yAudit()
+  })
+
+  test('@as renders a part as another element, styled the same', async function (assert) {
+    await render(
+      <template>
+        <NavigationMenu @as="div" role="navigation" aria-label="Site" as |n|>
+          <n.List>
+            <n.Item @value="start" as |item|>
+              <item.Trigger @as="span" role="button" tabindex="0">Getting started</item.Trigger>
+              <item.Content @as="section">
+                <n.Link @as="button" type="button">Introduction</n.Link>
+              </item.Content>
+            </n.Item>
+          </n.List>
+        </NavigationMenu>
+      </template>,
+    )
+    const nav = new NavigationMenuHarness()
+    assert.dom(nav.element).hasTagName('div').hasClass('jn-navigation-menu')
+    const start = nav.item('Getting started')
+    assert
+      .dom(start.trigger)
+      .hasTagName('span')
+      .hasClass('jn-navigation-menu-trigger')
+      .hasAttribute('data-slot', 'navigation-menu-trigger')
+      .hasAttribute('aria-expanded', 'false')
+    assert.strictEqual(getComputedStyle(start.trigger).height, '36px', 'h-9')
+    await a11yAudit()
+
+    await start.open()
+    assert
+      .dom(start.content)
+      .hasTagName('section')
+      .hasClass('jn-navigation-menu-content')
+      .hasAttribute('data-slot', 'navigation-menu-content')
+    assert
+      .dom(start.link('Introduction'))
+      .hasTagName('button')
+      .hasClass('jn-navigation-menu-link')
+      .hasAttribute('data-slot', 'navigation-menu-link')
+    await a11yAudit()
+  })
+
+  test('with @viewport={{false}}, n.Viewport places the viewport yourself', async function (assert) {
+    await render(
+      <template>
+        <NavigationMenu @viewport={{false}} as |n|>
+          <n.List>
+            <n.Item @value="start" as |item|>
+              <item.Trigger>Getting started</item.Trigger>
+              <item.Content><n.Link href="#intro">Introduction</n.Link></item.Content>
+            </n.Item>
+          </n.List>
+          <n.Viewport />
+        </NavigationMenu>
+      </template>,
+    )
+    const nav = new NavigationMenuHarness()
+    assert.dom('.jn-navigation-menu-viewport-wrapper', nav.element).exists({ count: 1 })
+    const start = nav.item('Getting started')
+    await start.open()
+    assert
+      .dom(nav.viewport)
+      .hasClass('jn-navigation-menu-viewport')
+      .hasAttribute('data-slot', 'navigation-menu-viewport')
+    assert.ok(nav.viewport!.contains(start.content), 'the content shows in it')
     await a11yAudit()
   })
 

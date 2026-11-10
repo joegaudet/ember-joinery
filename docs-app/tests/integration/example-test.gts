@@ -2,6 +2,7 @@ import { module, test } from 'qunit'
 import { setupRenderingTest } from 'docs-app/tests/helpers'
 import { click, find, render, select, triggerKeyEvent, waitUntil } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
+import { NavigationMenuHarness } from '@ember-joinery/test-support'
 import { Example } from 'docs-app/components/example'
 
 const tab = (name: string) => `[data-test-example-tab="${name}"]`
@@ -207,6 +208,46 @@ module('Integration | <Example>', function (hooks) {
     )
     await waitUntil(() => find(svg))
     assert.dom(svg).exists('the chart draws')
+    await a11yAudit()
+  })
+
+  test('@previewClass and @overflow give the frame upstream’s preview height and overflow', async function (assert) {
+    // The Navigation Menu page's previews, as upstream's previewClassName="h-96" and
+    // className="overflow-visible": the viewport hangs below the list without being in the top
+    // layer, so a frame that clips cuts its content off.
+    await render(<template><Example @name="navigation-menu-demo" /></template>)
+    assert.dom('.example').doesNotHaveAttribute('data-overflow')
+    assert.strictEqual(getComputedStyle(find('.example')!).overflow, 'hidden', 'clipped')
+    assert.strictEqual(getComputedStyle(find('.example-preview')!).height, '288px', 'its 18rem')
+
+    await render(
+      <template>
+        <Example @name="navigation-menu-demo" @previewClass="h-96" @overflow="visible" />
+      </template>,
+    )
+    const frame = find('.example') as HTMLElement
+    const preview = find('.example-preview') as HTMLElement
+    assert.dom(frame).hasAttribute('data-overflow', 'visible')
+    assert.dom(preview).hasClass('h-96')
+    assert.strictEqual(getComputedStyle(preview).height, '384px', 'h-96, as upstream’s')
+    assert.strictEqual(getComputedStyle(frame).overflow, 'visible', 'nothing clipped')
+    assert.strictEqual(
+      getComputedStyle(find('.example-bar')!).borderTopLeftRadius,
+      '15px',
+      'the corners round themselves',
+    )
+    assert.strictEqual(getComputedStyle(preview).borderBottomRightRadius, '15px')
+
+    const components = new NavigationMenuHarness().item('Components')
+    await components.open()
+    const content = components.content!.getBoundingClientRect()
+    const box = frame.getBoundingClientRect()
+    assert.ok(content.bottom > box.bottom, 'the open content reaches past the frame…')
+    const covering = document.elementFromPoint(
+      content.left + content.width / 2,
+      (box.bottom + content.bottom) / 2,
+    )
+    assert.ok(components.content!.contains(covering), '…and shows there, over what follows')
     await a11yAudit()
   })
 

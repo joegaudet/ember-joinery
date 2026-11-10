@@ -348,4 +348,58 @@ module('Integration | components | menubar', function (hooks) {
       .hasAttribute('data-inset', 'true')
     await a11yAudit()
   })
+
+  test('@as renders a part as another element, styled the same', async function (assert) {
+    await render(
+      <template>
+        <Menubar @as="span" as |bar|>
+          <bar.Menu as |m|>
+            <m.Trigger @as="span">File</m.Trigger>
+            <m.Content>
+              <m.Group @as="section">
+                <m.Label @as="span">Tabs</m.Label>
+                <m.Item @as="span">New Tab</m.Item>
+              </m.Group>
+              <m.Separator @as="span" />
+              <m.CheckboxItem @as="span" @checked={{true}}>Bookmarks Bar</m.CheckboxItem>
+            </m.Content>
+          </bar.Menu>
+        </Menubar>
+      </template>,
+    )
+    const menubar = new MenubarHarness()
+    assert
+      .dom(menubar.element)
+      .hasTagName('span')
+      .hasClass('jn-menubar')
+      .hasAttribute('role', 'menubar')
+    assert.strictEqual(getComputedStyle(menubar.element).height, '32px', 'h-8')
+    const file = menubar.menu('File')
+    assert
+      .dom(file.trigger)
+      .hasTagName('span')
+      .hasClass('jn-menubar-trigger')
+      .hasAttribute('data-slot', 'menubar-trigger')
+      .hasAttribute('role', 'menuitem')
+    assert.strictEqual(getComputedStyle(file.trigger).paddingInlineStart, '6px', 'px-1.5')
+    await a11yAudit()
+
+    await file.open()
+    const content = file.content!
+    assert.dom('section[data-slot="menubar-group"]', content).exists()
+    assert.dom('span[data-slot="menubar-label"]', content).hasText('Tabs')
+    assert
+      .dom(file.item('New Tab'))
+      .hasTagName('span')
+      .hasClass('jn-menubar-item')
+      .hasAttribute('data-slot', 'menubar-item')
+      .hasAttribute('role', 'menuitem')
+    assert.dom('span[data-slot="menubar-separator"]', content).hasAttribute('role', 'separator')
+    assert
+      .dom(file.item('Bookmarks Bar'))
+      .hasTagName('span')
+      .hasAttribute('data-slot', 'menubar-checkbox-item')
+      .hasAttribute('aria-checked', 'true')
+    await a11yAudit()
+  })
 })

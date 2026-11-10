@@ -39,7 +39,9 @@ export interface CommandInputSignature {
 
 /**
  * The search box, with its icon, in upstream's InputGroup: a wrapper, the group, the input and
- * an addon at its start that holds the icon.
+ * an addon at its start that holds the icon. It renders InputGroup's markup and classes rather
+ * than `<InputGroup>`, whose `data-test-jn="input-group"` root would make the input that
+ * group's part, not the command's, so `CommandHarness` couldn't reach it.
  */
 const CommandInput: TOC<CommandInputSignature> = <template>
   <div class="jn-command-input-wrapper" data-slot="command-input-wrapper">

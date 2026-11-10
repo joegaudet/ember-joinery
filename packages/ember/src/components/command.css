@@ -50,20 +50,7 @@
 }
 
 /*
- * CommandInput renders upstream's InputGroup and InputGroupAddon around the input: these are
- * their inline utilities, from apps/v4/registry/bases/radix/ui/input-group.tsx (the output of
- * `node scripts/extract-classes.mjs input-group` for the two parts and the one alignment
- * Command uses), scoped to the command's group. Its `group/input-group` marker stays on the
- * element.
+ * CommandInput renders upstream's InputGroup and InputGroupAddon around the input, with their
+ * classes (`jn-input-group`, `jn-input-group-addon jn-input-group-addon-align-inline-start`), so
+ * input-group.css gives them InputGroup's inline utilities, as upstream's do.
  */
-:where(.jn-command-input-group) {
-  @apply relative flex w-full min-w-0 items-center outline-none has-[>textarea]:h-auto;
-}
-
-:where(.jn-command-input-group > .jn-input-group-addon) {
-  @apply flex cursor-text items-center justify-center select-none;
-}
-
-:where(.jn-command-input-group > .jn-input-group-addon-align-inline-start) {
-  @apply order-first;
-}

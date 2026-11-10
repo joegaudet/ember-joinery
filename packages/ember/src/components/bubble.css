@@ -1,0 +1,28 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/bubble.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="bubble-group" in BubbleGroup */
+:where(.jn-bubble-group) {
+  @apply flex min-w-0 flex-col;
+}
+
+/* in bubbleVariants; keep on the element: group/bubble */
+:where(.jn-bubble) {
+  @apply relative flex w-fit min-w-0 flex-col;
+}
+
+/* data-slot="bubble-content" in BubbleContent */
+:where(.jn-bubble-content) {
+  @apply w-fit max-w-full min-w-0 overflow-hidden wrap-break-word [button]:text-start [button,a]:transition-colors;
+}
+
+/* in bubbleReactionsVariants */
+:where(.jn-bubble-reactions) {
+  @apply absolute z-10 flex w-fit items-center justify-center;
+}

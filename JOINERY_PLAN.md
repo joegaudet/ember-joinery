@@ -589,7 +589,8 @@ workspace.
   buttons unnamed and gives its separator `role="separator"`, which a listbox may not hold;
   Joinery's name the buttons (an argument with an English default each) and hide the separator
   from assistive technology. Upstream's examples leave their comboboxes unlabelled. The
-  guide's Select examples add `aria-label` to the trigger. Most of its Combobox examples keep
+  guide's Select examples name the trigger, with `aria-label`, or in a Field with its label's
+  `for` and the trigger's `id`. Most of its Combobox examples keep
   upstream's markup, whose input its placeholder names; only `combobox-multiple`'s chips input
   (which has no placeholder) and `combobox-popup`'s trigger (a combobox its text doesn't name)
   add one. The pixels are upstream's.

@@ -53,6 +53,11 @@ export default class FileUploadDropzone extends Component<FileUploadDropzoneSign
     return names.length ? this.labels.rejectedLabel([...names]) : undefined
   }
 
+  /** Whether to say files can be dropped: only where they can be, and while it takes them. */
+  get showsHint(): boolean {
+    return !this.state.disabled
+  }
+
   get description(): string | undefined {
     return this.labels.description ?? this.state.accept
   }
@@ -116,11 +121,13 @@ export default class FileUploadDropzone extends Component<FileUploadDropzoneSign
               {{if this.isDragging this.labels.dropLabel this.labels.prompt}}
             </span>
             {{#if dropzone.supported}}
-              {{#unless this.isDragging}}
-                <span class="jn-empty-description" data-slot="file-upload-dropzone-hint">
-                  {{this.labels.hint}}
-                </span>
-              {{/unless}}
+              {{#if this.showsHint}}
+                {{#unless this.isDragging}}
+                  <span class="jn-empty-description" data-slot="file-upload-dropzone-hint">
+                    {{this.labels.hint}}
+                  </span>
+                {{/unless}}
+              {{/if}}
             {{/if}}
             {{#if this.description}}
               <span class="jn-empty-description" data-slot="file-upload-dropzone-description">

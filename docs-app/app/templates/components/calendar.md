@@ -60,7 +60,8 @@ name, number and week start comes from `Intl` in `@locale`.
 ## Date Picker
 
 You can use the `<Calendar>` component to build a date picker, in a
-[Popover](/components/popover.md). A Date Picker page comes with Joinery's Date Picker.
+[Popover](/components/popover.md). See the [Date Picker](/components/date-picker.md) page for
+more information.
 
 ## Persian / Hijri / Jalali Calendar
 

@@ -53,6 +53,7 @@
     "@types/qunit": "^2.19.14",
     "axe-core": "^4.14.0",
     "babel-plugin-ember-template-compilation": "^4.0.1",
+    "chrono-node": "^2.8.4",
     "decorator-transforms": "^2.4.0",
     "ember-a11y-testing": "^8.0.1",
     "ember-cli": "~7.3.0",

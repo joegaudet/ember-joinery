@@ -240,8 +240,9 @@ Show several files with [Tabs](/components/tabs.md), one `CodeBlock` in each tab
 
 ## Message
 
-Put a `CodeBlock` between paragraphs inside a Message. Upstream's example (`code-block-chat`)
-comes with Message and Bubble.
+Put a `CodeBlock` between paragraphs inside a [Message](/components/message.md).
+
+<Example @name="code-block-chat" @title="Message" />
 
 ## Typeset
 
@@ -360,7 +361,7 @@ alone.
 
 Upstream renders a chat message with Streamdown and routes its fenced code to a `CodeBlock`,
 disabling the copy button until the closing fence arrives. Its example (`code-block-markdown`)
-comes with Message and Bubble, and a Markdown renderer for Ember.
+comes with a Markdown renderer for Ember.
 
 ## Accessibility
 

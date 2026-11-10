@@ -1,5 +1,5 @@
 {
-  "$comment": "Waiting for components that haven't landed: code-block-trace (Trace), code-block-chat (Message and Bubble), code-block-markdown (Message, Bubble and a Markdown renderer for Ember, upstream's Streamdown). The unit that lands each one ports its examples onto the Code Block page and maps them here.",
+  "$comment": "Waiting for components that haven't landed: code-block-trace (Trace), code-block-markdown (a Markdown renderer for Ember, upstream's Streamdown). The unit that lands each one ports its examples onto the Code Block page and maps them here.",
   "examples": {
     "code-block-demo": {
       "example": "code-block-demo",
@@ -64,6 +64,11 @@
     "code-block-streaming": {
       "example": "code-block-streaming",
       "threshold": 0.025,
+      "reason": "Only highlighted tokens differ: the reference app screenshots before Shiki has highlighted (it is ready once its fonts are), and Joinery colours tokens with GitHub's high-contrast themes, which meet WCAG AA where upstream's github-light does not. Upstream's code names a real model, and Joinery's sources name none, so its placeholder (of the same length, so the layout is the same) differs in those characters."
+    },
+    "code-block-chat": {
+      "example": "code-block-chat",
+      "threshold": 0.02,
       "reason": "Only highlighted tokens differ: the reference app screenshots before Shiki has highlighted (it is ready once its fonts are), and Joinery colours tokens with GitHub's high-contrast themes, which meet WCAG AA where upstream's github-light does not. Upstream's code names a real model, and Joinery's sources name none, so its placeholder (of the same length, so the layout is the same) differs in those characters."
     },
     "code-block-tabs": {

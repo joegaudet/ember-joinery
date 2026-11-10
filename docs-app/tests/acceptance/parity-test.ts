@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupApplicationTest } from 'docs-app/tests/helpers'
-import { currentRouteName, find, visit } from '@ember/test-helpers'
+import { currentRouteName, find, visit, waitUntil } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { exampleNames } from 'docs-app/examples/index'
 
@@ -108,6 +108,10 @@ module('Acceptance | parity route', function (hooks) {
       stage().clientWidth - padding,
       'the stage less its padding',
     )
+    // The stage stays (only ?style= renders a new one), so the chart already observes its
+    // container, and settled() waits for a resize observer's first entry only: the entry for
+    // the new width comes a frame or so later.
+    await waitUntil(() => find(svg))
     assert.dom(svg).exists('and the chart draws')
     await a11yAudit({ rules: { region: { enabled: false } } })
   })

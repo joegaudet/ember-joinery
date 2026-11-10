@@ -12,6 +12,8 @@ import {
   Icon,
   InputGroup,
   Kbd,
+  Popover,
+  Tooltip,
   inputGroupAddonAttributes,
   inputGroupAddonClasses,
   inputGroupButtonAttributes,
@@ -238,6 +240,69 @@ module('Integration | components | input-group', function (hooks) {
     const sm = new ButtonHarness('sm')
     assert.dom(sm.element).hasAttribute('type', 'submit', 'its own type wins')
     assert.strictEqual(getComputedStyle(sm.element).height, '32px', "Nova has no sm rule: Button's")
+    await a11yAudit()
+  })
+
+  test("a button in an overlay's root in an addon gets the margin a button directly there does", async function (assert) {
+    await render(
+      <template>
+        <InputGroup data-test-group="direct" as |g|>
+          <g.Input aria-label="Direct" />
+          <g.Addon @align="inline-start">
+            <g.Button @size="icon-xs" aria-label="Copy"><Icon @icon={{Copy}} /></g.Button>
+          </g.Addon>
+          <g.Addon @align="inline-end">
+            <g.Button @size="icon-xs" aria-label="Search"><Icon @icon={{Search}} /></g.Button>
+          </g.Addon>
+        </InputGroup>
+        <InputGroup data-test-group="through" as |g|>
+          <g.Input aria-label="Through" />
+          <g.Addon @align="inline-start">
+            <Tooltip as |t|>
+              <g.Button @size="icon-xs" aria-label="Copy" {{t.trigger}}><Icon
+                  @icon={{Copy}}
+                /></g.Button>
+              <t.Content>Copy</t.Content>
+            </Tooltip>
+          </g.Addon>
+          <g.Addon @align="inline-end">
+            <Popover as |p|>
+              <g.Button @size="icon-xs" aria-label="Search" {{p.trigger}}><Icon
+                  @icon={{Search}}
+                /></g.Button>
+              <p.Content aria-label="Search">Results</p.Content>
+            </Popover>
+          </g.Addon>
+        </InputGroup>
+        <InputGroup data-test-group="text" as |g|>
+          <g.Input aria-label="Text" />
+          <g.Addon @align="inline-end">
+            <Popover as |p|>
+              <a href="#help" {{p.trigger}}>Help</a>
+              <p.Content aria-label="Help">More</p.Content>
+            </Popover>
+          </g.Addon>
+        </InputGroup>
+      </template>,
+    )
+    const addons = (group: string) =>
+      [
+        ...document.querySelectorAll<HTMLElement>(
+          `[data-test-group="${group}"] > [data-slot="input-group-addon"]`,
+        ),
+      ].map(addon => getComputedStyle(addon))
+    const [directStart, directEnd] = addons('direct')
+    const [start, end] = addons('through')
+    assert.strictEqual(
+      directStart!.marginInlineStart,
+      '-4.8px',
+      "Nova's has-[>button]:ms-[-0.3rem]",
+    )
+    assert.strictEqual(directEnd!.marginInlineEnd, '-4.8px', "Nova's has-[>button]:me-[-0.3rem]")
+    assert.strictEqual(start!.marginInlineStart, '-4.8px', "through a Tooltip's root")
+    assert.strictEqual(end!.marginInlineEnd, '-4.8px', "through a Popover's root")
+    const [text] = addons('text')
+    assert.strictEqual(text!.marginInlineEnd, '0px', 'not for a trigger that is no button (a link)')
     await a11yAudit()
   })
 

@@ -61,12 +61,6 @@ export default class DatePickerNaturalLanguage extends Component {
           @onValueChange={{this.change}}
           {{on "keydown" this.keyDown}}
         />
-        {{!
-          Radix's Popover renders no element, so upstream's button is directly in the addon,
-          whose rule for a button there (has-[>button]) pulls it 0.3rem toward the end. Joinery's
-          Popover root sits between them (display: contents), so here the button sits that much
-          further in.
-        }}
         <g.Addon @align="inline-end">
           <Popover @open={{this.open}} @onOpenChange={{this.setOpen}} as |p|>
             <g.Button

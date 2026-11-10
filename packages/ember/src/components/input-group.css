@@ -56,3 +56,92 @@
 :where(.jn-input-group-textarea) {
   @apply flex-1 resize-none;
 }
+
+/*
+ * Through an overlay's root (edited by hand). Each sheet pulls an inline addon toward the
+ * group's edge when it holds a button directly (`has-[>button]:-ms-*`, `has-[>button]:-me-*`).
+ * Radix's Popover, Tooltip, Hover Card, Dialog, Sheet, Select and menu roots render no element,
+ * so upstream's trigger (a date picker's calendar button, a tooltip's or dropdown's button) is
+ * that button. Joinery's roots are an element with display: contents (`data-test-jn` names
+ * each; a tooltip provider is `data-jn-tooltip-provider`), so this restates the rule one or two
+ * such roots down, at the sheet's weight (0,0,1), under the `style-<name>` variant build-css.mjs
+ * declares, copied from each sheet's rule (Sera's are commented out upstream);
+ * scripts/input-group-css.test.mjs checks the copy against them.
+ */
+:where(.jn-input-group-addon-align-inline-start):has(
+  > :where(
+      [data-test-jn='popover'],
+      [data-test-jn='tooltip'],
+      [data-test-jn='hover-card'],
+      [data-test-jn='dialog'],
+      [data-test-jn='alert-dialog'],
+      [data-test-jn='sheet'],
+      [data-test-jn='drawer'],
+      [data-test-jn='dropdown-menu'],
+      [data-test-jn='context-menu'],
+      [data-test-jn='select']
+    )
+    > button,
+  > :where([data-jn-tooltip-provider]) > :where([data-test-jn='tooltip']) > button
+) {
+  @variant style-luma {
+    @apply -ms-1;
+  }
+  @variant style-lyra {
+    @apply ms-[-0.3rem];
+  }
+  @variant style-maia {
+    @apply -ms-1;
+  }
+  @variant style-mira {
+    @apply ms-[-0.275rem];
+  }
+  @variant style-nova {
+    @apply ms-[-0.3rem];
+  }
+  @variant style-rhea {
+    @apply ms-[-0.3rem];
+  }
+  @variant style-vega {
+    @apply -ms-1;
+  }
+}
+
+:where(.jn-input-group-addon-align-inline-end):has(
+  > :where(
+      [data-test-jn='popover'],
+      [data-test-jn='tooltip'],
+      [data-test-jn='hover-card'],
+      [data-test-jn='dialog'],
+      [data-test-jn='alert-dialog'],
+      [data-test-jn='sheet'],
+      [data-test-jn='drawer'],
+      [data-test-jn='dropdown-menu'],
+      [data-test-jn='context-menu'],
+      [data-test-jn='select']
+    )
+    > button,
+  > :where([data-jn-tooltip-provider]) > :where([data-test-jn='tooltip']) > button
+) {
+  @variant style-luma {
+    @apply -me-1;
+  }
+  @variant style-lyra {
+    @apply me-[-0.3rem];
+  }
+  @variant style-maia {
+    @apply -me-1;
+  }
+  @variant style-mira {
+    @apply me-[-0.275rem];
+  }
+  @variant style-nova {
+    @apply me-[-0.3rem];
+  }
+  @variant style-rhea {
+    @apply me-[-0.3rem];
+  }
+  @variant style-vega {
+    @apply -me-1;
+  }
+}

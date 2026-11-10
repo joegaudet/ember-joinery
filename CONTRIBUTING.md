@@ -297,6 +297,15 @@ select's list, `min-w-(--radix-select-trigger-width)`) calls `ignoreROError()` f
 `resize-observer.ts`: anchoring sets that width from a resize observer, and the browser's benign
 "ResizeObserver loop" message would otherwise fail the test.
 
+**Through an overlay's root.** Radix's overlay roots (Popover, Tooltip, Dialog, Select, the
+menus) render no element, so upstream's trigger is its parent's child, and a rule upstream
+writes for that child (a Field's `*:w-full`, an Input Group addon's `has-[>button]` margin)
+reaches it. Joinery's root is an element with `display: contents` (its `data-test-jn` names
+it), which such a rule reaches instead, so restate the rule one root down, by hand, at its
+weight: `select.css` does for a Field's, and `input-group.css` for an addon's, each style's
+under the `style-<name>` variant `build-css.mjs` declares, with a test in
+`scripts/input-group-css.test.mjs` that holds the copy to the sheets.
+
 **Your own element.** Every part takes `@as`, a tag (`<Button @as="a" href="/login">`), through
 `As`. For a component of the caller's own, such as `LinkTo`, there is a part modifier made with
 `part()`: a compound component yields one per part (`<LinkTo {{d.trigger}}>`), and a component

@@ -638,14 +638,14 @@ workspace.
   day's price in its button. The pixels are upstream's.
 - **Where the Date Picker's examples part from upstream.** Upstream writes dates with date-fns'
   `format`; with no date library, the examples write `PPP` from Intl, its ordinal suffix
-  included (`November 10th, 2026`), and the Arabic one in Intl's order (`10 نوفمبر 2026`,
-  where date-fns' is `نوفمبر 10, 2026`). The natural-language example keeps upstream's
-  `chrono-node`, a dependency of the guide only. Radix's Popover renders no element, so
-  upstream's trigger sits directly in its parent; Joinery's root is an element
-  (`display: contents`) between them, so the time example's button says `w-full`, which its
-  Field's `*:w-full` gives upstream's, and in the input examples the addon's `has-[>button]`
-  margin misses the calendar button, which sits 0.3rem further in (under the parity
-  threshold).
+  included (`November 10th, 2026`), and the Arabic one in date-fns' `arSA` order from Intl's
+  parts (`نوفمبر 10, 2026`). The natural-language example keeps upstream's `chrono-node`, a
+  dependency of the guide only. Radix's Popover renders no element, so upstream's trigger sits
+  directly in its parent; Joinery's root is an element (`display: contents`) between them, so
+  the time example's button says `w-full`, which its Field's `*:w-full` gives upstream's. In
+  the input examples, input-group.css restates each sheet's `has-[>button]` addon margin one
+  overlay root down (under the `style-<name>` variants build-css.mjs declares), so the calendar
+  button, and any overlay's button in an addon, sits where upstream's does.
 - **Where Select and Combobox part from upstream, for WCAG.** Radix's open Select hides the rest
   of the page with `aria-hidden`, leaving the trigger focusable but hidden; Joinery's makes it
   inert, as a modal dialog does. Base UI's Combobox leaves its chevron, clear and chip remove

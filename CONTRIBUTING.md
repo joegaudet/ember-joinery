@@ -219,6 +219,13 @@ both repositories out at those commits into `.upstream/` (sparse and shallow, so
    The output also lists the `group/*` markers the element must keep, and leaves conditional
    classes as comments.
 
+   A rule written by hand that has to restate a style sheet's per-style utilities, for an
+   element the sheet's selector can't reach, puts each style's under its `style-<name>`
+   variant (after upstream's `.style-<name>` wrapper), which `build-css.mjs` declares in every
+   style's compile and which matches only in that style's: `@variant style-nova { @apply
+rounded-md; }`. Trace's rule for a trigger inside an overlay's root is one, with a test in
+   `scripts/build-css.test.mjs` that holds the copy to the sheets.
+
    The script reads one file, so where a part renders another upstream component
    (ItemSeparator and ButtonGroupSeparator render Separator), that component's inline
    utilities go after the output by hand, under a comment that says so. They come first in its

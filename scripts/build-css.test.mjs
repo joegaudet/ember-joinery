@@ -8,6 +8,7 @@ import {
   mergedRules,
   sheetRule,
   styleEntry,
+  styleVariants,
   styles,
   topLevel,
 } from '../packages/ember/build-css.mjs'
@@ -144,3 +145,43 @@ test(
     assert.match(rule, /padding-block: calc\((?:var\(--spacing\)|0\.25rem) \* 1\.5\);/, 'py-1.5')
   },
 )
+
+test('each style declares a variant for every style, which matches only in its own', () => {
+  assert.strictEqual(styles().length, 8)
+  for (const style of styles()) {
+    const variants = styleVariants(style)
+    assert.strictEqual(variants.length, 8)
+    for (const other of styles()) {
+      const selector = other === style ? '&' : '&:not(*)'
+      assert.ok(
+        variants.includes(`@custom-variant style-${other} (${selector});`),
+        `${style} declares style-${other} as ${selector}`,
+      )
+    }
+    const entry = styleEntry(style)
+    const lastImport = entry.lastIndexOf('@import ')
+    assert.ok(
+      entry.indexOf('@custom-variant') > lastImport,
+      'after every @import, which CSS ignores once another rule comes first',
+    )
+  }
+})
+
+test("trace.css restates each sheet's utilities for a line's wrapper, through an overlay's root", () => {
+  const read = file => readFileSync(join(repoRoot, 'packages/ember/src', file), 'utf8')
+  const trace = read('components/trace.css')
+  const wrapper = '*:has-[>[data-slot=trace-line]]:'
+  for (const style of styles()) {
+    const sheet = read(`styles/${style}.css`)
+    const rule = /^:where\(\.jn-trace\) \{\s*@apply ([^;]+);/m.exec(sheet)
+    assert.ok(rule, `the ${style} sheet has a rule for the trace`)
+    const expected = rule[1]
+      .split(/\s+/)
+      .filter(utility => utility.startsWith(wrapper))
+      .map(utility => utility.slice(wrapper.length))
+    assert.ok(expected.length > 0, `the ${style} sheet styles what wraps a line`)
+    const copy = new RegExp(`@variant style-${style} \\{\\s*@apply ([^;]+);`).exec(trace)
+    assert.ok(copy, `trace.css has a style-${style} block`)
+    assert.deepStrictEqual(copy[1].split(/\s+/), expected, `trace.css matches the ${style} sheet`)
+  }
+})

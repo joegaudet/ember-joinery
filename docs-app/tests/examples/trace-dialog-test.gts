@@ -14,6 +14,18 @@ module('Example | trace-dialog', function (hooks) {
     assert.strictEqual(line.title, 'Searched the web for cache keys')
     const dialog = new DialogHarness()
     assert.strictEqual(line.control, dialog.trigger, 'the line sits in the dialog trigger')
+    const trigger = getComputedStyle(dialog.trigger)
+    assert.strictEqual(
+      trigger.display,
+      'flex',
+      "the trace lays out its row, through the dialog's root",
+    )
+    assert.strictEqual(
+      dialog.trigger.getBoundingClientRect().width,
+      line.element.getBoundingClientRect().width,
+      'as wide as its line',
+    )
+    assert.strictEqual(trigger.borderRadius, '8px', 'rounded, for the focus ring')
     await line.click()
     assert.true(dialog.isOpen)
     assert.strictEqual(dialog.label, 'Searched the web for cache keys')

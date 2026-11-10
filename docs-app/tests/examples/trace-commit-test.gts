@@ -19,6 +19,19 @@ module('Example | trace-commit', function (hooks) {
       files.lines.map(line => line.description),
       ['+2 −2', '+7 −0'],
     )
+    for (const line of files.lines) {
+      const trigger = line.control!
+      assert.strictEqual(
+        getComputedStyle(trigger).display,
+        'flex',
+        "each file's sheet trigger is the row",
+      )
+      assert.strictEqual(
+        trigger.getBoundingClientRect().width,
+        line.element.getBoundingClientRect().width,
+        'as wide as its line',
+      )
+    }
     await files.lines[1]!.click()
     const [, added] = SheetHarness.findAll()
     assert.true(added!.isOpen)

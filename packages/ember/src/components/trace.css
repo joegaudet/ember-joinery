@@ -12,6 +12,63 @@
   @apply flex w-full min-w-0 flex-col *:has-[>[data-slot=trace-line]]:flex *:has-[>[data-slot=trace-line]]:w-fit *:has-[>[data-slot=trace-line]]:max-w-full *:has-[>[data-slot=trace-line]]:min-w-0 *:has-[>[data-slot=trace-line]]:text-start *:has-[>[data-slot=trace-line]]:outline-none;
 }
 
+/*
+ * Through an overlay's root (edited by hand). Upstream's Trace styles any trigger or link that
+ * wraps a TraceLine, as its direct child: `*:has-[>[data-slot=trace-line]]:…`, with the inline
+ * utilities above and each style's radius and focus ring in its sheet. Radix's Dialog, Sheet,
+ * Alert Dialog, Popover, Hover Card, Tooltip and menu roots, and vaul's Drawer, render no
+ * element, so their trigger is that child. Joinery's roots are an element with display: contents
+ * (`data-test-jn` names each; a tooltip provider is `data-jn-tooltip-provider`), which those
+ * rules reach instead. So this restates them one or two such roots down, at their weight
+ * (0,1,0): the inline utilities, then each sheet's, under the `style-<name>` variant build-css.mjs
+ * declares, copied from the sheets' `:where(.jn-trace)` rule (scripts/build-css.test.mjs checks
+ * the copy against them).
+ */
+:where(
+    .jn-trace
+      > :is(
+        [data-test-jn='dialog'],
+        [data-test-jn='alert-dialog'],
+        [data-test-jn='sheet'],
+        [data-test-jn='drawer'],
+        [data-test-jn='popover'],
+        [data-test-jn='hover-card'],
+        [data-test-jn='tooltip'],
+        [data-test-jn='dropdown-menu'],
+        [data-test-jn='context-menu'],
+        [data-jn-tooltip-provider]
+      ),
+    .jn-trace > :is([data-jn-tooltip-provider]) > :is([data-test-jn='tooltip'])
+  )
+  > *:has(> [data-slot='trace-line']) {
+  @apply flex w-fit max-w-full min-w-0 text-start outline-none;
+
+  @variant style-luma {
+    @apply rounded-lg focus-visible:ring-3 focus-visible:ring-ring/30;
+  }
+  @variant style-lyra {
+    @apply rounded-none focus-visible:ring-1 focus-visible:ring-ring/50;
+  }
+  @variant style-maia {
+    @apply rounded-lg focus-visible:ring-[3px] focus-visible:ring-ring/50;
+  }
+  @variant style-mira {
+    @apply rounded-sm focus-visible:ring-2 focus-visible:ring-ring/30;
+  }
+  @variant style-nova {
+    @apply rounded-md focus-visible:ring-3 focus-visible:ring-ring/50;
+  }
+  @variant style-rhea {
+    @apply rounded-lg focus-visible:ring-3 focus-visible:ring-ring/30;
+  }
+  @variant style-sera {
+    @apply rounded-none focus-visible:ring-2 focus-visible:ring-ring/30;
+  }
+  @variant style-vega {
+    @apply rounded-md focus-visible:ring-3 focus-visible:ring-ring/50;
+  }
+}
+
 /* data-slot="trace-line" in TraceLine */
 :where(.jn-trace-line) {
   @apply flex w-fit max-w-full min-w-0 items-center text-muted-foreground transition-colors in-[a,button]:cursor-pointer in-[a:hover,button:hover]:text-foreground data-[status=error]:text-destructive data-[status=error]:in-[a:hover,button:hover]:text-destructive data-[status=pending]:opacity-60 data-[status=running]:*:data-[slot=trace-title]:shimmer;

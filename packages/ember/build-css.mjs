@@ -14,10 +14,11 @@
 // its own), then, in `@layer joinery`, src/css/base.css, the ported sheet
 // (src/styles/<style>.css), and every component's own rules (src/components/**/*.css, A–Z:
 // the inline utilities scripts/extract-classes.mjs pulls out of upstream's source). The entry
-// is generated here, so adding a component's CSS file is all it takes to ship it. Between the
-// sheet and the components' rules go the MERGED rules (see there): a class's rule repeated
-// where upstream's tailwind-merge lets it beat a later rule of the sheet. The themes and
-// tailwind.css are copied as written.
+// is generated here, so adding a component's CSS file is all it takes to ship it, and it
+// declares a `style-<name>` variant for each style, which matches in that style's compile only
+// (see `styleVariants`). Between the sheet and the components' rules go the MERGED rules (see
+// there): a class's rule repeated where upstream's tailwind-merge lets it beat a later rule of
+// the sheet. The themes and tailwind.css are copied as written.
 //
 // Everything a style ships is in `@layer joinery`, but for what Tailwind puts at the top level
 // for the rules to use (`@property` registrations, keyframes, and `@layer properties`, its
@@ -110,6 +111,20 @@ export function componentCss() {
   return cssFiles('src/components', { recursive: true })
 }
 
+/**
+ * A variant for each style, `style-<name>`, after the `.style-<name>` wrapper upstream's sheets
+ * have (port-styles.mjs drops it): it matches in that style's compile and nowhere else (`:not(*)`
+ * matches no element). A component's CSS uses it for a rule written by hand that has to restate a
+ * sheet's per-style utilities for an element the sheet's selector can't reach:
+ * `@variant style-nova { @apply rounded-md; }`. Every style's entry declares all eight, so the
+ * same file compiles in each.
+ */
+export function styleVariants(style) {
+  return styles().map(
+    name => `@custom-variant style-${name} (${name === style ? '&' : '&:not(*)'});`,
+  )
+}
+
 /** The entry Tailwind compiles for a style, importing everything by absolute path. */
 export function styleEntry(style) {
   const at = file => JSON.stringify(join(packageDir, file))
@@ -120,6 +135,9 @@ export function styleEntry(style) {
     `@import ${at(`src/styles/${style}.css`)} layer(joinery);`,
     `@import ${JSON.stringify(mergedFile(style))} layer(joinery);`,
     ...componentCss().map(file => `@import ${at(file)} layer(joinery);`),
+    // After the imports, which CSS ignores once another rule comes first. Tailwind reads every
+    // variant before it compiles a rule, so the files above can use them.
+    ...styleVariants(style),
     '',
   ].join('\n')
 }

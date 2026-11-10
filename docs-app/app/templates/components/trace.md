@@ -274,7 +274,9 @@ failed one says so, and one still running shimmers.
 ### Trace
 
 A list of rows: a `div` laid out as a column. It also styles any trigger or link that wraps a
-`TraceLine` (as wide as its line, rounded, with a focus ring).
+`TraceLine` (as wide as its line, rounded, with a focus ring), a Dialog's, Sheet's, Drawer's,
+Popover's, Tooltip's or menu's trigger too: those render a root around their trigger, with
+`display: contents`, where upstream's Radix roots render none, and the trace looks through it.
 
 | Argument | Type     | Default | What it does                                       |
 | -------- | -------- | ------- | -------------------------------------------------- |

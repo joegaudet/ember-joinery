@@ -7,7 +7,13 @@ import { ArrowUpRight, ChevronRight, ChevronsDown, FileText, Search, Terminal } 
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
 import { VisuallyHidden } from '@ember-joinery/primitives/visually-hidden'
 import {
+  Dialog,
+  Drawer,
   Icon,
+  Popover,
+  Sheet,
+  Tooltip,
+  TooltipProvider,
   Trace,
   TraceCollapsible,
   TraceDescription,
@@ -251,6 +257,108 @@ module('Integration | components | trace', function (hooks) {
       getComputedStyle(docs.control!).boxShadow,
       'none',
       'with a focus ring (focus-visible:ring-3)',
+    )
+    await a11yAudit()
+  })
+
+  test("an overlay's trigger around a line is styled by the trace, through the overlay's root", async function (assert) {
+    // Radix's roots render no element, so upstream's trigger is the trace's own child. Joinery's
+    // are an element with display: contents in between, which trace.css looks through.
+    await render(
+      <template>
+        <Trace class="w-96">
+          <Dialog as |d|>
+            <d.Trigger>
+              <TraceLine @name="dialog" as |l|>
+                <l.Icon><Icon @icon={{Search}} /></l.Icon>
+                <l.Title>Searched the web for cache keys</l.Title>
+                <l.Icon><Icon @icon={{ChevronRight}} /></l.Icon>
+              </TraceLine>
+            </d.Trigger>
+            <d.Content>
+              <d.Title>Searched the web for cache keys</d.Title>
+            </d.Content>
+          </Dialog>
+          <Sheet as |s|>
+            <s.Trigger>
+              <TraceLine @name="sheet" as |l|>
+                <l.Icon><Icon @icon={{FileText}} /></l.Icon>
+                <l.Title>Edited README.md</l.Title>
+              </TraceLine>
+            </s.Trigger>
+            <s.Content>
+              <s.Title>README.md</s.Title>
+            </s.Content>
+          </Sheet>
+          <Drawer as |d|>
+            <d.Trigger>
+              <TraceLine @name="drawer" as |l|>
+                <l.Icon><Icon @icon={{Terminal}} /></l.Icon>
+                <l.Title>Ran pnpm build</l.Title>
+              </TraceLine>
+            </d.Trigger>
+            <d.Content>
+              <d.Title>pnpm build</d.Title>
+            </d.Content>
+          </Drawer>
+          <Popover as |p|>
+            <p.Trigger>
+              <TraceLine @name="popover" as |l|>
+                <l.Title>Read 3 sources</l.Title>
+              </TraceLine>
+            </p.Trigger>
+            <p.Content>Three sources.</p.Content>
+          </Popover>
+          <TooltipProvider>
+            <Tooltip as |t|>
+              <t.Trigger>
+                <TraceLine @name="tooltip" as |l|>
+                  <l.Title>Thought for 4s</l.Title>
+                </TraceLine>
+              </t.Trigger>
+              <t.Content>Four seconds</t.Content>
+            </Tooltip>
+          </TooltipProvider>
+          <div>
+            <button type="button">
+              <TraceLine @name="nested" as |l|>
+                <l.Title>Not the trace's: in a box of its own</l.Title>
+              </TraceLine>
+            </button>
+          </div>
+        </Trace>
+      </template>,
+    )
+    for (const name of ['dialog', 'sheet', 'drawer', 'popover', 'tooltip']) {
+      const line = new TraceLineHarness(name)
+      const trigger = line.control!
+      assert.dom(trigger).hasTagName('button', `${name}: its trigger wraps the line`)
+      const style = getComputedStyle(trigger)
+      assert.strictEqual(style.display, 'flex', `${name}: flex, as the trace's own child is`)
+      assert.strictEqual(
+        trigger.getBoundingClientRect().width,
+        line.element.getBoundingClientRect().width,
+        `${name}: w-fit, as wide as its line, not the trace`,
+      )
+      assert.strictEqual(style.borderRadius, '8px', `${name}: rounded-md, for the focus ring`)
+      assert.strictEqual(style.textAlign, 'start', `${name}: text-start`)
+
+      await tab()
+      assert.dom(trigger).isFocused(`${name}: Tab reaches its trigger`)
+      const focused = getComputedStyle(trigger)
+      assert.strictEqual(focused.outlineStyle, 'none', `${name}: no browser outline`)
+      assert.notStrictEqual(
+        focused.boxShadow,
+        'none',
+        `${name}: the trace's focus ring (focus-visible:ring-3) instead`,
+      )
+    }
+
+    const nested = new TraceLineHarness('nested').control!
+    assert.notStrictEqual(
+      getComputedStyle(nested).display,
+      'flex',
+      'a trigger in a box of its own is not the trace’s to style',
     )
     await a11yAudit()
   })

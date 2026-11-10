@@ -13,6 +13,15 @@ module('Example | trace-sheet', function (hooks) {
     const line = new TraceLineHarness()
     assert.strictEqual(line.title, 'Explored 4 files')
     const sheet = new SheetHarness()
+    const trigger = line.control!
+    assert.strictEqual(trigger, sheet.trigger, 'the line sits in the sheet trigger')
+    assert.strictEqual(getComputedStyle(trigger).display, 'flex', "through the sheet's root")
+    assert.strictEqual(
+      trigger.getBoundingClientRect().width,
+      line.element.getBoundingClientRect().width,
+      'as wide as its line',
+    )
+    assert.strictEqual(getComputedStyle(trigger).borderRadius, '8px', 'rounded, for the focus ring')
     await line.click()
     assert.true(sheet.isOpen)
     assert.strictEqual(sheet.label, 'Explored 4 files')

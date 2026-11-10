@@ -171,10 +171,17 @@ export const anchorContent = modifier<AnchorContentSignature>((element, [referen
  * Radix's re-namespaced custom properties on a floating part, mapped to the ones `anchor` sets,
  * so upstream's classes work unchanged: `--radix-popover-content-transform-origin`,
  * `--radix-popover-content-available-width` and `-height`, and `--radix-popover-trigger-width`
- * and `-height` (with `tooltip` or `hover-card` in place of `popover`).
+ * and `-height` (with `tooltip` or `hover-card` in place of `popover`). Radix's Popper's own
+ * (`--radix-popper-anchor-width`, which upstream's sidebar examples size a menu by, and the
+ * rest), which every floating part's content sees, are set too.
  */
 export function exposeProperties(element: HTMLElement, name: string): () => void {
   const properties: Array<[string, string]> = [
+    ['--radix-popper-transform-origin', 'var(--jn-anchor-transform-origin)'],
+    ['--radix-popper-available-width', 'var(--jn-anchor-available-width)'],
+    ['--radix-popper-available-height', 'var(--jn-anchor-available-height)'],
+    ['--radix-popper-anchor-width', 'var(--jn-anchor-width)'],
+    ['--radix-popper-anchor-height', 'var(--jn-anchor-height)'],
     [`--radix-${name}-content-transform-origin`, 'var(--jn-anchor-transform-origin)'],
     [`--radix-${name}-content-available-width`, 'var(--jn-anchor-available-width)'],
     [`--radix-${name}-content-available-height`, 'var(--jn-anchor-available-height)'],

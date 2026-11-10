@@ -8,6 +8,7 @@ import { ChevronDown } from 'lucide'
 import { maskitoTransform, type MaskitoOptions } from '@maskito/core'
 import { AsYouType, parsePhoneNumberFromString } from 'libphonenumber-js/core'
 import { ControllableState } from '@ember-joinery/primitives/controllable-state'
+import { idFor } from '@ember-joinery/primitives/id'
 import { nativeValue } from '@ember-joinery/primitives/native-value'
 import { VisuallyHidden } from '@ember-joinery/primitives/visually-hidden'
 import Icon, { type IconNode } from '@ember-joinery/ember/components/icon'
@@ -54,7 +55,10 @@ export interface PhoneInputSignature {
     onValueChange?: (value: string | null) => void
     /** The country whose numbers are typed (ISO 3166), when you control it. */
     country?: CountryCode
-    /** The country it starts with: by default the country of its value, else `US`. */
+    /**
+     * The country it starts with: by default the country of its value, else the first of
+     * `@countries`, else `US`.
+     */
     defaultCountry?: CountryCode
     /** Called with the new country whenever it changes. */
     onCountryChange?: (country: CountryCode) => void
@@ -66,7 +70,10 @@ export interface PhoneInputSignature {
     metadata?: MetadataJson
     /** The language the countries are named in. Default the browser's. */
     locale?: string
-    /** The country picker's name. Default `Country`. */
+    /**
+     * The country picker's whole accessible name. By default it is named after the input: its
+     * label and `country` (`Phone country`), so several phone inputs' pickers differ.
+     */
     countryLabel?: string
     /** The picker's chevron. Default lucide's `chevron-down`. */
     icon?: IconNode
@@ -85,6 +92,21 @@ export interface PhoneInputSignature {
 const displayContents = modifier((element: HTMLElement) => {
   element.style.setProperty('display', 'contents')
 })
+
+/**
+ * The number in `text` when it is an international one, `+` or `00` and then digits, written
+ * `+…` with its spaces and punctuation gone; else `undefined`.
+ */
+function internationalNumber(text: string): string | undefined {
+  const number = text
+    .trim()
+    .replace(/^00/, '+')
+    .replace(/[^\d+]/g, '')
+  return /^\+\d+$/.test(number) ? number : undefined
+}
+
+/** The `beforeinput` types that bring a whole number at once, read before the mask sees them. */
+const WHOLE_INSERTS = new Set(['insertFromDrop', 'insertFromPaste', 'insertReplacementText'])
 
 /** A press on the addon, but not on its button, focuses the input, as Input Group's does. */
 function focusInput(event: MouseEvent): void {
@@ -106,9 +128,9 @@ const TRIGGER_CLASSES = `${inputGroupButtonClasses({ variant: 'ghost', size: 'xs
  *   <PhoneInput @value={{this.phone}} @onValueChange={{this.setPhone}} />
  *   <PhoneInput @defaultCountry="GB" @national={{true}} />
  *
- * The picker shows the country of the value: a number from another country, set or pasted,
- * switches it, and choosing a country keeps the national number typed so far. `@countries`
- * narrows the list.
+ * The picker shows the country of the value: a number from another country, set, pasted,
+ * dropped or autofilled, switches it, and choosing a country keeps the national number typed so
+ * far. `@countries` narrows the list.
  */
 export default class PhoneInput extends Component<PhoneInputSignature> {
   /** What was last typed; shown while it still stands for the value. */
@@ -132,6 +154,7 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
     defaultValue: () =>
       this.args.defaultCountry ??
       countryOfPhone(this.valueState.value, undefined, this.metadata) ??
+      this.args.countries?.[0] ??
       'US',
     onChange: () => this.args.onCountryChange,
     fallback: 'US',
@@ -168,8 +191,9 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
     return this.nameOf(this.country)
   }
 
-  get countryLabel(): string {
-    return this.args.countryLabel ?? 'Country'
+  /** The hidden `country` that follows the input's label in the picker's default name. */
+  get countryWordId(): string {
+    return idFor(this, 'country-word')
   }
 
   @cached
@@ -275,25 +299,110 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
   }
 
   /**
-   * A pasted international number (`+44 …`, `0044 …`) replaces what the input holds, and
-   * switches the country to its own: the mask alone would read its calling code as digits.
+   * A whole number that arrives at once: pasted, dropped, autofilled, or filled in by a test.
+   * One that starts with `+` (or `00`) is read in its own country, which the picker switches
+   * to, and replaces what the input holds: the mask of the country shown would read its calling
+   * code as the first digits of a number of its own, and store another number. A number from a
+   * country `@countries` leaves out, or whose calling code is unknown, is turned away. Anything
+   * else is left to the mask (`undefined`).
    */
-  onPaste = (event: ClipboardEvent): void => {
-    const text = event.clipboardData?.getData('text/plain') ?? ''
-    const number = text
-      .trim()
-      .replace(/^00/, '+')
-      .replace(/[^\d+]/g, '')
-    if (!number.startsWith('+') || !/\d/.test(number)) return
+  takeNumber(text: string): 'taken' | 'refused' | undefined {
+    const number = internationalNumber(text)
+    if (!number) return undefined
     const country = countryOfPhone(number, this.country, this.metadata)
-    if (!country) return
     const allowed = this.args.countries
-    if (allowed && !allowed.includes(country)) return
-    event.preventDefault()
+    if (!country || (allowed && !allowed.includes(country))) return 'refused'
     if (country !== this.countryState.value) this.countryState.set(country)
     this.typed = undefined
     this.valueState.set(this.toE164(this.format(number, country), country))
+    return 'taken'
   }
+
+  /** Whether the mask of the country shown leaves `text` as it is: text it shaped itself. */
+  fitsMask(text: string): boolean {
+    const options = phoneMask(this.country, { national: this.national, metadata: this.metadata })
+    return maskitoTransform(text, options) === text
+  }
+
+  /**
+   * Reads a whole number before the mask does, in the capture phase, so it goes before
+   * `{{maskito}}` in the template: a paste (its clipboard), a drop or a writing suggestion (its
+   * `beforeinput`), and an `input` no `beforeinput` announced, as Chrome's autofill and
+   * `fillIn()` send (with no `inputType`) and Firefox's (`insertReplacementText`). Typing has an
+   * `inputType` and is left alone, and so is text the mask shaped itself (the calling code its
+   * focus plugin puts in, with an `input` of no type). A number taken or turned away goes no
+   * further, and the input shows what the value now is.
+   */
+  wholeNumbers = modifier((element: HTMLInputElement) => {
+    const read = (text: string, event: Event): void => {
+      if (!this.takeNumber(text)) return
+      event.preventDefault()
+      event.stopImmediatePropagation()
+      element.value = this.shown
+    }
+    const onPaste = (event: ClipboardEvent) =>
+      read(event.clipboardData?.getData('text/plain') ?? '', event)
+    const onBeforeInput = (event: InputEvent) => {
+      if (!WHOLE_INSERTS.has(event.inputType)) return
+      // One that can't be cancelled is read from its `input`, once it is in.
+      if (!event.cancelable) return
+      read(event.data ?? event.dataTransfer?.getData('text/plain') ?? '', event)
+    }
+    const onInput = (event: Event) => {
+      const { inputType } = event as InputEvent
+      if (inputType && inputType !== 'insertReplacementText') return
+      if (this.fitsMask(element.value)) return
+      read(element.value, event)
+    }
+    const options = { capture: true }
+    element.addEventListener('paste', onPaste, options)
+    element.addEventListener('beforeinput', onBeforeInput, options)
+    element.addEventListener('input', onInput, options)
+    return () => {
+      element.removeEventListener('paste', onPaste, options)
+      element.removeEventListener('beforeinput', onBeforeInput, options)
+      element.removeEventListener('input', onInput, options)
+    }
+  })
+
+  /**
+   * Names the picker after its input, `Phone country`, so a screen reader tells apart the
+   * pickers of a form with several phone inputs: the input's `aria-labelledby`, else its
+   * `<label>`s (given an id if they have none), then a hidden `country`; else its `aria-label`
+   * and `country`. `@countryLabel` names it instead.
+   */
+  nameTrigger = modifier((trigger: HTMLElement, [label]: [string | undefined]) => {
+    if (label) {
+      trigger.setAttribute('aria-label', label)
+      return () => trigger.removeAttribute('aria-label')
+    }
+    const input = trigger
+      .closest('[data-slot="input-group"]')
+      ?.querySelector<HTMLInputElement>('input[data-slot="input-group-control"]')
+    const given = new Map<HTMLLabelElement, string>()
+    let ids = input?.getAttribute('aria-labelledby')?.trim()
+    if (!ids && input?.labels?.length) {
+      ids = [...input.labels]
+        .map((element, index) => {
+          if (element.id) return element.id
+          element.id = idFor(this, `label-${index}`)
+          given.set(element, element.id)
+          return element.id
+        })
+        .join(' ')
+    }
+    if (ids) {
+      trigger.setAttribute('aria-labelledby', `${ids} ${this.countryWordId}`)
+    } else {
+      const name = input?.getAttribute('aria-label')?.trim()
+      trigger.setAttribute('aria-label', name ? `${name} country` : 'Country')
+    }
+    return () => {
+      trigger.removeAttribute('aria-labelledby')
+      trigger.removeAttribute('aria-label')
+      for (const [element, id] of given) if (element.id === id) element.removeAttribute('id')
+    }
+  })
 
   /**
    * Choosing a country sends focus to the input, to type the number; Escape, to the picker.
@@ -350,9 +459,9 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
             dir="ltr"
             disabled={{@disabled}}
             {{this.registerInput}}
+            {{this.wholeNumbers}}
             {{nativeValue value=this.shown onValueChange=this.onText}}
             {{maskito this.options}}
-            {{on "paste" this.onPaste capture=true}}
             ...attributes
           />
           <div
@@ -368,7 +477,7 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
               data-slot="button"
               data-variant="ghost"
               data-size="xs"
-              aria-label={{this.countryLabel}}
+              {{this.nameTrigger @countryLabel}}
               {{s.trigger}}
             >
               <span class="jn-phone-input-flag" aria-hidden="true">{{this.flag}}</span>
@@ -401,6 +510,7 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
           {{/each}}
         </s.Content>
       </Select>
+      <span id={{this.countryWordId}} hidden>country</span>
       {{#if @formName}}
         <input type="hidden" name={{@formName}} value={{if this.value this.value ""}} />
       {{/if}}

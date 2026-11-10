@@ -59,16 +59,23 @@ number is being typed, the value holds its digits so far, with the `+`.
 The input shows the international format, `+1 212 555-0123`, with the country's calling code
 fixed in front: it goes in when the input takes focus and comes out again on blur if nothing
 follows it. Backspace stops at it. The input is `type="tel"` with `autocomplete="tel"` and
-`inputmode="tel"`, so phones show a dial pad and browsers can fill in the user's number, which
-the mask tidies too.
+`inputmode="tel"`, so phones show a dial pad and browsers can fill in the user's number.
+
+A number that arrives whole (pasted, dropped, or filled in by the browser, which fills a
+`tel` field with the full international number) is read before the mask sees it. One that
+starts with `+` or `00` is read in its own country, which the picker switches to, so a saved
+`+44 7400 123456` stays a number of the United Kingdom however the input was set up. Anything
+else, such as a national number, the mask shapes for the country shown.
 
 ## Choosing a country
 
-The picker shows the country of the value, else `@defaultCountry`, else the United States.
-Choose another, and the national number typed so far moves to its calling code, and focus goes
-back to the input to go on typing. Pasting a number that starts with `+` (or `00`) switches to
-that number's country, and so does a value from another country you pass. Typing on the closed
-picker chooses the country whose name starts with what was typed, as any Select does.
+The picker shows the country of the value, else `@defaultCountry`, else the first of
+`@countries`, else the United States. Choose another, and the national number typed so far moves
+to its calling code, and focus goes back to the input to go on typing. A number that starts with
+`+` (or `00`) pasted, dropped or autofilled switches to that number's country, and so does a
+value from another country you pass. Typing a `+` doesn't: the mask keeps the calling code of the
+country shown in front, so choose the country first. Typing on the closed picker chooses the
+country whose name starts with what was typed, as any Select does.
 
 The country is controlled or not too (`@country`, `@defaultCountry` and `@onCountryChange`).
 Countries are named in `@locale`'s language (the browser's, by default), with
@@ -83,8 +90,10 @@ puts the calling code beside the flag. The value is still E.164.
 
 ## A list of your own
 
-`@countries` narrows the picker to the countries given, as ISO 3166 codes, in their order. A
-pasted number from another country stays in the country shown.
+`@countries` narrows the picker to the countries given, as ISO 3166 codes, in their order, and
+without `@defaultCountry` or a value it starts on the first of them. A number from a country the
+list leaves out, pasted, dropped or autofilled, is turned away: the input keeps what it held, and
+no other number is stored. So is one whose calling code no country has.
 
 <Example @name="phone-input-countries" @title="Some countries" />
 
@@ -112,7 +121,8 @@ Phone Input lays itself out right to left inside any element with `dir="rtl"` (s
 [Direction](/primitives/direction.md)): the picker moves to the right, at the field's start, and
 the number sits beside it. A phone number reads left to right in any language, so the input is
 `dir="ltr"`. Name the countries in the page's language with `@locale`, and the picker with
-`@countryLabel`.
+`@countryLabel`, whose English default (the input's label, then `country`) is the only text
+Phone Input adds.
 
 <Example @name="phone-input-rtl" @title="RTL" @dir="rtl" />
 
@@ -120,26 +130,30 @@ the number sits beside it. A phone number reads left to right in any language, s
 
 ### PhoneInput
 
-| Argument           | Type                              | Default              | What it does                                                         |
-| ------------------ | --------------------------------- | -------------------- | -------------------------------------------------------------------- |
-| `@value`           | `string \| null`                  |                      | The number in E.164 form, or `null`, controlled                      |
-| `@defaultValue`    | `string \| null`                  |                      | The number it starts with, uncontrolled                              |
-| `@onValueChange`   | `(value: string \| null) => void` |                      | Called with the new number whenever it changes                       |
-| `@country`         | `CountryCode`                     |                      | The country, controlled (ISO 3166: `US`, `GB`…)                      |
-| `@defaultCountry`  | `CountryCode`                     | the value's, or `US` | The country it starts with, uncontrolled                             |
-| `@onCountryChange` | `(country: CountryCode) => void`  |                      | Called with the new country whenever it changes                      |
-| `@countries`       | `CountryCode[]`                   | every country        | The countries the picker offers, in this order                       |
-| `@national`        | `boolean`                         | `false`              | Show the national format, with the calling code beside the flag      |
-| `@locale`          | `string`                          | the browser's        | The language the countries are named in                              |
-| `@countryLabel`    | `string`                          | `Country`            | The picker's accessible name                                         |
-| `@icon`            | `IconNode`                        | `chevron-down`       | The picker's chevron                                                 |
-| `@metadata`        | `MetadataJson`                    | the `min` metadata   | libphonenumber-js metadata (`max`, `mobile`, or your own)            |
-| `@disabled`        | `boolean`                         | `false`              | Disables the input and the picker                                    |
-| `@formName`        | `string`                          |                      | Puts a hidden input by this name in a form, holding the E.164 number |
-| `@name`            | `string`                          |                      | Its name, for `PhoneInputHarness` (`data-test-jn-name`)              |
+| Argument           | Type                              | Default            | What it does                                                         |
+| ------------------ | --------------------------------- | ------------------ | -------------------------------------------------------------------- |
+| `@value`           | `string \| null`                  |                    | The number in E.164 form, or `null`, controlled                      |
+| `@defaultValue`    | `string \| null`                  |                    | The number it starts with, uncontrolled                              |
+| `@onValueChange`   | `(value: string \| null) => void` |                    | Called with the new number whenever it changes                       |
+| `@country`         | `CountryCode`                     |                    | The country, controlled (ISO 3166: `US`, `GB`…)                      |
+| `@defaultCountry`  | `CountryCode`                     | see below          | The country it starts with, uncontrolled                             |
+| `@onCountryChange` | `(country: CountryCode) => void`  |                    | Called with the new country whenever it changes                      |
+| `@countries`       | `CountryCode[]`                   | every country      | The countries the picker offers, in this order                       |
+| `@national`        | `boolean`                         | `false`            | Show the national format, with the calling code beside the flag      |
+| `@locale`          | `string`                          | the browser's      | The language the countries are named in                              |
+| `@countryLabel`    | `string`                          | see below          | The picker's whole accessible name                                   |
+| `@icon`            | `IconNode`                        | `chevron-down`     | The picker's chevron                                                 |
+| `@metadata`        | `MetadataJson`                    | the `min` metadata | libphonenumber-js metadata (`max`, `mobile`, or your own)            |
+| `@disabled`        | `boolean`                         | `false`            | Disables the input and the picker                                    |
+| `@formName`        | `string`                          |                    | Puts a hidden input by this name in a form, holding the E.164 number |
+| `@name`            | `string`                          |                    | Its name, for `PhoneInputHarness` (`data-test-jn-name`)              |
 
 Its attributes go on the `<input>`: `id` (for a `<FieldLabel for>`), `placeholder`,
 `aria-invalid`, `aria-describedby`, `required`. An invalid input rings the whole group.
+
+Without `@defaultCountry`, it starts in the country of its value, else the first of
+`@countries`, else `US`. Without `@countryLabel`, the picker is named after the input: its label
+(its `aria-labelledby`, its `<label>`, or its `aria-label`), then `country`, as in `Phone country`.
 
 ### The helpers
 
@@ -183,8 +197,12 @@ calling code.
 ## Accessibility
 
 - The input is named as any input is: by a `<FieldLabel for>` (its `id`), `aria-label` or
-  `aria-labelledby`. The picker is a `combobox` named by `@countryLabel`, and holds the country's
-  name for assistive technology; its flag is hidden from it.
+  `aria-labelledby`. The picker is a `combobox` named after the input, `Phone country`, so a
+  form with several phone inputs, as in the first example, has pickers a screen reader tells
+  apart: `aria-labelledby` names the input's label and a hidden `country` (a `<label>` without
+  an `id` is given one), or, for an input named by `aria-label`, `aria-label` repeats it.
+  `@countryLabel` replaces that name, whole: give each picker its own. The picker holds the
+  country's name for assistive technology; its flag is hidden from it.
 - Each country in the list is an option named by its name and calling code.
 - The input reads left to right in any language (`dir="ltr"`), as phone numbers do.
 
@@ -221,7 +239,9 @@ assert.strictEqual(phone.country, 'FR')
 | `typeText(text)`                       | Types at the end, as a keyboard does                      |
 | `backspace(n)`                         | Presses Backspace at the end, `n` times                   |
 | `paste(text)`                          | Selects everything and pastes over it                     |
-| `fillIn(text)`, `clear()`, `focus()`   | Fills the input at once, empties it, focuses it           |
+| `drop(text)`                           | Drops text at the end, as a drag and drop does            |
+| `fillIn(text)`                         | Fills the input at once, as the browser's autofill does   |
+| `clear()`, `focus()`, `blur()`         | Empties the input, focuses it, takes focus off it         |
 
 ## Built on
 
@@ -231,4 +251,7 @@ code; and [libphonenumber-js](https://gitlab.com/catamphetamine/libphonenumber-j
 metadata holds each country's rules, which converts what is typed to E.164 and finds a number's
 country. Formwright's `@ember-formwright/maskito/phone` offers the same as its `phone` control,
 without a country picker; this is the standalone component, for use without a form library. The
-first example on this page ports Formwright's guide example for it.
+first example on this page ports Formwright's guide example for it. Formwright's office field is
+`@strict={{false}}`, which takes any country's number typed from its `+`; with a country picker,
+Phone Input has no such mode, so that field's hint says to pick the country or paste the number
+instead.

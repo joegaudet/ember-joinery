@@ -27,6 +27,11 @@ module('Example | phone-input-demo', function (hooks) {
 
     assert.strictEqual(contactForm.phone.value, '+1 212 555-0123', 'the stored number, formatted')
     assert.strictEqual(contactForm.phone.country, 'US')
+    assert.deepEqual(
+      [contactForm.phone, contactForm.mobile, contactForm.office].map(field => field.picker.label),
+      ['Phone country', 'UK mobile country', 'Office country'],
+      'each picker is named after its number',
+    )
 
     assert.strictEqual(contactForm.mobile.country, 'GB', 'its default country')
     await contactForm.mobile.typeText('7400123456')
@@ -35,6 +40,9 @@ module('Example | phone-input-demo', function (hooks) {
 
     await contactForm.office.paste('+33612')
     assert.strictEqual(contactForm.office.country, 'FR', 'a pasted number picks its country')
+    await contactForm.phone.fillIn('+447400123456')
+    assert.strictEqual(contactForm.phone.country, 'GB', 'and so does one autofilled')
+    assert.strictEqual(contact.phone, '+447400123456')
     await contactForm.save.click()
     assert.deepEqual(
       contactForm.fields.map(field => field.error),

@@ -182,13 +182,16 @@ await phone.backspace(5)
 assert.strictEqual(phone.value, '(555) 12')
 ```
 
-| Member            | What it is                                                              |
-| ----------------- | ----------------------------------------------------------------------- |
-| `typeText(text)`  | Types at the end, a character at a time, as a keyboard does             |
-| `backspace(n)`    | Presses Backspace at the end, `n` times (default 1)                     |
-| `paste(text)`     | Selects everything and pastes over it                                   |
-| `fillIn(text)`    | Replaces the text at once, as autofill does; the mask shapes the result |
-| `value`, `label`… | `InputHarness`'s                                                        |
+| Member                 | What it is                                                              |
+| ---------------------- | ----------------------------------------------------------------------- |
+| `typeText(text)`       | Types at the end, a character at a time, as a keyboard does             |
+| `backspace(n)`         | Presses Backspace at the end, `n` times (default 1)                     |
+| `deleteForward(at, n)` | Presses Delete `n` times with the caret at `at` (default 1)             |
+| `paste(text)`          | Selects everything and pastes over it                                   |
+| `drop(text)`           | Drops text at the end, as a drag and drop does                          |
+| `undo()`, `redo()`     | Presses Ctrl+Z and Ctrl+Shift+Z                                         |
+| `fillIn(text)`         | Replaces the text at once, as autofill does; the mask shapes the result |
+| `value`, `label`…      | `InputHarness`'s                                                        |
 
 ## Built on
 

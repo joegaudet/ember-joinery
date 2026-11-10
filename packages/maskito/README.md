@@ -39,9 +39,11 @@ const phoneMask = {
   say), and `maskText(text, options)` shows a value set from code as the mask would.
 - **`PhoneInput`** is an Input Group with a Select of countries (flag, name and calling code) in
   its addon, masked by `@maskito/phone` for the country chosen. Its value is E.164
-  (`+12125550123`) or `null`; a pasted international number switches the country. It takes
-  `@country`, `@countries`, `@national`, `@locale` and `@metadata`, and `isValidPhone()`,
-  `formatPhone()` and `countryOfPhone()` check and show stored numbers.
+  (`+12125550123`) or `null`; an international number pasted, dropped or autofilled switches
+  the country (one from a country `@countries` leaves out is turned away), and the picker is
+  named after the input (`Phone country`). It takes `@country`, `@countries`, `@national`,
+  `@locale` and `@metadata`, and `isValidPhone()`, `formatPhone()` and `countryOfPhone()` check
+  and show stored numbers.
 
 Each module is also a subpath of its own (`@ember-joinery/maskito/components/masked-input`,
 `/components/phone-input`, `/maskito`, `/presets`, `/phone`), so an app that uses only the masked
@@ -49,7 +51,7 @@ input never loads libphonenumber-js's metadata.
 
 Its harnesses, `MaskedInputHarness` and `PhoneInputHarness`, are in
 `@ember-joinery/maskito/test-support`. They type the way a browser does, with the `beforeinput`
-events the mask answers, and paste.
+events the mask answers, and paste, drop and fill in as a browser does too.
 
 Full documentation: the Masked Input and Phone Input pages of the guide at
 **https://joegaudet.com/ember-joinery/guide/**. Built on [Maskito](https://maskito.dev)

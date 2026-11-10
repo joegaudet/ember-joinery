@@ -1,4 +1,4 @@
-import { focus, settled } from '@ember/test-helpers'
+import { focus, settled, triggerKeyEvent } from '@ember/test-helpers'
 
 type TextControl = HTMLInputElement | HTMLTextAreaElement
 
@@ -11,10 +11,12 @@ function edit(
   inputType: string,
   data: string | null,
   apply: (from: number, to: number) => void,
+  dataTransfer: DataTransfer | null = null,
 ): void {
   const before = new InputEvent('beforeinput', {
     inputType,
     data,
+    dataTransfer,
     bubbles: true,
     cancelable: true,
     composed: true,
@@ -23,7 +25,9 @@ function edit(
   const from = element.selectionStart ?? element.value.length
   const to = element.selectionEnd ?? from
   apply(from, to)
-  element.dispatchEvent(new InputEvent('input', { inputType, data, bubbles: true, composed: true }))
+  element.dispatchEvent(
+    new InputEvent('input', { inputType, data, dataTransfer, bubbles: true, composed: true }),
+  )
 }
 
 /** Puts the caret at the end, as a click after the text would. */
@@ -52,6 +56,57 @@ export async function backspace(element: TextControl, times = 1): Promise<void> 
       else element.setRangeText('', from, to, 'end')
     })
   }
+  await settled()
+}
+
+/**
+ * Presses Delete `times` times, starting with the caret at `at` (a character's index), as a
+ * keyboard does: the caret stays where it is and the text after it moves up.
+ */
+export async function deleteForward(element: TextControl, at: number, times = 1): Promise<void> {
+  await focus(element)
+  element.setSelectionRange(at, at)
+  for (let i = 0; i < times; i++) {
+    edit(element, 'deleteContentForward', null, (from, to) => {
+      if (from === to) element.setRangeText('', from, Math.min(from + 1, element.value.length))
+      else element.setRangeText('', from, to, 'start')
+    })
+  }
+  await settled()
+}
+
+/** Z's key code, which Maskito's undo and redo shortcuts read (`keyCode`, as layouts differ). */
+const Z = 90
+
+/** Presses Ctrl+Z, which undoes the last edit. */
+export async function undo(element: TextControl): Promise<void> {
+  await focus(element)
+  await triggerKeyEvent(element, 'keydown', Z, { ctrlKey: true })
+}
+
+/** Presses Ctrl+Shift+Z, which redoes the edit undone last. */
+export async function redo(element: TextControl): Promise<void> {
+  await focus(element)
+  await triggerKeyEvent(element, 'keydown', Z, { ctrlKey: true, shiftKey: true })
+}
+
+/**
+ * Drops `text` at the end, as a drag and drop of text does: a cancelable `beforeinput`
+ * (`insertFromDrop`, with the text as its `data` and on its `dataTransfer`), then, if nothing
+ * cancelled it, the insertion and an `input`.
+ */
+export async function dropText(element: TextControl, text: string): Promise<void> {
+  await focus(element)
+  caretToEnd(element)
+  const dataTransfer = new DataTransfer()
+  dataTransfer.setData('text/plain', text)
+  edit(
+    element,
+    'insertFromDrop',
+    text,
+    (from, to) => element.setRangeText(text, from, to, 'end'),
+    dataTransfer,
+  )
   await settled()
 }
 

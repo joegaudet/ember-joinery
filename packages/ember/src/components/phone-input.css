@@ -30,12 +30,12 @@
 }
 
 /*
- * Wide enough for a country's name and calling code, and no taller than a long list needs. At
- * select.css's popper rules' weight and one more (`:not(template)`, 0,0,1), since select.css comes
- * after this file and its content's max height is the space left on the page.
+ * Wide enough for a country's name and calling code, and no taller than a long list needs (18rem),
+ * nor than the space left on the page, which is Select's own popper limit. At select.css's popper
+ * rules' weight and one more (`:not(template)`, 0,0,1), since select.css comes after this file.
  */
 :where(.jn-phone-input-content):not(template) {
-  @apply max-h-72 w-72;
+  @apply max-h-[min(18rem,var(--radix-select-content-available-height))] w-72;
 }
 
 :where(.jn-phone-input-item-name) {

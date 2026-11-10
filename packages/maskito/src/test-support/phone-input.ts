@@ -1,6 +1,6 @@
 import { InputHarness, SelectHarness } from '@ember-joinery/test-support'
 import { Harness } from '@ember-joinery/test-support'
-import { backspace, pasteText, typeText } from './-private/typing.ts'
+import { backspace, dropText, pasteText, typeText } from './-private/typing.ts'
 
 /**
  * Drives a `<PhoneInput>` from `@ember-joinery/maskito`: its input (an `InputHarness`) and its
@@ -117,7 +117,15 @@ export class PhoneInputHarness extends Harness {
     await pasteText(this.control, text)
   }
 
-  /** Replaces the text at once, as autofill does; the mask shapes it. */
+  /** Drops `text` at the end, as a drag and drop does; an international number switches country. */
+  async drop(text: string): Promise<void> {
+    await dropText(this.control, text)
+  }
+
+  /**
+   * Replaces the text at once, with an `input` and no `inputType`, as Chrome's autofill does;
+   * an international number switches country, and the mask shapes anything else.
+   */
   async fillIn(text: string): Promise<void> {
     await this.input.fillIn(text)
   }
@@ -130,5 +138,10 @@ export class PhoneInputHarness extends Harness {
   /** Moves focus to the input. */
   async focus(): Promise<void> {
     await this.input.focus()
+  }
+
+  /** Takes focus off the input; a calling code with nothing after it comes out. */
+  async blur(): Promise<void> {
+    await this.input.blur()
   }
 }

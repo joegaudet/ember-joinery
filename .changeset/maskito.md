@@ -14,9 +14,11 @@ and write their text. `PhoneInput` is an Input Group whose addon is a ghost Inpu
 opening a Select of countries (flag, name in `@locale`'s language, calling code), and whose input
 `@maskito/phone` masks for the country chosen; its value is the number in E.164 form, or `null`.
 Choosing a country moves the national number to its calling code and sends focus to the input,
-a pasted international number switches to its country, and `@countries`, `@national`,
-`@country` and `@metadata` shape it; it lays itself out right to left with the number still
-left to right. `isValidPhone`, `formatPhone` and `countryOfPhone` check and show stored numbers.
-Its `/test-support` has `MaskedInputHarness` and `PhoneInputHarness`, which type, delete and
-paste as a browser does. `@ember-joinery/ember`'s style sheets style its parts; nothing in the
+and an international number pasted, dropped or autofilled is read in its own country, which the
+picker switches to (one from a country `@countries` leaves out is turned away); `@countries`
+(whose first country it starts on), `@national`, `@country` and `@metadata` shape it, and the
+picker is named after its input (`Phone country`) unless `@countryLabel` names it. It lays
+itself out right to left with the number still left to right. `isValidPhone`, `formatPhone` and
+`countryOfPhone` check and show stored numbers. Its `/test-support` has `MaskedInputHarness` and
+`PhoneInputHarness`, which type, delete, paste, drop, fill in, undo and redo as a browser does. `@ember-joinery/ember`'s style sheets style its parts; nothing in the
 core packages imports it.

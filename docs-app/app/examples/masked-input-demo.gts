@@ -3,7 +3,10 @@ import { tracked } from '@glimmer/tracking'
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@ember-joinery/ember'
 import { MaskedInput } from '@ember-joinery/maskito'
 
-// Ported from Formwright's guide (data-maskito): a phone and a postal code mask.
+// Ported from Formwright's guide (data-maskito): a phone and a postal code mask. The postal
+// code's FieldDescription is Joinery's own: a mask turns away a character with no message, so
+// the guide's Accessibility notes ask for what it expects in words, and a placeholder alone
+// goes once something is typed.
 const phoneMask = {
   mask: ['(', /\d/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/],
 }

@@ -74,7 +74,7 @@ module('Integration | components | phone-input', function (hooks) {
       .hasAttribute('data-variant', 'ghost')
       .hasAttribute('role', 'combobox')
       .hasAttribute('aria-expanded', 'false')
-    assert.strictEqual(phone.picker.label, 'Country')
+    assert.strictEqual(phone.picker.label, 'Phone country', 'named after the input')
     assert.strictEqual(phone.country, 'US', 'the United States, with no value or country')
     assert.strictEqual(phone.countryName, 'United States', 'named for assistive technology')
     assert.strictEqual(phone.flag, countryFlag('US'))
@@ -118,6 +118,20 @@ module('Integration | components | phone-input', function (hooks) {
     await phone.backspace(12)
     assert.strictEqual(phone.value, '+1 ', 'Backspace leaves the calling code')
     assert.strictEqual(state.changes.at(-1), null, 'which is no number: null')
+    await a11yAudit()
+  })
+
+  test('the calling code goes in on focus, and comes out on blur if nothing follows it', async function (assert) {
+    await render(<template><PhoneInput @name="phone" aria-label="Phone" /></template>)
+    const phone = new PhoneInputHarness('phone')
+    await phone.focus()
+    assert.strictEqual(phone.value, '+1 ', 'in front, ready for the first digit')
+    await phone.blur()
+    assert.strictEqual(phone.value, '', 'out again, so the placeholder shows')
+
+    await phone.typeText('212')
+    await phone.blur()
+    assert.strictEqual(phone.value, '+1 212', 'it stays in front of a number')
     await a11yAudit()
   })
 
@@ -229,7 +243,15 @@ module('Integration | components | phone-input', function (hooks) {
     assert.dom(gb.querySelector('.jn-phone-input-flag')).hasAttribute('aria-hidden', 'true')
     assert.true(phone.picker.isOptionSelected('US'), 'the country shown is selected')
     const content = phone.picker.content!
-    assert.true(rect(content).height <= 288 + 1, 'no taller than max-h-72')
+    assert.true(rect(content).height <= 288 + 1, 'no taller than 18rem')
+    // As if the page left 120px for it; its transition (`duration-100`) would ease the change.
+    content.style.setProperty('transition', 'none')
+    content.style.setProperty('--radix-select-content-available-height', '120px')
+    assert.strictEqual(
+      getComputedStyle(content).maxHeight,
+      '120px',
+      'nor than the space left on the page, as a Select',
+    )
     await a11yAudit()
   })
 
@@ -283,16 +305,101 @@ module('Integration | components | phone-input', function (hooks) {
     await a11yAudit()
   })
 
-  test('a country the list leaves out is not switched to by a paste', async function (assert) {
+  test('an international number filled in at once (autofill) or dropped switches to its country', async function (assert) {
+    const state = new State()
     await render(
       <template>
-        <PhoneInput @name="phone" @countries={{EUROPE}} @defaultCountry="GB" aria-label="Phone" />
+        <PhoneInput
+          @name="phone"
+          @onValueChange={{state.onValueChange}}
+          @onCountryChange={{state.onCountryChange}}
+          aria-label="Phone"
+        />
+        <PhoneInput @name="national" @national={{true}} aria-label="National" />
+      </template>,
+    )
+    const phone = new PhoneInputHarness('phone')
+    // fillIn() sends what Chrome's autofill does: the whole number, and an input with no type.
+    await phone.fillIn('+447400123456')
+    assert.strictEqual(phone.country, 'GB', 'not read as a number of the United States')
+    assert.strictEqual(phone.value, '+44 7400 123456')
+    assert.strictEqual(state.changes.at(-1), '+447400123456', 'the number filled in, stored')
+    assert.deepEqual(state.countries, ['GB'])
+
+    await phone.fillIn('+33 6 12 34 56 78')
+    assert.strictEqual(phone.country, 'FR', 'written with spaces')
+    assert.strictEqual(state.changes.at(-1), '+33612345678')
+
+    await phone.fillIn('0049 1512 3456789')
+    assert.strictEqual(phone.country, 'DE', '00 reads as +')
+    assert.strictEqual(state.changes.at(-1), '+4915123456789')
+
+    await phone.fillIn('+1 212 555 0123')
+    assert.strictEqual(phone.country, 'US')
+    assert.strictEqual(phone.value, '+1 212 555-0123')
+
+    await phone.fillIn('2125550199')
+    assert.strictEqual(phone.value, '+1 212 555-0199', 'a national number is the mask’s')
+    assert.strictEqual(state.changes.at(-1), '+12125550199')
+
+    await phone.clear()
+    await phone.drop('+44 7400 123456')
+    assert.strictEqual(phone.country, 'GB', 'a number dropped in switches too')
+    assert.strictEqual(phone.value, '+44 7400 123456')
+    assert.strictEqual(state.changes.at(-1), '+447400123456')
+
+    const national = new PhoneInputHarness('national')
+    await national.fillIn('+447400123456')
+    assert.strictEqual(national.country, 'GB', 'in the national format too')
+    assert.strictEqual(national.value, '07400 123456')
+    await national.fillIn('+12125550123')
+    assert.strictEqual(national.value, '(212) 555-0123', 'its calling code beside the flag')
+    assert.strictEqual(national.callingCode, '+1')
+    await a11yAudit()
+  })
+
+  test('a number from a country the list leaves out is turned away', async function (assert) {
+    const state = new State()
+    await render(
+      <template>
+        <PhoneInput
+          @name="phone"
+          @countries={{EUROPE}}
+          @defaultCountry="GB"
+          @onValueChange={{state.onValueChange}}
+          aria-label="Phone"
+        />
       </template>,
     )
     const phone = new PhoneInputHarness('phone')
     await phone.paste('+1 212 555 0123')
-    assert.strictEqual(phone.country, 'GB')
-    assert.true(phone.value.startsWith('+44'), 'the mask keeps the calling code it has')
+    assert.strictEqual(phone.country, 'GB', 'the country stays')
+    assert.strictEqual(phone.value, '+44 ', 'and nothing goes in after its calling code')
+    assert.deepEqual(state.changes, [], 'so no other number is stored')
+
+    await phone.typeText('7400123456')
+    await phone.fillIn('+12125550123')
+    assert.strictEqual(phone.value, '+44 7400 123456', 'filled in, it is undone')
+    assert.strictEqual(state.changes.at(-1), '+447400123456')
+    await phone.drop('+1 212 555 0123')
+    assert.strictEqual(phone.value, '+44 7400 123456', 'dropped, it never goes in')
+
+    await phone.paste('+33 6 12 34 56 78')
+    assert.strictEqual(phone.country, 'FR', 'a country the list has is switched to')
+    await phone.paste('+999 123')
+    assert.strictEqual(phone.value, '+33 6 12-34-56-78', 'as is a calling code no country has')
+    await a11yAudit()
+  })
+
+  test('with @countries and no country or value, it starts on the first of them', async function (assert) {
+    await render(
+      <template><PhoneInput @name="phone" @countries={{EUROPE}} aria-label="Phone" /></template>,
+    )
+    const phone = new PhoneInputHarness('phone')
+    assert.strictEqual(phone.country, 'GB', 'not the United States, which the list leaves out')
+    assert.strictEqual(phone.countryName, 'United Kingdom')
+    await phone.typeText('7400123456')
+    assert.strictEqual(phone.value, '+44 7400 123456', 'with its mask')
     await a11yAudit()
   })
 
@@ -364,6 +471,7 @@ module('Integration | components | phone-input', function (hooks) {
       <template><PhoneInput @name="phone" @countries={{EUROPE}} aria-label="Phone" /></template>,
     )
     const phone = new PhoneInputHarness('phone')
+    assert.strictEqual(phone.country, 'GB', 'the first of @countries')
     await phone.focus()
     await tab()
     assert.dom(phone.picker.trigger).isFocused('Tab moves from the input to the picker')
@@ -418,6 +526,47 @@ module('Integration | components | phone-input', function (hooks) {
       getComputedStyle(phone.group).borderTopColor,
       getComputedStyle(field.element).color,
       'the group rings an invalid input',
+    )
+    await a11yAudit()
+  })
+
+  test('each picker is named after its input, so several of them differ', async function (assert) {
+    await render(
+      <template>
+        <Field>
+          <FieldLabel for="names-home">Home</FieldLabel>
+          <PhoneInput id="names-home" @name="home" />
+        </Field>
+        <Field>
+          <FieldLabel id="names-work-label" for="names-work">Work</FieldLabel>
+          <PhoneInput id="names-work" @name="work" />
+        </Field>
+        <span id="names-mobile-label">Mobile</span>
+        <PhoneInput @name="mobile" aria-labelledby="names-mobile-label" />
+        <PhoneInput @name="fax" aria-label="Fax" />
+        <PhoneInput @name="own" aria-label="Phone" @countryLabel="Country of the phone" />
+      </template>,
+    )
+    const home = new PhoneInputHarness('home')
+    assert.strictEqual(home.picker.label, 'Home country', "its <label>'s text, then country")
+    assert.strictEqual(new PhoneInputHarness('work').picker.label, 'Work country')
+    assert
+      .dom(new PhoneInputHarness('work').picker.trigger)
+      .hasAttribute(
+        'aria-labelledby',
+        /^names-work-label /,
+        'a label with an id is named by it, so a new label text follows',
+      )
+    assert.strictEqual(
+      new PhoneInputHarness('mobile').picker.label,
+      'Mobile country',
+      'its aria-labelledby',
+    )
+    assert.strictEqual(new PhoneInputHarness('fax').picker.label, 'Fax country', 'its aria-label')
+    assert.strictEqual(
+      new PhoneInputHarness('own').picker.label,
+      'Country of the phone',
+      '@countryLabel names it instead',
     )
     await a11yAudit()
   })

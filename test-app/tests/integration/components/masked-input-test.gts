@@ -5,8 +5,8 @@ import { on } from '@ember/modifier'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
-import { Field, FieldLabel, asInput } from '@ember-joinery/ember'
-import { FieldHarness, InputHarness, tab } from '@ember-joinery/test-support'
+import { Field, FieldLabel, asInput, asTextarea } from '@ember-joinery/ember'
+import { FieldHarness, InputHarness, TextareaHarness, tab } from '@ember-joinery/test-support'
 import {
   MaskedInput,
   dateMask,
@@ -38,6 +38,7 @@ const price = numberMask({ maximumFractionDigits: 2, thousandSeparator: ',', pre
 class State {
   @tracked value: string | undefined = undefined
   @tracked mask: MaskitoOptions | null = phoneMask
+  @tracked shown = true
   changes: string[] = []
   heard: string[] = []
   take = true
@@ -112,6 +113,74 @@ module('Integration | components | masked-input', function (hooks) {
 
     await phone.backspace(5)
     assert.strictEqual(phone.value, '(555) 12', 'Backspace steps over its fixed characters')
+    await a11yAudit()
+  })
+
+  test('Delete steps over its fixed characters, and the digits after move up', async function (assert) {
+    const state = new State()
+    await render(
+      <template>
+        <MaskedInput
+          @name="phone"
+          @mask={{phoneMask}}
+          @defaultValue="5551234567"
+          @onValueChange={{state.onValueChange}}
+          aria-label="Phone"
+        />
+      </template>,
+    )
+    const phone = new MaskedInputHarness('phone')
+    assert.strictEqual(phone.value, '(555) 123-4567')
+    await phone.deleteForward(4)
+    assert.strictEqual(phone.value, '(555) 123-4567', 'Delete on ) only moves the caret past it')
+    assert.strictEqual(phone.control.selectionStart, 5)
+    await phone.deleteForward(4, 3)
+    assert.strictEqual(
+      phone.value,
+      '(555) 234-567',
+      'past ) and the space, the next Delete takes the 1, and the digits move up',
+    )
+    assert.strictEqual(state.changes.at(-1), '(555) 234-567')
+    await a11yAudit()
+  })
+
+  test('Ctrl+Z and Ctrl+Shift+Z undo and redo the masked text', async function (assert) {
+    const state = new State()
+    await render(
+      <template>
+        <MaskedInput
+          @name="phone"
+          @mask={{phoneMask}}
+          @onValueChange={{state.onValueChange}}
+          aria-label="Phone"
+        />
+      </template>,
+    )
+    const phone = new MaskedInputHarness('phone')
+    await phone.typeText('5551234')
+    assert.strictEqual(phone.value, '(555) 123-4')
+    await phone.backspace()
+    const backspaced = phone.value
+    assert.notStrictEqual(backspaced, '(555) 123-4')
+
+    await phone.undo()
+    assert.strictEqual(phone.value, '(555) 123-4', 'undo puts back what Backspace took')
+    assert.strictEqual(state.changes.at(-1), '(555) 123-4', '@onValueChange hears it')
+    await phone.redo()
+    assert.strictEqual(phone.value, backspaced, 'redo takes it again')
+    assert.strictEqual(state.changes.at(-1), backspaced)
+    await a11yAudit()
+  })
+
+  test('a drop is masked, as a paste is', async function (assert) {
+    await render(
+      <template><MaskedInput @name="phone" @mask={{phoneMask}} aria-label="Phone" /></template>,
+    )
+    const phone = new MaskedInputHarness('phone')
+    await phone.drop('555 123 4567')
+    assert.strictEqual(phone.value, '(555) 123-4567')
+    await phone.drop('8')
+    assert.strictEqual(phone.value, '(555) 123-4567', 'and nothing goes past the end')
     await a11yAudit()
   })
 
@@ -300,6 +369,49 @@ module('Integration | components | masked-input', function (hooks) {
     assert.strictEqual(maskText('2125550123', phoneMask), '(212) 555-0123')
     assert.strictEqual(maskText('2125550123'), '2125550123', 'without a mask, it is left alone')
     assert.strictEqual(maskText(undefined, phoneMask), undefined)
+    await a11yAudit()
+  })
+
+  test('the maskito modifier masks a textarea too', async function (assert) {
+    const state = new State()
+    await render(
+      <template>
+        <textarea
+          aria-label="Phone"
+          {{asTextarea name="own"}}
+          {{maskito phoneMask}}
+          {{on "input" state.hear}}
+        ></textarea>
+      </template>,
+    )
+    const own = new TextareaHarness('own')
+    await own.fillIn('5551234567')
+    assert.strictEqual(own.value, '(555) 123-4567')
+    assert.deepEqual(state.heard, ['(555) 123-4567'], 'its own listener reads the masked text')
+    await own.fillIn('555x')
+    assert.strictEqual(own.value, '(555', 'what the mask turns away stays out')
+    await a11yAudit()
+  })
+
+  test('the maskito modifier lets go of its element when it is torn down', async function (assert) {
+    const state = new State()
+    await render(
+      <template>
+        {{#if state.shown}}
+          <input aria-label="Phone" {{asInput name="own"}} {{maskito phoneMask}} />
+        {{/if}}
+      </template>,
+    )
+    const own = new InputHarness('own')
+    const control = own.control
+    await own.fillIn('5551234567')
+    assert.strictEqual(own.value, '(555) 123-4567', 'masked while it is there')
+
+    state.shown = false
+    await settled()
+    control.value = 'no mask'
+    control.dispatchEvent(new Event('input', { bubbles: true }))
+    assert.strictEqual(control.value, 'no mask', 'nothing masks it once it is gone')
     await a11yAudit()
   })
 

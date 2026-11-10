@@ -180,3 +180,22 @@
   color: inherit;
   background-color: transparent;
 }
+
+/*
+ * Code in the theme's monospace font, as preflight gives upstream's Code Block: a browser's own
+ * `monospace` for `code` would otherwise beat the font its `pre` sets.
+ */
+:where(code, kbd, samp, pre):where([data-slot], [data-slot] *) {
+  font-family: var(
+    --font-mono,
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    'Liberation Mono',
+    'Courier New',
+    monospace
+  );
+  font-size: 1em;
+}

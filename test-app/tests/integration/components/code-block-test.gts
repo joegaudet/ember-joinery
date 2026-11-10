@@ -175,6 +175,11 @@ module('Integration | components | code-block', function (hooks) {
     assert.strictEqual(style(plain.content).overflowX, 'auto')
     assert.strictEqual(style(plain.content).textAlign, 'start')
     assert.ok(/mono/i.test(style(plain.content).fontFamily), 'font-mono')
+    assert.strictEqual(
+      style(plain.content.querySelector('code')!).fontFamily,
+      style(plain.content).fontFamily,
+      "the code element too, not the browser's own monospace",
+    )
     assert.strictEqual(px(style(plain.content).lineHeight), 14 * 1.625, 'leading-relaxed')
 
     assert.strictEqual(px(style(header.content).paddingTop), 8, 'under a header, pt-2')
@@ -193,6 +198,26 @@ module('Integration | components | code-block', function (hooks) {
     assert.strictEqual(px(style(sm.content).paddingLeft), 10, 'sm: px-2.5')
     assert.strictEqual(px(style(sm.content).paddingTop), 6, 'sm under a header: pt-1.5')
     assert.strictEqual(style(sm.part('title')).fontSize, '12px')
+    await a11yAudit()
+  })
+
+  test("the code takes the theme's --font-mono, as a shadcn app's does", async function (assert) {
+    await render(
+      <template>
+        <div style="--font-mono: 'Courier New', monospace">
+          <CodeBlock as |b|>
+            <b.Header><b.Title>Title</b.Title></b.Header>
+            <b.Content @code="code" />
+          </CodeBlock>
+        </div>
+      </template>,
+    )
+    const block = new CodeBlockHarness()
+    assert.strictEqual(getComputedStyle(block.content).fontFamily, '"Courier New", monospace')
+    assert.strictEqual(
+      getComputedStyle(block.content.querySelector('code')!).fontFamily,
+      '"Courier New", monospace',
+    )
     await a11yAudit()
   })
 

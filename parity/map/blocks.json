@@ -1,0 +1,9 @@
+{
+  "$comment": "Joinery ports four of upstream's blocks (registry/bases/radix/blocks): login-01, signup-01, dashboard-01, and sidebar-13, the settings dialog. Each renders as a page of its own on both stages, from the top. Blocks are never required by --require-complete.",
+  "examples": {
+    "dashboard-01": "dashboard-01",
+    "login-01": "login-01",
+    "sidebar-13": "sidebar-13",
+    "signup-01": "signup-01"
+  }
+}

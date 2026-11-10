@@ -7,7 +7,8 @@ A calendar to choose a day, in shadcn's Calendar look, on ember-power-calendar.
 **An opt-in add-on.** Power Calendar is its own package, `@ember-joinery/power-calendar`, built
 on [ember-power-calendar](https://ember-power-calendar.com) 2. Nothing in Joinery's core packages
 imports it, so an app that doesn't install it doesn't load ember-power-calendar. For a calendar
-with no dependency at all, Joinery's own Calendar, in `@ember-joinery/ember`, ports shadcn's.
+with no dependency at all, Joinery's own [Calendar](/components/calendar.md), in
+`@ember-joinery/ember`, ports shadcn's.
 
 </div>
 

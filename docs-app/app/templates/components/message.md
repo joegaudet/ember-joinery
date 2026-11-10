@@ -47,8 +47,7 @@ import { Avatar, Bubble, Message } from '@ember-joinery/ember'
 
 **Note:** `Message` owns the row layout: avatar, alignment, header, and footer. Render the
 visible message surface inside it with [`Bubble`](/components/bubble.md). For the scroll
-container around a conversation, upstream has `MessageScroller`, which comes to Joinery in a
-later unit.
+container around a conversation, use [`MessageScroller`](/components/message-scroller.md).
 
 ## Composition
 
@@ -115,8 +114,7 @@ Place message-level actions in the `Footer` part, such as copy, retry, or feedba
 
 ## Attachment
 
-A message with images and files attached. Upstream's example (`message-attachment`) needs
-Attachment, which hasn't landed in Joinery yet; it comes with it.
+<Example @name="message-attachment" @title="Attachment" />
 
 ## API Reference
 

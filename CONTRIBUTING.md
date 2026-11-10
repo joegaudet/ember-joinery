@@ -104,9 +104,9 @@ properties`): the build fails on any other unlayered rule, which would beat an a
 layered CSS (it drops the one shadcn's `tailwind.css` keeps for a bare `.shimmer` class). In
 watch mode (`pnpm start` in the package), editing any CSS file under `src/` rebuilds them.
 
-An add-on (`packages/code-block`, and the carousel, data table and chart to come) is a v2 addon
-like `ember`, built with the same rollup config, around the heavy dependency it wraps (Shiki for
-Code Block). Its harnesses are in `src/test-support/`, a barrel of their own and its
+An add-on (`packages/code-block` and `packages/carousel`, and the data table and chart to come) is
+a v2 addon like `ember`, built with the same rollup config, around the heavy dependency it wraps
+(Shiki for Code Block, Embla for Carousel). Its harnesses are in `src/test-support/`, a barrel of their own and its
 `/test-support` subpath (`"barrels": ["src", "src/test-support"]`), and it takes
 `@ember-joinery/ember` and `@ember-joinery/test-support` as peers. It ships no CSS: upstream's
 style sheets, which `ember` ports whole, already style its parts, so its inline utilities go in

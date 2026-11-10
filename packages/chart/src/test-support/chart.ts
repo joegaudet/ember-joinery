@@ -272,9 +272,15 @@ export class ChartHarness extends Harness {
     return value ? value.split(' ').map(Number) : []
   }
 
-  /** Whether it is a pie chart, whose tooltip points at sectors rather than rows. */
+  /**
+   * Whether it is a pie chart, whose tooltip points at sectors rather than rows. A radar chart's
+   * layout is `centric` too, but it marks itself a polar chart (`data-polar-chart`).
+   */
   get isPie(): boolean {
-    return this.wrapper.getAttribute('data-layout') === 'centric'
+    const wrapper = this.wrapper
+    return (
+      wrapper.getAttribute('data-layout') === 'centric' && !wrapper.hasAttribute('data-polar-chart')
+    )
   }
 
   /**

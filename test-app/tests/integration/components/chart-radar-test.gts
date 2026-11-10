@@ -118,6 +118,7 @@ module('Integration | components | chart-radar', function (hooks) {
     const chart = new PolarChartHarness('radar')
     assert.strictEqual(chart.width, 229)
     assert.strictEqual(chart.layout, 'centric')
+    assert.false(chart.isPie, "centric like a pie's, but not a pie chart")
     assert.deepEqual(
       chart.ring,
       { cx: 114.5, cy: 114.5, innerRadius: 0, outerRadius: 87.6, startAngle: 90, endAngle: -270 },

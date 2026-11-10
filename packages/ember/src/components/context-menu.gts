@@ -56,7 +56,7 @@ export interface ContextMenuBlockParams {
   /** The area a right click (or a long press) opens it on. */
   Trigger: WithBoundArgs<typeof ContextMenuTrigger, 'Part'>
   /** The menu, beside the pointer. */
-  Content: WithBoundArgs<typeof MenuContent, 'Part' | 'look'>
+  Content: WithBoundArgs<typeof MenuContent, 'Part' | 'look' | 'rootPlacement'>
   /** Radix's `Portal`, kept for upstream's markup: it renders its block in place. */
   Portal: PrimitiveBlockParams['Portal']
   /** A group of items. */
@@ -77,7 +77,7 @@ export interface ContextMenuBlockParams {
   Shortcut: WithBoundArgs<typeof MenuShortcut, 'look'>
   /** A submenu: it yields its Trigger and Content. */
   Sub: WithBoundArgs<typeof MenuSub, 'Part' | 'look'>
-  /** Makes your own element the area that opens it (the primitive's, unstyled). */
+  /** Makes your own element the area that opens it, styled as the Trigger is: `<div {{c.trigger}}>`. */
   trigger: PrimitiveBlockParams['trigger']
   /** Makes your own element an item, styled as one. */
   item: PartModifier<HTMLElement, MenuItemModifierOptions>
@@ -117,13 +117,14 @@ const ContextMenu: TOC<ContextMenuSignature> = <template>
     @modal={{@modal}}
     @dir={{@dir}}
     @name={{@name}}
+    @triggerLook={{LOOK.triggerLook}}
     ...attributes
     as |c|
   >
     {{yield
       (hash
         Trigger=(component ContextMenuTrigger Part=c.Trigger)
-        Content=(component MenuContent Part=c.Content look=LOOK)
+        Content=(component MenuContent Part=c.Content look=LOOK rootPlacement=undefined)
         Portal=c.Portal
         Group=(component MenuGroup Part=c.Group look=LOOK)
         Label=(component MenuLabel Part=c.Label look=LOOK)

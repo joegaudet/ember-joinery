@@ -44,6 +44,7 @@ export {
   itemPart as menuItemPart,
   type MenuCheckedState,
   type MenuItemLook,
+  type MenuPartLook,
   type MenuRoot,
   type MenuCheckboxItemBlockParams,
   type MenuCheckboxItemOptions,

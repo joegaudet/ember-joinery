@@ -103,13 +103,14 @@ export interface MenuRoot extends MenuLevel {
 /**
  * Whether the user is using the keyboard, as Radix's Menu tracks it for each root: a key press
  * turns it on, and the pointer going down or moving turns it off. A menu opened by the keyboard
- * moves focus to its first item, and one opened by the pointer doesn't.
+ * moves focus to its first item, and one opened by the pointer doesn't. Where there is no
+ * document (a server render, as in FastBoot), it listens for nothing: no menu opens there.
  */
 export class KeyboardIntent {
   isUsingKeyboard = false
 
   constructor(owner: object) {
-    const document = globalThis.document
+    if (typeof document === 'undefined') return
     const onPointer = () => (this.isUsingKeyboard = false)
     const onKeyDown = () => {
       this.isUsingKeyboard = true
@@ -563,7 +564,6 @@ function withTextValue<Named extends MenuItemOptions>(
   }
 }
 
-/** A plain item's modifier: `<a {{m.item}}>`, `<LinkTo {{m.item onSelect=…}}>`. */
 /**
  * What a styled layer adds to an item's modifier: its classes and attributes (`data-slot`,
  * `data-variant`…), from the modifier's own arguments.
@@ -573,7 +573,15 @@ export type MenuItemLook<Named> = (named: Named) => {
   attributes?: Readonly<Record<string, AttributeValue>>
 }
 
-function withLook<Named>(
+/**
+ * What a styled layer adds to a modifier a part yields (a Sub's `trigger`, a RadioGroup's
+ * `item`, a Context Menu's `trigger`), from the modifier's arguments: the primitive's own and
+ * any the styled layer adds (`inset`). It takes it as `@triggerLook` or `@itemLook`, so the
+ * modifier renders what the styled part does.
+ */
+export type MenuPartLook = MenuItemLook<Readonly<Record<string, unknown>>>
+
+export function withLook<Named>(
   spec: PartSpec<HTMLElement>,
   named: Named,
   look: MenuItemLook<Named> | undefined,
@@ -853,6 +861,8 @@ export interface MenuRadioGroupSignature {
     onValueChange?: (value: string) => void
     /** The tag to render. Default `div`. */
     as?: TagName
+    /** A styled layer's look for the `item` modifier, so it renders what its Item does. */
+    itemLook?: MenuPartLook
   }
   Blocks: { default: [MenuRadioGroupBlockParams] }
   Element: HTMLElement
@@ -870,7 +880,7 @@ export class MenuRadioGroup extends Component<MenuRadioGroupSignature> {
   item: PartModifier<HTMLElement, MenuRadioItemOptions> = withTextValue(
     part<HTMLElement, MenuRadioItemOptions>(options => {
       const checked = this.value !== undefined && this.value === options.value
-      return itemSpec(this.args.menu, options, {
+      const spec = itemSpec(this.args.menu, options, {
         part: 'radio-item',
         role: 'menuitemradio',
         attributes: {
@@ -880,6 +890,7 @@ export class MenuRadioGroup extends Component<MenuRadioGroupSignature> {
         },
         onSelect: () => this.args.onValueChange?.(options.value),
       })
+      return withLook(spec, { ...options }, this.args.itemLook)
     }),
   )
 
@@ -1141,6 +1152,8 @@ export interface MenuSubSignature {
   Args: ControllableArgs<'open', boolean> & {
     /** @internal The menu's root, bound by it. */
     menu: MenuRoot
+    /** A styled layer's look for the `trigger` modifier, so it renders what its Trigger does. */
+    triggerLook?: MenuPartLook
   }
   Blocks: { default: [MenuSubBlockParams] }
 }
@@ -1216,7 +1229,7 @@ export class MenuSub extends Component<MenuSubSignature> {
       const disabled = options.disabled ?? false
       const open = this.isOpen
       const hover = hoverListeners(disabled)!
-      return {
+      const spec: PartSpec<HTMLElement> = {
         attributes: {
           role: 'menuitem',
           tabindex: '-1',
@@ -1301,6 +1314,7 @@ export class MenuSub extends Component<MenuSubSignature> {
           }
         },
       }
+      return withLook(spec, { ...options }, this.args.triggerLook)
     }),
   )
 

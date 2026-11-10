@@ -1,6 +1,7 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { render } from '@ember/test-helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
+import { render, settled } from '@ember/test-helpers'
 import { fn } from '@ember/helper'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
@@ -34,6 +35,11 @@ class State {
   @tracked position = 'bottom'
   setStatusBar = (checked: boolean) => (this.statusBar = checked)
   setPosition = (value: string) => (this.position = value)
+}
+
+class Placement {
+  @tracked placement: 'top-end' | 'top' = 'top-end'
+  @tracked align: 'start' | undefined = undefined
 }
 
 module('Integration | components | dropdown-menu', function (hooks) {
@@ -205,6 +211,7 @@ module('Integration | components | dropdown-menu', function (hooks) {
       '28px',
       '@inset is ps-7',
     )
+    assert.dom(menu.item('Inset')).hasAttribute('data-inset', 'true', 'as React renders it')
     assert.strictEqual(
       getComputedStyle(menu.item('API')).opacity,
       '0.5',
@@ -330,6 +337,42 @@ module('Integration | components | dropdown-menu', function (hooks) {
     await a11yAudit()
   })
 
+  test('a @placement on the menu, ember-primitives’ argument, places it, its alignment too', async function (assert) {
+    const placement = new Placement()
+    await render(
+      <template>
+        <div style="position: fixed; top: 300px; left: 200px">
+          <DropdownMenu @defaultOpen={{true}} @placement={{placement.placement}} as |m|>
+            <m.Trigger style="width: 300px">Open</m.Trigger>
+            <m.Content @align={{placement.align}} style="width: 100px">
+              <m.Item>Profile</m.Item>
+            </m.Content>
+          </DropdownMenu>
+        </div>
+      </template>,
+    )
+    const menu = new DropdownMenuHarness()
+    const content = menu.content!
+    finishAnimations(content)
+    assert.strictEqual(menu.side, 'top')
+    assert.strictEqual(menu.align, 'end', 'top-end: the look’s start stands aside')
+    assert.true(Math.abs(rect(content).right - rect(menu.trigger).right) <= 1, 'the right edges')
+    assert.true(Math.abs(rect(content).bottom - (rect(menu.trigger).top - 4)) <= 1, '4px above')
+
+    placement.placement = 'top'
+    await settled()
+    finishAnimations(content)
+    assert.strictEqual(menu.align, 'center', 'top: centred')
+    const middle = (box: DOMRect) => box.left + box.width / 2
+    assert.true(Math.abs(middle(rect(content)) - middle(rect(menu.trigger))) <= 1)
+
+    placement.align = 'start'
+    await settled()
+    assert.strictEqual(menu.side, 'top', 'the side is still the placement’s')
+    assert.strictEqual(menu.align, 'start', 'and the Content’s @align wins')
+    await a11yAudit()
+  })
+
   test('the item modifier styles your own element as an item', async function (assert) {
     const selected: string[] = []
     const select = (name: string) => selected.push(name)
@@ -355,12 +398,78 @@ module('Integration | components | dropdown-menu', function (hooks) {
     assert
       .dom(menu.item('Delete'))
       .hasAttribute('data-variant', 'destructive')
-      .hasAttribute('data-inset')
+      .hasAttribute('data-inset', 'true')
     assert.strictEqual(getComputedStyle(menu.item('Profile')).display, 'flex', 'styled as an item')
     assert.dom(menu.item('Billing')).hasClass('jn-dropdown-menu-item').hasTagName('a')
     await a11yAudit()
     await menu.select('Profile')
     assert.deepEqual(selected, ['profile'])
+    await a11yAudit()
+  })
+
+  test('a checkbox item’s, a sub trigger’s and a radio item’s modifiers render what their parts do', async function (assert) {
+    const state = new State()
+    await render(
+      <template>
+        <DropdownMenu as |m|>
+          <m.Trigger>Open</m.Trigger>
+          <m.Content>
+            <m.CheckboxItem
+              @checked={{state.statusBar}}
+              @onCheckedChange={{state.setStatusBar}}
+              @inset={{true}}
+            >Status Bar</m.CheckboxItem>
+            <a
+              href="#panel"
+              data-case="modifier"
+              {{m.checkboxItem
+                checked=state.statusBar
+                onCheckedChange=state.setStatusBar
+                inset=true
+              }}
+            >Panel</a>
+            <m.Sub as |s|>
+              <s.Trigger>Invite users</s.Trigger>
+              <s.Content><m.Item>Email</m.Item></s.Content>
+            </m.Sub>
+            <m.Sub as |s|>
+              <a href="#share" data-case="modifier" {{s.trigger}}>Share</a>
+              <s.Content><m.Item>Message</m.Item></s.Content>
+            </m.Sub>
+            <m.RadioGroup @value={{state.position}} @onValueChange={{state.setPosition}} as |g|>
+              <g.Item @value="top">Top</g.Item>
+              <a href="#right" data-case="modifier" {{g.item value="right"}}>Right</a>
+            </m.RadioGroup>
+          </m.Content>
+        </DropdownMenu>
+      </template>,
+    )
+    const menu = new DropdownMenuHarness()
+    await menu.open()
+    // What an item renders, but for what is its own: its id, its href, and what it controls.
+    const renders = (label: string) => {
+      const { classes, attributes } = rendering(menu.item(label))
+      for (const own of ['id', 'aria-controls', 'href']) delete attributes[own]
+      return { classes, attributes }
+    }
+    assert.deepEqual(renders('Panel'), renders('Status Bar'), 'a checkbox item, checked')
+    assert.strictEqual(getComputedStyle(menu.item('Panel')).display, 'flex', 'styled as one')
+    assert.true(menu.isChecked('Panel'))
+    await a11yAudit()
+    await menu.select('Panel')
+    assert.false(state.statusBar, 'it toggles as the CheckboxItem does')
+    await menu.open()
+    assert.false(menu.isChecked('Panel'))
+    assert.deepEqual(renders('Panel'), renders('Status Bar'), 'and unchecked')
+
+    assert.deepEqual(renders('Share'), renders('Invite users'), 'a sub trigger')
+    const radio = rendering(menu.item('Right'))
+    delete radio.attributes['href']
+    radio.attributes['data-test-jn-value'] = 'top'
+    assert.deepEqual(radio, rendering(menu.item('Top')), 'a radio item')
+    assert.dom(menu.item('Right')).hasClass('jn-dropdown-menu-radio-item')
+    await menu.select('Right')
+    assert.strictEqual(state.position, 'right')
     await a11yAudit()
   })
 

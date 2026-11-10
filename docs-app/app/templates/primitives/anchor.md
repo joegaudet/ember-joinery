@@ -56,7 +56,13 @@ that stops it.
 
 shadcn's styles animate on `data-side` (`data-[side=bottom]:slide-in-from-top-2`), and Joinery's
 components map the custom properties to the names shadcn's styles read
-(`--radix-popover-content-transform-origin`). Everything it set is put back when it stops.
+(`--radix-popover-content-transform-origin`). The anchor's size is set before the element is
+measured, and Floating UI places it again when those properties change its size, so an element
+as wide as its anchor is placed at that width the first time. It goes straight to its place: a
+transition of its own on the properties that place it (`duration-100` leaves
+`transition-property` at `all`) is cut short. The browser's "ResizeObserver loop" message, which
+an element sized by its anchor can cause, isn't reported as an error (`ignoreROError()`).
+Everything it set is put back when it stops.
 
 ## Options
 

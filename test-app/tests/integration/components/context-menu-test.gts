@@ -1,6 +1,8 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
 import { render } from '@ember/test-helpers'
+import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
 import { ContextMenu } from '@ember-joinery/ember'
@@ -35,6 +37,11 @@ const Area = <template>
     }
   </style>
 </template>
+
+class People {
+  @tracked value = 'sam'
+  set = (value: string) => (this.value = value)
+}
 
 module('Integration | components | context-menu', function (hooks) {
   setupRenderingTest(hooks)
@@ -106,6 +113,59 @@ module('Integration | components | context-menu', function (hooks) {
     await a11yAudit()
   })
 
+  test('its modifiers render what its parts do: the trigger, a sub trigger and a radio item', async function (assert) {
+    const people = new People()
+    await render(
+      <template>
+        <Area />
+        <ContextMenu @name="parts" as |c|>
+          <c.Trigger class="cm-area">Right click here</c.Trigger>
+        </ContextMenu>
+        <ContextMenu @name="modifiers" as |c|>
+          <div class="cm-area" data-case="modifier" {{c.trigger}}>Right click here</div>
+          <c.Content>
+            <c.Sub as |s|>
+              <s.Trigger @inset={{true}}>More Tools</s.Trigger>
+              <s.Content><c.Item>Save Page...</c.Item></s.Content>
+            </c.Sub>
+            <c.Sub as |s|>
+              <div data-case="modifier" {{s.trigger inset=true}}>Navigate</div>
+              <s.Content><c.Item>Back</c.Item></s.Content>
+            </c.Sub>
+            <c.RadioGroup @value={{people.value}} @onValueChange={{people.set}} as |g|>
+              <g.Item @value="pedro" @inset={{true}}>Pedro Duarte</g.Item>
+              <div data-case="modifier" {{g.item value="colm" inset=true}}>Colm Tuite</div>
+            </c.RadioGroup>
+          </c.Content>
+        </ContextMenu>
+      </template>,
+    )
+    const parts = new ContextMenuHarness('parts')
+    const menu = new ContextMenuHarness('modifiers')
+    assert.deepEqual(rendering(menu.trigger), rendering(parts.trigger), 'the trigger')
+    assert.strictEqual(getComputedStyle(menu.trigger).userSelect, 'none', 'select-none')
+
+    await menu.open({ x: 150, y: 150 })
+    // Each sub trigger has an id, and names its own content, of its own.
+    const subTrigger = (label: string) => {
+      const { classes, attributes } = rendering(menu.item(label))
+      delete attributes['id']
+      delete attributes['aria-controls']
+      return { classes, attributes }
+    }
+    assert.deepEqual(subTrigger('Navigate'), subTrigger('More Tools'), 'a sub trigger')
+    assert.strictEqual(getComputedStyle(menu.item('Navigate')).display, 'flex', 'styled as one')
+    assert.strictEqual(menu.role('Colm Tuite'), 'menuitemradio')
+    const radio = rendering(menu.item('Colm Tuite'))
+    radio.attributes['data-test-jn-value'] = 'pedro'
+    assert.deepEqual(radio, rendering(menu.item('Pedro Duarte')), 'a radio item')
+    await a11yAudit()
+
+    await menu.select('Colm Tuite')
+    assert.strictEqual(people.value, 'colm', 'it selects as the Item does')
+    await a11yAudit()
+  })
+
   test('its style sheet sizes and places it at the pointer, without Tailwind', async function (assert) {
     await render(
       <template>
@@ -164,6 +224,11 @@ module('Integration | components | context-menu', function (hooks) {
     )
     const menu = new ContextMenuHarness()
     await menu.open()
+    // Placed by Floating UI (its anchor is the pointer): there at once, not sliding into place,
+    // so the submenu below measures it where it stays.
+    const content = menu.content!
+    assert.strictEqual(getComputedStyle(content).left, content.style.left, 'no slide into place')
+    assert.strictEqual(getComputedStyle(content).top, content.style.top)
     await pressKey('ArrowDown')
     assert.strictEqual(menu.highlighted, 'التنقل')
     await pressKey('ArrowLeft')

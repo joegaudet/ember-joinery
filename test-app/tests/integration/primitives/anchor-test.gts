@@ -14,6 +14,7 @@ import {
   isAnchorFallbackForced,
   supportsAnchorPositioning,
   type Align,
+  type AnchorData,
   type AnchorMode,
   type Middleware,
   type Side,
@@ -54,6 +55,14 @@ const Styles = <template>
       display: block;
       width: 10px;
       height: 5px;
+    }
+    /* As upstream's dropdown menu: w-(--radix-dropdown-menu-trigger-width). */
+    .anchor-follows {
+      width: var(--jn-anchor-width);
+    }
+    /* As upstream's duration-100, which leaves transition-property at its initial all. */
+    .anchor-slow {
+      transition-duration: 10s;
     }
   </style>
 </template>
@@ -276,6 +285,101 @@ function anchoringTests(hooks: TestHooks) {
       rect(trigger).left + rect(trigger).width / 2,
       'centred on the trigger',
     )
+    await a11yAudit()
+  })
+
+  test('content as wide as its anchor is measured at that width, so its first place is its last', async function (assert) {
+    const measured: Array<[floating: number, reference: number]> = []
+    const record = (data: AnchorData) => {
+      if (data.rects.floating.width > 0) {
+        measured.push([data.rects.floating.width, data.rects.reference.width])
+      }
+    }
+    await render(
+      <template>
+        <Styles />
+        <div class="anchor-stage">
+          <button id="trigger" type="button" class="anchor-trigger anchor-wide">Trigger</button>
+        </div>
+        <div
+          id="content"
+          class="anchor-content anchor-follows"
+          {{topLayer}}
+          {{anchorTo "#trigger" align="end" setData=record}}
+        >Content</div>
+      </template>,
+    )
+    const trigger = document.getElementById('trigger')!
+    const content = document.getElementById('content')!
+    assert.true(measured.length > 0, 'it said where it went')
+    assert.true(
+      measured.every(([floating, reference]) => Math.abs(floating - reference) <= 0.5),
+      `every placement measured the content at the anchor’s width (${JSON.stringify(measured)})`,
+    )
+    near(assert, rect(content).width, rect(trigger).width, 'as wide as its anchor')
+    assertPlaced(assert, trigger, content, 'bottom', 'end', 0)
+    await a11yAudit()
+  })
+
+  test('a transition of the content’s own doesn’t slide it into place', async function (assert) {
+    await render(
+      <template>
+        <Styles />
+        <div class="anchor-stage">
+          <button id="trigger" type="button" class="anchor-trigger">Trigger</button>
+        </div>
+        <div
+          id="content"
+          class="anchor-content anchor-slow"
+          {{topLayer}}
+          {{anchorTo "#trigger" side="right" align="start" sideOffset=4}}
+        >Content</div>
+      </template>,
+    )
+    const trigger = document.getElementById('trigger')!
+    const content = document.getElementById('content')!
+    const placing = content
+      .getAnimations()
+      .filter(
+        animation =>
+          animation instanceof CSSTransition &&
+          /^(left|top|right|bottom|margin)/.test(animation.transitionProperty),
+      )
+      .map(animation => (animation as CSSTransition).transitionProperty)
+    assert.deepEqual(placing, [], 'no transition moves it')
+    assertPlaced(assert, trigger, content, 'right', 'start', 4)
+    await a11yAudit()
+  })
+
+  test('it ignores the browser’s resize loop message, which a content sized by its anchor can cause', async function (assert) {
+    const seen: unknown[] = []
+    const original = window.onerror
+    window.onerror = (message: unknown) => {
+      seen.push(message)
+      return true
+    }
+    try {
+      await render(
+        <template>
+          <Styles />
+          <div class="anchor-stage">
+            <button id="trigger" type="button" class="anchor-trigger">Trigger</button>
+          </div>
+          <div id="content" class="anchor-content" {{topLayer}} {{anchorTo "#trigger"}}>
+            Content
+          </div>
+        </template>,
+      )
+      const handler = window.onerror as NonNullable<typeof window.onerror>
+      assert.true(
+        handler('ResizeObserver loop completed with undelivered notifications.'),
+        'the loop message is handled',
+      )
+      handler('A real error')
+      assert.deepEqual(seen, ['A real error'], 'other errors still reach the handler')
+    } finally {
+      window.onerror = original
+    }
     await a11yAudit()
   })
 

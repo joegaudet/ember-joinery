@@ -8,19 +8,26 @@ import ContextMenuCheckboxes from 'docs-app/examples/context-menu-checkboxes'
 module('Example | context-menu-checkboxes', function (hooks) {
   setupRenderingTest(hooks)
 
-  test('three settings, two of them on, each toggled by selecting it', async function (assert) {
+  test('three settings, unchecked, which stay so as upstream’s do', async function (assert) {
     await render(<template><ContextMenuCheckboxes /></template>)
     const menu = new ContextMenuHarness()
     await menu.open()
     assert.deepEqual(menu.items, ['Show Bookmarks Bar', 'Show Full URLs', 'Show Developer Tools'])
     assert.deepEqual(
+      menu.items.map(item => menu.role(item)),
+      ['menuitemcheckbox', 'menuitemcheckbox', 'menuitemcheckbox'],
+    )
+    assert.deepEqual(
       menu.items.map(item => menu.isChecked(item)),
-      [true, false, true],
+      [false, false, false],
     )
     await a11yAudit()
+
+    // Nothing keeps their state, so selecting one closes the menu and leaves it unchecked.
     await menu.select('Show Full URLs')
+    assert.false(menu.isOpen)
     await menu.open()
-    assert.true(menu.isChecked('Show Full URLs'))
+    assert.false(menu.isChecked('Show Full URLs'))
     await a11yAudit()
   })
 })

@@ -31,7 +31,9 @@ export type {
   MenuItemModifierOptions,
   MenuItemStyle,
   MenuItemVariant,
+  MenuRadioItemModifierOptions,
   MenuSubBlock,
+  MenuSubTriggerModifierOptions,
 } from '../-private/menu-parts.gts'
 
 const LOOK = menuLook('dropdown-menu')
@@ -63,8 +65,8 @@ const DropdownMenuTrigger: TOC<TriggerSignature> = <template>
 export interface DropdownMenuBlockParams {
   /** A `<button>` that opens and closes it. For your own element, use `trigger`. */
   Trigger: WithBoundArgs<typeof DropdownMenuTrigger, 'Part'>
-  /** The menu, below its trigger and lined up with its start, 4px off. */
-  Content: WithBoundArgs<typeof MenuContent, 'Part' | 'look'>
+  /** The menu, below its trigger and lined up with its start (or at `@placement`), 4px off. */
+  Content: WithBoundArgs<typeof MenuContent, 'Part' | 'look' | 'rootPlacement'>
   /** Radix's `Portal`, kept for upstream's markup: it renders its block in place. */
   Portal: PrimitiveBlockParams['Portal']
   /** A group of items. */
@@ -154,7 +156,7 @@ const DropdownMenu: TOC<DropdownMenuSignature> = <template>
     {{yield
       (hash
         Trigger=(component DropdownMenuTrigger Part=m.Trigger)
-        Content=(component MenuContent Part=m.Content look=LOOK)
+        Content=(component MenuContent Part=m.Content look=LOOK rootPlacement=@placement)
         Portal=m.Portal
         Group=(component MenuGroup Part=m.Group look=LOOK)
         Label=(component MenuLabel Part=m.Label look=LOOK)

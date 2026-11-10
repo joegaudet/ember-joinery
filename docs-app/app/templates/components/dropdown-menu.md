@@ -174,7 +174,9 @@ It renders an element with `display: contents` and yields `{ Trigger, Content, P
 Label, Item, LinkItem, CheckboxItem, RadioGroup, Separator, Shortcut, Sub, Arrow, trigger, item,
 checkboxItem, isOpen, open, close, toggle, setOpen }`. It also takes ember-primitives' Menu's
 positioning arguments (`@placement`, `@offsetOptions`, `@flipOptions`, `@shiftOptions`,
-`@middleware`, `@strategy`): see [the primitive](/primitives/dropdown-menu.md).
+`@middleware`, `@strategy`): see [the primitive](/primitives/dropdown-menu.md). A `@placement`
+decides the Content's side and its alignment (`@placement="top-end"` lines it up with the
+trigger's end, above it), unless the Content's own `@side` or `@align` says otherwise.
 
 ### m.Trigger
 
@@ -186,7 +188,7 @@ ArrowDown. `@disabled` turns it off. For your own element or component, use `{{m
 | Argument                                                         | Type                                     | Default    | What it does                                            |
 | ---------------------------------------------------------------- | ---------------------------------------- | ---------- | ------------------------------------------------------- |
 | `@side`                                                          | `"top" \| "right" \| "bottom" \| "left"` | `"bottom"` | The side of the trigger it goes on                      |
-| `@align`                                                         | `"start" \| "center" \| "end"`           | `"start"`  | Where along that side                                   |
+| `@align`                                                         | `"start" \| "center" \| "end"`           | `"start"`  | Where along that side (a `@placement`'s, if one is set) |
 | `@sideOffset`                                                    | `number`                                 | `4`        | Its distance from the trigger, in pixels                |
 | `@alignOffset`                                                   | `number`                                 | `0`        | Its shift from the start or end, in pixels              |
 | `@avoidCollisions`                                               | `boolean`                                | `true`     | Flip and shift to stay in view                          |
@@ -207,17 +209,17 @@ Content a `class` with a width of its own to change it, as upstream's examples d
 
 ### Items
 
-| Part             | Arguments                                                                                                         |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `m.Item`         | `@onSelect`, `@variant` (`"default"` or `"destructive"`), `@inset`, `@disabled`, `@textValue`, `@as`              |
-| `m.LinkItem`     | `@href`, `@includeActiveQueryParams`, `@activeOnSubPaths`, and the Item's                                         |
-| `m.CheckboxItem` | `@checked` (`true`, `false` or `"indeterminate"`), `@onCheckedChange`, `@inset`, `@disabled`, `@icon`             |
-| `m.RadioGroup`   | `@value`, `@onValueChange`; yields `{ Item, value }`, whose `Item` takes `@value`, `@inset`, `@disabled`, `@icon` |
-| `m.Label`        | `@inset`                                                                                                          |
-| `m.Shortcut`     | `@as` (default `span`)                                                                                            |
-| `m.Sub`          | `@open`, `@defaultOpen`, `@onOpenChange`; yields `{ Trigger, Content, trigger, isOpen, setOpen }`                 |
-| `s.Trigger`      | `@inset`, `@disabled`, `@icon` (its chevron)                                                                      |
-| `s.Content`      | the Content's, but `@side` and `@align`: it goes beside its trigger, aligned with its top                         |
+| Part             | Arguments                                                                                                               |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `m.Item`         | `@onSelect`, `@variant` (`"default"` or `"destructive"`), `@inset`, `@disabled`, `@textValue`, `@as`                    |
+| `m.LinkItem`     | `@href`, `@includeActiveQueryParams`, `@activeOnSubPaths`, and the Item's                                               |
+| `m.CheckboxItem` | `@checked` (`true`, `false` or `"indeterminate"`), `@onCheckedChange`, `@inset`, `@disabled`, `@icon`                   |
+| `m.RadioGroup`   | `@value`, `@onValueChange`; yields `{ Item, item, value }`, whose `Item` takes `@value`, `@inset`, `@disabled`, `@icon` |
+| `m.Label`        | `@inset`                                                                                                                |
+| `m.Shortcut`     | `@as` (default `span`)                                                                                                  |
+| `m.Sub`          | `@open`, `@defaultOpen`, `@onOpenChange`; yields `{ Trigger, Content, trigger, isOpen, setOpen }`                       |
+| `s.Trigger`      | `@inset`, `@disabled`, `@icon` (its chevron)                                                                            |
+| `s.Content`      | the Content's, but `@side` and `@align`: it goes beside its trigger, aligned with its top                               |
 
 Selecting an item calls `@onSelect` with a cancelable event and closes the menu;
 `event.preventDefault()` keeps it open. A checkbox or radio item's state is yours, as Radix's
@@ -229,7 +231,9 @@ open isn't open again the next time the menu opens.
 
 `{{m.item}}` makes your own element or component an item, styled as one (`variant`, `inset`
 and the Item's other arguments are its named arguments): `<LinkTo @route="profile" {{m.item}}>`.
-`{{m.checkboxItem}}` does the same for a checkbox item, whose check mark is then yours.
+`{{m.checkboxItem}}` does the same for a checkbox item, a radio group's `{{g.item value="top"}}`
+for a radio item, and a submenu's `{{s.trigger}}` for its trigger. Each renders the classes and
+data attributes its part does; the check mark, or the chevron, is then yours.
 
 ### Data attributes
 

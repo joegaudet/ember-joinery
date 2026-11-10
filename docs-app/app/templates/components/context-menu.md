@@ -108,11 +108,11 @@ Use `c.CheckboxItem` for toggles.
 
 <Example @name="context-menu-checkboxes" @title="Checkboxes" />
 
-Here the example parts from ui.shadcn.com's, on purpose. Upstream's passes `defaultChecked`,
-which Radix's checkbox item doesn't take (its state is only ever `checked`), so on
-ui.shadcn.com all three items open unchecked and don't toggle. This one keeps the state the
-example means: Show Bookmarks Bar and Show Developer Tools start checked, and each item toggles,
-with its state in the example's own `@tracked` fields, as a checkbox item's always is.
+As on ui.shadcn.com, all three items open unchecked and don't toggle. Upstream's example passes
+`defaultChecked`, which Radix's checkbox item doesn't take, and `c.CheckboxItem` takes no
+`@defaultChecked` either: its state is only ever `@checked`, which `@onCheckedChange` asks you to
+change. To make them toggle, keep each item's state in a `@tracked` field of your own, as the
+[Dropdown Menu's checkboxes](/components/dropdown-menu.md#checkboxes) do.
 
 ## Radio
 
@@ -153,7 +153,8 @@ checkboxItem, isOpen, close }`.
 
 A `<span>` (`@as` for another tag) that a right click, or a long press by touch or pen, opens
 the menu on. Its text isn't selectable (`select-none`). With `@disabled`, the browser's own menu
-shows there instead.
+shows there instead. `{{c.trigger}}` makes your own element the trigger, with the Trigger's
+classes and data attributes: `<div class="…" {{c.trigger}}>`.
 
 ### c.Content
 
@@ -166,7 +167,8 @@ stay in view; it takes `@alignOffset`, `@avoidCollisions`, `@collisionPadding`, 
 
 The items, groups, labels, separators, shortcuts and submenus are the
 [Dropdown Menu's](/components/dropdown-menu.md#items), with `context-menu` in their classes and
-`data-slot`s.
+`data-slot`s, and so are their modifiers (`{{c.item}}`, `{{c.checkboxItem}}`, a radio group's
+`{{g.item}}` and a submenu's `{{s.trigger}}`).
 
 ### Data attributes
 

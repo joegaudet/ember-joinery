@@ -34,13 +34,13 @@ element already observed hears its current size too, and the first hears nothing
 
 ## API
 
-| Export                    | What it does                                                          |
-| ------------------------- | --------------------------------------------------------------------- |
-| `resizeObserver(context)` | The app's shared observer (one per owner, so one per test)            |
-| `.observe(el, callback)`  | Calls `callback(entry)` at the start and each time `el` resizes       |
-| `.unobserve(el, cb)`      | Stops calling `cb` for `el`; the last one stops observing `el`        |
-| `ignoreROError()`         | Silences the "ResizeObserver loop" message (`resizeObserver` does it) |
-| `ResizeObservers` (class) | The type `resizeObserver()` returns                                   |
+| Export                    | What it does                                                                      |
+| ------------------------- | --------------------------------------------------------------------------------- |
+| `resizeObserver(context)` | The app's shared observer (one per owner, so one per test)                        |
+| `.observe(el, callback)`  | Calls `callback(entry)` at the start and each time `el` resizes                   |
+| `.unobserve(el, cb)`      | Stops calling `cb` for `el`; the last one stops observing `el`                    |
+| `ignoreROError()`         | Silences the "ResizeObserver loop" message (`resizeObserver` and anchoring do it) |
+| `ResizeObservers` (class) | The type `resizeObserver()` returns                                               |
 
 `context` is anything with an owner (a component, a route), or the owner itself.
 

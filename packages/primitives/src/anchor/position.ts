@@ -14,6 +14,7 @@ import {
   type Placement,
   type VirtualElement,
 } from '@floating-ui/dom'
+import { ignoreROError } from '../resize-observer.ts'
 import { exposeMetadata, flipTo, originFor, transformOrigin, type ArrowSize } from './middleware.ts'
 import {
   anchorMode,
@@ -107,6 +108,31 @@ function isDisplayed(element: Element): boolean {
   return element.isConnected && element.getClientRects().length > 0
 }
 
+/** The properties anchoring places an element with: its inset, its margins and its visibility. */
+const PLACING = /^(?:left|top|right|bottom|inset|margin|visibility)/
+
+/**
+ * Cuts short any transition of the element's own that would slide it into its place. Radix
+ * places a wrapper, which has no transitions; Joinery places the element itself, and upstream's
+ * classes give it a `transition-duration` (`duration-100`, for its animation) with
+ * `transition-property` left at its initial `all`. Its other transitions carry on.
+ */
+function arrive(element: HTMLElement): void {
+  if (typeof element.getAnimations !== 'function' || typeof CSSTransition === 'undefined') return
+  // getAnimations() brings the style up to date first, so it sees the transitions just started.
+  for (const animation of element.getAnimations()) {
+    if (animation instanceof CSSTransition && PLACING.test(animation.transitionProperty)) {
+      animation.cancel()
+    }
+  }
+}
+
+/** The anchor's size, as the floating element's custom properties. */
+function setAnchorSize(styles: Styles, size: { width: number; height: number }): void {
+  styles.set(ANCHOR_PROPERTIES.width, `${size.width}px`)
+  styles.set(ANCHOR_PROPERTIES.height, `${size.height}px`)
+}
+
 function isRTL(element: Element): boolean {
   return getComputedStyle(element).direction === 'rtl'
 }
@@ -152,8 +178,7 @@ function applyPlaced(
   const origin = originFor(placed.placement, placed.floating, placed.arrow, arrowSize)
   styles.set(ANCHOR_PROPERTIES.availableWidth, `${placed.available.width}px`)
   styles.set(ANCHOR_PROPERTIES.availableHeight, `${placed.available.height}px`)
-  styles.set(ANCHOR_PROPERTIES.width, `${placed.reference.width}px`)
-  styles.set(ANCHOR_PROPERTIES.height, `${placed.reference.height}px`)
+  setAnchorSize(styles, placed.reference)
   styles.set(ANCHOR_PROPERTIES.transformOrigin, `${origin.x} ${origin.y}`)
 
   const arrow = resolved.arrow
@@ -331,8 +356,14 @@ function measureArrow(
  *
  * Either way the floating element gets `data-side` and `data-align` (where it ended up, after
  * any flip), the `--jn-anchor-*` custom properties (`ANCHOR_PROPERTIES`), and the arrow its
- * place, and `setData` hears where it went. It follows the anchor as the page scrolls and
- * resizes. Everything it set is put back when it stops.
+ * place, and `setData` hears where it went. The anchor's size is set before anything is
+ * measured, and Floating UI places the element again when those properties change its size, as
+ * Radix's Popper does, so an element sized by them (a menu as wide as its trigger) is placed at
+ * its own size the first time. It goes straight to its place: a transition of the element's
+ * own on the properties that place it is cut short. It follows the anchor as the page scrolls
+ * and resizes, and the browser's "ResizeObserver loop" message, which an element sized by its
+ * anchor can cause, isn't an error (`ignoreROError()`). Everything it set is put back when it
+ * stops.
  *
  *   const stop = anchor(menu, trigger, { side: 'bottom', align: 'start', sideOffset: 4 })
  *
@@ -350,6 +381,9 @@ export function anchor(
   const styles = new Styles(floating)
   const attributes = new Attributes(floating)
   const arrowStyles = resolved.arrow ? new Styles(resolved.arrow) : undefined
+  ignoreROError()
+  // Before anything is measured, so an element sized by its anchor has that size from the start.
+  setAnchorSize(styles, reference.getBoundingClientRect())
 
   let stopped = false
   let token: unknown = waiter.beginAsync()
@@ -410,6 +444,8 @@ export function anchor(
       }
 
       const referenceRect = reference.getBoundingClientRect()
+      // The anchor's size first, so an element sized by it is measured at that size.
+      setAnchorSize(styles, referenceRect)
       const floatingRect = floating.getBoundingClientRect()
       const placement = measurePlacement(resolved, referenceRect, floatingRect, rtl)
       const [placedSide] = sideAndAlign(placement)
@@ -462,6 +498,7 @@ export function anchor(
         arrowStyles,
         arrowSize,
       )
+      arrive(floating)
       ready()
     }
     const stopUpdates = autoUpdate(reference, floating, update)
@@ -500,8 +537,15 @@ export function anchor(
           }),
         size({
           padding,
-          apply: ({ availableWidth, availableHeight }) => {
+          apply: ({ availableWidth, availableHeight, rects }) => {
             available = { width: availableWidth, height: availableHeight }
+            if (stopped || run !== latest) return
+            // As Radix's Popper: the properties go on here, so an element they size has its
+            // size before it is placed. When they change it, size() measures it again and the
+            // middleware runs once more, so flip, shift and the alignment see its real size.
+            styles.set(ANCHOR_PROPERTIES.availableWidth, `${availableWidth}px`)
+            styles.set(ANCHOR_PROPERTIES.availableHeight, `${availableHeight}px`)
+            setAnchorSize(styles, rects.reference)
           },
         }),
         ...resolved.middleware,
@@ -554,6 +598,7 @@ export function anchor(
           arrowStyles,
           arrowSize,
         )
+        arrive(floating)
         if (isDisplayed(floating)) ready()
       })
       void waitForPromise(done)

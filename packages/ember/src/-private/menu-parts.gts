@@ -14,7 +14,9 @@ import {
   type MenuCheckboxItemOptions,
   type MenuContentArgs,
   type MenuItemOptions,
+  type MenuPartLook,
   type MenuRadioGroupBlockParams,
+  type MenuRadioItemOptions,
   type MenuRoot,
   type MenuSubBlockParams,
   type MenuSubContentArgs,
@@ -55,6 +57,23 @@ export interface MenuLook {
   /** The content's alignment and distance when it is given none: upstream's own. */
   readonly contentAlign: 'start' | undefined
   readonly contentSideOffset: number | undefined
+  /**
+   * What the primitive's yielded modifiers add, so each renders what its part does: the
+   * trigger's (a context menu's; a dropdown menu's trigger has nothing of its own but its
+   * `data-slot`, and upstream's `asChild` keeps a Button's), a sub trigger's, a radio item's.
+   */
+  readonly triggerLook: MenuPartLook | undefined
+  readonly subTriggerLook: MenuPartLook
+  readonly radioItemLook: MenuPartLook
+}
+
+/**
+ * `data-inset`, from a part's `@inset` or a modifier's `inset`: `"true"`, as upstream's React
+ * renders `data-inset={inset}`, or nothing. The parts and their modifiers both use it, so they
+ * render the same thing.
+ */
+function dataInset(inset: unknown): 'true' | undefined {
+  return inset ? 'true' : undefined
 }
 
 /**
@@ -66,22 +85,25 @@ export interface MenuLook {
  */
 export function menuLook(name: MenuName): MenuLook {
   const indicator = `jn-${name}-item-indicator`
+  const trigger = {
+    class: name === 'context-menu' ? 'jn-context-menu-trigger' : undefined,
+    slot: `${name}-trigger`,
+  }
+  const subTrigger = { class: `jn-${name}-sub-trigger`, slot: `${name}-sub-trigger` }
+  const radioItem = { class: `jn-${name}-radio-item`, slot: `${name}-radio-item` }
   return {
     name,
-    trigger: {
-      class: name === 'context-menu' ? 'jn-context-menu-trigger' : undefined,
-      slot: `${name}-trigger`,
-    },
+    trigger,
     content: { class: `jn-${name}-content jn-menu-target`, slot: `${name}-content` },
     group: { slot: `${name}-group` },
     label: { class: `jn-${name}-label`, slot: `${name}-label` },
     item: { class: `jn-${name}-item group/${name}-item`, slot: `${name}-item` },
     checkboxItem: { class: `jn-${name}-checkbox-item`, slot: `${name}-checkbox-item` },
     radioGroup: { slot: `${name}-radio-group` },
-    radioItem: { class: `jn-${name}-radio-item`, slot: `${name}-radio-item` },
+    radioItem,
     separator: { class: `jn-${name}-separator`, slot: `${name}-separator` },
     shortcut: { class: `jn-${name}-shortcut`, slot: `${name}-shortcut` },
-    subTrigger: { class: `jn-${name}-sub-trigger`, slot: `${name}-sub-trigger` },
+    subTrigger,
     subContent: { class: `jn-${name}-sub-content jn-menu-target`, slot: `${name}-sub-content` },
     checkboxIndicator:
       name === 'dropdown-menu'
@@ -95,6 +117,18 @@ export function menuLook(name: MenuName): MenuLook {
     // place is the pointer's, which the primitive decides.
     contentAlign: name === 'dropdown-menu' ? 'start' : undefined,
     contentSideOffset: name === 'dropdown-menu' ? 4 : undefined,
+    triggerLook:
+      name === 'context-menu'
+        ? () => ({ class: trigger.class, attributes: { 'data-slot': trigger.slot } })
+        : undefined,
+    subTriggerLook: named => ({
+      class: subTrigger.class,
+      attributes: { 'data-slot': subTrigger.slot, 'data-inset': dataInset(named['inset']) },
+    }),
+    radioItemLook: named => ({
+      class: radioItem.class,
+      attributes: { 'data-slot': radioItem.slot, 'data-inset': dataInset(named['inset']) },
+    }),
   }
 }
 
@@ -138,7 +172,7 @@ export function styledItem(
       attributes: {
         'data-slot': look.item.slot,
         'data-variant': named.variant ?? 'default',
-        'data-inset': named.inset ? 'true' : undefined,
+        'data-inset': dataInset(named.inset),
       },
     })),
   )
@@ -154,7 +188,7 @@ export function styledCheckboxItem(
       class: look.checkboxItem.class,
       attributes: {
         'data-slot': look.checkboxItem.slot,
-        'data-inset': named.inset ? 'true' : undefined,
+        'data-inset': dataInset(named.inset),
       },
     })),
   )
@@ -189,7 +223,7 @@ export const MenuItem: TOC<MenuItemSignature> = <template>
     @textValue={{@textValue}}
     class={{@look.item.class}}
     data-slot={{@look.item.slot}}
-    data-inset={{@inset}}
+    data-inset={{dataInset @inset}}
     data-variant={{variantOf @variant}}
     ...attributes
   >{{yield}}</@Part>
@@ -220,7 +254,7 @@ export const MenuCheckboxItem: TOC<MenuCheckboxItemSignature> = <template>
     @textValue={{@textValue}}
     class={{@look.checkboxItem.class}}
     data-slot={{@look.checkboxItem.slot}}
-    data-inset={{@inset}}
+    data-inset={{dataInset @inset}}
     ...attributes
     as |item|
   ><span
@@ -259,7 +293,7 @@ export const MenuLinkItem: TOC<MenuLinkItemSignature> = <template>
     @textValue={{@textValue}}
     class={{@look.item.class}}
     data-slot={{@look.item.slot}}
-    data-inset={{@inset}}
+    data-inset={{dataInset @inset}}
     data-variant={{variantOf @variant}}
     ...attributes
     as |link|
@@ -294,7 +328,7 @@ export const MenuRadioItem: TOC<MenuRadioItemSignature> = <template>
     @textValue={{@textValue}}
     class={{@look.radioItem.class}}
     data-slot={{@look.radioItem.slot}}
-    data-inset={{@inset}}
+    data-inset={{dataInset @inset}}
     ...attributes
     as |item|
   ><span
@@ -323,6 +357,8 @@ export interface MenuRadioGroupSignature {
       {
         /** A radio item of this group: `<g.Item @value="top">Top</g.Item>`. */
         Item: WithBoundArgs<typeof MenuRadioItem, 'Part' | 'look'>
+        /** Makes your own element a radio item, styled as one (its mark is yours). */
+        item: PartModifier<HTMLElement, MenuRadioItemModifierOptions>
         /** The group's value. */
         value: string | undefined
       },
@@ -331,17 +367,23 @@ export interface MenuRadioGroupSignature {
   Element: HTMLElement
 }
 
+/** What the styled radio group's `item` modifier takes: the item, and `inset`. */
+export type MenuRadioItemModifierOptions = MenuRadioItemOptions & Pick<MenuItemStyle, 'inset'>
+
 /** A group of radio items, the one whose value is `@value` checked. */
 export const MenuRadioGroup: TOC<MenuRadioGroupSignature> = <template>
   <@Part
     @as={{@as}}
     @value={{@value}}
     @onValueChange={{@onValueChange}}
+    @itemLook={{@look.radioItemLook}}
     data-slot={{@look.radioGroup.slot}}
     ...attributes
     as |group|
   >{{yield
-      (hash Item=(component MenuRadioItem Part=group.Item look=@look) value=group.value)
+      (hash
+        Item=(component MenuRadioItem Part=group.Item look=@look) item=group.item value=group.value
+      )
     }}</@Part>
 </template>
 
@@ -380,7 +422,7 @@ export const MenuLabel: TOC<MenuLabelSignature> = <template>
     @as={{@as}}
     class={{@look.label.class}}
     data-slot={{@look.label.slot}}
-    data-inset={{@inset}}
+    data-inset={{dataInset @inset}}
     ...attributes
   >{{yield}}</@Part>
 </template>
@@ -431,18 +473,24 @@ export interface MenuContentSignature {
     Part: Parts['Content']
     /** @internal The menu's look. */
     look: MenuLook
+    /** @internal The menu's own `@placement` (ember-primitives' Menu takes it at its root). */
+    rootPlacement: MenuContentArgs['placement']
   }
   Blocks: { default: [] }
   Element: HTMLDivElement
 }
 
-/** `@align`, or the menu's own unless a `@placement` decides it. */
+/**
+ * `@align`, or the look's own unless a `@placement` (the Content's, or the menu's) decides it:
+ * the primitive lets an `@align` win over a placement, so the look's default must stand aside.
+ */
 function alignOf(
   align: MenuContentArgs['align'],
   placement: MenuContentArgs['placement'],
+  rootPlacement: MenuContentArgs['placement'],
   look: MenuLook,
 ): MenuContentArgs['align'] {
-  return align ?? (placement ? undefined : look.contentAlign)
+  return align ?? (placement || rootPlacement ? undefined : look.contentAlign)
 }
 
 function sideOffsetOf(sideOffset: number | undefined, look: MenuLook): number | undefined {
@@ -456,7 +504,7 @@ export const MenuContent: TOC<MenuContentSignature> = <template>
     @forceMount={{@forceMount}}
     @loop={{@loop}}
     @side={{@side}}
-    @align={{alignOf @align @placement @look}}
+    @align={{alignOf @align @placement @rootPlacement @look}}
     @sideOffset={{sideOffsetOf @sideOffset @look}}
     @alignOffset={{@alignOffset}}
     @avoidCollisions={{@avoidCollisions}}
@@ -508,7 +556,7 @@ export const MenuSubTrigger: TOC<MenuSubTriggerSignature> = <template>
     @textValue={{@textValue}}
     class={{@look.subTrigger.class}}
     data-slot={{@look.subTrigger.slot}}
-    data-inset={{@inset}}
+    data-inset={{dataInset @inset}}
     ...attributes
   >{{yield}}<Icon @icon={{if @icon @icon ChevronRight}} class="jn-rtl-flip" /></@Part>
 </template>
@@ -547,14 +595,18 @@ export const MenuSubContent: TOC<MenuSubContentSignature> = <template>
   >{{yield}}</@Part>
 </template>
 
+/** What the styled `trigger` modifier of a submenu takes. */
+export type MenuSubTriggerModifierOptions = Omit<MenuItemOptions, 'onSelect'> &
+  Pick<MenuItemStyle, 'inset'>
+
 /** What a styled submenu yields. */
 export interface MenuSubBlock {
   /** The item that opens it. */
   Trigger: WithBoundArgs<typeof MenuSubTrigger, 'Part' | 'look'>
   /** Its content, beside the trigger. */
   Content: WithBoundArgs<typeof MenuSubContent, 'Part' | 'look'>
-  /** Makes your own element the item that opens it (the primitive's, unstyled). */
-  trigger: MenuSubBlockParams['trigger']
+  /** Makes your own element the item that opens it, styled as one (its chevron is yours). */
+  trigger: PartModifier<HTMLElement, MenuSubTriggerModifierOptions>
   /** Whether it is open. */
   isOpen: boolean
   /** Opens (`true`) or closes (`false`) it. */
@@ -579,7 +631,13 @@ export interface MenuSubSignature {
 
 /** A submenu: it yields its Trigger and Content. */
 export const MenuSub: TOC<MenuSubSignature> = <template>
-  <@Part @open={{@open}} @defaultOpen={{@defaultOpen}} @onOpenChange={{@onOpenChange}} as |sub|>
+  <@Part
+    @open={{@open}}
+    @defaultOpen={{@defaultOpen}}
+    @onOpenChange={{@onOpenChange}}
+    @triggerLook={{@look.subTriggerLook}}
+    as |sub|
+  >
     {{yield
       (hash
         Trigger=(component MenuSubTrigger Part=sub.Trigger look=@look)

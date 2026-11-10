@@ -8,7 +8,7 @@ import { As, type TagName } from './as.gts'
 import type { Direction } from './direction.gts'
 import type { DismissReason, FocusOutsideEvent, PointerDownOutsideEvent } from './dismiss.ts'
 import { idFor } from './id.ts'
-import { part, type PartModifier } from './part.ts'
+import { part, type PartModifier, type PartSpec } from './part.ts'
 import { Delay, ElementRef, displayContents, type PopperContentArgs } from './-private/popper.gts'
 import {
   KeyboardIntent,
@@ -28,9 +28,11 @@ import {
   itemPart,
   labelPart,
   separatorPart,
+  withLook,
   type MenuCheckboxItemOptions,
   type MenuContentHost,
   type MenuItemOptions,
+  type MenuPartLook,
   type MenuRoot,
 } from './-private/menu.gts'
 
@@ -48,6 +50,8 @@ export interface ContextMenuArgs {
   dir?: Direction
   /** Its name, for `ContextMenuHarness` (`data-test-jn-name`). */
   name?: string
+  /** A styled layer's look for the `trigger` modifier, so it renders what its Trigger does. */
+  triggerLook?: MenuPartLook
 }
 
 /** What the trigger and its modifier take. */
@@ -237,7 +241,7 @@ export class ContextMenu extends Component<ContextMenuSignature> implements Menu
   >(options => {
     const disabled = options.disabled ?? false
     const cancel = () => this.longPress.cancel()
-    return {
+    const spec: PartSpec<HTMLElement> = {
       attributes: {
         'data-state': this.state,
         'data-disabled': disabled ? '' : undefined,
@@ -270,6 +274,7 @@ export class ContextMenu extends Component<ContextMenuSignature> implements Menu
         }
       },
     }
+    return withLook(spec, { ...options }, this.args.triggerLook)
   })
 
   item = itemPart(this)

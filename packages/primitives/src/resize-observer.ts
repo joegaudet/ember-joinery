@@ -20,8 +20,9 @@ let listening = false
  * the browser is saying it will deliver a resize in the next frame instead of this one. But it
  * arrives as an `error` event on `window`, which fails tests and fills error trackers.
  *
- * `resizeObserver()` calls it for you. It wraps `window.onerror` once (again only if something
- * replaces it), and listens for the `error` event once.
+ * `resizeObserver()` calls it for you, and so does anchoring (`anchorTo`, `anchor()`), whose
+ * floating element can be sized by its anchor. It wraps `window.onerror` once (again only if
+ * something replaces it), and listens for the `error` event once.
  */
 export function ignoreROError(): void {
   if (!listening) {

@@ -21,8 +21,8 @@ on a headless primitives layer, and each with a test harness.
   way users do, and check ARIA as they go.
 - **Accessible:** WCAG 2.2 AA, WAI-ARIA keyboard patterns, and right-to-left layouts.
 - **Opt-in add-ons** for the heavy parts: charts, carousel, data table, code block, file uploads,
-  a rich-text editor, calendars and date pickers on ember-power-calendar, and a
-  [Formwright](https://joegaudet.com/ember-formwright/) bridge.
+  a rich-text editor, calendars and date pickers on ember-power-calendar, masked and phone
+  inputs, and a [Formwright](https://joegaudet.com/ember-formwright/) bridge.
 
 ```gts
 import { Dialog, Button, Input } from '@ember-joinery/ember'
@@ -59,6 +59,7 @@ import { Dialog, Button, Input } from '@ember-joinery/ember'
 | `@ember-joinery/file-upload`    | File uploads (drop zone, file list, upload queue), on ember-file-upload            |
 | `@ember-joinery/tiptap`         | Rich-text editor with a formatting toolbar, on Tiptap                              |
 | `@ember-joinery/power-calendar` | Calendars and date pickers, on ember-power-calendar                                |
+| `@ember-joinery/maskito`        | Masked input and phone input (country picker, E.164), on Maskito                   |
 | `@ember-joinery/formwright`     | Joinery's inputs as [Formwright](https://joegaudet.com/ember-formwright/) controls |
 
 These will support Ember 6.12 LTS and 7.x, in Vite (Embroider) apps and classic ember-cli apps.
@@ -86,7 +87,9 @@ shadcn/ui's Calendar is built on. Its file uploads are built on
 [ember-file-upload](https://github.com/adopted-ember-addons/ember-file-upload) (MIT), and its
 rich-text editor on [Tiptap](https://github.com/ueberdosis/tiptap) (MIT, © Tiptap GmbH). Its
 opt-in calendars and date pickers are built on
-[ember-power-calendar](https://github.com/ember-power-addons/ember-power-calendar) (MIT). See
+[ember-power-calendar](https://github.com/ember-power-addons/ember-power-calendar) (MIT), and
+its masked and phone inputs on [Maskito](https://github.com/taiga-family/maskito) (Apache 2.0)
+and [libphonenumber-js](https://gitlab.com/catamphetamine/libphonenumber-js) (MIT). See
 [NOTICE](NOTICE).
 
 ## License

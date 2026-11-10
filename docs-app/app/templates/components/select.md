@@ -134,7 +134,8 @@ with the value at the right, and the check marks move to the left.
 | `@dir`           | `"ltr" \| "rtl"`          |         | The direction, when it isn't the page's                         |
 | `@name`          | `string`                  |         | Its name, for `SelectHarness` (`data-test-jn-name`)             |
 
-It renders an element with `display: contents` and yields `{ Trigger, Value, Content, Item,
+It renders an element with `display: contents` (where Radix's renders none; in a Field, the
+field's rules for what is directly inside it still size the trigger, as upstream's do) and yields `{ Trigger, Value, Content, Item,
 Group, Label, Separator, Arrow, trigger, value, isOpen, setOpen, setValue }`. Radix's `name` is
 `@formName`, as on Joinery's other controls: `@name` names it for its harness.
 

@@ -52,3 +52,24 @@
 :where(.jn-select-content[data-align-trigger='false']) {
   @apply data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1;
 }
+
+/*
+ * In a Field (edited by hand). Upstream's Radix Select renders no element, so a field's rules for
+ * the elements directly inside it reach its trigger: a vertical or responsive field stretches it
+ * (`*:w-full`), and a responsive one, once its group is 28rem wide, sizes it to its content
+ * (`@md/field-group:*:w-auto`). Joinery's root is an element with display: contents, which those
+ * rules reach instead, so these restate field.css's one level down, for a trigger directly in a
+ * Select's root (`data-test-jn="select"`, which every Select renders) directly in a field, at
+ * field.css's weight (`:not(template)`, 0,0,1): over the trigger's `w-fit`, under its variants.
+ */
+:where(.jn-field-orientation-vertical, .jn-field-orientation-responsive)
+  > :where([data-test-jn='select'])
+  > :where(.jn-select-trigger):not(template) {
+  @apply w-full;
+}
+
+:where(.jn-field-orientation-responsive)
+  > :where([data-test-jn='select'])
+  > :where(.jn-select-trigger):not(template) {
+  @apply @md/field-group:w-auto;
+}

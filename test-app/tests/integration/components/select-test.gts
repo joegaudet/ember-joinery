@@ -4,7 +4,7 @@ import { render, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
-import { Select } from '@ember-joinery/ember'
+import { Field, FieldLabel, Select } from '@ember-joinery/ember'
 import { SelectHarness, pressKey } from '@ember-joinery/test-support'
 
 /** A rendered length in pixels. */
@@ -247,6 +247,34 @@ module('Integration | components | select', function (hooks) {
       rect(viewport).width >= t.width - 1,
       `min-w-(--radix-select-trigger-width) (${rect(viewport).width} ≥ ${t.width})`,
     )
+    await a11yAudit()
+  })
+
+  test('in a Field, the field sizes the trigger, as upstream’s does with no root element', async function (assert) {
+    await render(
+      <template>
+        <div style="width: 320px">
+          <Field @name="vertical">
+            <FieldLabel for="vertical-fruit">Fruit</FieldLabel>
+            <Select @name="vertical" as |s|>
+              <s.Trigger id="vertical-fruit"><s.Value @placeholder="Fruit" /></s.Trigger>
+              <s.Content><s.Item @value="apple">Apple</s.Item></s.Content>
+            </Select>
+          </Field>
+          <Field @name="horizontal" @orientation="horizontal">
+            <FieldLabel for="horizontal-fruit">Fruit</FieldLabel>
+            <Select @name="horizontal" as |s|>
+              <s.Trigger id="horizontal-fruit"><s.Value @placeholder="Fruit" /></s.Trigger>
+              <s.Content><s.Item @value="apple">Apple</s.Item></s.Content>
+            </Select>
+          </Field>
+        </div>
+      </template>,
+    )
+    const vertical = new SelectHarness('vertical').trigger
+    assert.strictEqual(vertical.offsetWidth, 320, 'a vertical field stretches it (*:w-full)')
+    const horizontal = new SelectHarness('horizontal').trigger
+    assert.true(horizontal.offsetWidth < 160, 'a horizontal field leaves its w-fit')
     await a11yAudit()
   })
 

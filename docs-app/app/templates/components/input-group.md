@@ -55,34 +55,27 @@ For proper focus management, `g.Addon` should always be placed after `g.Input` o
 ### inline-start
 
 Use `@align="inline-start"` to position the addon at the start of the input. This is the
-default. Upstream's example, in a Field with a label and a description, comes with Field; the
-[Icon](#icon) examples below put icons at the start.
+default.
+
+<Example @name="input-group-inline-start" @title="inline-start" />
 
 ### inline-end
 
-Use `@align="inline-end"` to position the addon at the end of the input. Upstream's example, a
-password field in a Field, comes with Field.
+Use `@align="inline-end"` to position the addon at the end of the input.
 
-```gts
-<InputGroup as |g|>
-  <g.Input type="password" placeholder="Enter password" aria-label="Password" />
-  <g.Addon @align="inline-end">
-    <Icon @icon={{EyeOff}} />
-  </g.Addon>
-</InputGroup>
-```
+<Example @name="input-group-inline-end" @title="inline-end" />
 
 ### block-start
 
-Use `@align="block-start"` to position the addon above the input. Upstream's example, an input
-and a textarea in Fields, comes with Field; the [Textarea](#textarea) example below has a header
-above it.
+Use `@align="block-start"` to position the addon above the input.
+
+<Example @name="input-group-block-start" @title="block-start" />
 
 ### block-end
 
-Use `@align="block-end"` to position the addon below the input. Upstream's example, an amount
-and a comment in Fields, comes with Field; the [Textarea](#textarea) example below has a footer
-below it.
+Use `@align="block-end"` to position the addon below the input.
+
+<Example @name="input-group-block-end" @title="block-end" />
 
 ## Icon
 
@@ -131,8 +124,9 @@ library's, Joinery's a plain `<textarea>` with `field-sizing-content`.
 
 Joinery's styles use logical properties, so an input group lays itself out right to left
 inside any element with `dir="rtl"` (see [Direction](/primitives/direction.md)): an
-`inline-start` addon goes on the right, and its padding follows. Upstream's right-to-left
-example, whose last group is in a Field, comes with Field.
+`inline-start` addon goes on the right, and its padding follows.
+
+<Example @name="input-group-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 

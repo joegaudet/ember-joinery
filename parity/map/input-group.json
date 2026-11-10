@@ -1,13 +1,18 @@
 {
-  "$comment": "Waiting for components that haven't landed. For Field: input-group-inline-start, input-group-inline-end, input-group-block-start, input-group-block-end and input-group-rtl. For Dropdown Menu: input-group-dropdown. The unit that lands each ports its examples onto the Input Group page and maps them here.",
+  "$comment": "Waiting for a component that hasn't landed: input-group-dropdown (Dropdown Menu). The unit that lands it ports the example onto the Input Group page and maps it here.",
   "examples": {
     "input-group-demo": "input-group-demo",
+    "input-group-inline-start": "input-group-inline-start",
+    "input-group-inline-end": "input-group-inline-end",
+    "input-group-block-start": "input-group-block-start",
+    "input-group-block-end": "input-group-block-end",
     "input-group-icon": "input-group-icon",
     "input-group-text": "input-group-text",
     "input-group-button": "input-group-button",
     "input-group-kbd": "input-group-kbd",
     "input-group-spinner": "input-group-spinner",
     "input-group-textarea": "input-group-textarea",
-    "input-group-custom": "input-group-custom"
+    "input-group-custom": "input-group-custom",
+    "input-group-rtl": "input-group-rtl"
   }
 }

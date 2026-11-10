@@ -103,14 +103,16 @@ Use [`Badge`](/components/badge.md) in the label to highlight a recommended fiel
 ## Input Group
 
 To add icons, text, or buttons inside an input, use the `InputGroup` component. See the
-[Input Group](/components/input-group.md) component for more examples. Upstream's example, in a
-Field, is still to port.
+[Input Group](/components/input-group.md) component for more examples.
+
+<Example @name="input-input-group" @title="Input Group" />
 
 ## Button Group
 
 To add buttons to an input, use the `ButtonGroup` component. See the
-[Button Group](/components/button-group.md) component for more examples. Upstream's example, in
-a Field, is still to port.
+[Button Group](/components/button-group.md) component for more examples.
+
+<Example @name="input-button-group" @title="Button Group" />
 
 ## Form
 

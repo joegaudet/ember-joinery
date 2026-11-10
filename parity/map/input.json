@@ -1,5 +1,5 @@
 {
-  "$comment": "Waiting: input-input-group and input-button-group, whose Field, Input Group and Button Group have all landed, are still to port; input-form waits for Select. The unit that lands each ports its example onto the Input page and maps it here. The page also shows Joinery's own input-controlled, which has no upstream counterpart, so it isn't mapped.",
+  "$comment": "Waiting for a component that hasn't landed: input-form (Select). The unit that lands it ports the example onto the Input page and maps it here. The page also shows Joinery's own input-controlled, which has no upstream counterpart, so it isn't mapped.",
   "examples": {
     "input-demo": "input-demo",
     "input-basic": "input-basic",
@@ -12,6 +12,8 @@
     "input-grid": "input-grid",
     "input-required": "input-required",
     "input-badge": "input-badge",
+    "input-input-group": "input-input-group",
+    "input-button-group": "input-button-group",
     "input-rtl": "input-rtl"
   }
 }

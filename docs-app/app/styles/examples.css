@@ -235,3 +235,20 @@
     box-sizing: border-box;
   }
 }
+
+/*
+ * Upstream's blocks are pages of a Tailwind app, on Tailwind's preflight and shadcn's base
+ * layer: every element sizes its border box, and a border takes `--border`. login-01's and
+ * signup-01's page is `min-h-svh` with `p-6 md:p-10` round the form, the screen's height,
+ * padding and all; the dashboard's table sits in a plain `border`. Joinery's parts get both
+ * from joinery.css; this gives them to the blocks' own elements, below the utilities as above.
+ */
+@layer guide {
+  :where([data-example='login-01'], [data-parity='login-01']) :where(*),
+  :where([data-example='signup-01'], [data-parity='signup-01']) :where(*),
+  :where([data-example='dashboard-01'], [data-parity='dashboard-01']) :where(*),
+  :where([data-example='sidebar-13'], [data-parity='sidebar-13']) :where(*) {
+    box-sizing: border-box;
+    border-color: var(--border);
+  }
+}

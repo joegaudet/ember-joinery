@@ -1,0 +1,100 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/calendar.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* in Calendar; keep on the element: group/calendar */
+:where(.jn-calendar) {
+  @apply bg-background in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent;
+}
+
+/* in Calendar */
+:where(.jn-calendar) {
+  @apply rtl:**:[.rdp-button\_next>svg]:rotate-180;
+}
+
+/* in Calendar */
+:where(.jn-calendar) {
+  @apply rtl:**:[.rdp-button\_previous>svg]:rotate-180;
+}
+
+/* DayPicker classNames.root in Calendar, no slot to attach it to: w-fit */
+
+/* DayPicker classNames.months in Calendar, no slot to attach it to: relative flex flex-col gap-4 md:flex-row */
+
+/* DayPicker classNames.month in Calendar, no slot to attach it to: flex w-full flex-col gap-4 */
+
+/* DayPicker classNames.nav in Calendar, no slot to attach it to: absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1 */
+
+/* DayPicker classNames.button_previous in Calendar, no slot to attach it to: size-(--cell-size) p-0 select-none aria-disabled:opacity-50 */
+
+/* DayPicker classNames.button_next in Calendar, no slot to attach it to: size-(--cell-size) p-0 select-none aria-disabled:opacity-50 */
+
+/* DayPicker classNames.month_caption in Calendar, no slot to attach it to: flex h-(--cell-size) w-full items-center justify-center px-(--cell-size) */
+
+/* DayPicker classNames.dropdowns in Calendar, no slot to attach it to: flex h-(--cell-size) w-full items-center justify-center gap-1.5 text-sm font-medium */
+
+/* DayPicker classNames.dropdown_root in Calendar */
+:where(.jn-calendar-dropdown-root) {
+  @apply relative rounded-(--cell-radius);
+}
+/* NOTE: upstream's registry build never resolves .jn-calendar-dropdown-root here (its cn() call is in classNames, not a className), so on ui.shadcn.com its style rule applies nowhere; to match, keep that class off this element, or its rule from reaching it. */
+
+/* DayPicker classNames.dropdown in Calendar, no slot to attach it to: absolute inset-0 bg-popover opacity-0 */
+
+/* DayPicker classNames.caption_label in Calendar, no slot to attach it to: font-medium select-none */
+
+/* DayPicker classNames.caption_label in Calendar, only when captionLayout === "label": text-sm */
+/* NOTE: upstream's registry build never resolves .jn-calendar-caption here (it is behind a condition), so on ui.shadcn.com its style rule applies nowhere; to match, keep that class off this element, or its rule from reaching it. */
+
+/* DayPicker classNames.caption_label in Calendar, only when !(captionLayout === "label"): flex items-center gap-1 rounded-(--cell-radius) text-sm [&>svg]:size-3.5 [&>svg]:text-muted-foreground */
+/* NOTE: upstream's registry build never resolves .jn-calendar-caption-label here (it is behind a condition), so on ui.shadcn.com its style rule applies nowhere; to match, keep that class off this element, or its rule from reaching it. */
+
+/* DayPicker classNames.month_grid in Calendar, no slot to attach it to: w-full border-collapse */
+
+/* DayPicker classNames.weekdays in Calendar, no slot to attach it to: flex */
+
+/* DayPicker classNames.weekday in Calendar, no slot to attach it to: flex-1 rounded-(--cell-radius) text-[0.8rem] font-normal text-muted-foreground select-none */
+
+/* DayPicker classNames.week in Calendar, no slot to attach it to: mt-2 flex w-full */
+
+/* DayPicker classNames.week_number_header in Calendar, no slot to attach it to: w-(--cell-size) select-none */
+
+/* DayPicker classNames.week_number in Calendar, no slot to attach it to: text-[0.8rem] text-muted-foreground select-none */
+
+/* DayPicker classNames.day in Calendar, no slot to attach it to: relative aspect-square h-full w-full rounded-(--cell-radius) p-0 text-center select-none [&:last-child[data-selected=true]_button]:rounded-r-(--cell-radius); keep on the element: group/day */
+
+/* DayPicker classNames.day in Calendar, only when props.showWeekNumber: [&:nth-child(2)[data-selected=true]_button]:rounded-l-(--cell-radius) */
+
+/* DayPicker classNames.day in Calendar, only when !(props.showWeekNumber): [&:first-child[data-selected=true]_button]:rounded-l-(--cell-radius) */
+
+/* DayPicker classNames.range_start in Calendar, no slot to attach it to: relative isolate z-0 rounded-l-(--cell-radius) bg-muted after:absolute after:inset-y-0 after:right-0 after:w-4 after:bg-muted */
+
+/* DayPicker classNames.range_middle in Calendar, no slot to attach it to: rounded-none */
+
+/* DayPicker classNames.range_end in Calendar, no slot to attach it to: relative isolate z-0 rounded-r-(--cell-radius) bg-muted after:absolute after:inset-y-0 after:left-0 after:w-4 after:bg-muted */
+
+/* DayPicker classNames.today in Calendar, no slot to attach it to: rounded-(--cell-radius) bg-muted text-foreground data-[selected=true]:rounded-none */
+
+/* DayPicker classNames.outside in Calendar, no slot to attach it to: text-muted-foreground aria-selected:text-muted-foreground */
+
+/* DayPicker classNames.disabled in Calendar, no slot to attach it to: text-muted-foreground opacity-50 */
+
+/* DayPicker classNames.hidden in Calendar, no slot to attach it to: invisible */
+
+/* in Calendar, no slot to attach it to: size-4; keep on the element: jn-size-4 */
+
+/* in Calendar, no slot to attach it to: size-4; keep on the element: jn-size-4 */
+
+/* in Calendar, no slot to attach it to: size-4; keep on the element: jn-size-4 */
+
+/* in Calendar, no slot to attach it to: flex size-(--cell-size) items-center justify-center text-center */
+
+/* in CalendarDayButton */
+:where(.jn-calendar-day-button) {
+  @apply relative isolate z-10 flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 border-0 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-e-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-s-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70;
+}

@@ -430,6 +430,9 @@ This argument adds keyboard access and screen reader support to your charts.
 - The axes' labels keep Recharts 3's `#666`. shadcn's CSS greys `.recharts-cartesian-axis-tick
 text`, where Recharts 2 drew the labels; Recharts 3 draws them in
   `.recharts-cartesian-axis-tick-label`, so they are `#666` on ui.shadcn.com too, as here.
+- The tooltip glides from row to row (`transform 400ms ease`) unless the user prefers reduced
+  motion, as Recharts' does by default; `@isAnimationActive` on the `ChartTooltip` is `"auto"`
+  by default, `true` to always glide and `false` never to.
 - A chart shows its data as a picture. Where the numbers matter, show them as text or a table
   beside it too.
 
@@ -455,7 +458,9 @@ The box a chart draws in, and its colours.
 | `@initialDimension` | `{ width, height }` | `320 × 200` | The size the chart draws at before the container is measured |
 
 It takes attributes on its element, `class` and `style` included, and yields `AreaChart`,
-`BarChart`, `LineChart` and `PieChart`, each given the config and the initial size.
+`BarChart`, `LineChart`, `PieChart`, `RadarChart` and `RadialBarChart`, each given the config and
+the initial size. The polar charts, `RadarChart` and `RadialBarChart`, and their parts are on
+[Radar Charts](/charts/radar.md#api-reference) and [Radial Charts](/charts/radial.md#api-reference).
 
 ### AreaChart, BarChart, LineChart
 
@@ -681,6 +686,10 @@ With the accessibility layer, the chart takes focus.
 Leaving the chart hides the tooltip. On a reversed category axis (`@reversed`), the arrows
 swap, so `ArrowRight` still moves right.
 
+A tooltip the keyboard (or `@defaultIndex`) opens points at the first series' point on the row,
+as Recharts' does; Recharts' bars give it none, so in a bar chart it points at the row's tick,
+half way down the chart.
+
 In a vertical chart (`@layout="vertical"`, its rows down the y-axis), `ArrowRight` moves to the
 next row, down, and `ArrowLeft` to the previous one, as in a horizontal chart. Recharts 3 moves
 the other way there: it flips every move in a chart that doesn't run left to right, so its
@@ -732,6 +741,9 @@ assert.deepEqual(chart.legend?.labels, ['Desktop', 'Mobile'])
 | `tooltipPosition`      | Where the tooltip box is, against the chart                                |
 | `cursor`, `activeDots` | The cursor and the active dots, while the tooltip shows                    |
 | `legend`               | The legend, a `ChartLegendHarness`                                         |
+
+`PolarChartHarness`, a `ChartHarness` for radar and radial bar charts, also reads their ring,
+grid, axes, polygons and bars (see [Radar Charts](/charts/radar.md#testing)).
 
 `ChartTooltipHarness` reads a tooltip's `label`, `indicator`, `items` (each `key`, `name`,
 `value` and `indicator`), `names` and `entryValues`; `ChartLegendHarness`, a legend's `items` and

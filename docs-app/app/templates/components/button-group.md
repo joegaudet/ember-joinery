@@ -121,8 +121,8 @@ Pair with a `Select` component. Upstream's example (`button-group-select`) comes
 
 ## Popover
 
-Use with a `Popover` component. Upstream's example (`button-group-popover`) comes with Field, and
-has a Popover in the group (see [Nested](#nested)).
+Use with a `Popover` component. Upstream's example (`button-group-popover`) waits for a Popover
+inside a group to work (see [Nested](#nested)); its Field has landed.
 
 ## RTL
 

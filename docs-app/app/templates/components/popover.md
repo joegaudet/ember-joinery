@@ -65,7 +65,9 @@ Use `@align` on `p.Content` to control the horizontal alignment.
 
 ## With Form
 
-A popover with form fields inside. Upstream's example, `popover-form`, comes with Field.
+A popover with form fields inside.
+
+<Example @name="popover-form" @title="With Form" />
 
 ## RTL
 

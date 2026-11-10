@@ -1,9 +1,9 @@
 {
-  "$comment": "Waiting for a component that hasn't landed: popover-form (Field). The unit that lands Field ports it onto the Popover page and maps it here.",
   "examples": {
     "popover-demo": "popover-demo",
     "popover-basic": "popover-basic",
     "popover-alignments": "popover-alignments",
+    "popover-form": "popover-form",
     "popover-rtl": "popover-rtl"
   }
 }

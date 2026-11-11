@@ -13,7 +13,7 @@ import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { chromium } from 'playwright-core'
-import { parity, parseArgs, staticServer } from './parity.mjs'
+import { holdViewportEvents, parity, parseArgs, staticServer } from './parity.mjs'
 
 /** The Chromium to use: '' for playwright-core's own, a path, or null if there is none. */
 function findChromium() {
@@ -373,5 +373,43 @@ test(
     const missing = result['button-secondary light']
     assert.equal(missing.status, 'error')
     assert.match(missing.error, /nothing on the page matches the region "\.no-such-thing"/)
+  },
+)
+
+test(
+  "while held, a page's resize and media query listeners hear nothing, and after, they do",
+  { skip, timeout: 60_000 },
+  async () => {
+    // Chromium resizes the window to capture a page taller than the viewport, and a busy page
+    // can see it a pixel wide on the way (dashboard-01's sidebar and chart did). Whether a frame
+    // lands there depends on the page, so this checks the hold itself, with events of its own.
+    const instance = await chromium.launch({ executablePath: browser || undefined })
+    try {
+      const page = await instance.newPage()
+      await page.addInitScript(holdViewportEvents)
+      await page.goto('data:text/html,<p>a page</p>')
+      const heard = async held =>
+        page.evaluate(held => {
+          /* global window -- runs in the page */
+          const seen = []
+          const list = window.matchMedia('(max-width: 767px)')
+          const onResize = () => seen.push('resize')
+          const onChange = () => seen.push('change')
+          window.addEventListener('resize', onResize)
+          list.addEventListener('change', onChange)
+          list.onchange = () => seen.push('onchange')
+          window.__parityHold(held)
+          window.dispatchEvent(new Event('resize'))
+          list.dispatchEvent(new Event('change'))
+          window.__parityHold(false)
+          window.removeEventListener('resize', onResize)
+          list.removeEventListener('change', onChange)
+          return seen
+        }, held)
+      assert.deepEqual(await heard(true), [], 'held, nothing reaches the page')
+      assert.deepEqual(await heard(false), ['resize', 'change', 'onchange'], 'let go, all of it')
+    } finally {
+      await instance.close()
+    }
   },
 )

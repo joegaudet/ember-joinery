@@ -19,8 +19,9 @@
 // app's @fontsource packages, served by a server of this script's own on every run, so they load
 // whichever servers the pages come from, and injected into both pages; a font that doesn't load
 // is an error, not a fallback), every image loaded (or failed) first, those on the page and those
-// an avatar loads off it before it shows them, animations and transitions off, and
-// `prefers-reduced-motion`.
+// an avatar loads off it before it shows them, animations and transitions off,
+// `prefers-reduced-motion`, and the window's resize and media query events held back while the
+// screenshot is taken (see `holdViewportEvents`).
 // The diff is measured over the content's bounding box (everything on either page that isn't
 // the background; see "Comparing screenshots" below), and a diff over the example's threshold
 // (1% of the box's pixels unless its map entry sets one, with a reason) fails. The HTML report,
@@ -727,6 +728,33 @@ function trackImages() {
 }
 
 /**
+ * Runs in the page before any of its own scripts: lets the screenshot hold back the window's
+ * `resize` events and its media queries' `change` events while it captures
+ * (`window.__parityHold(true)`, then `false`). To capture a page taller than the viewport,
+ * Chromium resizes the window and back (`captureBeyondViewport`), and on a busy page it can
+ * draw a frame on the way, with the window a pixel wide. A page that listens catches it there:
+ * dashboard-01's Sidebar takes the window for a phone's, and its chart switches to the last 7
+ * days for good, as upstream's would, but upstream's page draws no frame then. Each listener
+ * here is the first on its target in the capture phase, which on the target itself comes before
+ * the page's own, and the window is its own size again when the capture ends, so the page loses
+ * nothing it would need.
+ */
+export function holdViewportEvents() {
+  let held = false
+  Object.defineProperty(window, '__parityHold', { value: on => (held = on) })
+  const hold = event => {
+    if (held) event.stopImmediatePropagation()
+  }
+  window.addEventListener('resize', hold, true)
+  const matchMedia = window.matchMedia
+  window.matchMedia = function (query) {
+    const list = matchMedia.call(this, query)
+    list.addEventListener('change', hold, true)
+    return list
+  }
+}
+
+/**
  * Where the first element matching `selector` is on the page, in whole pixels that cover it, or
  * null when nothing matches.
  */
@@ -791,6 +819,7 @@ async function screenshot(context, url, { theme, ready, fontsUrl, fonts, region 
   page.on('pageerror', error => errors.push(error.message))
   try {
     await page.addInitScript(trackImages)
+    await page.addInitScript(holdViewportEvents)
     await page.goto(url, { waitUntil: 'load', timeout: 60_000 })
     await page.waitForFunction(ready, null, { timeout: 30_000 })
     const failed = await page.$('[data-parity-missing], [data-parity-error]')
@@ -813,12 +842,19 @@ async function screenshot(context, url, { theme, ready, fontsUrl, fonts, region 
     }, fonts)
     if (unloaded.length) throw new Error(`these fonts didn't load: ${unloaded.join(', ')}`)
     const options = { fullPage: true, animations: 'disabled', caret: 'hide' }
-    if (!region) return await page.screenshot(options)
-    const clip = await page.evaluate(regionBox, region)
-    if (!clip || !clip.width || !clip.height) {
-      throw new Error(`nothing on the page matches the region "${region}", or it has no size`)
+    let clip
+    if (region) {
+      clip = await page.evaluate(regionBox, region)
+      if (!clip || !clip.width || !clip.height) {
+        throw new Error(`nothing on the page matches the region "${region}", or it has no size`)
+      }
     }
-    return await page.screenshot({ ...options, clip })
+    await page.evaluate(() => window.__parityHold(true))
+    try {
+      return await page.screenshot(clip ? { ...options, clip } : options)
+    } finally {
+      await page.evaluate(() => window.__parityHold(false))
+    }
   } catch (error) {
     throw new Error(`${url}: ${error.message}${errors.length ? `\n${errors.join('\n')}` : ''}`, {
       cause: error,

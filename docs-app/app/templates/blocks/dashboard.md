@@ -79,6 +79,12 @@ The sidebar's parts take the `SidebarProvider`'s yield (`@sidebar`), where upstr
   without these the titles stand about 5px taller than upstream's, and everything below them
   with them. An app that copies the block keeps them for the same reason; the same goes for any
   `text-*` class given to a Joinery part whose style sets its leading.
+- **The user's avatar.** Upstream's `data.user.avatar` is `/avatars/shadcn.jpg`, an image from
+  ui.shadcn.com's own `public/` folder. The block keeps the path, but neither the guide nor the
+  live demo serves that image (nor does the parity reference app, so both sides of the parity
+  check show the same), so the request fails and the avatar shows its fallback, "CN", where
+  ui.shadcn.com shows a photo. An app that copies the block gives `data.user` its own user's
+  name, email and picture.
 - **The chart's range on a phone.** Upstream's effect switches the chart to the last 7 days
   each time the window becomes a phone's; Joinery's does it when the Sidebar's provider says the
   window is narrower than 768px (its `isMobile`, read through `<UseSidebar>`), in the microtask

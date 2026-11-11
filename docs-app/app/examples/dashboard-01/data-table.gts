@@ -129,11 +129,11 @@ const DragHandle: TOC<CellComponentSignature<Features, Section>> = <template>
 
 // Upstream's drag column has an empty header (`() => null`), and its actions column none; a
 // header cell must have a name (axe's empty-table-header), so each has a visually hidden one.
-const DragHeader = <template>
+const DragHeader: TOC<HeaderComponentSignature<Features, Section>> = <template>
   <span class="sr-only">Reorder</span>
 </template>
 
-const ActionsHeader = <template>
+const ActionsHeader: TOC<HeaderComponentSignature<Features, Section>> = <template>
   <span class="sr-only">Actions</span>
 </template>
 
@@ -176,11 +176,11 @@ const StatusCell: TOC<CellComponentSignature<Features, Section>> = <template>
   </Badge>
 </template>
 
-const TargetHeader = <template>
+const TargetHeader: TOC<HeaderComponentSignature<Features, Section>> = <template>
   <div class="w-full text-right">Target</div>
 </template>
 
-const LimitHeader = <template>
+const LimitHeader: TOC<HeaderComponentSignature<Features, Section>> = <template>
   <div class="w-full text-right">Limit</div>
 </template>
 

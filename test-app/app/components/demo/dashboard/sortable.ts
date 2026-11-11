@@ -65,9 +65,10 @@ function register(
  *
  * Give each row `{{sortable.row id}}` and its handle `{{sortable.handle id}}`, and render
  * `announcement` in a live region and `SORTABLE_INSTRUCTIONS` under `instructionsId`. While a
- * row is dragged it follows the pointer up and down, the rows it passes make room for it, and
- * dropping it calls `onMove(activeId, overId)`, as upstream's `handleDragEnd` gets `active`
- * and `over`. A finger drags it as a mouse does (upstream's `TouchSensor`): the handle has
+ * row is dragged it has `data-dragging="true"` (upstream's `data-dragging={isDragging}`, for its
+ * `data-[dragging=true]:` classes), it follows the pointer up and down, the rows it passes make
+ * room for it, and dropping it calls `onMove(activeId, overId)`, as upstream's `handleDragEnd`
+ * gets `active` and `over`. A finger drags it as a mouse does (upstream's `TouchSensor`): the handle has
  * `touch-action: none`, so the browser doesn't take the touch for a scroll and cancel the drag,
  * and the handle keeps the pointer (`setPointerCapture`) until it lets go. From the keyboard,
  * Space or Enter picks the row up, the up and down arrows move it a row at a time (dnd-kit's
@@ -76,9 +77,6 @@ function register(
  * dnd-kit's own words.
  */
 export class SortableRows {
-  /** The row being dragged, while one is. */
-  @tracked activeId: SortableId | null = null
-
   /** What the live region says: the last step of the last drag. */
   @tracked announcement = ''
 
@@ -136,9 +134,6 @@ export class SortableRows {
     }
   })
 
-  /** Whether `id`'s row is being dragged. */
-  isDragging = (id: SortableId): boolean => this.activeId === id
-
   /** The rows on the page, top to bottom, measured where they are now. */
   #measure(): Measured[] {
     const rows = [...this.#rows.entries()]
@@ -159,7 +154,6 @@ export class SortableRows {
     if (from === -1) return undefined
     const drag: Drag = { id, by, items, from, over: from, startY, deltaY: 0 }
     this.#drag = drag
-    this.activeId = id
     this.#handles.get(id)?.element.setAttribute('aria-pressed', 'true')
     this.announcement = `Picked up draggable item ${id}.`
     this.#layout()
@@ -294,7 +288,6 @@ export class SortableRows {
     if (!drag) return undefined
     drag.stop?.()
     this.#drag = undefined
-    this.activeId = null
     this.#handles.get(drag.id)?.element.removeAttribute('aria-pressed')
     for (const item of drag.items) {
       item.element.style.transform = ''

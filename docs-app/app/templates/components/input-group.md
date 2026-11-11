@@ -104,10 +104,13 @@ addon the popover's `trigger` modifier (`<g.Addon {{popover.trigger}}>`), as ups
 
 To open a [Dropdown Menu](/components/dropdown-menu.md) from a group button, give the button the
 menu's `trigger` modifier (`<g.Button {{m.trigger}}>`), as upstream's `DropdownMenuTrigger
-asChild` does. Put the `DropdownMenu` around the addon rather than inside it: its root is an
-element with `display: contents`, where upstream's renders none, and inside the addon it would
-come between the addon and its button, so the addon's rule for a button directly inside it (its
-pull into the addon's padding) would miss it.
+asChild` does. Put the `DropdownMenu` around the addon rather than inside it, where upstream's
+is. Radix portals the menu's content to the body; Joinery's stays where the menu is in the DOM
+(it shows in the top layer), so inside the addon the menu would inherit the addon's text styles,
+its items in the addon's medium weight. Around the addon it lays out the same: the menu's root
+is an element with `display: contents`, and `input-group.css` restates the group's rules for an
+addon inside an overlay's root (the input's narrower padding beside it, and the addon's pull on
+a button).
 
 ## Spinner
 

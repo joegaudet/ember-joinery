@@ -1,7 +1,8 @@
 # Joinery: shadcn/ui for Ember, as a Formwright sibling
 
-Status: built, in review (2026-11-11). The plan was agreed through a 40-question intake and built
-unattended by subagents onto one stacked PR, now ready for review; see "Autonomous execution".
+Status: built (2026-11-11). The plan was agreed through a 40-question intake and built unattended
+by subagents onto one stacked PR, a draft until its last unit (`z-finish`) integrates and it is
+marked ready for review; see "Autonomous execution".
 Every component page's example and every chart is mapped and compared (CI's parity runs with
 `--require-complete`), and nothing Joinery tracks has changed upstream since the pins (shadcn-ui's
 one later commit, `dd41d19`, only lists community registries in `registry/directory.json`, so
@@ -721,7 +722,8 @@ workspace.
 
 ## Next steps
 
-1. Done: every unit is on `build/joinery-1.0`, and the PR is ready for review.
+1. Every unit is on `build/joinery-1.0` once `z-finish` integrates. The step after that marks
+   the PR ready for review; if it is still a draft, that step is left to do.
 2. Joe reviews it, merges it, and releases 1.0.0 (see "What stays with Joe" and "Releasing" in
    CONTRIBUTING.md), then merges the sibling PRs, joegaudet/ember-formwright#32 and
    joegaudet/real-enums#17.

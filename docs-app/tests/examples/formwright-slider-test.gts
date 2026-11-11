@@ -20,12 +20,23 @@ module('Example | formwright-slider', function (hooks) {
     const filters = new FiltersForm()
     assert.deepEqual(filters.volume.value, [50])
     assert.deepEqual(filters.volume.slider.labels, ['Volume'])
+    assert.strictEqual(filters.volume.hint, 'Turn it up in steps of ten.')
+    const hintOf = (field: SliderFieldHarness): string =>
+      field.element.querySelector('[data-test-fw-hint]')!.id
+    for (const thumb of filters.volume.slider.thumbs) {
+      assert
+        .dom(thumb)
+        .hasAttribute('aria-describedby', hintOf(filters.volume), 'its hint describes it')
+    }
     await filters.volume.press('ArrowRight')
     assert.deepEqual(filters.volume.value, [60], 'in steps of ten')
     assert.true(filters.volume.isDirty)
 
     assert.deepEqual(filters.price.value, [200, 800])
     assert.deepEqual(filters.price.slider.labels, ['Price, Minimum', 'Price, Maximum'])
+    for (const thumb of filters.price.slider.thumbs) {
+      assert.dom(thumb).hasAttribute('aria-describedby', hintOf(filters.price))
+    }
     await filters.price.press('End', 1)
     assert.deepEqual(filters.price.value, [200, 1000])
     await a11yAudit()

@@ -12,6 +12,8 @@ import { JoineryFieldLayout, setupJoineryForms } from '@ember-joinery/formwright
 import {
   CheckboxFieldHarness,
   InputFieldHarness,
+  RadioGroupFieldHarness,
+  SliderFieldHarness,
   SwitchFieldHarness,
 } from '@ember-joinery/formwright/test-support'
 
@@ -20,7 +22,14 @@ class Profile {
   @tracked bio = ''
   @tracked twoFactor = false
   @tracked terms = false
+  @tracked plan: string | null = 'starter'
+  @tracked volume = 50
 }
+
+const plans = [
+  { id: 'starter', title: 'Starter', description: 'For everyday use.' },
+  { id: 'pro', title: 'Pro', description: 'For advanced use.' },
+]
 
 const requireName = (model: Profile): ErrorMap =>
   model.name.length >= 3 ? {} : { name: ['Name must be at least 3 characters.'] }
@@ -36,7 +45,11 @@ class ProfileForm extends FormHarness {
   @field(InputFieldHarness) declare bio: InputFieldHarness
   @field(SwitchFieldHarness) declare twoFactor: SwitchFieldHarness
   @field(CheckboxFieldHarness) declare terms: CheckboxFieldHarness
+  @field(RadioGroupFieldHarness) declare plan: RadioGroupFieldHarness
+  @field(SliderFieldHarness) declare volume: SliderFieldHarness
 }
+
+const box = (element: Element) => element.getBoundingClientRect()
 
 const px = (value: number) => `${value}px`
 
@@ -154,6 +167,76 @@ module('Integration | formwright | layout', function (hooks) {
     await a11yAudit()
   })
 
+  test('right to left, a field and the controls in it start from the right', async function (assert) {
+    const model = new Profile()
+    await render(
+      <template>
+        <DirectionProvider @dir="rtl">
+          <div dir="rtl" style="width: 24rem">
+            <Form @model={{model}} @name="profile" as |f|>
+              <FieldGroup>
+                <f.Field
+                  @for="twoFactor"
+                  @control="switch"
+                  @label="Multi-factor authentication"
+                  @hint="Secure your account."
+                />
+                <f.Field @for="terms" @control="checkbox" @label="Accept the terms" />
+                <f.Field
+                  @for="plan"
+                  @control="radio"
+                  @label="Plan"
+                  @options={{plans}}
+                  @optionLabel="title"
+                  @storeKey={{true}}
+                  as |field|
+                >
+                  <field.Control @variant="card" />
+                </f.Field>
+                <f.Field @for="volume" @control="slider" @label="Volume" @step={{10}} />
+              </FieldGroup>
+            </Form>
+          </div>
+        </DirectionProvider>
+      </template>,
+    )
+    const form = new ProfileForm()
+    const content = form.twoFactor.element.querySelector('[data-slot="field-content"]')!
+    assert.true(
+      box(form.twoFactor.control).right <= box(content).left,
+      'a horizontal field puts its label and hint at the right, and the switch after them, to their left',
+    )
+    const label = form.terms.element.querySelector('[data-slot="field-label"]')!
+    assert.true(
+      box(form.terms.control).left >= box(label).right,
+      'a checkbox comes first, at the right of its label',
+    )
+    for (const key of ['starter', 'pro']) {
+      const radio = form.plan.radioGroup.item(key)
+      const title = radio
+        .closest('[data-slot="field"]')!
+        .querySelector('[data-slot="field-content"]')!
+      assert.true(box(radio).right <= box(title).left, `the ${key} card's radio is at its left`)
+    }
+    await form.plan.radioGroup.focus('starter')
+    await form.plan.radioGroup.press('ArrowLeft')
+    assert.strictEqual(model.plan, 'pro', 'the arrow keys flip: left is the next choice')
+
+    const track = form.volume.slider.element.querySelector('[data-slot="slider-track"]')!
+    const fromTheRight = (): number => {
+      const thumb = box(form.volume.slider.thumb())
+      return (box(track).right - (thumb.left + thumb.width / 2)) / box(track).width
+    }
+    assert.true(Math.abs(fromTheRight() - 0.5) < 0.05, 'a slider at 50 sits at the middle')
+    await form.volume.press('ArrowLeft')
+    assert.strictEqual(model.volume, 60, 'a slider steps up to the left')
+    assert.true(
+      Math.abs(fromTheRight() - 0.6) < 0.05,
+      `its thumb is 60% of the way from the right (${fromTheRight()})`,
+    )
+    await a11yAudit()
+  })
+
   test('a switch goes after its label and hint, which share a FieldContent', async function (assert) {
     const model = new Profile()
     await render(
@@ -220,6 +303,37 @@ module('Integration | formwright | layout', function (hooks) {
     await form.terms.check()
     assert.true(model.terms)
     assert.false(form.terms.isInvalid)
+    await a11yAudit()
+  })
+
+  test('a checkbox with a hint has its label and hint in a FieldContent from the start', async function (assert) {
+    const model = new Profile()
+    await render(
+      <template>
+        <Form @model={{model}} @name="profile" as |f|>
+          <f.Field
+            @for="terms"
+            @control="checkbox"
+            @label="Accept the terms"
+            @hint="You can change this later."
+          />
+        </Form>
+      </template>,
+    )
+    const form = new ProfileForm()
+    const group = form.terms.element.querySelector<HTMLElement>('[data-slot="field"]')!
+    assert.deepEqual(
+      [...group.children].map(child => child.getAttribute('data-slot') ?? child.className),
+      ['fw-control-area', 'field-content'],
+      "the layout reads the Field's @hint (Formwright's field.args.hint) to know there is one",
+    )
+    assert.deepEqual(
+      [...group.querySelector('[data-slot="field-content"]')!.children].map(child =>
+        child.getAttribute('data-slot'),
+      ),
+      ['field-label', 'field-description'],
+    )
+    assert.strictEqual(form.terms.hint, 'You can change this later.')
     await a11yAudit()
   })
 

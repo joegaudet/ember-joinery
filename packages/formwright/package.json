@@ -1,7 +1,7 @@
 {
   "name": "@ember-joinery/formwright",
   "version": "0.0.0",
-  "description": "Joinery for Formwright: every Joinery input as a Formwright control, a field layout with shadcn/ui's Field anatomy, and harnesses built on Formwright's own.",
+  "description": "Joinery for Formwright: Joinery's inputs as Formwright controls, a field layout with shadcn/ui's Field anatomy, and harnesses built on Formwright's own.",
   "keywords": [
     "ember-addon",
     "ember",

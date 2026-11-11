@@ -1,8 +1,8 @@
 # @ember-joinery/formwright
 
 [Joinery](https://joegaudet.com/ember-joinery/) for
-[Formwright](https://joegaudet.com/ember-formwright/): every Joinery input as a Formwright
-control, a field layout in shadcn/ui's Field anatomy, and harnesses built on Formwright's own.
+[Formwright](https://joegaudet.com/ember-formwright/): Joinery's inputs as Formwright
+controls, a field layout in shadcn/ui's Field anatomy, and harnesses built on Formwright's own.
 shadcn/ui builds its forms with react-hook-form; this is that, in Ember.
 
 > **Pre-release.** Nothing is published yet; see the
@@ -46,7 +46,8 @@ import { Button, FieldGroup, asButton } from '@ember-joinery/ember'
   `number`, `textarea`, `currency`, `select`, `checkbox`, `checkbox-group`, `radio`, `range`),
   and Joinery adds `native-select`, `combobox`, `switch`, `toggle`, `toggle-group`, `slider`,
   `input-otp` and `date-picker`. Each is also exported (`SelectControl`…) and listed in
-  `joineryControls`.
+  `joineryControls`. Rating and FileDrop aren't controls yet; the guide's Controls page says
+  why.
 - **The layout**, `JoineryFieldLayout` (`@layout="joinery"`, `"joinery-vertical"`,
   `"joinery-horizontal"`, `"joinery-responsive"`), renders shadcn's `Field`, `FieldLabel`,
   `FieldDescription` and `FieldError`, a group control's `FieldSet` and `FieldLegend`, with

@@ -347,24 +347,35 @@ const formSchema = z.object({
 ## Submitting
 
 Upstream's Next.js forms (`form-next-demo`, `form-next-complex`) are the demo and the complex
-form, submitted to a server action, with a Spinner in the button while it runs. Formwright's
-`@onSubmit` can return a promise: the form waits for it, `f.state.isSubmitting` is true
-meanwhile, and `f.Submit` is `aria-busy`.
+form, submitted to a server action: while it runs, the fields and the button are disabled and
+the button shows a Spinner, and once it succeeds the form empties and a toast says so.
+Formwright's `@onSubmit` can return a promise: the form waits for it, `f.state.isSubmitting` is
+true meanwhile, and `f.Submit` is `aria-busy`. Here is the demo, submitted that way:
+
+<Example @name="formwright-next-demo" @title="Submitting" />
 
 ```gts
-<f.Submit {{asButton}} disabled={{f.state.isSubmitting}}>
+<f.Field @for="title" @label="Bug Title" @disabled={{f.state.isSubmitting}} />
+<f.Submit {{asButton}} @disabled={{f.state.isSubmitting}}>
   {{#if f.state.isSubmitting}}<Spinner />{{/if}}
   Submit
 </f.Submit>
 ```
 
+Upstream's server checks the schema once the action runs; Formwright checks it before
+`@onSubmit`, so an invalid form shows its errors at once and never starts saving.
+`form-next-complex` is the [complex form](#complex-forms) submitted the same way, with a
+`Preferences saved` toast.
+
 ## Accessibility
 
 - Each control is named by its field's label (`for` and `id`), and a group control's
-  `FieldSet` by its legend.
+  `FieldSet` by its legend. A slider's thumbs, which a `<label>` can't name, are named after it
+  (`aria-label`).
 - A field's hint and, while it is invalid, its errors describe its control
   (`aria-describedby`); the control is `aria-invalid`, and the errors are `role="alert"`, so
-  they are announced as they appear.
+  they are announced as they appear. On a slider, each thumb is described and `aria-invalid`,
+  as the thumbs are what takes the focus.
 - After a failed submit, focus moves to the first invalid control.
 - Upstream's array example leaves its inputs unlabelled; this one names them, `Email address 1`.
   Its toast's values scroll from the keyboard (`tabindex="0"`), which upstream's don't.
@@ -388,3 +399,10 @@ Each example's Test tab drives it with Formwright's `FormHarness` and Joinery's 
 [ui.shadcn.com/docs/forms](https://ui.shadcn.com/docs/forms), from
 `apps/v4/content/docs/forms` and `apps/v4/registry/new-york-v4/examples/form-*` at
 shadcn-ui/ui@8ab2771.
+
+These examples aren't in the [parity](https://github.com/joegaudet/ember-joinery/blob/main/CONTRIBUTING.md#parity)
+comparison yet. Upstream's form examples are new-york-v4 registry examples shown on the
+`docs/forms` pages, and `upstream/inventory.json` and the parity reference app cover the
+component pages' examples (`examples/radix`, in a radix style) and the charts gallery only, so
+there is nothing to map them to. Comparing them needs both to take the new-york-v4 examples and
+style, as they do the charts.

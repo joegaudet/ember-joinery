@@ -44,12 +44,12 @@ module('Example | formwright-select', function (hooks) {
       'zh',
       'ja',
     ])
-    await preferences.language.select.pressOption('auto')
+    await preferences.language.selectHarness.pressOption('auto')
     assert.deepEqual(preferences.language.errors, [
       'Auto-detection is not allowed. Please select a specific language.',
     ])
 
-    await preferences.language.choose('fr')
+    await preferences.language.select('fr')
     assert.strictEqual(preferences.language.text, 'French')
     await preferences.submit()
     assert.deepEqual(JSON.parse(new ToasterHarness().toast().description!), { language: 'fr' })

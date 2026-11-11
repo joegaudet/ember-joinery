@@ -1,14 +1,16 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { render } from '@ember/test-helpers'
+import { render, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { array } from '@ember/helper'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { Form, type ErrorMap } from '@ember-formwright/ember'
 import { CurrencyHarness, FormHarness, field } from '@ember-formwright/test-support'
-import { FieldGroup, InputGroup } from '@ember-joinery/ember'
+import { FieldGroup, InputGroup, Slider } from '@ember-joinery/ember'
+import { SliderHarness } from '@ember-joinery/test-support'
 import { JoineryFieldLayout, setupJoineryForms } from '@ember-joinery/formwright'
 import {
+  CheckboxFieldHarness,
   CheckboxGroupFieldHarness,
   ComboboxFieldHarness,
   DatePickerFieldHarness,
@@ -19,6 +21,7 @@ import {
   RadioGroupFieldHarness,
   SelectFieldHarness,
   SliderFieldHarness,
+  SwitchFieldHarness,
   ToggleFieldHarness,
   ToggleGroupFieldHarness,
 } from '@ember-joinery/formwright/test-support'
@@ -58,6 +61,14 @@ class Settings {
   @tracked seats: number | null = 2
   @tracked budget: number | null = 1200
   @tracked bio = ''
+  @tracked about = ''
+  @tracked agree = false
+  @tracked notify = false
+}
+
+class Mode {
+  @tracked readonly = false
+  @tracked disabled = false
 }
 
 class SettingsForm extends FormHarness {
@@ -77,6 +88,9 @@ class SettingsForm extends FormHarness {
   @field(NumberFieldHarness) declare seats: NumberFieldHarness
   @field(CurrencyHarness) declare budget: CurrencyHarness
   @field(InputFieldHarness) declare bio: InputFieldHarness
+  @field(InputFieldHarness) declare about: InputFieldHarness
+  @field(CheckboxFieldHarness) declare agree: CheckboxFieldHarness
+  @field(SwitchFieldHarness) declare notify: SwitchFieldHarness
 }
 
 const requireLanguage = (model: Settings): ErrorMap =>
@@ -129,7 +143,7 @@ module('Integration | formwright | controls', function (hooks) {
 
     await form.language.open()
     assert.deepEqual(form.language.options, ['en', 'fr', 'de'])
-    await form.language.select.select('fr')
+    await form.language.select('fr')
     assert.strictEqual(model.language, 'fr', 'it stores the key')
     assert.strictEqual(form.language.value, 'fr')
     assert.strictEqual(form.language.text, 'French')
@@ -164,9 +178,9 @@ module('Integration | formwright | controls', function (hooks) {
     )
     const form = new SettingsForm()
     assert.strictEqual(form.language.text, 'Auto', 'a key from the block shows its item')
-    await form.language.choose('de')
+    await form.language.select('de')
     assert.strictEqual(model.language, 'de')
-    await form.language.choose('auto')
+    await form.language.select('auto')
     assert.strictEqual(model.language, 'auto', 'an item with no option behind it stores its key')
     await a11yAudit()
   })
@@ -380,6 +394,90 @@ module('Integration | formwright | controls', function (hooks) {
     await a11yAudit()
   })
 
+  test("a slider's hint and errors describe each thumb, aria-invalid while the field is", async function (assert) {
+    const model = new Settings()
+    const requireLoud = (settings: Settings): ErrorMap =>
+      settings.volume >= 60 ? {} : { volume: ['Turn it up to at least 60.'] }
+    await render(
+      <template>
+        <Form @model={{model}} @name="settings" @validator={{requireLoud}} as |f|>
+          <FieldGroup>
+            <f.Field @for="bio" @label="Bio" />
+            <f.Field
+              @for="volume"
+              @control="slider"
+              @label="Volume"
+              @hint="Turn it up in steps of ten."
+              @step={{10}}
+            />
+            <f.Field @for="price" @control="range" @label="Price" @hint="Between $0 and $100." />
+          </FieldGroup>
+          <f.Submit>Save</f.Submit>
+        </Form>
+      </template>,
+    )
+    const form = new SettingsForm()
+    const hintOf = (field: SliderFieldHarness): string =>
+      field.element.querySelector('[data-test-fw-hint]')!.id
+    const errorsOf = (field: SliderFieldHarness): string =>
+      field.element.querySelector('[data-test-fw-errors]')!.id
+    const [volumeThumb] = form.volume.slider.thumbs
+    assert.strictEqual(form.volume.control, volumeThumb, "the field's id is on its first thumb")
+    assert.dom(form.volume.control).hasAttribute('role', 'slider')
+    for (const thumb of [...form.volume.slider.thumbs, ...form.price.slider.thumbs]) {
+      const field = form.volume.element.contains(thumb) ? form.volume : form.price
+      assert.dom(thumb).hasAttribute('aria-describedby', hintOf(field), 'its hint describes it')
+      assert.dom(thumb).doesNotHaveAttribute('aria-invalid')
+    }
+
+    await form.submit()
+    assert.true(form.volume.isInvalid)
+    assert.deepEqual(form.volume.errors, ['Turn it up to at least 60.'])
+    assert
+      .dom(volumeThumb)
+      .hasAttribute('aria-describedby', `${hintOf(form.volume)} ${errorsOf(form.volume)}`)
+      .hasAttribute('aria-invalid', 'true')
+    assert.dom(volumeThumb).isFocused('a failed submit focuses the invalid slider')
+    for (const thumb of form.price.slider.thumbs) {
+      assert.dom(thumb).doesNotHaveAttribute('aria-invalid', 'a valid range is not invalid')
+    }
+    await a11yAudit()
+
+    await form.volume.press('ArrowRight')
+    assert.strictEqual(model.volume, 60)
+    assert.false(form.volume.isInvalid, 'its error clears as it is fixed')
+    assert.dom(volumeThumb).hasAttribute('aria-describedby', hintOf(form.volume))
+    assert.dom(volumeThumb).doesNotHaveAttribute('aria-invalid')
+    await a11yAudit()
+  })
+
+  test("a slider field renders Joinery's Slider markup", async function (assert) {
+    const model = new Settings()
+    await render(
+      <template>
+        <Slider @defaultValue={{array 20 80}} @name="plain" />
+        <Form @model={{model}} @name="settings" as |f|>
+          <f.Field @for="price" @control="range" @label="Price" />
+        </Form>
+      </template>,
+    )
+    const form = new SettingsForm()
+    const markup = (root: HTMLElement): string[] =>
+      [root, ...root.querySelectorAll<HTMLElement>('[data-slot]')].map(
+        element => `${element.dataset['slot']}: ${element.className}`,
+      )
+    const plain = new SliderHarness('plain')
+    assert.deepEqual(markup(form.price.slider.element), markup(plain.element))
+    assert.deepEqual(markup(plain.element), [
+      'slider: jn-slider',
+      'slider-track: jn-slider-track',
+      'slider-range: jn-slider-range',
+      'slider-thumb: jn-slider-thumb',
+      'slider-thumb: jn-slider-thumb',
+    ])
+    await a11yAudit()
+  })
+
   test('input-otp is an Input OTP, in groups', async function (assert) {
     const model = new Settings()
     await render(
@@ -493,24 +591,131 @@ module('Integration | formwright | controls', function (hooks) {
     await a11yAudit()
   })
 
-  test('readonly and disabled reach every control', async function (assert) {
+  test('readonly and disabled reach every control, each as it can take them', async function (assert) {
     const model = new Settings()
+    const mode = new Mode()
     await render(
       <template>
-        <Form @model={{model}} @name="settings" @disabled={{true}} as |f|>
+        <Form
+          @model={{model}}
+          @name="settings"
+          @readonly={{mode.readonly}}
+          @disabled={{mode.disabled}}
+          as |f|
+        >
+          <f.Field @for="bio" @label="Bio" />
+          <f.Field @for="about" @control="textarea" @label="About" />
+          <f.Field @for="seats" @control="number" @label="Seats" />
+          <f.Field @for="budget" @control="currency" @label="Budget" @locale="en-US" />
           <f.Field @for="language" @control="select" @label="Language" @options={{languages}} />
-          <f.Field @for="plan" @control="radio" @label="Plan" @options={{plans}} />
+          <f.Field
+            @for="nativeLanguage"
+            @control="native-select"
+            @label="Native language"
+            @options={{languages}}
+          />
+          <f.Field
+            @for="framework"
+            @control="combobox"
+            @label="Framework"
+            @options={{languages}}
+            @storeKey={{true}}
+          />
+          <f.Field @for="agree" @control="checkbox" @label="Agree" />
+          <f.Field @for="notify" @control="switch" @label="Notify" />
           <f.Field @for="bold" @control="toggle" @label="Bold" />
+          <f.Field @for="plan" @control="radio" @label="Plan" @options={{plans}} />
+          <f.Field
+            @for="tasks"
+            @control="checkbox-group"
+            @label="Tasks"
+            @options={{tasks}}
+            @storeKey={{true}}
+          />
+          <f.Field
+            @for="size"
+            @control="toggle-group"
+            @label="Size"
+            @options={{sizes}}
+            @storeKey={{true}}
+          />
+          <f.Field @for="volume" @control="slider" @label="Volume" />
+          <f.Field @for="code" @control="input-otp" @label="Code" />
           <f.Field @for="dob" @control="date-picker" @label="Date of birth" />
         </Form>
       </template>,
     )
     const form = new SettingsForm()
-    assert.dom(form.language.control).isDisabled()
-    assert.dom(form.bold.control).isDisabled()
-    assert.dom(form.dob.control).isDisabled()
+    const textual = [form.bio, form.about, form.seats, form.budget] as const
+    const pressable = [
+      form.language,
+      form.nativeLanguage,
+      form.agree,
+      form.notify,
+      form.bold,
+      form.code,
+      form.dob,
+    ] as const
+    const options = (harness: { element: Element }) => [
+      ...harness.element.querySelectorAll<HTMLElement>('[data-test-fw-option]'),
+    ]
+
+    mode.readonly = true
+    await settled()
+    for (const harness of textual) {
+      assert.dom(harness.control).hasAttribute('readonly', '', `${harness.path} is read-only`)
+      assert.dom(harness.control).isNotDisabled(`${harness.path} still takes focus`)
+    }
+    assert
+      .dom(form.framework.control)
+      .hasAttribute('readonly', '', "a combobox's input is read-only")
+      .hasAttribute('aria-readonly', 'true')
+      .isNotDisabled()
+    for (const harness of pressable) {
+      assert
+        .dom(harness.control)
+        .isDisabled(`${harness.path}, which can't be read-only, is disabled`)
+    }
+    assert.true(form.plan.radioGroup.isDisabled, 'a radio group is disabled')
+    for (const option of [...options(form.tasks), ...options(form.size)]) {
+      assert.dom(option).isDisabled('so are a checkbox group and a toggle group')
+    }
+    assert.true(form.volume.slider.isDisabled, 'and a slider')
+    assert.dom('[data-slot="field"][data-disabled="true"]').doesNotExist('no field looks disabled')
+    await a11yAudit()
+
+    mode.readonly = false
+    mode.disabled = true
+    await settled()
+    for (const harness of [...textual, form.framework, ...pressable]) {
+      assert.dom(harness.control).isDisabled(`${harness.path} is disabled`)
+    }
+    assert.true(form.plan.radioGroup.isDisabled)
+    for (const option of [...options(form.tasks), ...options(form.size)]) {
+      assert.dom(option).isDisabled()
+    }
+    assert.true(form.volume.slider.isDisabled)
     assert.true(form.plan.isDisabled)
-    assert.dom('[data-slot="field"][data-disabled="true"]').exists()
+    for (const harness of [...textual, form.framework, ...pressable, form.volume]) {
+      assert
+        .dom(harness.element.querySelector('[data-slot="field"]'))
+        .hasAttribute('data-disabled', 'true', `${harness.path}'s Field looks disabled`)
+    }
+    for (const harness of [form.plan, form.tasks, form.size]) {
+      assert
+        .dom(harness.element.querySelector('[data-slot="field-set"]'))
+        .hasAttribute('data-disabled', 'true', `and ${harness.path}'s FieldSet`)
+    }
+    await a11yAudit()
+
+    mode.disabled = false
+    await settled()
+    for (const harness of [...textual, form.framework]) {
+      assert.dom(harness.control).isNotDisabled().doesNotHaveAttribute('readonly')
+    }
+    for (const harness of pressable) assert.dom(harness.control).isNotDisabled()
+    assert.false(form.plan.radioGroup.isDisabled)
+    assert.false(form.volume.slider.isDisabled)
     await a11yAudit()
   })
 })

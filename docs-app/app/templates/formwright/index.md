@@ -3,7 +3,7 @@
 shadcn's forms are built on a form library: React Hook Form, TanStack Form or Formisch, with the
 [Field](/components/field.md) component setting each field out. Joinery's are built on
 [Formwright](https://joegaudet.com/ember-formwright/), through `@ember-joinery/formwright`:
-every Joinery input is a Formwright control, a field layout sets each field out in shadcn's
+Joinery's inputs are Formwright controls, a field layout sets each field out in shadcn's
 Field anatomy, and the harnesses are built on Formwright's own.
 
 <Example @name="formwright-demo" @title="Bug Report" />
@@ -31,7 +31,10 @@ setupJoineryForms()
 That registers every [control](/formwright/controls.md) and [layout](/formwright/layout.md),
 and makes Joinery's layout the one every field uses. Formwright's own names (`input`, `select`,
 `radio`, `checkbox`…) then render Joinery's components, so a Formwright form an app already has
-takes on Joinery's look without a change.
+takes on Joinery's look with no change to its templates. Its tests may need one: Formwright's
+harnesses for a native select, radio, checkbox or range can't drive Joinery's, and
+[Testing](/formwright/testing.md#moving-from-formwrights-harnesses) lists the harness that
+replaces each.
 
 ## Usage
 

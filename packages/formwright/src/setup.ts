@@ -22,7 +22,8 @@ import { ToggleGroupControl } from './controls/toggle-group.gts'
 import { JoineryFieldLayout } from './layout.gts'
 
 /**
- * Every Joinery input, by the Formwright control name it registers as. Formwright's own names
+ * Joinery's inputs (all but Rating and FileDrop, as yet), by the Formwright control name each
+ * registers as. Formwright's own names
  * (`input` and its types, `textarea`, `select`, `radio`, `checkbox`, `checkbox-group`,
  * `currency`, `range`) get Joinery's component; the rest are new.
  */
@@ -72,7 +73,7 @@ export interface RegisterJoineryControlsOptions {
 }
 
 /**
- * Registers every Joinery input as a Formwright control (see `joineryControls`), for every form.
+ * Registers Joinery's inputs as Formwright controls (see `joineryControls`), for every form.
  * Formwright's own names then render Joinery's components: `@control="select"` is Joinery's
  * Select. Call it once, at boot (`setupJoineryForms()` does).
  */

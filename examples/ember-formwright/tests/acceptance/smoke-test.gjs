@@ -38,7 +38,7 @@ module('Acceptance | smoke', function (hooks) {
     assert.strictEqual(project.name.label, 'Project name')
     assert.strictEqual(project.name.hint, 'Shown on your dashboard.')
     assert.dom(project.name.control).hasClass('jn-input', "Joinery's Input")
-    assert.dom(project.plan.select.trigger).hasClass('jn-select-trigger', "Joinery's Select")
+    assert.dom(project.plan.selectHarness.trigger).hasClass('jn-select-trigger', "Joinery's Select")
     assert.dom(project.notify.switch.element).hasClass('jn-switch', "Joinery's Switch")
     assert.dom(project.terms.checkbox.element).hasClass('jn-checkbox', "Joinery's Checkbox")
     assert
@@ -74,7 +74,7 @@ module('Acceptance | smoke', function (hooks) {
     await a11yAudit()
 
     await project.name.fillIn('Atlas')
-    await project.plan.choose('pro')
+    await project.plan.select('pro')
     await project.terms.check()
     await project.notify.toggle()
     assert.strictEqual(project.plan.value, 'pro')

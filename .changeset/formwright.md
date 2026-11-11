@@ -4,8 +4,8 @@
 ---
 
 `@ember-joinery/formwright` is a new opt-in package that builds Joinery's forms on Formwright,
-as shadcn's are built on react-hook-form. `setupJoineryForms()` registers every Joinery input as
-a Formwright control (`input` and its types, `number`, `currency`, `textarea`, `select`,
+as shadcn's are built on react-hook-form. `setupJoineryForms()` registers Joinery's inputs as
+Formwright controls (`input` and its types, `number`, `currency`, `textarea`, `select`,
 `native-select`, `combobox`, `checkbox`, `checkbox-group`, `radio`, `switch`, `toggle`,
 `toggle-group`, `slider`, `range`, `input-otp` and `date-picker`), so Formwright's own names render
 Joinery's components, and makes `JoineryFieldLayout` the layout every field uses: shadcn's Field

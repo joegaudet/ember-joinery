@@ -1,7 +1,8 @@
 # Controls
 
-Every Joinery input as a Formwright control. `setupJoineryForms()` (or
-`registerJoineryControls()`) registers them, so a field names one with `@control`:
+Joinery's inputs as Formwright controls (all but Rating and FileDrop; see
+[Not here yet](#not-here-yet)). `setupJoineryForms()` (or `registerJoineryControls()`)
+registers them, so a field names one with `@control`:
 
 | `@control`                                                                                                      | Joinery component                                 | Stores                                       |
 | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------- |
@@ -44,7 +45,11 @@ group, radio group and switch, each in one of upstream's forms. Joinery's other 
 
 A `slider` field stores a number; a `range` field, or a slider whose value is a list, one number
 for each thumb. `@min`, `@max` (0 to 100 by default) and `@step` bound it. A `<label>` can't
-name a `role="slider"`, so each thumb is named after the field's label (`Price, Minimum`).
+name a `role="slider"`, so each thumb is named after the field's label (`Price, Minimum`). The
+thumbs take the focus, so each carries what a field gives its control: the hint and errors
+describe it (`aria-describedby`), it is `aria-invalid` while the field is, and the first has
+the field's id, so a failed submit focuses it. Attributes on `field.Control` go on the
+Slider's root, so a class sizes it.
 
 <Example @name="formwright-slider" @title="Slider" />
 
@@ -137,8 +142,21 @@ around all of it, as the [demo](/formwright/forms.md#demo)'s count and the
 
 Joinery's opt-in add-ons on Formwright's libraries (File Upload, Rich Text Editor, Power
 Calendar, Masked Input and Phone Input) aren't registered as controls: Formwright's own add-on
-packages already offer each, and this package takes no dependency on Joinery's add-ons. Nor is
-Rating, whose own fieldset and legend a field's would repeat.
+packages already offer each, and this package takes no dependency on Joinery's add-ons.
+
+Two of Joinery's own inputs aren't controls yet either:
+
+- **Rating.** Its root is a `<fieldset>` of native radios, and the styled Rating passes nothing
+  to the radios, which take the focus. So a field's hint, errors and `aria-invalid` couldn't
+  reach them, as a slider's once couldn't reach its thumbs, and a group field's `FieldSet` and
+  legend would wrap a second, unnamed group. A Rating control has to render the primitive's
+  items itself, as the slider control renders its thumbs, naming its group with `aria-label`.
+  Until then, pass a control of your own to `@control`.
+- **FileDrop.** It keeps no value: it hands the files dropped or picked to `@onFiles`, and
+  shows nothing of them. Its root is the `<label>` of its own hidden file input, which a field's
+  label would repeat. A control would have to keep the files and list them, which is what
+  Joinery's File Upload add-on does; Formwright's own file-upload add-on is the Formwright
+  control for that.
 
 ## Upstream
 

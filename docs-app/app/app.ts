@@ -21,5 +21,5 @@ export default class App extends Application {
 
 loadInitializers(App, config.modulePrefix, compatModules)
 
-// Formwright's forms in Joinery: every Joinery input a control, and Joinery's field layout.
+// Formwright's forms in Joinery: Joinery's inputs as controls, and Joinery's field layout.
 setupJoineryForms()

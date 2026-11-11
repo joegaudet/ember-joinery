@@ -61,7 +61,7 @@ module('Example | formwright-complex', function (hooks) {
     assert.strictEqual(subscription.plan.value, 'basic', 'Reset puts every field back')
 
     await subscription.plan.select('pro')
-    await subscription.billingPeriod.choose('yearly')
+    await subscription.billingPeriod.select('yearly')
     await subscription.addons.select(['analytics', 'support'])
     await subscription.emailNotifications.check()
     await subscription.submit()

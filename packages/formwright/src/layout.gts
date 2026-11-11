@@ -32,7 +32,14 @@ const HORIZONTAL = new Set(['checkbox', 'switch', 'toggle'])
 /** The controls that come before their label, as a checkbox does. */
 const CONTROL_FIRST = new Set(['checkbox'])
 
-/** What a field's layout may read of the field beyond its state: its hint, when it has one. */
+/**
+ * What a field's layout may read of the field beyond its state: its hint, when it has one.
+ * Formwright's `FieldLayoutState` says nothing of the hint, so this reads the `@hint` of
+ * Formwright's own Field component (`field.args.hint`, as Formwright's `Hint` part does):
+ * internal to Formwright, not its layout contract. `layout-test.gts` ("a checkbox with a hint
+ * …") fails if a Formwright release stops giving it; should Formwright add the hint to
+ * `FieldLayoutState`, read it from there instead.
+ */
 interface FieldWithArgs extends FieldLayoutState {
   readonly args?: { readonly hint?: string }
 }

@@ -58,11 +58,11 @@
 
 /*
  * The classes the pages give a preview with `<Example @previewClass="…">`, upstream's
- * `previewClassName` (the Navigation Menu page's `h-96`). The pages themselves aren't scanned,
+ * `previewClassName` (the Navigation Menu page's `h-96`, Code Block's Markdown `h-auto`). The pages themselves aren't scanned,
  * since every word of their prose would become a utility; add a page's classes here, and
  * docs-app/tests/unit/preview-classes-test.ts checks that each one is.
  */
-@source inline('h-96');
+@source inline('h-96 h-auto');
 
 /*
  * Typography's examples are upstream's own markup: bare headings, paragraphs, a list, a

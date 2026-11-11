@@ -362,8 +362,12 @@ alone.
 ### Markdown
 
 Upstream renders a chat message with Streamdown and routes its fenced code to a `CodeBlock`,
-disabling the copy button until the closing fence arrives. Its example (`code-block-markdown`)
-comes with a Markdown renderer for Ember.
+disabling the copy button until the closing fence arrives. Ember has no Streamdown, so the example
+parses the message with [marked](https://marked.js.org/)'s lexer and renders its blocks as
+Streamdown does: paragraphs, inline code, and each fenced block as a `CodeBlock`, whose copy
+button waits for the closing fence while the reply streams.
+
+<Example @name="code-block-markdown" @title="Markdown" @previewClass="h-auto" />
 
 ## Accessibility
 

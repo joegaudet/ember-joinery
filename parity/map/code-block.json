@@ -1,5 +1,4 @@
 {
-  "$comment": "Waiting for components that haven't landed: code-block-markdown (a Markdown renderer for Ember, upstream's Streamdown). The unit that lands it ports its example onto the Code Block page and maps it here.",
   "examples": {
     "code-block-demo": {
       "example": "code-block-demo",
@@ -76,6 +75,11 @@
       "example": "code-block-tabs",
       "threshold": 0.025,
       "reason": "Only highlighted tokens differ: the reference app screenshots before Shiki has highlighted (it is ready once its fonts are), and Joinery colours tokens with GitHub's high-contrast themes, which meet WCAG AA where upstream's github-light does not. Upstream's code names a real model, and Joinery's sources name none, so its placeholder (of the same length, so the layout is the same) differs in those characters."
+    },
+    "code-block-markdown": {
+      "example": "code-block-markdown",
+      "threshold": 0.015,
+      "reason": "Only highlighted tokens differ: the reference app screenshots before Shiki has highlighted (it is ready once its fonts are), and Joinery colours tokens with GitHub's high-contrast themes, which meet WCAG AA where upstream's github-light does not. The Markdown around the code, Streamdown's upstream and marked's here, matches (1.08% light, 1.11% dark, all of it in the code's tokens)."
     }
   }
 }

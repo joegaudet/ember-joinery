@@ -1,10 +1,12 @@
 import Component from '@glimmer/component'
 import type { ControlSignature } from '@ember-formwright/ember'
 import { Icon, type IconNode, type RatingSize } from '@ember-joinery/ember'
-import { Rating, defaultRatingItemLabel, ratingPercent } from '@ember-joinery/primitives/rating'
+import { Rating, ratingPercent } from '@ember-joinery/primitives/rating'
 import { VisuallyHidden } from '@ember-joinery/primitives/visually-hidden'
 import { Star } from 'lucide'
 import { toNumber } from '../-private/options.ts'
+import { translate } from '@ember-joinery/primitives/i18n'
+import { messages as primitiveMessages } from '@ember-joinery/primitives/messages'
 
 export interface RatingControlSignature {
   Args: ControlSignature<number | null>['Args'] & {
@@ -64,7 +66,10 @@ export class RatingControl extends Component<RatingControlSignature> {
   /** Each radio's id: the root has the field's. */
   idFor = (index: number): string => `${this.args.id}-${index}`
   half = (value: number): 'start' | 'end' | undefined => halfOf(value, this.step)
-  labelFor = (value: number): string => (this.args.itemLabel ?? defaultRatingItemLabel)(value)
+  labelFor = (value: number): string =>
+    this.args.itemLabel
+      ? this.args.itemLabel(value)
+      : translate(this, primitiveMessages.ratingItem, { count: value })
   isSelected = (value: number, rating: number): boolean => value <= rating
   isChecked = (value: number, rating: number): boolean => value === rating
   percentFor = (value: number, rating: number): number => ratingPercent(value, rating, this.step)

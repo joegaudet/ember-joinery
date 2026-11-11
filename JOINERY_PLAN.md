@@ -49,6 +49,21 @@ Deviations from the intake, and why:
   and Formwright supplies `Form`. Of the 27 blocks, the four ported are `login-01`, `signup-01`,
   `dashboard-01` and, for settings, `sidebar-13` (a sidebar in a settings dialog), the one
   settings screen among them; the demo opens it over the dashboard, at `/settings`.
+- **The forms, built once each, and not yet compared** (changes Phase 12, and item 6 of the
+  definition of done for its examples, until a later unit closes the gap). Upstream's
+  `registry/new-york-v4/examples/form-*` are 34 files: 30 examples, and the schema and action
+  files of its two Next.js forms. Most are one form written three times, for React Hook Form,
+  TanStack Form and Formisch; Formwright is the one form library here, so each form is one guide
+  example, which names the upstream ones it rebuilds: 12 in all, the nine forms every library
+  has, React Hook Form's password form, and the two Next.js forms (`form-next-demo`,
+  `form-next-complex`), which are forms of their own. They aren't in the parity comparison yet:
+  they are the `docs/forms` pages' examples, in new-york-v4, which neither
+  `upstream/inventory.json` nor the reference app covers (it renders new-york-v4 only for the
+  charts), so `--require-complete` doesn't count them either. Comparing them needs the inventory
+  to list those pages' examples and the reference app to render them with their libraries
+  (React Hook Form, TanStack Form, Formisch, and Next.js's `<Form>`); until then the gap is listed
+  in the PR's Known gaps and on the guide's Forms page. Of Joinery's inputs, FileDrop isn't a
+  Formwright control: it keeps no value, and File Upload is what keeps files.
 
 **What we're copying:** [ui.shadcn.com](https://ui.shadcn.com/): every component, every example
 on its component pages, a subset of its blocks, and its theming. The source of truth is the code
@@ -501,9 +516,10 @@ Block from Phase 9.
 
 ### Phase 12: Formwright bridge
 
-`@ember-joinery/formwright`: every Joinery input registered as a Formwright control, a Field
-layout using shadcn's Field anatomy, and harnesses built on Formwright's `FieldHarness`. The 34
-upstream `form-*` examples are rebuilt on Formwright. There is an `ember-formwright` example app.
+`@ember-joinery/formwright`: every Joinery input that keeps a value registered as a Formwright
+control, a Field layout using shadcn's Field anatomy, and harnesses built on Formwright's
+`FieldHarness`. The 34 upstream `form-*` files are rebuilt on Formwright, one guide example for
+each form (see the deviations above). There is an `ember-formwright` example app.
 
 ### Phase 13: Blocks, demo, site, theme builder, reference
 

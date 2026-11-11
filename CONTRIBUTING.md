@@ -651,7 +651,10 @@ The demo is the guide's dashboard block (`docs-app/app/examples/dashboard-01`), 
 settings block (`sidebar-13`) over it at `/settings`, copied into `test-app/app/components/demo`
 as an app copies a block in. `scripts/demo-blocks.test.mjs` fails when a copy differs from the
 guide's, but for the files the demo adapts to its routes, which it lists; change a block in the
-guide, then copy it again. The blocks lay themselves out with Tailwind's utilities, which
+guide, then copy it again. The dashboard's page (`dashboard-01.gts`) is the app's application
+template, inside the demo's root and beside its outlet and Toaster: the same script checks that
+the template imports what the page does (from the demo's folder), and that its `style` and its
+`SidebarProvider` are the page's, but for the `@name` the demo gives the sidebar. The blocks lay themselves out with Tailwind's utilities, which
 `test-app/app/styles/demo.css` compiles from the demo's files alone, scoped to its root
 (`[data-jn-demo]`) and with Tailwind's theme as a reference, so the integration tests, which
 render outside it, still see Joinery as an app without Tailwind does. The app's application

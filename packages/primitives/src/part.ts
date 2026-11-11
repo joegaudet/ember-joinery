@@ -174,13 +174,16 @@ function write(change: () => void): void {
  * element's new value to restore when it stops setting that attribute. Where two parts on one
  * element set the same attribute, the last to set it wins. On events, the caller's listeners
  * run first when they come first (`...attributes` before the part modifier), and can stop the
- * part's by calling `preventDefault()`.
+ * part's by calling `preventDefault()`. The function's `this` is the modifier, which has the app's
+ * owner (for `translate(this, …)`).
  */
 export function part<
   E extends Element = HTMLElement,
   Named extends object = Record<string, never>,
   Positional extends unknown[] = [],
->(spec: (named: Named, positional: Positional) => PartSpec<E>): PartModifier<E, Named, Positional> {
+>(
+  spec: (this: object, named: Named, positional: Positional) => PartSpec<E>,
+): PartModifier<E, Named, Positional> {
   return class Part extends Modifier<PartSignature<E, Named, Positional>> {
     #element: E | undefined
     /** The attributes the part sets now, as it wrote them. */
@@ -199,7 +202,7 @@ export function part<
     #unwatch: (() => void) | undefined
 
     override modify(element: E, positional: Positional, named: Named): void {
-      const next = spec(named, positional)
+      const next = spec.call(this, named, positional)
       const installing = this.#element === undefined
       if (installing) {
         this.#element = element

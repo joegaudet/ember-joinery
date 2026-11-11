@@ -1,5 +1,7 @@
 import type { TOC } from '@ember/component/template-only'
 import { DocumentFileDrop as DocumentFileDropPrimitive } from '@ember-joinery/primitives/file-drop'
+import { t } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 export interface DocumentFileDropSignature {
   Args: {
@@ -45,7 +47,11 @@ const DocumentFileDrop: TOC<DocumentFileDropSignature> = <template>
         ...attributes
       >
         <div class="jn-document-file-drop-content" data-slot="document-file-drop-content">
-          {{#if (has-block)}}{{yield}}{{else}}{{if @label @label "Drop files anywhere"}}{{/if}}
+          {{#if (has-block)}}{{yield}}{{else}}{{if
+              @label
+              @label
+              (t messages.documentFileDropLabel)
+            }}{{/if}}
         </div>
       </div>
     {{/if}}

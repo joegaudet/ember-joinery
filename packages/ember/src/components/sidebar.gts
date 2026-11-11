@@ -22,6 +22,8 @@ import Input from './input.gts'
 import Sheet from './sheet.gts'
 import Skeleton from './skeleton.gts'
 import Tooltip from './tooltip.gts'
+import { t } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 /** Upstream's `SIDEBAR_COOKIE_NAME`: the cookie the sidebar keeps its open state in. */
 export const SIDEBAR_COOKIE_NAME = 'sidebar_state'
@@ -534,11 +536,11 @@ class SidebarPanel extends Component<SidebarSignature> {
           ...attributes
         >
           <s.Header {{visuallyHidden}}>
-            <s.Title>{{if @mobileTitle @mobileTitle "Sidebar"}}</s.Title>
+            <s.Title>{{if @mobileTitle @mobileTitle (t messages.sidebarMobileTitle)}}</s.Title>
             <s.Description>{{if
                 @mobileDescription
                 @mobileDescription
-                "Displays the mobile sidebar."
+                (t messages.sidebarMobileDescription)
               }}</s.Description>
           </s.Header>
           <div class="jn-sidebar-mobile-inner">{{yield}}</div>
@@ -603,7 +605,7 @@ const SidebarTrigger: TOC<SidebarTriggerSignature> = <template>
       {{@sidebar.registerTrigger}}
     >
       <Icon @icon={{if @icon @icon PanelLeft}} class="jn-rtl-flip" />
-      <span {{visuallyHidden}}>{{if @label @label "Toggle Sidebar"}}</span>
+      <span {{visuallyHidden}}>{{if @label @label (t messages.sidebarToggle)}}</span>
     </Button>
   {{/let}}
 </template>
@@ -627,9 +629,9 @@ const SidebarRail: TOC<SidebarRailSignature> = <template>
     class="jn-sidebar-rail"
     data-sidebar="rail"
     data-slot="sidebar-rail"
-    aria-label={{if @label @label "Toggle Sidebar"}}
+    aria-label={{if @label @label (t messages.sidebarToggle)}}
     tabindex="-1"
-    title={{if @label @label "Toggle Sidebar"}}
+    title={{if @label @label (t messages.sidebarToggle)}}
     data-test-jn-part="rail"
     data-test-jn-owner={{@sidebar.id}}
     ...attributes

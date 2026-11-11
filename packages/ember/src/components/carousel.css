@@ -1,0 +1,100 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/carousel.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="carousel" in Carousel */
+:where(.jn-carousel) {
+  @apply relative;
+}
+
+/* data-slot="carousel-content" in CarouselContent */
+:where(.jn-carousel-content) {
+  @apply overflow-hidden;
+}
+
+/* in CarouselContent, no slot to attach it to: flex */
+
+/* in CarouselContent, only when orientation === "horizontal": -ml-4 */
+
+/* in CarouselContent, only when !(orientation === "horizontal"): -mt-4 flex-col */
+
+/* data-slot="carousel-item" in CarouselItem */
+:where(.jn-carousel-item) {
+  @apply min-w-0 shrink-0 grow-0 basis-full;
+}
+
+/* data-slot="carousel-item" in CarouselItem, only when orientation === "horizontal": pl-4 */
+
+/* data-slot="carousel-item" in CarouselItem, only when !(orientation === "horizontal"): pt-4 */
+
+/* data-slot="carousel-previous" in CarouselPrevious */
+:where(.jn-carousel-previous) {
+  @apply absolute touch-manipulation;
+}
+
+/* data-slot="carousel-previous" in CarouselPrevious, only when orientation === "horizontal": inset-y-0 -left-12 my-auto */
+
+/* data-slot="carousel-previous" in CarouselPrevious, only when !(orientation === "horizontal"): -top-12 left-1/2 -translate-x-1/2 rotate-90 */
+
+/* in CarouselPrevious, no slot to attach it to: sr-only */
+
+/* data-slot="carousel-next" in CarouselNext */
+:where(.jn-carousel-next) {
+  @apply absolute touch-manipulation;
+}
+
+/* data-slot="carousel-next" in CarouselNext, only when orientation === "horizontal": inset-y-0 -right-12 my-auto */
+
+/* data-slot="carousel-next" in CarouselNext, only when !(orientation === "horizontal"): -bottom-12 left-1/2 -translate-x-1/2 rotate-90 */
+
+/* in CarouselNext, no slot to attach it to: sr-only */
+
+/*
+ * Written by hand, after the extracted rules: what extract-classes.mjs leaves as comments
+ * above. Joinery's Carousel gives the row of slides inside the content (which upstream leaves
+ * without a slot) the class `jn-carousel-container`, and each part that upstream styles by its
+ * orientation (`orientation === "horizontal" ? … : …`) renders `data-orientation`, which these
+ * rules key on. They come after the parts' base rules, as upstream's conditional strings come
+ * after its base string in each cn() call, and they are logical (scripts/rtl.mjs), as upstream's
+ * right-to-left copy of the component is: `-ml-4` is `-ms-4`, `-left-12` is `-start-12`.
+ */
+:where(.jn-carousel-container) {
+  @apply flex;
+}
+
+:where(.jn-carousel-container[data-orientation='horizontal']) {
+  @apply -ms-4;
+}
+
+:where(.jn-carousel-container[data-orientation='vertical']) {
+  @apply -mt-4 flex-col;
+}
+
+:where(.jn-carousel-item[data-orientation='horizontal']) {
+  @apply ps-4;
+}
+
+:where(.jn-carousel-item[data-orientation='vertical']) {
+  @apply pt-4;
+}
+
+:where(.jn-carousel-previous[data-orientation='horizontal']) {
+  @apply inset-y-0 -start-12 my-auto;
+}
+
+:where(.jn-carousel-previous[data-orientation='vertical']) {
+  @apply -top-12 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 rotate-90;
+}
+
+:where(.jn-carousel-next[data-orientation='horizontal']) {
+  @apply inset-y-0 -end-12 my-auto;
+}
+
+:where(.jn-carousel-next[data-orientation='vertical']) {
+  @apply -bottom-12 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 rotate-90;
+}

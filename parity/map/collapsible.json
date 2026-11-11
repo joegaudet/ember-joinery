@@ -1,0 +1,9 @@
+{
+  "examples": {
+    "collapsible-demo": "collapsible-demo",
+    "collapsible-basic": "collapsible-basic",
+    "collapsible-settings": "collapsible-settings",
+    "collapsible-file-tree": "collapsible-file-tree",
+    "collapsible-rtl": "collapsible-rtl"
+  }
+}

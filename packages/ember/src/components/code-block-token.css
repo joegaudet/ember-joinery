@@ -1,0 +1,12 @@
+/*
+ * A highlighted token's colour in @ember-joinery/code-block, from upstream's
+ * apps/v4/registry/bases/radix/lib/highlighter.tsx (shadcn-ui/ui@8ab2771), whose token spans
+ * carry `text-(--shiki-light) dark:text-(--shiki-dark)`. Shiki gives each token both themes'
+ * colours as custom properties, and `.dark` picks the dark one. Written by hand: the spans have
+ * no slot for scripts/extract-classes.mjs to attach them to, so the add-on renders them with
+ * this class.
+ */
+
+:where(.jn-code-block-token) {
+  @apply text-(--shiki-light) dark:text-(--shiki-dark);
+}

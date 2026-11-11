@@ -1,0 +1,18 @@
+{
+  "examples": {
+    "input-group-demo": "input-group-demo",
+    "input-group-inline-start": "input-group-inline-start",
+    "input-group-inline-end": "input-group-inline-end",
+    "input-group-block-start": "input-group-block-start",
+    "input-group-block-end": "input-group-block-end",
+    "input-group-icon": "input-group-icon",
+    "input-group-text": "input-group-text",
+    "input-group-button": "input-group-button",
+    "input-group-kbd": "input-group-kbd",
+    "input-group-dropdown": "input-group-dropdown",
+    "input-group-spinner": "input-group-spinner",
+    "input-group-textarea": "input-group-textarea",
+    "input-group-custom": "input-group-custom",
+    "input-group-rtl": "input-group-rtl"
+  }
+}

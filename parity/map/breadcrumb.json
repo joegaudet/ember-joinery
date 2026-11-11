@@ -1,0 +1,11 @@
+{
+  "examples": {
+    "breadcrumb-demo": "breadcrumb-demo",
+    "breadcrumb-basic": "breadcrumb-basic",
+    "breadcrumb-separator": "breadcrumb-separator",
+    "breadcrumb-dropdown": "breadcrumb-dropdown",
+    "breadcrumb-ellipsis": "breadcrumb-ellipsis",
+    "breadcrumb-link": "breadcrumb-link",
+    "breadcrumb-rtl": "breadcrumb-rtl"
+  }
+}

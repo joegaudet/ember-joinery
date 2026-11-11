@@ -1,0 +1,124 @@
+/*
+ * The parts of @ember-joinery/power-calendar, an opt-in add-on (on ember-power-calendar) that
+ * nothing in @ember-joinery/ember imports. Its rules live here, as every add-on's do, so
+ * joinery.css styles it with nothing more to import; an app without the add-on never renders
+ * these classes.
+ *
+ * The add-on draws shadcn's Calendar, so these are the inline utilities of
+ * apps/v4/registry/bases/radix/ui/calendar.tsx (shadcn-ui/ui@8ab2771): its classNames for
+ * react-day-picker's parts, and CalendarDayButton's, written for the add-on's own markup. The
+ * root also carries `jn-calendar`, so each style sheet's Calendar rule (its padding,
+ * --cell-size and --cell-radius) applies, and the nav buttons carry a ghost Button's classes and
+ * each day a ghost icon Button's, as upstream's do. The caption leaves off `jn-calendar-caption`:
+ * upstream's sits behind a condition, which its registry build never resolves, so on
+ * ui.shadcn.com no style's caption rule applies. Where
+ * react-day-picker marks a day with a modifier class (range_start, today, outside…), the add-on
+ * sets a data attribute on the day's cell instead. Physical sides are logical, as in the ported
+ * sheets, so the rules hold in both directions; the day's focus ring is the Button's own
+ * (focus-visible) rather than react-day-picker's focused modifier. The date pickers' content is
+ * upstream's PopoverContent `className="w-auto p-0"`, and their trigger the examples' Button.
+ */
+
+/* data-slot="calendar": Calendar's className and root */
+:where(.jn-power-calendar) {
+  @apply w-fit bg-background in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent;
+}
+
+/* months, month */
+:where(.jn-power-calendar-months) {
+  @apply relative flex flex-col gap-4 md:flex-row;
+}
+
+:where(.jn-power-calendar-month) {
+  @apply flex w-full flex-col gap-4;
+}
+
+/* nav, button_previous, button_next */
+:where(.jn-power-calendar-nav) {
+  @apply absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1;
+}
+
+:where(.jn-power-calendar-nav-button) {
+  @apply size-(--cell-size) p-0 select-none aria-disabled:opacity-50;
+}
+
+/* month_caption, caption_label (captionLayout="label") */
+:where(.jn-power-calendar-month-caption) {
+  @apply flex h-(--cell-size) w-full items-center justify-center px-(--cell-size);
+}
+
+:where(.jn-power-calendar-caption-label) {
+  @apply text-sm font-medium select-none;
+}
+
+/* month_grid, weekdays, weekday, week: rows of a grid, laid out as upstream's table is */
+:where(.jn-power-calendar-grid) {
+  @apply w-full;
+}
+
+:where(.jn-power-calendar-weekdays) {
+  @apply flex;
+}
+
+/* A <th> centres its text; the grid's header cells are <div>s, so they say so. */
+:where(.jn-power-calendar-weekday) {
+  @apply flex-1 rounded-(--cell-radius) text-center text-[0.8rem] font-normal text-muted-foreground select-none;
+}
+
+:where(.jn-power-calendar-week) {
+  @apply mt-2 flex w-full;
+}
+
+/* day: the cell around each day's button */
+:where(.jn-power-calendar-day) {
+  @apply relative aspect-square h-full w-full rounded-(--cell-radius) p-0 text-center select-none [&:first-child[data-selected=true]_button]:rounded-s-(--cell-radius) [&:last-child[data-selected=true]_button]:rounded-e-(--cell-radius);
+}
+
+/* today, outside, disabled, hidden */
+:where(.jn-power-calendar-day[data-today]) {
+  @apply rounded-(--cell-radius) bg-muted text-foreground data-[selected=true]:rounded-none;
+}
+
+:where(.jn-power-calendar-day[data-outside]) {
+  @apply text-muted-foreground aria-selected:text-muted-foreground;
+}
+
+:where(.jn-power-calendar-day[data-disabled]) {
+  @apply text-muted-foreground opacity-50;
+}
+
+:where(.jn-power-calendar-day[data-hidden]) {
+  @apply invisible;
+}
+
+/* range_start, range_end, range_middle */
+:where(.jn-power-calendar-day[data-range-start]) {
+  @apply relative isolate z-0 rounded-s-(--cell-radius) bg-muted after:absolute after:inset-y-0 after:end-0 after:w-4 after:bg-muted;
+}
+
+:where(.jn-power-calendar-day[data-range-end]) {
+  @apply relative isolate z-0 rounded-e-(--cell-radius) bg-muted after:absolute after:inset-y-0 after:start-0 after:w-4 after:bg-muted;
+}
+
+:where(.jn-power-calendar-day[data-range-middle]) {
+  @apply rounded-none;
+}
+
+/* CalendarDayButton */
+:where(.jn-power-calendar-day-button) {
+  @apply relative isolate z-10 flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 border-0 leading-none font-normal focus-visible:relative focus-visible:z-10 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-e-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-s-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70;
+}
+
+/* The date pickers: upstream's PopoverContent className="w-auto p-0" (overflow-hidden too, from
+   date-picker-input), and the examples' outlined trigger. */
+:where(.jn-date-picker-content) {
+  @apply w-auto overflow-hidden p-0;
+}
+
+:where(.jn-date-picker-trigger) {
+  @apply justify-between text-start font-normal data-[empty=true]:text-muted-foreground;
+}
+
+:where(.jn-date-picker-trigger-value) {
+  @apply truncate;
+}

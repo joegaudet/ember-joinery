@@ -1,0 +1,12 @@
+{
+  "examples": {
+    "spinner-demo": "spinner-demo",
+    "spinner-rtl": "spinner-rtl",
+    "spinner-custom": "spinner-custom",
+    "spinner-size": "spinner-size",
+    "spinner-button": "spinner-button",
+    "spinner-badge": "spinner-badge",
+    "spinner-input-group": "spinner-input-group",
+    "spinner-empty": "spinner-empty"
+  }
+}

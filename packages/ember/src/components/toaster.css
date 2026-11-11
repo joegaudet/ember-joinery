@@ -1,0 +1,51 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/sonner.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* in Toaster, no slot to attach it to: toaster */
+
+/* in Toaster, no slot to attach it to: size-4 */
+
+/* in Toaster, no slot to attach it to: size-4 */
+
+/* in Toaster, no slot to attach it to: size-4 */
+
+/* in Toaster, no slot to attach it to: size-4 */
+
+/* in Toaster, no slot to attach it to: size-4 animate-spin */
+
+/*
+ * Joinery's own, for what upstream's Toaster gets from Tailwind or from sonner's markup:
+ *
+ * - The icons it gives sonner are lucide's, with `size-4` (and `animate-spin` on the loader).
+ *   They have no slot, so the script above can't attach them; the Toaster's icons carry
+ *   jn-toaster-icon (and jn-toaster-icon-loading) for these rules, and the jn-size-4 marker.
+ * - Each list is in the top layer (a manual popover), so the browser's popover styles apply to
+ *   it: a border, padding, Canvas colours, overflow and `inset: 0`. This puts them back, under
+ *   sonner's own rules (in :where(), so sonner.css's sides and size win).
+ * - NOTE: upstream's `toastOptions.classNames.toast` is `cn-toast`, which the registry build
+ *   leaves as it is, and the style sheets' rule for it sets a radius. sonner's own rule (its
+ *   --border-radius, which the Toaster sets to --radius) beats it, as sonner's unlayered CSS
+ *   beats the sheets on ui.shadcn.com, so the rule only shows where it is !important (Rhea,
+ *   Sera).
+ */
+:where(.jn-toaster-icon) {
+  @apply size-4;
+}
+
+:where(.jn-toaster-icon-loading) {
+  @apply animate-spin;
+}
+
+:where([data-sonner-toaster][popover]) {
+  inset: auto;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+}

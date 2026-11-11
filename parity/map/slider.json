@@ -1,0 +1,11 @@
+{
+  "examples": {
+    "slider-demo": "slider-demo",
+    "slider-range": "slider-range",
+    "slider-multiple": "slider-multiple",
+    "slider-vertical": "slider-vertical",
+    "slider-controlled": "slider-controlled",
+    "slider-disabled": "slider-disabled",
+    "slider-rtl": "slider-rtl"
+  }
+}

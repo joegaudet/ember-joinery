@@ -1,0 +1,45 @@
+version: 2
+updates:
+  # The npm ecosystem covers pnpm workspaces; it updates the root pnpm-lock.yaml.
+  # Every workspace package is listed so its own package.json is kept current too.
+  - package-ecosystem: 'npm'
+    directories:
+      - '/'
+      - '/packages/*'
+      - '/test-app'
+      - '/docs-app'
+      - '/examples/*'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+    groups:
+      # One PR a week for everything that shouldn't break anything.
+      minor-and-patch:
+        update-types: ['minor', 'patch']
+        # A playwright-core upgrade brings a new Chromium, which can move every parity
+        # screenshot (and leaves a preinstalled browser behind), so it gets a PR of its own.
+        exclude-patterns: ['playwright-core']
+      # Ember's packages move together; review their majors together.
+      ember:
+        patterns: ['ember-*', '@ember/*', '@embroider/*', '@glimmer/*', '@glint/*']
+        update-types: ['major']
+      # tailwindcss and its CLI must stay on the same version.
+      tailwind:
+        patterns: ['tailwindcss', '@tailwindcss/*']
+        update-types: ['major']
+    ignore:
+      # For the guide (docs-app, still to come): as in Formwright, Kolay 5.4 needs typedoc's
+      # TypeScript range and a patched ember-repl@8.2.3, so both are upgraded by hand. Until
+      # docs-app adds them (the patch goes under patchedDependencies in pnpm-workspace.yaml),
+      # these rules match nothing.
+      - dependency-name: 'kolay'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+      - dependency-name: 'ember-repl'
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    groups:
+      actions:
+        patterns: ['*']

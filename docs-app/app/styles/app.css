@@ -1,0 +1,1027 @@
+/*
+ * The Joinery guide: the same palette as the marketing site (docs/site/site.css).
+ *
+ * Cascade layers: the first declared loses. Every rule here is in `guide`, below Joinery's own
+ * `joinery` layer, so wherever a Joinery component renders, its rules win over the guide's,
+ * whatever their specificity. Above Joinery's are Tailwind's `theme` and `utilities`, for the
+ * examples' layout classes (examples.css), and below everything Tailwind's `properties`
+ * fallbacks. app.ts imports this file first, so this statement is the first layer declaration
+ * on the page and fixes the order.
+ */
+@layer properties, guide, joinery, theme, utilities;
+
+@layer guide {
+  :root {
+    --g-font: Geist, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --g-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --g-bg: #ffffff;
+    --g-surface: #f7f6f3;
+    --g-fg: #1c1a17;
+    --g-muted: #5f5a52;
+    --g-border: #e6e2da;
+    /* Joinery's accent: walnut amber. */
+    --g-accent: #a3480a;
+    --g-accent-soft: rgb(163 72 10 / 0.1);
+    --g-coral: #c81e3a;
+    --g-code-bg: #f8f7f4;
+    --g-gutter: 16px;
+    color-scheme: light dark;
+  }
+
+  /*
+   * Dark follows the system, unless <html> has shadcn's `.dark` class or a `.light` one (the
+   * parity route sets one of them, so the comparison gets the scheme it asks for).
+   */
+  @media (prefers-color-scheme: dark) {
+    :root:not(.light) {
+      --g-bg: #12110f;
+      --g-surface: #1a1916;
+      --g-fg: #ece9e3;
+      --g-muted: #a8a196;
+      --g-border: #2c2a26;
+      --g-accent: #f5b04c;
+      --g-accent-soft: rgb(245 176 76 / 0.12);
+      --g-coral: #fb7185;
+      --g-code-bg: #161512;
+    }
+  }
+
+  :root.light {
+    color-scheme: light;
+  }
+
+  :root.dark {
+    --g-bg: #12110f;
+    --g-surface: #1a1916;
+    --g-fg: #ece9e3;
+    --g-muted: #a8a196;
+    --g-border: #2c2a26;
+    --g-accent: #f5b04c;
+    --g-accent-soft: rgb(245 176 76 / 0.12);
+    --g-coral: #fb7185;
+    --g-code-bg: #161512;
+    color-scheme: dark;
+  }
+
+  /*
+   * The guide's own boxes size from their border edge. The reset stops at a stage (see
+   * .guide-stage): the stage itself is the guide's, but what an example renders inside it gets
+   * no box-sizing from the guide, so it sizes the way Joinery's own CSS says, as in an app
+   * without Tailwind.
+   */
+  :where(:not(.guide-stage *)),
+  :where(:not(.guide-stage *))::before,
+  :where(:not(.guide-stage *))::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--g-bg);
+    color: var(--g-fg);
+    font: 16px/1.65 var(--g-font);
+  }
+
+  /* The guide's links; examples render their own (see .guide-stage). */
+  @scope (body) to (.guide-stage) {
+    a {
+      color: var(--g-accent);
+    }
+  }
+
+  /* Anchor jumps land below the sticky header. */
+  html {
+    scroll-padding-top: 5rem;
+  }
+
+  /* ---- header and layout ------------------------------------------------------------- */
+
+  .guide-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem clamp(var(--g-gutter), 3vw, 2rem);
+    background: color-mix(in srgb, var(--g-bg) 85%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--g-border);
+  }
+
+  .guide-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .guide-tag {
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    background: var(--g-accent-soft);
+    color: var(--g-accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .guide-header nav {
+    display: flex;
+    gap: 1.25rem;
+  }
+
+  .guide-header nav a {
+    color: var(--g-muted);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .guide-header nav a:hover {
+    color: var(--g-fg);
+  }
+
+  .guide-layout {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 clamp(var(--g-gutter), 3vw, 2rem);
+  }
+
+  .guide-sidebar {
+    position: sticky;
+    top: 4rem;
+    align-self: start;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    padding: 1.5rem 0;
+  }
+
+  .guide-sidebar summary {
+    display: none;
+  }
+
+  .guide-sidebar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .guide-sidebar li {
+    margin: 0;
+  }
+
+  .guide-sidebar nav > ul > li {
+    margin-bottom: 1.1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--g-muted);
+  }
+
+  .guide-sidebar nav > ul > li > ul {
+    margin-top: 0.35rem;
+    font-size: 0.92rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .guide-sidebar a {
+    display: block;
+    padding: 0.28rem 0.7rem;
+    border-radius: 8px;
+    color: var(--g-fg);
+    text-decoration: none;
+  }
+
+  .guide-sidebar a:hover {
+    background: var(--g-surface);
+  }
+
+  .guide-sidebar a.active {
+    background: var(--g-accent-soft);
+    color: var(--g-accent);
+    font-weight: 600;
+  }
+
+  .guide-main {
+    min-width: 0;
+    padding: 1.5rem 0 5rem;
+  }
+
+  /* The sibling projects, as on the project site's footer. */
+  .guide-footer {
+    padding: 1.5rem clamp(var(--g-gutter), 3vw, 2rem);
+    border-top: 1px solid var(--g-border);
+    color: var(--g-muted);
+    font-size: 0.875rem;
+  }
+
+  .guide-footer a {
+    color: inherit;
+  }
+
+  .guide-footer [aria-current='page'] {
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  @media (max-width: 860px) {
+    .guide-layout {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .guide-sidebar {
+      position: static;
+      max-height: none;
+      padding: 0.75rem 0 0;
+    }
+
+    .guide-sidebar summary {
+      display: block;
+      cursor: pointer;
+      font-weight: 600;
+      padding: 0.4rem 0;
+    }
+
+    .guide-sidebar:not([open]) nav {
+      display: none;
+    }
+  }
+
+  /* ---- prose ------------------------------------------------------------------------- */
+
+  .guide-prose {
+    max-width: 50rem;
+  }
+
+  /*
+   * The page's own elements. An example frame is outside the scope: its preview shows the
+   * example as upstream's does (a Table, Typography or Kbd example styles its own table,
+   * headings and code), and its code panel has the rules further down.
+   */
+  @scope (.guide-prose) to (.example, .guide-stage) {
+    h1 {
+      margin: 0.5rem 0 0.75rem;
+      font-size: clamp(2rem, 4vw, 2.6rem);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+    }
+
+    h1 + p {
+      font-size: 1.12rem;
+      color: var(--g-muted);
+    }
+
+    h2 {
+      margin: 3rem 0 0.75rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--g-border);
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+    }
+
+    h3 {
+      margin: 2rem 0 0.5rem;
+      font-size: 1.15rem;
+    }
+
+    code:not(pre > code) {
+      padding: 0.1em 0.35em;
+      border-radius: 5px;
+      background: var(--g-accent-soft);
+      font: 0.88em var(--g-mono);
+    }
+
+    pre {
+      margin: 1.25rem 0;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      border: 1px solid var(--g-border);
+      border-radius: 12px;
+      background: var(--g-code-bg) !important;
+      font: 0.86rem/1.6 var(--g-mono);
+    }
+
+    table {
+      display: block;
+      width: 100%;
+      overflow-x: auto;
+      border-collapse: collapse;
+      margin: 1.25rem 0;
+      font-size: 0.93rem;
+    }
+
+    th,
+    td {
+      padding: 0.55rem 0.8rem;
+      border-bottom: 1px solid var(--g-border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--g-muted);
+    }
+
+    td:first-child code {
+      white-space: nowrap;
+    }
+  }
+
+  /* The "#" link a heading gets for sharing; shown on hover or focus. */
+  .heading-anchor {
+    margin-left: 0.4rem;
+    color: var(--g-muted);
+    text-decoration: none;
+    font-weight: 400;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  :is(h2, h3):hover > .heading-anchor,
+  .heading-anchor:focus-visible {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .heading-anchor {
+      opacity: 0.6;
+    }
+  }
+
+  .guide-loading,
+  .guide-error {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  .guide-error {
+    border: 1px solid var(--g-coral);
+    color: var(--g-coral);
+  }
+
+  /* ---- callouts ---------------------------------------------------------------------- */
+
+  .callout {
+    display: block;
+    margin: 1.25rem 0;
+    padding: 0.85rem 1.1rem;
+    border-left: 4px solid var(--g-accent);
+    border-radius: 0 10px 10px 0;
+    background: var(--g-accent-soft);
+  }
+
+  .callout > p:first-child > strong:only-child {
+    display: block;
+    margin-bottom: -0.25rem;
+  }
+
+  .callout--warning {
+    border-left-color: var(--g-coral);
+    background: color-mix(in srgb, var(--g-coral) 10%, transparent);
+  }
+
+  .callout--tip {
+    border-left-color: #0d9488;
+    background: rgb(13 148 136 / 0.1);
+  }
+
+  .callout p {
+    margin: 0.25rem 0;
+  }
+
+  /* ---- where examples render ----------------------------------------------------------- */
+
+  /*
+   * The frame's preview and the parity route. Nothing the guide sets reaches in: the prose
+   * and link rules stop at it (the `@scope` limits above), so does the box-sizing reset (its
+   * `:not(.guide-stage *)`), and the text styles the page would pass down start over here, as
+   * upstream's preview gets them from its body and Tailwind's preflight. Joinery's CSS does
+   * the rest; the stage adds no reset of its own, so the guide and the parity comparison show
+   * Joinery as an app without Tailwind sees it. Where upstream relies on preflight (its
+   * `box-sizing: border-box` on every element, say), joinery.css sets the same on its parts,
+   * and the parity comparison shows a part that doesn't.
+   */
+  .guide-stage {
+    /* What a part that sets font-sans or font-mono (Kbd) takes, as on ui.shadcn.com: Geist. */
+    --font-sans: var(--g-font);
+    --font-mono: var(--g-mono);
+    background: var(--background, var(--g-bg));
+    color: var(--foreground, var(--g-fg));
+    font-family: var(--g-font);
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: normal;
+    text-align: start;
+    text-transform: none;
+    white-space: normal;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ---- example frame ----------------------------------------------------------------- */
+
+  .example {
+    margin: 1.75rem 0;
+    border: 1px solid var(--g-border);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--g-surface);
+    box-shadow: 0 18px 50px -30px rgb(163 72 10 / 0.4);
+  }
+
+  /*
+   * `@overflow="visible"`, as upstream's `overflow-visible` on a frame: what overflows the
+   * preview (a navigation menu's viewport, which hangs below its list and isn't in the top
+   * layer) shows over what follows the frame instead of being cut off. With nothing clipped to
+   * the frame's rounded corners, the parts at its corners round their own.
+   */
+  .example[data-overflow='visible'] {
+    overflow: visible;
+  }
+
+  .example[data-overflow='visible'] > .example-bar {
+    border-start-start-radius: 15px;
+    border-start-end-radius: 15px;
+  }
+
+  .example[data-overflow='visible'] > .example-panel > :last-child {
+    border-end-start-radius: 15px;
+    border-end-end-radius: 15px;
+  }
+
+  .example-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--g-border);
+    background: var(--g-bg);
+  }
+
+  .example-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .example-tabs {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.2rem;
+    border-radius: 10px;
+    background: var(--g-surface);
+  }
+
+  .example-tabs button {
+    font: 500 0.82rem var(--g-font);
+    color: var(--g-muted);
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    padding: 0.3rem 0.7rem;
+    cursor: pointer;
+  }
+
+  .example-tabs [aria-selected='true'] {
+    background: var(--g-bg);
+    color: var(--g-fg);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  }
+
+  .example-tabs button:focus-visible,
+  .example-copy:focus-visible {
+    outline: 2px solid var(--g-accent);
+    outline-offset: 2px;
+  }
+
+  /* The preview's switchers: style, base colour, radius, dark, RTL and width. */
+  .example-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.75rem;
+    padding: 0.45rem 0.9rem;
+    border-bottom: 1px solid var(--g-border);
+    background: var(--g-bg);
+    font-size: 0.8rem;
+    color: var(--g-muted);
+  }
+
+  .example-tools label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .example-tools select,
+  .example-tools button {
+    font: 500 0.8rem var(--g-font);
+    color: var(--g-fg);
+    background: var(--g-surface);
+    border: 1px solid var(--g-border);
+    border-radius: 7px;
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+  }
+
+  .example-tools [aria-pressed='true'] {
+    background: var(--g-accent-soft);
+    border-color: var(--g-accent);
+    color: var(--g-accent);
+  }
+
+  .example-tools :focus-visible {
+    outline: 2px solid var(--g-accent);
+    outline-offset: 2px;
+  }
+
+  .example-widths {
+    display: inline-flex;
+    gap: 0.25rem;
+  }
+
+  /* A preview at a set width: a frame that wide, scrolled sideways when the page is narrower. */
+  .example-viewport {
+    overflow-x: auto;
+    padding: 1rem;
+  }
+
+  .preview-frame {
+    display: block;
+    box-sizing: content-box;
+    margin: 0 auto;
+    border: 1px solid var(--g-border);
+    border-radius: 10px;
+    background: var(--g-bg);
+    height: 18rem;
+  }
+
+  /* A block at the frame's own width: as wide as the preview, border and all. */
+  .preview-frame[data-fill='true'] {
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  /*
+   * A block (`@block`): a whole screen, as upstream's `type="block"` previews show one. It fills
+   * its frame, from the top, with nothing around it; its own layout (`min-h-svh`) is the frame's.
+   */
+  .example-preview[data-block='true'] {
+    display: block;
+    min-height: 0;
+    padding: 0;
+  }
+
+  /* As upstream's preview: the example centred in a fixed-height stage, or placed by @align. */
+  .example-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 18rem;
+    padding: 2.5rem;
+  }
+
+  .example-preview[data-align='start'] {
+    align-items: flex-start;
+  }
+
+  .example-preview[data-align='end'] {
+    align-items: flex-end;
+  }
+
+  /*
+   * `@fullWidth`: the example fills the preview's width, as upstream's preview widens the chart
+   * demo (`[&_.preview>div]:w-full`) and the charts gallery its interactive charts. Centred in a
+   * flex box, an example with no width of its own shrinks to its content's, and a chart in it
+   * to nothing. The parity stage's `?fullWidth=true` does the same.
+   */
+  .example-preview[data-full-width='true'] > *,
+  .parity-stage[data-full-width='true'] > * {
+    width: 100%;
+  }
+
+  .example-loading,
+  .example-missing {
+    margin: 0;
+    padding: 1.25rem;
+    color: var(--g-muted);
+  }
+
+  .example-missing {
+    color: var(--g-coral);
+  }
+
+  .example-code {
+    position: relative;
+    max-height: 34rem;
+    overflow: auto;
+    background: var(--g-code-bg);
+  }
+
+  .example-code pre {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    background: transparent !important;
+    font: 0.84rem/1.6 var(--g-mono);
+  }
+
+  /* The name of a file the example imports, above its source. */
+  .example-file {
+    margin: 0;
+    padding: 0.6rem 1.25rem;
+    border-top: 1px solid var(--g-border);
+    font: 500 0.78rem var(--g-mono);
+    color: var(--g-muted);
+  }
+
+  .example-copy {
+    position: sticky;
+    float: right;
+    top: 0.6rem;
+    margin: 0.6rem 0.6rem 0 0;
+    font: 500 0.78rem var(--g-font);
+    color: var(--g-fg);
+    background: var(--g-bg);
+    border: 1px solid var(--g-border);
+    border-radius: 8px;
+    padding: 0.25rem 0.7rem;
+    cursor: pointer;
+  }
+
+  /* Announced to screen readers; the button's own label shows it on screen. */
+  .example-copied {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* ---- the introduction's example ------------------------------------------------------ */
+
+  .intro-toggle {
+    font: 500 0.9rem var(--g-font);
+    color: var(--g-fg);
+    background: transparent;
+    border: 1px solid var(--g-border);
+    border-radius: 8px;
+    padding: 0.45rem 0.9rem;
+    cursor: pointer;
+  }
+
+  .intro-toggle[data-state='on'] {
+    background: var(--g-accent-soft);
+    border-color: var(--g-accent);
+    font-weight: 700;
+  }
+
+  .intro-toggle:focus-visible {
+    outline: 2px solid var(--g-accent);
+    outline-offset: 2px;
+  }
+
+  /* ---- a section's overview: its pages --------------------------------------------------- */
+
+  .section-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 0.35rem 1.5rem;
+    margin: 1.5rem 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .section-list a {
+    color: var(--g-fg);
+    text-decoration: none;
+  }
+
+  .section-list a:hover {
+    color: var(--g-accent);
+    text-decoration: underline;
+  }
+
+  .section-list-empty {
+    color: var(--g-muted);
+    font-style: italic;
+  }
+
+  /* ---- the API reference: a package's modules (package-reference.gts) -------------------- */
+
+  .api-reference-count {
+    color: var(--g-muted);
+  }
+
+  .api-module {
+    margin: 0.6rem 0;
+    border: 1px solid var(--g-border);
+    border-radius: 12px;
+    background: var(--g-surface);
+  }
+
+  .api-module > summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.75rem;
+    padding: 0.7rem 1rem;
+    cursor: pointer;
+  }
+
+  .api-module > summary::marker {
+    color: var(--g-muted);
+  }
+
+  .api-module > summary:focus-visible {
+    outline: 2px solid var(--g-accent);
+    outline-offset: 2px;
+    border-radius: 12px;
+  }
+
+  /* A module's name is a heading, for moving through the page by headings. */
+  .guide-prose .api-module-title {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 1.05rem;
+    letter-spacing: 0;
+  }
+
+  .api-module-path {
+    color: var(--g-muted);
+  }
+
+  .api-module-exports {
+    flex-basis: 100%;
+    color: var(--g-muted);
+    font-size: 0.88rem;
+  }
+
+  .api-module-body {
+    padding: 0 1rem 1rem;
+    border-top: 1px solid var(--g-border);
+    background: var(--g-bg);
+    border-end-start-radius: 12px;
+    border-end-end-radius: 12px;
+  }
+
+  .api-export {
+    margin-top: 1.5rem;
+  }
+
+  .guide-prose .api-export-name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.6rem;
+    margin: 0 0 0.5rem;
+    font-size: 1.05rem;
+  }
+
+  .api-kind {
+    color: var(--g-accent);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .api-extends {
+    color: var(--g-muted);
+    font-size: 0.85rem;
+    font-weight: 400;
+  }
+
+  /*
+   * Kolay's renderer (unlayered, so its rules beat these but for !important) names the
+   * declaration again, which the export's own heading already does.
+   */
+  .api-export > section > div > .typedoc__declaration > .typedoc__declaration-name {
+    display: none !important;
+  }
+
+  /* ---- the theme builder (theme-builder.gts) ---------------------------------------------- */
+
+  /*
+   * The builder needs the window's whole width: its controls beside the components, as many
+   * columns of them as fit. The page's own prose keeps its measure. The builder puts
+   * `guide-wide` on <body> while it shows, rather than a `.guide-prose:has(.theme-builder)`
+   * here, which every page would pay for: Chromium rechecks a `:has()` as rows are added, and
+   * IncrementalEach's page adds 20,000.
+   */
+  .guide-wide .guide-layout,
+  .guide-wide .guide-prose {
+    max-width: none;
+  }
+
+  .guide-wide .guide-prose :is(h1, h2, h3, p, ul, ol, pre, table, .callout):not(.theme-builder *) {
+    max-width: 50rem;
+  }
+
+  .theme-builder {
+    display: grid;
+    grid-template-columns: minmax(17rem, 21rem) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+    margin: 1.75rem 0;
+  }
+
+  @media (max-width: 1100px) {
+    .theme-builder {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* Its controls: a stage of their own, in Nova on Neutral, the colours of the page's scheme. */
+  .tb-panel {
+    position: sticky;
+    top: 4.5rem;
+    display: grid;
+    gap: 1.25rem;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    font-size: 0.875rem;
+  }
+
+  @media (max-width: 1100px) {
+    .tb-panel {
+      position: static;
+      max-height: none;
+    }
+  }
+
+  .tb-pickers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .tb-field {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .tb-switch {
+    display: flex;
+    align-items: center;
+    align-self: end;
+    gap: 0.5rem;
+    min-height: 2.25rem;
+  }
+
+  .tb-hint {
+    margin: 0 0 0.75rem;
+    color: var(--muted-foreground);
+  }
+
+  .tb-group {
+    margin: 0 0 1rem;
+    padding: 0;
+    border: 0;
+  }
+
+  .tb-group > legend {
+    margin-bottom: 0.4rem;
+    padding: 0;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .tb-token {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.25rem 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .tb-token > label {
+    grid-column: 2 / 4;
+  }
+
+  .tb-swatch {
+    grid-row: 1 / 3;
+    align-self: end;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 2px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .tb-token > input:not([type='color']) {
+    grid-column: 2;
+    font-family: var(--g-mono);
+    font-size: 0.8rem;
+  }
+
+  .tb-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    position: sticky;
+    bottom: -1rem;
+    margin: 0 -1rem -1rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border);
+    background: var(--background);
+  }
+
+  .tb-copied {
+    color: var(--muted-foreground);
+  }
+
+  .tb-css-title {
+    margin: 0 0 0.5rem;
+  }
+
+  .guide-prose .tb-css pre {
+    max-height: 18rem;
+    margin: 0;
+    font-size: 0.78rem;
+  }
+
+  .guide-prose .tb-preview-title {
+    margin-top: 2rem;
+  }
+
+  /* Each component page's demo, in the theme being built, in as many columns as fit. */
+  .tb-demos {
+    columns: 26rem;
+    column-gap: 1rem;
+  }
+
+  .tb-demo {
+    break-inside: avoid;
+    margin: 0 0 1rem;
+    border: 1px solid var(--g-border);
+    border-radius: 14px;
+    background: var(--g-surface);
+  }
+
+  .guide-prose .tb-demo-title {
+    margin: 0;
+    padding: 0.5rem 0.85rem;
+    border-bottom: 1px solid var(--g-border);
+    font-size: 0.85rem;
+  }
+
+  .tb-demo-stage.example-preview {
+    min-height: 10rem;
+    padding: 1.5rem 1rem;
+    border-end-start-radius: 13px;
+    border-end-end-radius: 13px;
+  }
+
+  /* ---- the parity route: one example, nothing around it --------------------------------- */
+
+  .parity-stage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2.5rem;
+  }
+
+  .parity-stage[data-align='start'] {
+    align-items: flex-start;
+  }
+
+  .parity-stage[data-align='end'] {
+    align-items: flex-end;
+  }
+
+  .parity-missing {
+    margin: 2rem;
+    color: var(--g-coral);
+  }
+}

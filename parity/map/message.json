@@ -1,0 +1,10 @@
+{
+  "examples": {
+    "message-demo": "message-demo",
+    "message-avatar": "message-avatar",
+    "message-group": "message-group",
+    "message-header-footer": "message-header-footer",
+    "message-actions": "message-actions",
+    "message-attachment": "message-attachment"
+  }
+}

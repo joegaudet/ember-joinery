@@ -1,0 +1,15 @@
+{
+  "$comment": "Every Input OTP example is ported. The Primitives page's input-otp-headless is Joinery's own, with no upstream counterpart, so it isn't mapped.",
+  "examples": {
+    "input-otp-demo": "input-otp-demo",
+    "input-otp-pattern": "input-otp-pattern",
+    "input-otp-separator": "input-otp-separator",
+    "input-otp-disabled": "input-otp-disabled",
+    "input-otp-controlled": "input-otp-controlled",
+    "input-otp-invalid": "input-otp-invalid",
+    "input-otp-four-digits": "input-otp-four-digits",
+    "input-otp-alphanumeric": "input-otp-alphanumeric",
+    "input-otp-form": "input-otp-form",
+    "input-otp-rtl": "input-otp-rtl"
+  }
+}

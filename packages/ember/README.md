@@ -1,0 +1,16 @@
+# @ember-joinery/ember
+
+shadcn/ui for Ember: every component on [ui.shadcn.com](https://ui.shadcn.com/), in modern Ember,
+each with a test harness. Its CSS ships compiled, so Tailwind is optional.
+
+```bash
+npm install @ember-joinery/ember
+```
+
+```js
+import '@ember-joinery/ember/tokens.css' // shadcn's theme tokens (or themes/<colour>.css)
+import '@ember-joinery/ember/joinery.css' // the components, in the Nova style (or styles/<style>.css)
+```
+
+Full documentation: the guide at **https://joegaudet.com/ember-joinery/guide/**. Design and API
+ported from [shadcn/ui](https://ui.shadcn.com/) (MIT).

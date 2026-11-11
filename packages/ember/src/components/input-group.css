@@ -1,0 +1,247 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/input-group.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="input-group" in InputGroup; keep on the element: group/input-group */
+:where(.jn-input-group) {
+  @apply relative flex w-full min-w-0 items-center outline-none has-[>textarea]:h-auto;
+}
+
+/* in inputGroupAddonVariants */
+:where(.jn-input-group-addon) {
+  @apply flex cursor-text items-center justify-center select-none;
+}
+
+/* in inputGroupAddonVariants (cva-variant align.inline-start) */
+:where(.jn-input-group-addon-align-inline-start) {
+  @apply order-first;
+}
+
+/* in inputGroupAddonVariants (cva-variant align.inline-end) */
+:where(.jn-input-group-addon-align-inline-end) {
+  @apply order-last;
+}
+
+/* in inputGroupAddonVariants (cva-variant align.block-start) */
+:where(.jn-input-group-addon-align-block-start) {
+  @apply order-first w-full justify-start;
+}
+
+/* in inputGroupAddonVariants (cva-variant align.block-end) */
+:where(.jn-input-group-addon-align-block-end) {
+  @apply order-last w-full justify-start;
+}
+
+/* in inputGroupButtonVariants */
+:where(.jn-input-group-button) {
+  @apply flex items-center shadow-none;
+}
+
+/* in InputGroupText */
+:where(.jn-input-group-text) {
+  @apply flex items-center [&_svg]:pointer-events-none;
+}
+
+/* data-slot="input-group-control" in InputGroupInput */
+:where(.jn-input-group-input) {
+  @apply flex-1;
+}
+
+/* data-slot="input-group-control" in InputGroupTextarea */
+:where(.jn-input-group-textarea) {
+  @apply flex-1 resize-none;
+}
+
+/*
+ * Through an overlay's root (edited by hand). Each sheet pulls an inline addon toward the
+ * group's edge when it holds a button directly (`has-[>button]:-ms-*`, `has-[>button]:-me-*`).
+ * Radix's Popover, Tooltip, Hover Card, Dialog, Sheet, Select and menu roots (and Base UI's
+ * Combobox) render no element, so upstream's trigger (a date picker's calendar button, a tooltip's or dropdown's button) is
+ * that button. Joinery's roots are an element with display: contents (`data-test-jn` names
+ * each; a tooltip provider is `data-jn-tooltip-provider`), so this restates the rule one or two
+ * such roots down, at the sheet's weight (0,0,1), under the `style-<name>` variant build-css.mjs
+ * declares, copied from each sheet's rule (Sera's are commented out upstream);
+ * scripts/input-group-css.test.mjs checks the copy against them.
+ */
+:where(.jn-input-group-addon-align-inline-start):has(
+  > :where(
+      [data-test-jn='popover'],
+      [data-test-jn='tooltip'],
+      [data-test-jn='hover-card'],
+      [data-test-jn='dialog'],
+      [data-test-jn='alert-dialog'],
+      [data-test-jn='sheet'],
+      [data-test-jn='drawer'],
+      [data-test-jn='dropdown-menu'],
+      [data-test-jn='context-menu'],
+      [data-test-jn='select'],
+      [data-test-jn='combobox']
+    )
+    > button,
+  > :where([data-jn-tooltip-provider]) > :where([data-test-jn='tooltip']) > button
+) {
+  @variant style-luma {
+    @apply -ms-1;
+  }
+  @variant style-lyra {
+    @apply ms-[-0.3rem];
+  }
+  @variant style-maia {
+    @apply -ms-1;
+  }
+  @variant style-mira {
+    @apply ms-[-0.275rem];
+  }
+  @variant style-nova {
+    @apply ms-[-0.3rem];
+  }
+  @variant style-rhea {
+    @apply ms-[-0.3rem];
+  }
+  @variant style-vega {
+    @apply -ms-1;
+  }
+}
+
+:where(.jn-input-group-addon-align-inline-end):has(
+  > :where(
+      [data-test-jn='popover'],
+      [data-test-jn='tooltip'],
+      [data-test-jn='hover-card'],
+      [data-test-jn='dialog'],
+      [data-test-jn='alert-dialog'],
+      [data-test-jn='sheet'],
+      [data-test-jn='drawer'],
+      [data-test-jn='dropdown-menu'],
+      [data-test-jn='context-menu'],
+      [data-test-jn='select'],
+      [data-test-jn='combobox']
+    )
+    > button,
+  > :where([data-jn-tooltip-provider]) > :where([data-test-jn='tooltip']) > button
+) {
+  @variant style-luma {
+    @apply -me-1;
+  }
+  @variant style-lyra {
+    @apply me-[-0.3rem];
+  }
+  @variant style-maia {
+    @apply -me-1;
+  }
+  @variant style-mira {
+    @apply me-[-0.275rem];
+  }
+  @variant style-nova {
+    @apply me-[-0.3rem];
+  }
+  @variant style-rhea {
+    @apply me-[-0.3rem];
+  }
+  @variant style-vega {
+    @apply -me-1;
+  }
+}
+
+/*
+ * Through an overlay's root, for an addon (edited by hand). Each sheet narrows the input's
+ * padding beside an inline addon that is the group's own child
+ * (`has-[>[data-align=inline-end]]:[&>input]:pe-1.5`, and `ps-1.5` for one at the start).
+ * Upstream's addon is that child even when it is a tooltip's or a popover's trigger
+ * (`<TooltipTrigger asChild><InputGroupAddon>`); Joinery's is inside the overlay's root, so
+ * this restates the rules for an inline addon one or two such roots down, at the sheet's
+ * weight (0,1,1), copied from each sheet's rule under its `style-<name>` variant (Sera has
+ * none); scripts/input-group-css.test.mjs checks the copy against them. A block addon also
+ * turns the group into a column (`has-[>[data-align=block-end]]:flex-col`), which this doesn't
+ * restate: upstream has no overlay around one.
+ */
+:where(.jn-input-group):has(
+    > :where(
+        [data-test-jn='popover'],
+        [data-test-jn='tooltip'],
+        [data-test-jn='hover-card'],
+        [data-test-jn='dialog'],
+        [data-test-jn='alert-dialog'],
+        [data-test-jn='sheet'],
+        [data-test-jn='drawer'],
+        [data-test-jn='dropdown-menu'],
+        [data-test-jn='context-menu'],
+        [data-test-jn='select'],
+        [data-test-jn='combobox']
+      )
+      > [data-align='inline-start'],
+    > :where([data-jn-tooltip-provider])
+      > :where([data-test-jn='tooltip'])
+      > [data-align='inline-start']
+  )
+  > input {
+  @variant style-luma {
+    @apply ps-1.5;
+  }
+  @variant style-lyra {
+    @apply ps-1.5;
+  }
+  @variant style-maia {
+    @apply ps-1.5;
+  }
+  @variant style-mira {
+    @apply ps-1.5;
+  }
+  @variant style-nova {
+    @apply ps-1.5;
+  }
+  @variant style-rhea {
+    @apply ps-1.5;
+  }
+  @variant style-vega {
+    @apply ps-1.5;
+  }
+}
+
+:where(.jn-input-group):has(
+    > :where(
+        [data-test-jn='popover'],
+        [data-test-jn='tooltip'],
+        [data-test-jn='hover-card'],
+        [data-test-jn='dialog'],
+        [data-test-jn='alert-dialog'],
+        [data-test-jn='sheet'],
+        [data-test-jn='drawer'],
+        [data-test-jn='dropdown-menu'],
+        [data-test-jn='context-menu'],
+        [data-test-jn='select'],
+        [data-test-jn='combobox']
+      )
+      > [data-align='inline-end'],
+    > :where([data-jn-tooltip-provider])
+      > :where([data-test-jn='tooltip'])
+      > [data-align='inline-end']
+  )
+  > input {
+  @variant style-luma {
+    @apply pe-1.5;
+  }
+  @variant style-lyra {
+    @apply pe-1.5;
+  }
+  @variant style-maia {
+    @apply pe-1.5;
+  }
+  @variant style-mira {
+    @apply pe-1.5;
+  }
+  @variant style-nova {
+    @apply pe-1.5;
+  }
+  @variant style-rhea {
+    @apply pe-1.5;
+  }
+  @variant style-vega {
+    @apply pe-1.5;
+  }
+}

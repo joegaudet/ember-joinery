@@ -1,0 +1,15 @@
+{
+  "examples": {
+    "item-demo": "item-demo",
+    "item-variant": "item-variant",
+    "item-size": "item-size",
+    "item-icon": "item-icon",
+    "item-avatar": "item-avatar",
+    "item-image": "item-image",
+    "item-group": "item-group",
+    "item-header": "item-header",
+    "item-link": "item-link",
+    "item-dropdown": "item-dropdown",
+    "item-rtl": "item-rtl"
+  }
+}

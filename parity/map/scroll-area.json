@@ -1,0 +1,7 @@
+{
+  "examples": {
+    "scroll-area-demo": "scroll-area-demo",
+    "scroll-area-horizontal-demo": "scroll-area-horizontal-demo",
+    "scroll-area-rtl": "scroll-area-rtl"
+  }
+}

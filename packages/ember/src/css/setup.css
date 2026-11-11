@@ -1,0 +1,24 @@
+/*
+ * What Joinery's build compiles the style sheets with, as upstream's apps/v4/app/globals.css
+ * sets up ui.shadcn.com: Tailwind (its theme for reference only, inlined into each rule, so the
+ * output needs no Tailwind variables), tw-animate-css, shadcn's own additions, and the token
+ * mapping apps get as tailwind.css, for reference too. Nothing here is emitted on its own (but
+ * what the rules use: keyframes and Tailwind's `@property` registrations); build-css.mjs puts it
+ * ahead of each style's rules.
+ */
+@import 'tailwindcss/theme.css' theme(inline reference);
+@import 'tw-animate-css';
+@import './shadcn.css';
+@import '../tailwind.css' theme(reference);
+
+/*
+ * The fonts: where a style sets `font-sans` or `font-mono` (Kbd's keys, say), the part takes the
+ * app's `--font-sans` or `--font-mono` when the page sets one, as upstream's take ui.shadcn.com's
+ * Geist (its globals.css maps them the same way), and Tailwind's own stacks when it doesn't.
+ */
+@theme inline reference {
+  /* prettier-ignore */
+  --font-sans: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji');
+  /* prettier-ignore */
+  --font-mono: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace);
+}

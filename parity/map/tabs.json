@@ -1,0 +1,10 @@
+{
+  "examples": {
+    "tabs-demo": "tabs-demo",
+    "tabs-line": "tabs-line",
+    "tabs-vertical": "tabs-vertical",
+    "tabs-disabled": "tabs-disabled",
+    "tabs-icons": "tabs-icons",
+    "tabs-rtl": "tabs-rtl"
+  }
+}

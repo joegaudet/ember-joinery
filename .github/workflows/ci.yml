@@ -1,0 +1,129 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    name: lint, format, build, typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm build
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: node --test scripts/*.test.mjs
+
+  test:
+    name: test (ember ${{ matrix.ember }}${{ matrix.fallback && ', anchor fallback' || '' }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Latest stable and the previous LTS.
+          - ember: '7.3'
+          - ember: '6.12'
+          # CSS anchor positioning forced off, so the Floating UI fallback is tested too.
+          - ember: '7.3'
+            fallback: true
+    env:
+      # The test app's build puts globalThis.JOINERY_ANCHOR_FALLBACK on the page when this is 1.
+      JOINERY_ANCHOR_FALLBACK: ${{ matrix.fallback && '1' || '' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      # Inserted directly under pnpm-workspace.yaml's top-level `overrides:` key, so the
+      # packages' dev copy and the test app agree on one ember-source.
+      - name: Pin ember-source ${{ matrix.ember }}
+        if: matrix.ember != '7.3'
+        run: |
+          sed -i "s/^overrides:$/&\n  ember-source: ~${{ matrix.ember }}.0/" pnpm-workspace.yaml
+          grep -n ember-source pnpm-workspace.yaml
+          pnpm install --no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile
+        if: matrix.ember == '7.3'
+      - run: pnpm build
+      # The suite runs in the runner's preinstalled Chrome.
+      - run: pnpm test
+
+  # The guide's typecheck, and its tests: every page rendered and audited, every example's test.
+  guide:
+    name: guide (every example and page)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm --filter docs-app typecheck
+      - run: pnpm --filter docs-app test
+
+  # The site as pages.yml builds it: Joinery's CSS copied in, and the demo and the guide in
+  # production mode, under /ember-joinery/, so a break in any of them (or in a base path) shows
+  # on the PR, not only after a merge to main.
+  site:
+    name: site (the Pages build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm site:css
+      - run: pnpm demo:build
+      - run: pnpm guide:build
+      - name: Check the site's CSS, the base paths and the 404 page
+        run: |
+          test -s docs/site/joinery/tokens.css && test -s docs/site/joinery/joinery.css
+          test -s docs/site/joinery/themes/stone.css && test -s docs/site/joinery/styles/lyra.css
+          grep -q 'src="/ember-joinery/demo/assets/' docs/site/demo/index.html
+          grep -q 'src="/ember-joinery/guide/assets/' docs/site/guide/index.html
+          cmp docs/site/guide/index.html docs/site/404.html
+
+  # Each example app's smoke test.
+  examples:
+    name: example (${{ matrix.example }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [ember-vite-basic, ember-classic, ember-tailwind, ember-formwright]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm --filter ${{ matrix.example }} test

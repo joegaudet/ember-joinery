@@ -1,0 +1,13 @@
+{
+  "examples": {
+    "bubble-demo": "bubble-demo",
+    "bubble-variants": "bubble-variants",
+    "bubble-alignment": "bubble-alignment",
+    "bubble-group-demo": "bubble-group-demo",
+    "bubble-link-button": "bubble-link-button",
+    "bubble-reactions": "bubble-reactions",
+    "bubble-collapsible": "bubble-collapsible",
+    "bubble-tooltip": "bubble-tooltip",
+    "bubble-popover": "bubble-popover"
+  }
+}

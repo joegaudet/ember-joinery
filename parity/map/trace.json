@@ -1,0 +1,20 @@
+{
+  "examples": {
+    "trace-demo": "trace-demo",
+    "trace-static": "trace-static",
+    "trace-status": "trace-status",
+    "trace-description": "trace-description",
+    "trace-collapsible": "trace-collapsible",
+    "trace-open": "trace-open",
+    "trace-link": "trace-link",
+    "trace-dialog": "trace-dialog",
+    "trace-sheet": "trace-sheet",
+    "trace-group": "trace-group",
+    "trace-sources": "trace-sources",
+    "trace-steps": "trace-steps",
+    "trace-commit": "trace-commit",
+    "trace-turn": "trace-turn",
+    "trace-thinking": "trace-thinking",
+    "trace-tool-calls": "trace-tool-calls"
+  }
+}

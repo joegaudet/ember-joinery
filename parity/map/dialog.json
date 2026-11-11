@@ -1,0 +1,10 @@
+{
+  "examples": {
+    "dialog-demo": "dialog-demo",
+    "dialog-close-button": "dialog-close-button",
+    "dialog-no-close-button": "dialog-no-close-button",
+    "dialog-sticky-footer": "dialog-sticky-footer",
+    "dialog-scrollable-content": "dialog-scrollable-content",
+    "dialog-rtl": "dialog-rtl"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "examples": {
+    "pagination-demo": "pagination-demo",
+    "pagination-simple": "pagination-simple",
+    "pagination-icons-only": "pagination-icons-only",
+    "pagination-rtl": "pagination-rtl"
+  }
+}

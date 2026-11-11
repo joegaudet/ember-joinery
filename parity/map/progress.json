@@ -1,0 +1,9 @@
+{
+  "$comment": "Every Progress example is ported. progress-label and progress-rtl name the bar with aria-labelledby, which upstream's leave off: a FieldLabel's for doesn't name a progressbar. progress-demo moves from 13% to 66% half a second after it renders, on each side, so both screenshots wait a second, past that timer.",
+  "examples": {
+    "progress-demo": { "example": "progress-demo", "wait": 1000 },
+    "progress-controlled": "progress-controlled",
+    "progress-label": "progress-label",
+    "progress-rtl": "progress-rtl"
+  }
+}

@@ -1,0 +1,13 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/textarea.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="textarea" in Textarea */
+:where(.jn-textarea) {
+  @apply flex field-sizing-content min-h-16 w-full outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50;
+}

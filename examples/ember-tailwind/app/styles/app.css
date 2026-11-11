@@ -1,0 +1,10 @@
+/*
+ * Layers declared first lose. Joinery's layer goes above Tailwind's `base` (preflight resets
+ * every button, input and margin there, and would otherwise undo Joinery's padding, borders,
+ * radii and backgrounds) and below `components` and `utilities`, so a utility class on a
+ * component overrides Joinery's rules. This statement must come before any other layer.
+ */
+@layer theme, base, joinery, components, utilities;
+@import 'tailwindcss';
+/* shadcn's tokens as Tailwind's theme (bg-primary, rounded-lg…) and its dark: variant. */
+@import '@ember-joinery/ember/tailwind.css';

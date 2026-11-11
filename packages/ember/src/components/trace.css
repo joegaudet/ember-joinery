@@ -1,0 +1,121 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/trace.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="trace" in Trace */
+:where(.jn-trace) {
+  @apply flex w-full min-w-0 flex-col *:has-[>[data-slot=trace-line]]:flex *:has-[>[data-slot=trace-line]]:w-fit *:has-[>[data-slot=trace-line]]:max-w-full *:has-[>[data-slot=trace-line]]:min-w-0 *:has-[>[data-slot=trace-line]]:text-start *:has-[>[data-slot=trace-line]]:outline-none;
+}
+
+/*
+ * Through an overlay's root (edited by hand). Upstream's Trace styles any trigger or link that
+ * wraps a TraceLine, as its direct child: `*:has-[>[data-slot=trace-line]]:…`, with the inline
+ * utilities above and each style's radius and focus ring in its sheet. Radix's Dialog, Sheet,
+ * Alert Dialog, Popover, Hover Card, Tooltip and menu roots, and vaul's Drawer, render no
+ * element, so their trigger is that child. Joinery's roots are an element with display: contents
+ * (`data-test-jn` names each; a tooltip provider is `data-jn-tooltip-provider`), which those
+ * rules reach instead. So this restates them one or two such roots down, at their weight
+ * (0,1,0): the inline utilities, then each sheet's, under the `style-<name>` variant build-css.mjs
+ * declares, copied from the sheets' `:where(.jn-trace)` rule (scripts/build-css.test.mjs checks
+ * the copy against them).
+ */
+:where(
+    .jn-trace
+      > :is(
+        [data-test-jn='dialog'],
+        [data-test-jn='alert-dialog'],
+        [data-test-jn='sheet'],
+        [data-test-jn='drawer'],
+        [data-test-jn='popover'],
+        [data-test-jn='hover-card'],
+        [data-test-jn='tooltip'],
+        [data-test-jn='dropdown-menu'],
+        [data-test-jn='context-menu'],
+        [data-jn-tooltip-provider]
+      ),
+    .jn-trace > :is([data-jn-tooltip-provider]) > :is([data-test-jn='tooltip'])
+  )
+  > *:has(> [data-slot='trace-line']) {
+  @apply flex w-fit max-w-full min-w-0 text-start outline-none;
+
+  @variant style-luma {
+    @apply rounded-lg focus-visible:ring-3 focus-visible:ring-ring/30;
+  }
+  @variant style-lyra {
+    @apply rounded-none focus-visible:ring-1 focus-visible:ring-ring/50;
+  }
+  @variant style-maia {
+    @apply rounded-lg focus-visible:ring-[3px] focus-visible:ring-ring/50;
+  }
+  @variant style-mira {
+    @apply rounded-sm focus-visible:ring-2 focus-visible:ring-ring/30;
+  }
+  @variant style-nova {
+    @apply rounded-md focus-visible:ring-3 focus-visible:ring-ring/50;
+  }
+  @variant style-rhea {
+    @apply rounded-lg focus-visible:ring-3 focus-visible:ring-ring/30;
+  }
+  @variant style-sera {
+    @apply rounded-none focus-visible:ring-2 focus-visible:ring-ring/30;
+  }
+  @variant style-vega {
+    @apply rounded-md focus-visible:ring-3 focus-visible:ring-ring/50;
+  }
+}
+
+/* data-slot="trace-line" in TraceLine */
+:where(.jn-trace-line) {
+  @apply flex w-fit max-w-full min-w-0 items-center text-muted-foreground transition-colors in-[a,button]:cursor-pointer in-[a:hover,button:hover]:text-foreground data-[status=error]:text-destructive data-[status=error]:in-[a:hover,button:hover]:text-destructive data-[status=pending]:opacity-60 data-[status=running]:*:data-[slot=trace-title]:shimmer;
+}
+
+/* data-slot="trace-icon" in TraceIcon */
+:where(.jn-trace-icon) {
+  @apply flex shrink-0 items-center justify-center [&_svg]:pointer-events-none;
+}
+
+/* data-slot="trace-title" in TraceTitle */
+:where(.jn-trace-title) {
+  @apply min-w-0 truncate motion-reduce:shimmer-none;
+}
+
+/* data-slot="trace-description" in TraceDescription */
+:where(.jn-trace-description) {
+  @apply shrink-0 text-muted-foreground/70 tabular-nums;
+}
+
+/* data-slot="trace-collapsible" in TraceCollapsible */
+:where(.jn-trace-collapsible) {
+  @apply flex w-full min-w-0 flex-col;
+}
+
+/* data-slot="trace-collapsible-trigger" in TraceCollapsibleTrigger; keep on the element: group/trace-collapsible-trigger */
+:where(.jn-trace-collapsible-trigger) {
+  @apply flex w-fit max-w-full min-w-0 cursor-pointer items-center text-start text-muted-foreground transition-colors outline-none hover:text-foreground has-[[data-status=error]]:text-destructive;
+}
+
+/*
+ * in TraceCollapsibleTrigger, no slot to attach it to: transition-transform
+ * group-aria-expanded/trace-collapsible-trigger:rotate-90. Upstream gives them to the trigger's
+ * chevron, a TraceIcon (data-slot="trace-icon", whose own rules are above); Joinery's chevron
+ * also carries jn-trace-collapsible-trigger-icon for them, by hand. They come after the
+ * TraceIcon's own, as upstream's className does in its cn() call.
+ */
+:where(.jn-trace-collapsible-trigger-icon) {
+  @apply transition-transform group-aria-expanded/trace-collapsible-trigger:rotate-90;
+}
+
+/* data-slot="trace-collapsible-content" in TraceCollapsibleContent */
+:where(.jn-trace-collapsible-content) {
+  @apply min-w-0 overflow-hidden [--radix-accordion-content-height:var(--radix-collapsible-content-height)] data-open:animate-accordion-down data-closed:animate-accordion-up;
+}
+
+/* data-slot="trace-collapsible-content-inner" in TraceCollapsibleContent */
+:where(.jn-trace-collapsible-content-inner) {
+  @apply min-w-0 wrap-break-word text-muted-foreground;
+}

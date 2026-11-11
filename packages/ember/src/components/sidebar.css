@@ -1,0 +1,293 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/sidebar.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="sidebar-wrapper" in SidebarProvider; keep on the element: group/sidebar-wrapper */
+:where(.jn-sidebar-wrapper) {
+  @apply flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar;
+}
+
+/*
+ * Upstream's Sidebar renders one of three elements, each `data-slot="sidebar"` with no semantic
+ * class: a plain panel (`collapsible="none"`), the mobile sheet's content, and the desktop
+ * panel. extract-classes.mjs gives all three `jn-sidebar`; Joinery names the first two
+ * `jn-sidebar-static` and `jn-sidebar-mobile`, so each rule styles only its own element. The
+ * rules and their order are the script's.
+ */
+
+/* data-slot="sidebar" in Sidebar, collapsible === "none" */
+:where(.jn-sidebar-static) {
+  @apply flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground;
+}
+
+/* data-slot="sidebar" in Sidebar, on mobile: the sheet's content */
+:where(.jn-sidebar-mobile) {
+  @apply w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden;
+}
+
+/* in Sidebar, no slot to attach it to: sr-only */
+
+/* in Sidebar, no slot to attach it to: flex h-full w-full flex-col */
+
+/* data-slot="sidebar" in Sidebar; keep on the element: group peer */
+:where(.jn-sidebar) {
+  @apply hidden text-sidebar-foreground md:block;
+}
+
+/* data-slot="sidebar-gap" in Sidebar */
+:where(.jn-sidebar-gap) {
+  @apply relative w-(--sidebar-width) bg-transparent;
+}
+
+/* data-slot="sidebar-gap" in Sidebar */
+:where(.jn-sidebar-gap) {
+  @apply group-data-[collapsible=offcanvas]:w-0;
+}
+
+/* data-slot="sidebar-gap" in Sidebar */
+:where(.jn-sidebar-gap) {
+  @apply group-data-[side=right]:rotate-180;
+}
+
+/* data-slot="sidebar-gap" in Sidebar, only when variant === "floating" || variant === "inset": group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))] */
+
+/* data-slot="sidebar-gap" in Sidebar, only when !(variant === "floating" || variant === "inset"): group-data-[collapsible=icon]:w-(--sidebar-width-icon) */
+
+/* data-slot="sidebar-container" in Sidebar */
+:where(.jn-sidebar-container) {
+  @apply fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear data-[side=left]:left-0 data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] data-[side=right]:right-0 data-[side=right]:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] md:flex;
+}
+
+/* data-slot="sidebar-container" in Sidebar, only when variant === "floating" || variant === "inset": p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)] */
+
+/* data-slot="sidebar-container" in Sidebar, only when !(variant === "floating" || variant === "inset"): group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l */
+
+/* data-slot="sidebar-inner" in Sidebar */
+:where(.jn-sidebar-inner) {
+  @apply flex size-full flex-col;
+}
+
+/* in SidebarTrigger, no slot to attach it to: sr-only */
+
+/* data-slot="sidebar-rail" in SidebarRail */
+:where(.jn-sidebar-rail) {
+  @apply absolute inset-y-0 z-20 hidden w-4 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:start-1/2 after:w-[2px] sm:flex ltr:-translate-x-1/2 rtl:-translate-x-1/2;
+}
+
+/* data-slot="sidebar-rail" in SidebarRail */
+:where(.jn-sidebar-rail) {
+  @apply in-data-[side=left]:cursor-w-resize rtl:in-data-[side=left]:cursor-e-resize in-data-[side=right]:cursor-e-resize rtl:in-data-[side=right]:cursor-w-resize;
+}
+
+/* data-slot="sidebar-rail" in SidebarRail */
+:where(.jn-sidebar-rail) {
+  @apply [[data-side=left][data-state=collapsed]_&]:cursor-e-resize rtl:[[data-side=left][data-state=collapsed]_&]:cursor-w-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize rtl:[[data-side=right][data-state=collapsed]_&]:cursor-e-resize;
+}
+
+/* data-slot="sidebar-rail" in SidebarRail */
+:where(.jn-sidebar-rail) {
+  @apply group-data-[collapsible=offcanvas]:translate-x-0 rtl:group-data-[collapsible=offcanvas]:-translate-x-0 group-data-[collapsible=offcanvas]:after:start-full hover:group-data-[collapsible=offcanvas]:bg-sidebar;
+}
+
+/* data-slot="sidebar-rail" in SidebarRail */
+:where(.jn-sidebar-rail) {
+  @apply [[data-side=left][data-collapsible=offcanvas]_&]:-end-2;
+}
+
+/* data-slot="sidebar-rail" in SidebarRail */
+:where(.jn-sidebar-rail) {
+  @apply [[data-side=right][data-collapsible=offcanvas]_&]:-start-2;
+}
+
+/* data-slot="sidebar-inset" in SidebarInset */
+:where(.jn-sidebar-inset) {
+  @apply relative flex w-full flex-1 flex-col;
+}
+
+/* data-slot="sidebar-header" in SidebarHeader */
+:where(.jn-sidebar-header) {
+  @apply flex flex-col;
+}
+
+/* data-slot="sidebar-footer" in SidebarFooter */
+:where(.jn-sidebar-footer) {
+  @apply flex flex-col;
+}
+
+/* data-slot="sidebar-separator" in SidebarSeparator */
+:where(.jn-sidebar-separator) {
+  @apply w-auto;
+}
+
+/* data-slot="sidebar-content" in SidebarContent */
+:where(.jn-sidebar-content) {
+  @apply flex min-h-0 flex-1 flex-col overflow-auto group-data-[collapsible=icon]:overflow-hidden;
+}
+
+/* data-slot="sidebar-group" in SidebarGroup */
+:where(.jn-sidebar-group) {
+  @apply relative flex w-full min-w-0 flex-col;
+}
+
+/* data-slot="sidebar-group-label" in SidebarGroupLabel */
+:where(.jn-sidebar-group-label) {
+  @apply flex shrink-0 items-center outline-hidden [&>svg]:shrink-0;
+}
+
+/* data-slot="sidebar-group-action" in SidebarGroupAction */
+:where(.jn-sidebar-group-action) {
+  @apply flex aspect-square items-center justify-center outline-hidden transition-transform group-data-[collapsible=icon]:hidden after:absolute after:-inset-2 md:after:hidden [&>svg]:shrink-0;
+}
+
+/* data-slot="sidebar-group-content" in SidebarGroupContent */
+:where(.jn-sidebar-group-content) {
+  @apply w-full;
+}
+
+/* data-slot="sidebar-menu" in SidebarMenu */
+:where(.jn-sidebar-menu) {
+  @apply flex w-full min-w-0 flex-col;
+}
+
+/* data-slot="sidebar-menu-item" in SidebarMenuItem; keep on the element: group/menu-item */
+:where(.jn-sidebar-menu-item) {
+  @apply relative;
+}
+
+/* in sidebarMenuButtonVariants; keep on the element: peer/menu-button group/menu-button */
+:where(.jn-sidebar-menu-button) {
+  @apply flex w-full items-center overflow-hidden outline-hidden disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate;
+}
+
+/* data-slot="sidebar-menu-action" in SidebarMenuAction */
+:where(.jn-sidebar-menu-action) {
+  @apply flex items-center justify-center outline-hidden transition-transform group-data-[collapsible=icon]:hidden after:absolute after:-inset-2 md:after:hidden [&>svg]:shrink-0;
+}
+
+/* data-slot="sidebar-menu-action" in SidebarMenuAction, only when showOnHover: group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 peer-data-active/menu-button:text-sidebar-accent-foreground aria-expanded:opacity-100 md:opacity-0 */
+
+/* data-slot="sidebar-menu-badge" in SidebarMenuBadge */
+:where(.jn-sidebar-menu-badge) {
+  @apply flex items-center justify-center tabular-nums select-none group-data-[collapsible=icon]:hidden;
+}
+
+/* data-slot="sidebar-menu-skeleton" in SidebarMenuSkeleton */
+:where(.jn-sidebar-menu-skeleton) {
+  @apply flex items-center;
+}
+
+/* in SidebarMenuSkeleton */
+:where(.jn-sidebar-menu-skeleton-text) {
+  @apply max-w-(--skeleton-width) flex-1;
+}
+
+/* data-slot="sidebar-menu-sub" in SidebarMenuSub */
+:where(.jn-sidebar-menu-sub) {
+  @apply flex min-w-0 flex-col;
+}
+
+/* data-slot="sidebar-menu-sub-item" in SidebarMenuSubItem; keep on the element: group/menu-sub-item */
+:where(.jn-sidebar-menu-sub-item) {
+  @apply relative;
+}
+
+/* data-slot="sidebar-menu-sub-button" in SidebarMenuSubButton */
+:where(.jn-sidebar-menu-sub-button) {
+  @apply flex min-w-0 -translate-x-px rtl:translate-x-px items-center overflow-hidden outline-hidden group-data-[collapsible=icon]:hidden disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:shrink-0;
+}
+
+/*
+ * Written by hand, after the extracted rules: what extract-classes.mjs leaves as comments
+ * above, in upstream's order (each conditional string comes last in its cn() call), made
+ * logical as scripts/rtl.mjs makes the rest.
+ *
+ * The widths upstream's SidebarProvider sets inline on its wrapper (`SIDEBAR_WIDTH`,
+ * `SIDEBAR_WIDTH_ICON`) and its Sidebar on the mobile sheet (`SIDEBAR_WIDTH_MOBILE`) are set
+ * here instead, so a `style` of yours (`style="--sidebar-width: 20rem"`) wins without dropping
+ * the others. The mobile width reads `--sidebar-width-mobile`, as upstream's docs page says it
+ * does.
+ */
+:where(.jn-sidebar-wrapper) {
+  --sidebar-width: 16rem;
+  --sidebar-width-icon: 3rem;
+}
+
+:where(.jn-sidebar-mobile) {
+  --sidebar-width: var(--sidebar-width-mobile, 18rem);
+}
+
+/* The sheet's own column, which upstream leaves without a slot. */
+:where(.jn-sidebar-mobile-inner) {
+  @apply flex h-full w-full flex-col;
+}
+
+/* The gap and the container, by the panel's variant: floating and inset leave room for a margin. */
+:where(.jn-sidebar[data-variant='floating'], .jn-sidebar[data-variant='inset'])
+  > :where(.jn-sidebar-gap) {
+  @apply group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))];
+}
+
+:where(.jn-sidebar[data-variant='sidebar']) > :where(.jn-sidebar-gap) {
+  @apply group-data-[collapsible=icon]:w-(--sidebar-width-icon);
+}
+
+:where(.jn-sidebar[data-variant='floating'], .jn-sidebar[data-variant='inset'])
+  > :where(.jn-sidebar-container) {
+  @apply p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)];
+}
+
+:where(.jn-sidebar[data-variant='sidebar']) > :where(.jn-sidebar-container) {
+  @apply group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-e group-data-[side=right]:border-s;
+}
+
+/* A menu action with `@showOnHover`: hidden on wide screens until its item is hovered or focused. */
+:where(.jn-sidebar-menu-action[data-show-on-hover]) {
+  @apply group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 peer-data-active/menu-button:text-sidebar-accent-foreground aria-expanded:opacity-100 md:opacity-0;
+}
+
+/*
+ * Joinery's, for WCAG: a sidebar that has slid off the screen (`offcanvas`) hides what is in it,
+ * so the Tab key and assistive technology skip what nobody can see. Upstream's leaves it all
+ * focusable, off the screen. `visibility` waits out the slide on the way out (a transition keeps
+ * it visible until its end) and comes back at once on the way in, since an open sidebar's
+ * container transitions only upstream's properties. The rail stays, so a pointer can still open
+ * the sidebar from the screen's edge; it is out of the tab order already.
+ */
+:where(.jn-sidebar[data-collapsible='offcanvas']) > :where(.jn-sidebar-container) {
+  visibility: hidden;
+  transition-property: left, right, width, visibility;
+}
+
+:where(.jn-sidebar[data-collapsible='offcanvas']) :where(.jn-sidebar-rail) {
+  visibility: visible;
+}
+
+/*
+ * The trigger's `aria-expanded` is Joinery's: upstream's trigger has none. Every sheet's ghost
+ * Button rule gives `aria-expanded:` the look of an open menu's trigger (`bg-muted
+ * text-foreground`), which upstream's open sidebar never shows on its trigger. So an open
+ * sidebar's ghost trigger rests as a ghost Button does (preflight's transparent background and
+ * inherited colour, in base.css), and gets the ghost rule's hover back, which is the same in all
+ * eight sheets and which this rule would otherwise beat. `{{sidebar.trigger}}` gives your own
+ * element `jn-sidebar-trigger` too, so a ghost Button of yours rests the same way.
+ */
+:where(.jn-sidebar-trigger.jn-button-variant-ghost)[aria-expanded='true'] {
+  background-color: transparent;
+  color: inherit;
+  @apply hover:bg-muted hover:text-foreground dark:hover:bg-muted/50;
+}
+
+/*
+ * SidebarSeparator renders upstream's Separator (apps/v4/registry/bases/radix/ui/separator.tsx),
+ * whose inline utilities these are, but for `bg-border`, which the style sheet's
+ * `jn-sidebar-separator` rule (`bg-sidebar-border`) replaces in upstream's cn() call. As in
+ * Tailwind's output, the `data-horizontal:` width comes after the part's own `w-auto`.
+ */
+:where(.jn-sidebar-separator) {
+  @apply shrink-0 data-horizontal:h-px data-horizontal:w-full data-vertical:w-px data-vertical:self-stretch;
+}

@@ -1,0 +1,73 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/attachment.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* in attachmentVariants; keep on the element: group/attachment */
+:where(.jn-attachment) {
+  @apply relative flex max-w-full shrink-0 flex-wrap border bg-card text-card-foreground transition-colors has-[>a,>button]:hover:bg-muted/50 data-[state=error]:border-destructive/30 data-[state=idle]:border-dashed;
+}
+
+/* in attachmentVariants: upstream's later .jn-attachment-orientation-horizontal overrides this in every style */
+:where(.jn-attachment:not(.jn-attachment-orientation-horizontal)) {
+  @apply min-w-0;
+}
+
+/* in attachmentVariants (cva-variant orientation.horizontal) */
+:where(.jn-attachment-orientation-horizontal) {
+  @apply items-center;
+}
+
+/* in attachmentVariants (cva-variant orientation.vertical) */
+:where(.jn-attachment-orientation-vertical) {
+  @apply flex-col;
+}
+
+/* in attachmentMediaVariants */
+:where(.jn-attachment-media) {
+  @apply relative flex aspect-square shrink-0 items-center justify-center overflow-hidden group-data-[state=error]/attachment:bg-destructive/10 group-data-[state=error]/attachment:text-destructive [&_svg]:pointer-events-none;
+}
+
+/* in attachmentMediaVariants (cva-variant variant.image) */
+:where(.jn-attachment-media-variant-image) {
+  @apply *:[img]:aspect-square *:[img]:w-full *:[img]:object-cover;
+}
+
+/* data-slot="attachment-content" in AttachmentContent */
+:where(.jn-attachment-content) {
+  @apply max-w-full min-w-0 flex-1;
+}
+
+/* data-slot="attachment-title" in AttachmentTitle */
+:where(.jn-attachment-title) {
+  @apply block max-w-full min-w-0 truncate group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer;
+}
+
+/* data-slot="attachment-description" in AttachmentDescription */
+:where(.jn-attachment-description) {
+  @apply block min-w-0 truncate text-muted-foreground group-data-[state=error]/attachment:text-destructive/80;
+}
+
+/* data-slot="attachment-description" in AttachmentDescription */
+:where(.jn-attachment-description) {
+  @apply max-w-full;
+}
+
+/* data-slot="attachment-actions" in AttachmentActions */
+:where(.jn-attachment-actions) {
+  @apply flex shrink-0 items-center;
+}
+
+/* data-slot="attachment-trigger" in AttachmentTrigger */
+:where(.jn-attachment-trigger) {
+  @apply absolute inset-0 z-10 outline-none;
+}
+
+/* data-slot="attachment-group" in AttachmentGroup */
+:where(.jn-attachment-group) {
+  @apply flex min-w-0 scroll-fade-x snap-x snap-mandatory scrollbar-none overflow-x-auto overscroll-x-contain *:data-[slot=attachment]:flex-none *:data-[slot=attachment]:snap-start;
+}

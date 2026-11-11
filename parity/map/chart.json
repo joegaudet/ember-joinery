@@ -1,0 +1,345 @@
+{
+  "$comment": "The Chart docs page's examples and the charts gallery (registry/new-york-v4/charts) map here. The gallery draws each chart in the new-york-v4 registry's Card, which none of Joinery's eight styles is, so a gallery chart's entry compares its chart's region ([data-slot=\"chart\"]) alone, at the default threshold: the card around it differs by design, and Card's own page compares Joinery's. The area, bar and line interactive examples are shown full width upstream (fullWidth), and compared whole, header and chart. chart-pie-legend and chart-pie-interactive have no footer, so on a plain stage each card shrinks to its header and its chart to nothing; the gallery's grid cell gives them a width, so they are stretched across both stages (fullWidth), and their chart compared, as the other pie charts' are. The tooltip charts have no width of their own (the gallery stretches each across its grid cell; on a plain stage the card, whose header is a size container, shrinks to nothing), so they are shown full width (fullWidth). There new-york-v4's 1px border and 24px padding leave upstream's chart 18px narrower than in Nova's card, which moves every bar, so those entries compare what the examples are about, the tooltip at @defaultIndex (.recharts-tooltip-wrapper); the stacked bars under it are drawn as the gallery's bar charts draw theirs.",
+  "examples": {
+    "chart-demo": {
+      "example": "chart-demo",
+      "fullWidth": true,
+      "threshold": {
+        "light": 0.06,
+        "dark": 0.07
+      },
+      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is: Nova's header sits lower, and new-york-v4's 1px border (Nova's Card draws a ring) leaves the chart 2px narrower, so every bar and point is a little off. The chart itself matches recharts' (the gallery's charts, compared by their chart's region, differ by 0%). Each theme's threshold is its measurement rounded up, plus a point: 4.15% light, 5.24% dark."
+    },
+    "chart-example": "chart-example",
+    "chart-example-grid": "chart-example-grid",
+    "chart-example-axis": "chart-example-axis",
+    "chart-example-tooltip": "chart-example-tooltip",
+    "chart-example-legend": "chart-example-legend",
+    "chart-tooltip": "chart-tooltip",
+    "chart-rtl": "chart-rtl",
+    "chart-area-default": {
+      "example": "chart-area-default",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-area-interactive": {
+      "example": "chart-area-interactive",
+      "fullWidth": true,
+      "threshold": {
+        "light": 0.1,
+        "dark": 0.12
+      },
+      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is: Nova's header sits lower, and new-york-v4's 1px border (Nova's Card draws a ring) leaves the chart 2px narrower, so every area's curve, its gradient and the x-axis are a little off, as in chart-bar-interactive and chart-line-interactive. The stacked natural areas are recharts' own (chart-area-stacked and chart-area-gradient, compared by their chart's region, match). Each theme's threshold is its measurement rounded up, plus a point: 8.47% light, 10.81% dark."
+    },
+    "chart-area-linear": {
+      "example": "chart-area-linear",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-area-step": {
+      "example": "chart-area-step",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-area-legend": {
+      "example": "chart-area-legend",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-area-stacked": {
+      "example": "chart-area-stacked",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-area-stacked-expand": {
+      "example": "chart-area-stacked-expand",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-area-icons": {
+      "example": "chart-area-icons",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-area-gradient": {
+      "example": "chart-area-gradient",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-area-axes": {
+      "example": "chart-area-axes",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-line-interactive": {
+      "example": "chart-line-interactive",
+      "fullWidth": true,
+      "threshold": {
+        "light": 0.06,
+        "dark": 0.08
+      },
+      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is: Nova's header sits lower, and new-york-v4's 1px border (Nova's Card draws a ring) leaves the chart 2px narrower, so every bar and point is a little off. The chart itself matches recharts' (the gallery's charts, compared by their chart's region, differ by 0%). Each theme's threshold is its measurement rounded up, plus a point: 4.88% light, 6.72% dark."
+    },
+    "chart-line-default": {
+      "example": "chart-line-default",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-line-linear": {
+      "example": "chart-line-linear",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-line-step": {
+      "example": "chart-line-step",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-line-multiple": {
+      "example": "chart-line-multiple",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-line-dots": {
+      "example": "chart-line-dots",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-line-dots-custom": {
+      "example": "chart-line-dots-custom",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-line-dots-colors": {
+      "example": "chart-line-dots-colors",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-line-label": {
+      "example": "chart-line-label",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-line-label-custom": {
+      "example": "chart-line-label-custom",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-interactive": {
+      "example": "chart-bar-interactive",
+      "fullWidth": true,
+      "threshold": {
+        "light": 0.07,
+        "dark": 0.09
+      },
+      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is: Nova's header sits lower, and new-york-v4's 1px border (Nova's Card draws a ring) leaves the chart 2px narrower, so every bar is a little off and the x-axis keeps other dates (Apr 2, Apr 7… upstream; Apr 3, Apr 8… here). At upstream's width the bars are recharts' own (the chart's bar tests compare them). Each theme's threshold is its measurement rounded up, plus a point: 5.38% light, 7.04% dark."
+    },
+    "chart-bar-default": {
+      "example": "chart-bar-default",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-horizontal": {
+      "example": "chart-bar-horizontal",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-multiple": {
+      "example": "chart-bar-multiple",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-stacked": {
+      "example": "chart-bar-stacked",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-label": {
+      "example": "chart-bar-label",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-label-custom": {
+      "example": "chart-bar-label-custom",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-mixed": {
+      "example": "chart-bar-mixed",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-active": {
+      "example": "chart-bar-active",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-bar-negative": {
+      "example": "chart-bar-negative",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-simple": {
+      "example": "chart-pie-simple",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-separator-none": {
+      "example": "chart-pie-separator-none",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-label": {
+      "example": "chart-pie-label",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-label-custom": {
+      "example": "chart-pie-label-custom",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-label-list": {
+      "example": "chart-pie-label-list",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-legend": {
+      "example": "chart-pie-legend",
+      "fullWidth": true,
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-donut": {
+      "example": "chart-pie-donut",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-donut-active": {
+      "example": "chart-pie-donut-active",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-donut-text": {
+      "example": "chart-pie-donut-text",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-stacked": {
+      "example": "chart-pie-stacked",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-pie-interactive": {
+      "example": "chart-pie-interactive",
+      "fullWidth": true,
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radar-default": {
+      "example": "chart-radar-default",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radar-dots": {
+      "example": "chart-radar-dots",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radar-grid-circle": {
+      "example": "chart-radar-grid-circle",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radar-grid-circle-fill": {
+      "example": "chart-radar-grid-circle-fill",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radar-grid-circle-no-lines": {
+      "example": "chart-radar-grid-circle-no-lines",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radar-grid-custom": {
+      "example": "chart-radar-grid-custom",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radar-grid-fill": {
+      "example": "chart-radar-grid-fill",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radar-grid-none": {
+      "example": "chart-radar-grid-none",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radar-icons": {
+      "example": "chart-radar-icons",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radar-label-custom": {
+      "example": "chart-radar-label-custom",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radar-legend": {
+      "example": "chart-radar-legend",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radar-lines-only": {
+      "example": "chart-radar-lines-only",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radar-multiple": {
+      "example": "chart-radar-multiple",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radar-radius": {
+      "example": "chart-radar-radius",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radial-grid": {
+      "example": "chart-radial-grid",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radial-label": {
+      "example": "chart-radial-label",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radial-shape": {
+      "example": "chart-radial-shape",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radial-simple": {
+      "example": "chart-radial-simple",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radial-stacked": {
+      "example": "chart-radial-stacked",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-radial-text": {
+      "example": "chart-radial-text",
+      "region": "[data-slot=\"chart\"]"
+    },
+    "chart-tooltip-advanced": {
+      "example": "chart-tooltip-advanced",
+      "fullWidth": true,
+      "region": ".recharts-tooltip-wrapper",
+      "threshold": 0.07,
+      "reason": "Compared by its tooltip alone (see the $comment). Upstream's chart is 18px narrower than Joinery's, so the second day's tick, and the tooltip 10px right of it, falls on a whole pixel there and half way between two here (x 300 and 304.5 at the parity viewport): the same text, anti-aliased differently along every edge. Measured 5.43% light and 5.58% dark; the threshold is the larger rounded up, plus a point."
+    },
+    "chart-tooltip-default": {
+      "example": "chart-tooltip-default",
+      "fullWidth": true,
+      "region": ".recharts-tooltip-wrapper",
+      "threshold": 0.09,
+      "reason": "Compared by its tooltip alone (see the $comment). Upstream's chart is 18px narrower than Joinery's, so the second day's tick, and the tooltip 10px right of it, falls on a whole pixel there and half way between two here (x 300 and 304.5 at the parity viewport): the same text, anti-aliased differently along every edge. Measured 7.53% light and 7.90% dark; the threshold is the larger rounded up, plus a point."
+    },
+    "chart-tooltip-formatter": {
+      "example": "chart-tooltip-formatter",
+      "fullWidth": true,
+      "region": ".recharts-tooltip-wrapper",
+      "threshold": 0.09,
+      "reason": "Compared by its tooltip alone (see the $comment). Upstream's chart is 18px narrower than Joinery's, so the second day's tick, and the tooltip 10px right of it, falls on a whole pixel there and half way between two here (x 300 and 304.5 at the parity viewport): the same text, anti-aliased differently along every edge. Measured 6.96% light and 7.33% dark; the threshold is the larger rounded up, plus a point."
+    },
+    "chart-tooltip-icons": {
+      "example": "chart-tooltip-icons",
+      "fullWidth": true,
+      "region": ".recharts-tooltip-wrapper",
+      "threshold": 0.11,
+      "reason": "Compared by its tooltip alone (see the $comment). Upstream's chart is 18px narrower than Joinery's, so the second day's tick, and the tooltip 10px right of it, falls on a whole pixel there and half way between two here (x 300 and 304.5 at the parity viewport): the same text, anti-aliased differently along every edge. Measured 9.37% light and 9.83% dark; the threshold is the larger rounded up, plus a point."
+    },
+    "chart-tooltip-indicator-line": {
+      "example": "chart-tooltip-indicator-line",
+      "fullWidth": true,
+      "region": ".recharts-tooltip-wrapper",
+      "threshold": 0.09,
+      "reason": "Compared by its tooltip alone (see the $comment). Upstream's chart is 18px narrower than Joinery's, so the second day's tick, and the tooltip 10px right of it, falls on a whole pixel there and half way between two here (x 300 and 304.5 at the parity viewport): the same text, anti-aliased differently along every edge. Measured 7.53% light and 7.90% dark; the threshold is the larger rounded up, plus a point."
+    },
+    "chart-tooltip-indicator-none": {
+      "example": "chart-tooltip-indicator-none",
+      "fullWidth": true,
+      "region": ".recharts-tooltip-wrapper",
+      "threshold": 0.09,
+      "reason": "Compared by its tooltip alone (see the $comment). Upstream's chart is 18px narrower than Joinery's, so the second day's tick, and the tooltip 10px right of it, falls on a whole pixel there and half way between two here (x 300 and 304.5 at the parity viewport): the same text, anti-aliased differently along every edge. Measured 7.53% light and 7.90% dark; the threshold is the larger rounded up, plus a point."
+    },
+    "chart-tooltip-label-custom": {
+      "example": "chart-tooltip-label-custom",
+      "fullWidth": true,
+      "region": ".recharts-tooltip-wrapper",
+      "threshold": 0.1,
+      "reason": "Compared by its tooltip alone (see the $comment). Upstream's chart is 18px narrower than Joinery's, so the second day's tick, and the tooltip 10px right of it, falls on a whole pixel there and half way between two here (x 300 and 304.5 at the parity viewport): the same text, anti-aliased differently along every edge. Measured 7.81% light and 8.17% dark; the threshold is the larger rounded up, plus a point."
+    },
+    "chart-tooltip-label-formatter": {
+      "example": "chart-tooltip-label-formatter",
+      "fullWidth": true,
+      "region": ".recharts-tooltip-wrapper",
+      "threshold": 0.1,
+      "reason": "Compared by its tooltip alone (see the $comment). Upstream's chart is 18px narrower than Joinery's, so the second day's tick, and the tooltip 10px right of it, falls on a whole pixel there and half way between two here (x 300 and 304.5 at the parity viewport): the same text, anti-aliased differently along every edge. Measured 7.69% light and 8.09% dark; the threshold is the larger rounded up, plus a point."
+    },
+    "chart-tooltip-label-none": {
+      "example": "chart-tooltip-label-none",
+      "fullWidth": true,
+      "region": ".recharts-tooltip-wrapper",
+      "threshold": 0.1,
+      "reason": "Compared by its tooltip alone (see the $comment). Upstream's chart is 18px narrower than Joinery's, so the second day's tick, and the tooltip 10px right of it, falls on a whole pixel there and half way between two here (x 300 and 304.5 at the parity viewport): the same text, anti-aliased differently along every edge. Measured 8.39% light and 8.84% dark; the threshold is the larger rounded up, plus a point."
+    }
+  }
+}

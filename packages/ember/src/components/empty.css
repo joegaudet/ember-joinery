@@ -1,0 +1,35 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/empty.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="empty" in Empty */
+:where(.jn-empty) {
+  @apply flex w-full min-w-0 flex-1 flex-col items-center justify-center text-center text-balance;
+}
+
+/* data-slot="empty-header" in EmptyHeader */
+:where(.jn-empty-header) {
+  @apply flex max-w-sm flex-col items-center;
+}
+
+/* in emptyMediaVariants */
+:where(.jn-empty-media) {
+  @apply flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0;
+}
+
+/* :where(.jn-empty-title): also: jn-font-heading */
+
+/* data-slot="empty-description" in EmptyDescription */
+:where(.jn-empty-description) {
+  @apply text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary;
+}
+
+/* data-slot="empty-content" in EmptyContent */
+:where(.jn-empty-content) {
+  @apply flex w-full max-w-sm min-w-0 flex-col items-center text-balance;
+}

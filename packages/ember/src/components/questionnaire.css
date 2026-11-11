@@ -1,0 +1,159 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/questionnaire.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="questionnaire" in Questionnaire */
+:where(.jn-questionnaire) {
+  @apply flex w-full min-w-0 flex-col;
+}
+
+/* data-slot="questionnaire-progress" in QuestionnaireProgress */
+:where(.jn-questionnaire-progress) {
+  @apply min-h-[1lh] w-fit min-w-[14ch] font-medium text-muted-foreground tabular-nums;
+}
+
+/* data-slot="questionnaire-item" in QuestionnaireItem */
+:where(.jn-questionnaire-item) {
+  @apply min-w-0 border-0 p-0 outline-none;
+}
+
+/* data-slot="questionnaire-title" in QuestionnaireTitle; also: jn-font-heading */
+:where(.jn-questionnaire-title) {
+  @apply text-pretty;
+}
+
+/* data-slot="questionnaire-description" in QuestionnaireDescription */
+:where(.jn-questionnaire-description) {
+  @apply text-pretty text-muted-foreground;
+}
+
+/* data-slot="questionnaire-choices" in QuestionnaireChoices; keep on the element: group/questionnaire-choices */
+:where(.jn-questionnaire-choices) {
+  @apply grid min-w-0;
+}
+
+/* data-slot="questionnaire-choice" in QuestionnaireChoice; keep on the element: group/questionnaire-choice */
+:where(.jn-questionnaire-choice) {
+  @apply relative flex min-h-11 cursor-pointer items-start text-start transition-colors outline-none select-none;
+}
+
+/* data-slot="questionnaire-choice" in QuestionnaireChoice */
+:where(.jn-questionnaire-choice) {
+  @apply data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50;
+}
+
+/* data-slot="questionnaire-choice-input" in QuestionnaireChoice */
+:where(.jn-questionnaire-choice-input) {
+  @apply absolute inset-0 z-10 size-full cursor-pointer opacity-0;
+}
+
+/* data-slot="questionnaire-choice-indicator" in QuestionnaireChoice */
+:where(.jn-questionnaire-choice-indicator) {
+  @apply pointer-events-none relative flex shrink-0 items-center justify-center border group-data-[type=radio]/questionnaire-choice:rounded-full;
+}
+
+/* data-slot="questionnaire-choice-indicator-dot" in QuestionnaireChoice */
+:where(.jn-questionnaire-choice-indicator-dot) {
+  @apply hidden rounded-full group-data-[type=checkbox]/questionnaire-choice:hidden group-data-checked/questionnaire-choice:block;
+}
+
+/* data-slot="questionnaire-choice-indicator-check" in QuestionnaireChoice */
+:where(.jn-questionnaire-choice-indicator-check) {
+  @apply hidden group-data-[type=radio]/questionnaire-choice:hidden group-data-checked/questionnaire-choice:block;
+}
+
+/* data-slot="questionnaire-choice-label" in QuestionnaireChoice; also: jn-questionnaire-choice-content */
+:where(.jn-questionnaire-choice-label) {
+  @apply flex min-w-0 flex-1 flex-col leading-snug;
+}
+
+/* data-slot="questionnaire-choice-shortcut" in QuestionnaireChoice; also: jn-questionnaire-shortcut */
+:where(.jn-questionnaire-choice-shortcut) {
+  @apply pointer-events-none ms-auto hidden shrink-0 group-data-[shortcut]/questionnaire-choice:inline-flex;
+}
+
+/* data-slot="questionnaire-input-wrapper" in QuestionnaireInput; keep on the element: group/questionnaire-input */
+:where(.jn-questionnaire-input-wrapper) {
+  @apply relative min-w-0;
+}
+
+/* data-slot="questionnaire-input" in QuestionnaireInput */
+:where(.jn-questionnaire-input) {
+  @apply min-h-11 w-full min-w-0 transition-[color,box-shadow,background-color] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0;
+}
+
+/* data-slot="questionnaire-input" in QuestionnaireInput */
+:where(.jn-questionnaire-input) {
+  @apply selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground;
+}
+
+/* data-slot="questionnaire-error" in QuestionnaireError */
+:where(.jn-questionnaire-error) {
+  @apply text-destructive;
+}
+
+/* data-slot="questionnaire-actions" in QuestionnaireActions */
+:where(.jn-questionnaire-actions) {
+  @apply grid min-h-11 w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center;
+}
+
+/*
+ * The action row's height from `sm` up (edited by hand). Each sheet gives the row a responsive
+ * `sm:min-h-*`, which upstream's inline `min-h-11` doesn't override: tailwind-merge keeps both,
+ * since their variants differ, and Tailwind emits a `sm:` utility after every unprefixed one, so
+ * the sheet's wins from 640px up (Nova's row is 32px there, 44px below). Here the sheet comes
+ * first and a media query adds no weight, so the inline rule above would win at every width.
+ * This restates each sheet's after it, under the `style-<name>` variant build-css.mjs declares
+ * (scripts/build-css.test.mjs checks the copy against the sheets).
+ */
+:where(.jn-questionnaire-actions) {
+  @variant style-luma {
+    @apply sm:min-h-9;
+  }
+  @variant style-lyra {
+    @apply sm:min-h-8;
+  }
+  @variant style-maia {
+    @apply sm:min-h-9;
+  }
+  @variant style-mira {
+    @apply sm:min-h-7;
+  }
+  @variant style-nova {
+    @apply sm:min-h-8;
+  }
+  @variant style-rhea {
+    @apply sm:min-h-8;
+  }
+  @variant style-sera {
+    @apply sm:min-h-10;
+  }
+  @variant style-vega {
+    @apply sm:min-h-9;
+  }
+}
+
+/* data-slot="questionnaire-previous" in QuestionnairePrevious */
+:where(.jn-questionnaire-previous) {
+  @apply col-start-1 row-start-1 min-h-11 justify-self-start sm:min-h-0;
+}
+
+/* data-slot="questionnaire-skip" in QuestionnaireSkip */
+:where(.jn-questionnaire-skip) {
+  @apply col-start-2 row-start-1 min-h-11 justify-self-end sm:min-h-0;
+}
+
+/* data-slot="questionnaire-next" in QuestionnaireNext */
+:where(.jn-questionnaire-next) {
+  @apply col-start-3 row-start-1 min-h-11 justify-self-end sm:min-h-0;
+}
+
+/* data-slot="questionnaire-submit" in QuestionnaireSubmit */
+:where(.jn-questionnaire-submit) {
+  @apply col-start-3 row-start-1 min-h-11 justify-self-end sm:min-h-0;
+}

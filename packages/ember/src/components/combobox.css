@@ -1,0 +1,75 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/combobox.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* in ComboboxTrigger */
+:where(.jn-combobox-trigger-icon) {
+  @apply pointer-events-none;
+}
+
+/* in ComboboxClear */
+:where(.jn-combobox-clear-icon) {
+  @apply pointer-events-none;
+}
+
+/*
+ * in ComboboxInput. NOTE: upstream passes `w-auto` to its InputGroup's cn(), after the group's
+ * own `w-full`, so tailwind-merge keeps `w-auto`. input-group.css comes after this file (A–Z)
+ * and gives every `.jn-input-group` its `w-full`, so here the rule names both classes to win, or
+ * every combobox would go full width (edited by hand). It is still in @layer joinery, under an
+ * app's own CSS and a utility class.
+ */
+.jn-combobox-input:where(.jn-input-group) {
+  @apply w-auto;
+}
+
+/*
+ * data-slot="input-group-button" in ComboboxInput. NOTE: upstream gives these to the input's
+ * chevron button alone (its className); the clear button is a group button too, which it must
+ * not hide, so the rule is on the chevron's own class as well (edited by hand).
+ */
+:where(.jn-input-group-button.jn-combobox-trigger) {
+  @apply group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent;
+}
+
+/* in ComboboxContent, no slot to attach it to: isolate z-50 */
+
+/* data-slot="combobox-content" in ComboboxContent; keep on the element: group/combobox-content; also: jn-combobox-content-logical jn-menu-target jn-menu-translucent */
+:where(.jn-combobox-content) {
+  @apply relative max-h-(--available-height) w-(--anchor-width) max-w-(--available-width) min-w-[calc(var(--anchor-width)+--spacing(7))] origin-(--transform-origin) data-[chips=true]:min-w-(--anchor-width);
+}
+
+/* data-slot="combobox-list" in ComboboxList */
+:where(.jn-combobox-list) {
+  @apply overflow-y-auto overscroll-contain;
+}
+
+/* data-slot="combobox-item" in ComboboxItem */
+:where(.jn-combobox-item) {
+  @apply relative flex w-full cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0;
+}
+
+/* in ComboboxItem */
+:where(.jn-combobox-item-indicator-icon) {
+  @apply pointer-events-none;
+}
+
+/* data-slot="combobox-chip" in ComboboxChip */
+:where(.jn-combobox-chip) {
+  @apply has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-disabled:opacity-50;
+}
+
+/* in ComboboxChip */
+:where(.jn-combobox-chip-indicator-icon) {
+  @apply pointer-events-none;
+}
+
+/* data-slot="combobox-chip-input" in ComboboxChipsInput */
+:where(.jn-combobox-chip-input) {
+  @apply min-w-16 flex-1 outline-none;
+}

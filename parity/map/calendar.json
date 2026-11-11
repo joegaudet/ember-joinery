@@ -1,0 +1,15 @@
+{
+  "examples": {
+    "calendar-demo": "calendar-demo",
+    "calendar-hijri": "calendar-hijri",
+    "calendar-basic": "calendar-basic",
+    "calendar-range": "calendar-range",
+    "calendar-caption": "calendar-caption",
+    "calendar-presets": "calendar-presets",
+    "calendar-time": "calendar-time",
+    "calendar-booked-dates": "calendar-booked-dates",
+    "calendar-custom-days": "calendar-custom-days",
+    "calendar-week-numbers": "calendar-week-numbers",
+    "calendar-rtl": "calendar-rtl"
+  }
+}

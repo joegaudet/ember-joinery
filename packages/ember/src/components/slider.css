@@ -1,0 +1,28 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/slider.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="slider" in Slider */
+:where(.jn-slider) {
+  @apply relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-vertical:h-full data-vertical:w-auto data-vertical:flex-col;
+}
+
+/* data-slot="slider-track" in Slider */
+:where(.jn-slider-track) {
+  @apply relative grow overflow-hidden data-horizontal:w-full data-vertical:h-full;
+}
+
+/* data-slot="slider-range" in Slider */
+:where(.jn-slider-range) {
+  @apply absolute select-none data-horizontal:h-full data-vertical:w-full;
+}
+
+/* data-slot="slider-thumb" in Slider */
+:where(.jn-slider-thumb) {
+  @apply block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50;
+}

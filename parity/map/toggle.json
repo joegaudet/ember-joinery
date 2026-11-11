@@ -1,0 +1,10 @@
+{
+  "examples": {
+    "toggle-demo": "toggle-demo",
+    "toggle-outline": "toggle-outline",
+    "toggle-text": "toggle-text",
+    "toggle-sizes": "toggle-sizes",
+    "toggle-disabled": "toggle-disabled",
+    "toggle-rtl": "toggle-rtl"
+  }
+}

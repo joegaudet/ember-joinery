@@ -1,0 +1,11 @@
+{
+  "$comment": "card-rtl is shown on the Direction page too, and mapped here, the inventory's page for it.",
+  "examples": {
+    "card-demo": "card-demo",
+    "card-small": "card-small",
+    "card-spacing": "card-spacing",
+    "card-edge-to-edge": "card-edge-to-edge",
+    "card-image": "card-image",
+    "card-rtl": "card-rtl"
+  }
+}

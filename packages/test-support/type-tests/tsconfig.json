@@ -1,0 +1,12 @@
+{
+  "extends": "@ember/library-tsconfig",
+  "include": ["./**/*"],
+  "compilerOptions": {
+    "noEmit": true,
+    "emitDeclarationOnly": false,
+    "declaration": false,
+    "declarationMap": false,
+    "experimentalDecorators": false,
+    "types": ["ember-source/types"]
+  }
+}

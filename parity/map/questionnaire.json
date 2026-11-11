@@ -1,0 +1,18 @@
+{
+  "examples": {
+    "questionnaire-demo": "questionnaire-demo",
+    "questionnaire-multiple": "questionnaire-multiple",
+    "questionnaire-freeform": "questionnaire-freeform",
+    "questionnaire-skip": "questionnaire-skip",
+    "questionnaire-shortcuts": "questionnaire-shortcuts",
+    "questionnaire-validation": "questionnaire-validation",
+    "questionnaire-controlled": "questionnaire-controlled",
+    "questionnaire-resume": "questionnaire-resume",
+    "questionnaire-conditional": "questionnaire-conditional",
+    "questionnaire-navigation-state": "questionnaire-navigation-state",
+    "questionnaire-progress": "questionnaire-progress",
+    "questionnaire-animated": "questionnaire-animated",
+    "questionnaire-card": "questionnaire-card",
+    "questionnaire-dialog": "questionnaire-dialog"
+  }
+}

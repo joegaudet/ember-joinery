@@ -1,0 +1,165 @@
+/*
+ * The parts upstream's calendar.tsx (shadcn-ui/ui@8ab2771) styles through react-day-picker's
+ * `classNames` prop: scripts/extract-classes.mjs lists their utilities in calendar.css as "no slot
+ * to attach it to", and these rules attach them to react-day-picker's own classes (`rdp-months`,
+ * `rdp-day`…), which Joinery's Calendar renders on the same elements react-day-picker does, inside
+ * the calendar's root. The utilities are upstream's, in its order, with physical sides made
+ * logical as upstream's right-to-left copy has them (`rounded-l` is `rounded-s`, `after:right-0`
+ * is `after:end-0`), so one rule serves both directions.
+ *
+ * - The classes upstream adds under a condition apply under what carries it: `captionLayout ===
+ *   "label"` is a caption label outside a dropdown, and `props.showWeekNumber` the root's
+ *   `data-week-numbers`.
+ * - A day's cell gets its modifiers' classes (`rdp-today`, `rdp-range_start`…) only while it has
+ *   them, as react-day-picker's. Its rules run in upstream's order, which is also how Tailwind
+ *   sorts the utilities that conflict on one cell (`rounded-none` after `rounded-(--cell-radius)`,
+ *   `text-muted-foreground` after `text-foreground`).
+ * - NOTE: upstream's `dropdown_root` and `caption_label` strings also carry the semantic classes
+ *   `cn-calendar-dropdown-root`, `cn-calendar-caption` and `cn-calendar-caption-label`, which the
+ *   registry build never resolves (see calendar.css), so on ui.shadcn.com their style rules apply
+ *   nowhere. Joinery's elements don't carry them either.
+ * - The chevrons are lucide's, with `size-4` (`jn-size-4`, the marker the style sheets look for).
+ */
+
+/* classNames.root */
+:where(.jn-calendar) {
+  @apply w-fit;
+}
+
+/* classNames.months */
+:where(.jn-calendar .rdp-months) {
+  @apply relative flex flex-col gap-4 md:flex-row;
+}
+
+/* classNames.month */
+:where(.jn-calendar .rdp-month) {
+  @apply flex w-full flex-col gap-4;
+}
+
+/* classNames.nav */
+:where(.jn-calendar .rdp-nav) {
+  @apply absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1;
+}
+
+/* classNames.button_previous and button_next, after buttonVariants({ variant: buttonVariant }) */
+:where(.jn-calendar .rdp-button_previous),
+:where(.jn-calendar .rdp-button_next) {
+  @apply size-(--cell-size) p-0 select-none aria-disabled:opacity-50;
+}
+
+/* classNames.month_caption */
+:where(.jn-calendar .rdp-month_caption) {
+  @apply flex h-(--cell-size) w-full items-center justify-center px-(--cell-size);
+}
+
+/* classNames.dropdowns */
+:where(.jn-calendar .rdp-dropdowns) {
+  @apply flex h-(--cell-size) w-full items-center justify-center gap-1.5 text-sm font-medium;
+}
+
+/* classNames.dropdown_root */
+:where(.jn-calendar .rdp-dropdown_root) {
+  @apply relative rounded-(--cell-radius);
+}
+
+/* classNames.dropdown: the native select, invisible over its caption label */
+:where(.jn-calendar .rdp-dropdown) {
+  @apply absolute inset-0 bg-popover opacity-0;
+}
+
+/* classNames.caption_label: `text-sm` either way, the rest by captionLayout */
+:where(.jn-calendar .rdp-caption_label) {
+  @apply font-medium select-none;
+}
+:where(.jn-calendar .rdp-month_caption > .rdp-caption_label) {
+  @apply text-sm;
+}
+:where(.jn-calendar .rdp-dropdown_root > .rdp-caption_label) {
+  @apply flex items-center gap-1 rounded-(--cell-radius) text-sm [&>svg]:size-3.5 [&>svg]:text-muted-foreground;
+}
+
+/* classNames.month_grid */
+:where(.jn-calendar .rdp-month_grid) {
+  @apply w-full border-collapse;
+}
+
+/* classNames.weekdays */
+:where(.jn-calendar .rdp-weekdays) {
+  @apply flex;
+}
+
+/* classNames.weekday */
+:where(.jn-calendar .rdp-weekday) {
+  @apply flex-1 rounded-(--cell-radius) text-[0.8rem] font-normal text-muted-foreground select-none;
+}
+
+/* classNames.week */
+:where(.jn-calendar .rdp-week) {
+  @apply mt-2 flex w-full;
+}
+
+/* classNames.week_number_header */
+:where(.jn-calendar .rdp-week_number_header) {
+  @apply w-(--cell-size) select-none;
+}
+
+/* classNames.week_number */
+:where(.jn-calendar .rdp-week_number) {
+  @apply text-[0.8rem] text-muted-foreground select-none;
+}
+
+/* The WeekNumber component's inner box */
+:where(.jn-calendar-week-number) {
+  @apply flex size-(--cell-size) items-center justify-center text-center;
+}
+
+/* classNames.day (the cell; the day's button carries rdp-day too), and by showWeekNumber */
+:where(.jn-calendar td.rdp-day) {
+  @apply relative aspect-square h-full w-full rounded-(--cell-radius) p-0 text-center select-none [&:last-child[data-selected=true]_button]:rounded-e-(--cell-radius);
+}
+:where(.jn-calendar[data-week-numbers] td.rdp-day) {
+  @apply [&:nth-child(2)[data-selected=true]_button]:rounded-s-(--cell-radius);
+}
+:where(.jn-calendar:not([data-week-numbers]) td.rdp-day) {
+  @apply [&:first-child[data-selected=true]_button]:rounded-s-(--cell-radius);
+}
+
+/* classNames.range_start */
+:where(.jn-calendar .rdp-range_start) {
+  @apply relative isolate z-0 rounded-s-(--cell-radius) bg-muted after:absolute after:inset-y-0 after:end-0 after:w-4 after:bg-muted;
+}
+
+/* classNames.range_middle */
+:where(.jn-calendar .rdp-range_middle) {
+  @apply rounded-none;
+}
+
+/* classNames.range_end */
+:where(.jn-calendar .rdp-range_end) {
+  @apply relative isolate z-0 rounded-e-(--cell-radius) bg-muted after:absolute after:inset-y-0 after:start-0 after:w-4 after:bg-muted;
+}
+
+/* classNames.today */
+:where(.jn-calendar .rdp-today) {
+  @apply rounded-(--cell-radius) bg-muted text-foreground data-[selected=true]:rounded-none;
+}
+
+/* classNames.outside */
+:where(.jn-calendar .rdp-outside) {
+  @apply text-muted-foreground aria-selected:text-muted-foreground;
+}
+
+/* classNames.disabled */
+:where(.jn-calendar .rdp-disabled) {
+  @apply text-muted-foreground opacity-50;
+}
+
+/* classNames.hidden */
+:where(.jn-calendar .rdp-hidden) {
+  @apply invisible;
+}
+
+/* The Chevron component's icons: `size-4` */
+:where(.jn-calendar .rdp-chevron) {
+  @apply size-4;
+}

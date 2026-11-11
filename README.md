@@ -1,2 +1,146 @@
-# ember-joinery
-shadcn/ui for Ember: accessible, themeable components, each with a test harness
+# Joinery
+
+shadcn/ui for Ember: every component on [ui.shadcn.com](https://ui.shadcn.com/), in modern Ember,
+on a headless primitives layer, and each with a test harness.
+
+> **Status: 1.0.0 in review.** Every component is built, and nothing is published yet. The plan,
+> and every decision behind it, is in [JOINERY_PLAN.md](JOINERY_PLAN.md). The work is one stacked
+> PR, and nothing publishes until it has been reviewed and merged. The first release is 1.0.0.
+
+## What it is
+
+- **Every shadcn/ui component**, written the modern Ember way: `.gts` template-tag components
+  with full Glint types, yielded parts (`<Dialog as |d|><d.Trigger>`), state you can control or
+  leave to the component, and typed `@variant` and `@size` arguments.
+- **Headless primitives** (`@ember-joinery/primitives`): the unstyled, accessible behaviour
+  underneath, including everything [ember-primitives](https://github.com/universal-ember/ember-primitives)
+  offers.
+- **All eight of shadcn's styles and its base colours**, with its theme tokens, so any shadcn
+  theme pastes in unchanged. The CSS ships compiled, so Tailwind is optional.
+- **A harness for every component** (`@ember-joinery/test-support`). Tests drive components the
+  way users do, and check ARIA as they go.
+- **Accessible:** WCAG 2.2 AA, WAI-ARIA keyboard patterns, and right-to-left layouts.
+- **Blocks:** shadcn's login, signup, dashboard and settings blocks, as tested guide pages to
+  copy into your app, and a live demo built from them.
+- **Opt-in add-ons** for the heavy parts: charts, carousel, data table, code block, file uploads,
+  a rich-text editor, calendars and date pickers on ember-power-calendar, masked and phone
+  inputs, and a [Formwright](https://joegaudet.com/ember-formwright/) bridge.
+
+## Installation
+
+```bash
+pnpm add @ember-joinery/ember lucide
+pnpm add --save-dev @ember-joinery/test-support
+```
+
+Import the theme's tokens and the components' CSS once, in `app/app.ts` (or `app/app.js`):
+
+```ts
+import '@ember-joinery/ember/tokens.css'
+import '@ember-joinery/ember/joinery.css'
+```
+
+Classic ember-cli apps also need `ember-auto-import` 2 and `ember-template-imports`. Tailwind
+apps put Joinery's layer between Tailwind's `base` and `components` and add its
+`tailwind.css`; the guide's [Installation](https://joegaudet.com/ember-joinery/guide/getting-started/installation.md)
+page has the steps for each.
+
+## Usage
+
+```gts
+import { on } from '@ember/modifier'
+import { Button, Dialog, Field, Input, Label } from '@ember-joinery/ember'
+
+<template>
+  {{! uncontrolled; pass @open and @onOpenChange to control it }}
+  <Dialog @name="edit-profile" as |d|>
+    <Button @variant="outline" {{d.trigger}}>Edit profile</Button>
+    <d.Content>
+      <d.Header>
+        <d.Title>Edit profile</d.Title>
+        <d.Description>Make changes to your profile here.</d.Description>
+      </d.Header>
+      <Field>
+        <Label for="name">Name</Label>
+        <Input id="name" @name="name" @value={{this.name}} @onValueChange={{this.setName}} />
+      </Field>
+      <d.Footer>
+        <Button @variant="outline" {{d.close}}>Cancel</Button>
+        <Button @name="save" {{on "click" this.save}}>Save changes</Button>
+      </d.Footer>
+    </d.Content>
+  </Dialog>
+</template>
+```
+
+And test it with its harness, the way a user would use it:
+
+```ts
+import { ButtonHarness, DialogHarness, InputHarness, child } from '@ember-joinery/test-support'
+
+class EditProfile extends DialogHarness {
+  static named = 'edit-profile'
+  @child(InputHarness, 'name') declare name: InputHarness
+  @child(ButtonHarness, 'save') declare save: ButtonHarness
+}
+
+const dialog = new EditProfile()
+await dialog.open()
+await dialog.name.fillIn('Ada')
+await dialog.save.click()
+assert.dom(dialog.trigger).isFocused() // focus went back
+```
+
+## Packages
+
+| Package                         |                                                                                    |
+| ------------------------------- | ---------------------------------------------------------------------------------- |
+| `@ember-joinery/ember`          | The styled components, their CSS and the theme tokens                              |
+| `@ember-joinery/primitives`     | Headless behaviour and utilities                                                   |
+| `@ember-joinery/test-support`   | A harness for every component                                                      |
+| `@ember-joinery/chart`          | Charts: Glimmer SVG on d3                                                          |
+| `@ember-joinery/carousel`       | Carousel, on embla-carousel                                                        |
+| `@ember-joinery/data-table`     | Data table, on @tanstack/table-core                                                |
+| `@ember-joinery/code-block`     | Code block, on shiki                                                               |
+| `@ember-joinery/file-upload`    | File uploads (drop zone, file list, upload queue), on ember-file-upload            |
+| `@ember-joinery/tiptap`         | Rich-text editor with a formatting toolbar, on Tiptap                              |
+| `@ember-joinery/power-calendar` | Calendars and date pickers, on ember-power-calendar                                |
+| `@ember-joinery/maskito`        | Masked input and phone input (country picker, E.164), on Maskito                   |
+| `@ember-joinery/formwright`     | Joinery's inputs as [Formwright](https://joegaudet.com/ember-formwright/) controls |
+
+They support Ember 6.12 LTS and 7.x, in Vite (Embroider) apps and classic ember-cli apps. The
+guide's [API reference](https://joegaudet.com/ember-joinery/guide/reference/index.md) documents
+each, generated from its types.
+
+## Links
+
+- Site and live demo: https://joegaudet.com/ember-joinery/ (not live yet)
+- Guide: https://joegaudet.com/ember-joinery/guide/ (not live yet): getting started, every
+  component with its examples, the theme builder and the API reference
+- Sibling projects: [Formwright](https://joegaudet.com/ember-formwright/) (forms) and
+  [real-enums](https://joegaudet.com/real-enums/).
+
+## Credits
+
+Joinery is an independent project, not affiliated with shadcn/ui. Its design, component APIs and
+examples are ported from [shadcn/ui](https://ui.shadcn.com/) (MIT, © shadcn), and its headless
+layer covers the features of [ember-primitives](https://github.com/universal-ember/ember-primitives)
+(MIT). Its toasts port [sonner](https://github.com/emilkowalski/sonner) (MIT, © Emil Kowalski),
+which shadcn/ui's Sonner wraps, its charts port [recharts](https://github.com/recharts/recharts)
+(MIT, © recharts), which shadcn/ui's charts are built on, its Drawer ports
+[vaul](https://github.com/emilkowalski/vaul) (MIT, © Emil Kowalski), which shadcn/ui's Drawer is
+built on, its Command follows [cmdk](https://github.com/dip/cmdk) (MIT, © Paco Coursey),
+which shadcn/ui's Command is built on, and ports its command score, and its Calendar follows
+[React DayPicker](https://github.com/gpbl/react-day-picker) (MIT, © Giampaolo Bellavite), which
+shadcn/ui's Calendar is built on. Its file uploads are built on
+[ember-file-upload](https://github.com/adopted-ember-addons/ember-file-upload) (MIT), and its
+rich-text editor on [Tiptap](https://github.com/ueberdosis/tiptap) (MIT, © Tiptap GmbH). Its
+opt-in calendars and date pickers are built on
+[ember-power-calendar](https://github.com/ember-power-addons/ember-power-calendar) (MIT), and
+its masked and phone inputs on [Maskito](https://github.com/taiga-family/maskito) (Apache 2.0)
+and [libphonenumber-js](https://gitlab.com/catamphetamine/libphonenumber-js) (MIT). See
+[NOTICE](NOTICE).
+
+## License
+
+MIT. See [LICENSE.md](LICENSE.md).

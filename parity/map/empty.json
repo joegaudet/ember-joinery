@@ -1,0 +1,11 @@
+{
+  "examples": {
+    "empty-demo": "empty-demo",
+    "empty-outline": "empty-outline",
+    "empty-background": "empty-background",
+    "empty-avatar": "empty-avatar",
+    "empty-avatar-group": "empty-avatar-group",
+    "empty-input-group": "empty-input-group",
+    "empty-rtl": "empty-rtl"
+  }
+}

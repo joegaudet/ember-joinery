@@ -1,0 +1,12 @@
+{
+  "$comment": "The Primitives Select page shows Joinery's own select-headless, which has no upstream counterpart, so it isn't mapped.",
+  "examples": {
+    "select-demo": "select-demo",
+    "select-align-item": "select-align-item",
+    "select-groups": "select-groups",
+    "select-scrollable": "select-scrollable",
+    "select-disabled": "select-disabled",
+    "select-invalid": "select-invalid",
+    "select-rtl": "select-rtl"
+  }
+}

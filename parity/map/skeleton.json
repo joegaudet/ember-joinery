@@ -1,0 +1,11 @@
+{
+  "examples": {
+    "skeleton-demo": "skeleton-demo",
+    "skeleton-avatar": "skeleton-avatar",
+    "skeleton-card": "skeleton-card",
+    "skeleton-text": "skeleton-text",
+    "skeleton-form": "skeleton-form",
+    "skeleton-table": "skeleton-table",
+    "skeleton-rtl": "skeleton-rtl"
+  }
+}

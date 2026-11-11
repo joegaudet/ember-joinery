@@ -1,0 +1,58 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/context-menu.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="context-menu-trigger" in ContextMenuTrigger */
+:where(.jn-context-menu-trigger) {
+  @apply select-none;
+}
+
+/* data-slot="context-menu-content" in ContextMenuContent; also: jn-menu-target jn-menu-translucent */
+:where(.jn-context-menu-content) {
+  @apply z-50 max-h-(--radix-context-menu-content-available-height) origin-(--radix-context-menu-content-transform-origin) overflow-x-hidden overflow-y-auto;
+}
+
+/* data-slot="context-menu-item" in ContextMenuItem; keep on the element: group/context-menu-item */
+:where(.jn-context-menu-item) {
+  @apply relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0;
+}
+
+/* data-slot="context-menu-sub-trigger" in ContextMenuSubTrigger */
+:where(.jn-context-menu-sub-trigger) {
+  @apply flex cursor-default items-center outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0;
+}
+
+/* in ContextMenuSubTrigger; inside .jn-context-menu-sub-trigger only, since other parts share .jn-rtl-flip */
+:where(.jn-context-menu-sub-trigger) > :where(.jn-rtl-flip) {
+  @apply ms-auto;
+}
+
+/* data-slot="context-menu-sub-content" in ContextMenuSubContent; also: jn-menu-target jn-menu-translucent */
+:where(.jn-context-menu-sub-content) {
+  @apply z-50 origin-(--radix-context-menu-content-transform-origin) overflow-hidden;
+}
+
+/* data-slot="context-menu-checkbox-item" in ContextMenuCheckboxItem */
+:where(.jn-context-menu-checkbox-item) {
+  @apply relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0;
+}
+
+/* in ContextMenuCheckboxItem */
+:where(.jn-context-menu-item-indicator) {
+  @apply pointer-events-none;
+}
+
+/* data-slot="context-menu-radio-item" in ContextMenuRadioItem */
+:where(.jn-context-menu-radio-item) {
+  @apply relative flex cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0;
+}
+
+/* in ContextMenuRadioItem */
+:where(.jn-context-menu-item-indicator) {
+  @apply pointer-events-none;
+}

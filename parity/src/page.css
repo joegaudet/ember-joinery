@@ -1,0 +1,49 @@
+/*
+ * The parity page around each example. It matches the Joinery guide's `/parity/<name>` stage
+ * (docs-app), so the two screenshots line up: the example centred (or aligned as its docs page
+ * aligns it) in a 2.5rem padded box at least the viewport tall.
+ */
+:root {
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+  --font-ar: 'Noto Sans Arabic Variable', var(--font-sans);
+  --font-he: 'Noto Sans Hebrew Variable', var(--font-sans);
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+.parity-stage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 2.5rem;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+.parity-stage[data-align='start'] {
+  align-items: flex-start;
+}
+
+.parity-stage[data-align='end'] {
+  align-items: flex-end;
+}
+
+/* As upstream's `[&_.preview>div]:w-full`, or the charts gallery's full-width cell. */
+.parity-stage[data-full-width='true'] > * {
+  width: 100%;
+}
+
+.parity-index {
+  margin: 2rem;
+  font: 14px/1.6 var(--font-sans);
+}

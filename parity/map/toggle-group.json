@@ -1,0 +1,12 @@
+{
+  "examples": {
+    "toggle-group-demo": "toggle-group-demo",
+    "toggle-group-outline": "toggle-group-outline",
+    "toggle-group-sizes": "toggle-group-sizes",
+    "toggle-group-spacing": "toggle-group-spacing",
+    "toggle-group-vertical": "toggle-group-vertical",
+    "toggle-group-disabled": "toggle-group-disabled",
+    "toggle-group-font-weight-selector": "toggle-group-font-weight-selector",
+    "toggle-group-rtl": "toggle-group-rtl"
+  }
+}

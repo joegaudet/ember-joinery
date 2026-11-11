@@ -1,0 +1,156 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/field.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="field-set" in FieldSet */
+:where(.jn-field-set) {
+  @apply flex flex-col;
+}
+
+/* data-slot="field-group" in FieldGroup; keep on the element: group/field-group */
+:where(.jn-field-group) {
+  @apply @container/field-group flex w-full flex-col;
+}
+
+/* in fieldVariants; keep on the element: group/field */
+:where(.jn-field) {
+  @apply flex w-full;
+}
+
+/* in fieldVariants (cva-variant orientation.vertical) */
+:where(.jn-field-orientation-vertical) {
+  @apply flex-col *:w-full [&>.sr-only]:w-auto;
+}
+
+/* in fieldVariants (cva-variant orientation.horizontal) */
+:where(.jn-field-orientation-horizontal) {
+  @apply flex-row items-center has-[>[data-slot=field-content]]:items-start *:data-[slot=field-label]:flex-auto has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px;
+}
+
+/* in fieldVariants (cva-variant orientation.responsive) */
+:where(.jn-field-orientation-responsive) {
+  @apply flex-col *:w-full @md/field-group:flex-row @md/field-group:items-center @md/field-group:*:w-auto @md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:*:data-[slot=field-label]:flex-auto [&>.sr-only]:w-auto @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px;
+}
+
+/* data-slot="field-content" in FieldContent; keep on the element: group/field-content */
+:where(.jn-field-content) {
+  @apply flex flex-1 flex-col leading-snug;
+}
+
+/* data-slot="field-label" in FieldLabel; keep on the element: group/field-label peer/field-label */
+:where(.jn-field-label) {
+  @apply flex w-fit;
+}
+
+/* data-slot="field-label" in FieldLabel */
+:where(.jn-field-label) {
+  @apply has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col;
+}
+
+/* data-slot="field-label" in FieldTitle */
+:where(.jn-field-title) {
+  @apply flex w-fit items-center;
+}
+
+/* data-slot="field-description" in FieldDescription */
+:where(.jn-field-description) {
+  @apply leading-normal font-normal group-has-data-horizontal/field:text-balance;
+}
+
+/* data-slot="field-description" in FieldDescription */
+:where(.jn-field-description) {
+  @apply last:mt-0 nth-last-2:-mt-1;
+}
+
+/* data-slot="field-description" in FieldDescription */
+:where(.jn-field-description) {
+  @apply [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary;
+}
+
+/* data-slot="field-separator" in FieldSeparator */
+:where(.jn-field-separator) {
+  @apply relative;
+}
+
+/* in FieldSeparator, no slot to attach it to: absolute inset-0 top-1/2 */
+
+/* data-slot="field-separator-content" in FieldSeparator */
+:where(.jn-field-separator-content) {
+  @apply relative mx-auto block w-fit bg-background;
+}
+
+/* in content, no slot to attach it to: ml-4 flex list-disc flex-col gap-1 */
+
+/* data-slot="field-error" in FieldError */
+:where(.jn-field-error) {
+  @apply font-normal;
+}
+
+/*
+ * Joinery's own, for what the extraction above can't attach. Upstream's FieldSeparator places
+ * its line with `absolute inset-0 top-1/2` on the Separator inside it, and FieldError lists
+ * several errors in a `ul` with `ml-4 flex list-disc flex-col gap-1` (`ms-4` here, as upstream's
+ * right-to-left build writes it). Neither element has a slot of its own, so Joinery gives each
+ * a class: `jn-field-separator-line` and `jn-field-error-list`.
+ */
+:where(.jn-field-separator-line) {
+  @apply absolute inset-0 top-1/2;
+}
+
+:where(.jn-field-error-list) {
+  @apply ms-4 flex list-disc flex-col gap-1;
+}
+
+/*
+ * A FieldLabel is a Label too (`jn-label jn-field-label`), as upstream's is, and upstream's
+ * class merge lets the field label's utilities win over the label's. Every style sheet puts
+ * Label's rules after Field's, so where both set a property the label's would win here, and
+ * the one they both set is the line height: `leading-snug` in the field label's rule, against
+ * `leading-none` in the label's. This puts the field label's back. Sera's field label is
+ * `leading-relaxed`, as its label is, so there it comes out `leading-snug` instead (see the
+ * Field page's notes).
+ */
+:where(.jn-label.jn-field-label) {
+  @apply leading-snug;
+}
+
+/*
+ * After a legend, a description pulls up to it: every sheet's
+ * `[[data-variant=legend]+&]:-mt-1.5`. Upstream's Tailwind sorts that arbitrary variant after
+ * the inline `nth-last-2:-mt-1` and `last:mt-0` (above), so there it wins. Here the inline
+ * rules come after the sheet's, so this puts it back after them.
+ */
+:where(.jn-field-description) {
+  @apply [[data-variant=legend]+&]:-mt-1.5;
+}
+
+/*
+ * A field sizes its children: a vertical or responsive field stretches each to its width
+ * (`*:w-full`), but for a visually hidden one (`[&>.sr-only]:w-auto`), and a responsive field,
+ * once its group is 28rem wide, sizes each to its content (`@md/field-group:*:w-auto`).
+ * Upstream's Tailwind sorts these variants after a child's own plain width (a FieldLabel's
+ * `w-fit`, an Input's `w-full`), so they win there, and a child's width behind a variant (a
+ * Switch's `data-[size=default]:w-[32px]`, one class more specific) still beats them. Here a
+ * child's rules can come later (field.css puts FieldLabel's after Field's, and input.css
+ * follows field.css), so these restate them at the weight of one type selector:
+ * `:not(template)` matches every child that renders, and weighs 0,0,1. That wins over a
+ * child's plain rules (0,0,0) wherever they come, and loses to its variants (0,1,0), as
+ * upstream's do.
+ */
+:where(.jn-field-orientation-vertical, .jn-field-orientation-responsive) > :not(template) {
+  @apply w-full;
+}
+
+:where(.jn-field-orientation-vertical, .jn-field-orientation-responsive)
+  > :where(.sr-only):nth-child(n) {
+  @apply w-auto;
+}
+
+:where(.jn-field-orientation-responsive) > :not(template) {
+  @apply @md/field-group:w-auto;
+}

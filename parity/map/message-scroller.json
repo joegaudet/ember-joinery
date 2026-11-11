@@ -1,0 +1,15 @@
+{
+  "examples": {
+    "message-scroller-demo": "message-scroller-demo",
+    "message-scroller-anchoring": "message-scroller-anchoring",
+    "message-scroller-group-chat": "message-scroller-group-chat",
+    "message-scroller-previous-context": "message-scroller-previous-context",
+    "message-scroller-streaming": "message-scroller-streaming",
+    "message-scroller-opening-position": "message-scroller-opening-position",
+    "message-scroller-load-history": "message-scroller-load-history",
+    "message-scroller-animation": "message-scroller-animation",
+    "message-scroller-commands": "message-scroller-commands",
+    "message-scroller-visibility": "message-scroller-visibility",
+    "message-scroller-scrollable": "message-scroller-scrollable"
+  }
+}

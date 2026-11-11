@@ -1,0 +1,254 @@
+/*
+ * The utility classes the examples lay themselves out with. Upstream's examples are written
+ * with Tailwind's (`flex flex-wrap items-center gap-2`, a Button's `rounded-full`), and the
+ * guide's keep them as written, so this compiles those utilities, and only from the examples
+ * (`source(none)` turns the scan of everything else off). There is no preflight: Joinery's
+ * components still render as they do in an app without Tailwind (see app.css). The utilities
+ * sit in `@layer utilities`, above Joinery's, so a class on a component overrides its style, as
+ * tailwind-merge lets it on ui.shadcn.com. `tailwind.css` maps the theme's tokens, as in a
+ * Tailwind app.
+ */
+@import 'tailwindcss/theme.css' layer(theme);
+@import '@ember-joinery/ember/tailwind.css';
+@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+
+/*
+ * shadcn's own utilities and variants (no-scrollbar, scroll-fade, shimmer, data-open…), which
+ * upstream's examples use as ui.shadcn.com imports `shadcn/tailwind.css`: the copy Joinery's
+ * build compiles its styles with. Code Block's examples cap their content with
+ * `max-h-48 scroll-fade-y`; the Dialog and Sheet examples hide a scrollbar with `no-scrollbar`.
+ */
+@import '../../node_modules/@ember-joinery/ember/src/css/shadcn.css';
+
+/*
+ * tw-animate-css's enter and exit utilities (`animate-in`, `fade-in-0`, `slide-in-from-bottom-2`),
+ * which ui.shadcn.com imports as `tw-animate-css` and Questionnaire's animated example uses on
+ * its items. The guide declares it as a dependency of its own, at the ember package's range.
+ */
+@import 'tw-animate-css';
+
+/*
+ * ui.shadcn.com's style variants (`style-lyra:ml-4` on collapsible-file-tree's content), as its
+ * globals.css defines them, but on the `data-style` the frame's preview and the parity route's
+ * stage carry, where upstream's previews carry a `style-<name>` class.
+ */
+@custom-variant style-vega (&:where([data-style='vega'] *));
+@custom-variant style-nova (&:where([data-style='nova'] *));
+@custom-variant style-lyra (&:where([data-style='lyra'] *));
+@custom-variant style-maia (&:where([data-style='maia'] *));
+@custom-variant style-mira (&:where([data-style='mira'] *));
+@custom-variant style-luma (&:where([data-style='luma'] *));
+@custom-variant style-sera (&:where([data-style='sera'] *));
+@custom-variant style-rhea (&:where([data-style='rhea'] *));
+
+/*
+ * ui.shadcn.com's variant for each style (`style-lyra:mb-2`), from apps/v4/app/globals.css,
+ * where the preview carries `.style-<name>`. The guide's preview carries `data-style`.
+ */
+@custom-variant style-vega (&:where([data-style='vega'] *));
+@custom-variant style-nova (&:where([data-style='nova'] *));
+@custom-variant style-lyra (&:where([data-style='lyra'] *));
+@custom-variant style-maia (&:where([data-style='maia'] *));
+@custom-variant style-mira (&:where([data-style='mira'] *));
+@custom-variant style-luma (&:where([data-style='luma'] *));
+@custom-variant style-sera (&:where([data-style='sera'] *));
+@custom-variant style-rhea (&:where([data-style='rhea'] *));
+
+@source '../examples';
+
+/*
+ * The classes the pages give a preview with `<Example @previewClass="…">`, upstream's
+ * `previewClassName` (the Navigation Menu page's `h-96`, Code Block's Markdown `h-auto`). The pages themselves aren't scanned,
+ * since every word of their prose would become a utility; add a page's classes here, and
+ * docs-app/tests/unit/preview-classes-test.ts checks that each one is.
+ */
+@source inline('h-96 h-auto');
+
+/*
+ * Typography's examples are upstream's own markup: bare headings, paragraphs, a list, a
+ * blockquote and a table, styled with nothing but utility classes. On ui.shadcn.com, as in any
+ * Tailwind app (the only kind those classes work in), they sit on Tailwind's preflight and the
+ * base layer of shadcn's CSS: no margin, padding or border but what a class gives, a border
+ * that takes `--border`, headings and small text at the size a class sets, no list bullets, a
+ * table without gaps. The stage has neither (see app.css), so this gives those examples, and
+ * no others, the share of both they rely on: the parity route's stage (`data-parity`) and the
+ * frame's (`data-example`) each name their example. It sits in the guide's layer, below the
+ * utilities, so every class still wins.
+ */
+@layer guide {
+  :where([data-example|='typography'], [data-parity|='typography']) :where(*),
+  :where([data-example|='typography'], [data-parity|='typography']) :where(*)::before,
+  :where([data-example|='typography'], [data-parity|='typography']) :where(*)::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+    border-color: var(--border);
+    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+  }
+
+  :where([data-example|='typography'], [data-parity|='typography']) :where(h1, h2, h3, h4, h5, h6) {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  :where([data-example|='typography'], [data-parity|='typography']) :where(a) {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  :where([data-example|='typography'], [data-parity|='typography']) :where(b, strong) {
+    font-weight: bolder;
+  }
+
+  :where([data-example|='typography'], [data-parity|='typography']) :where(code, kbd, samp, pre) {
+    font-family: var(
+      --font-mono,
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      'Liberation Mono',
+      'Courier New',
+      monospace
+    );
+    font-size: 1em;
+  }
+
+  :where([data-example|='typography'], [data-parity|='typography']) :where(small) {
+    font-size: 80%;
+  }
+
+  :where([data-example|='typography'], [data-parity|='typography']) :where(table) {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+
+  :where([data-example|='typography'], [data-parity|='typography']) :where(ol, ul, menu) {
+    list-style: none;
+  }
+}
+
+/*
+ * Two of Code Block's examples put a bare paragraph (and Typeset's, a heading and inline code)
+ * beside the block, which on ui.shadcn.com sit on Tailwind's preflight: no margin, a heading at
+ * the text's size and weight, code in the theme's monospace font. The stage has no preflight
+ * (see app.css), so these examples alone get that share of it, keyed, as Typography's are, on
+ * the stage's `data-parity` (the parity route's) or `data-example` (the frame's). Typeset's own
+ * prose styles are ui.shadcn.com's typeset.css, which Joinery doesn't ship.
+ */
+@layer guide {
+  :where(
+      [data-parity='code-block-rtl'],
+      [data-parity='code-block-typeset'],
+      [data-example='code-block-rtl'],
+      [data-example='code-block-typeset']
+    )
+    :where(p, h3) {
+    margin: 0;
+  }
+
+  :where([data-parity='code-block-typeset'], [data-example='code-block-typeset']) :where(h3) {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  :where([data-parity='code-block-typeset'], [data-example='code-block-typeset']) :where(p > code) {
+    font-family: var(
+      --font-mono,
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      'Liberation Mono',
+      'Courier New',
+      monospace
+    );
+    font-size: 1em;
+  }
+}
+
+/*
+ * The chart page's tooltip demo lays out four fixed-size cells (`h-[137px] w-[224px] p-4`) that
+ * hold their padding, as preflight's `border-box` sizing makes them in any Tailwind app. Its
+ * cells aren't Joinery parts, which get that sizing from joinery.css, so this gives it to that
+ * example alone, below the utilities as above.
+ */
+@layer guide {
+  :where([data-example='chart-tooltip'], [data-parity='chart-tooltip']) :where(*),
+  :where([data-example='chart-tooltip'], [data-parity='chart-tooltip']) :where(*)::before,
+  :where([data-example='chart-tooltip'], [data-parity='chart-tooltip']) :where(*)::after {
+    box-sizing: border-box;
+  }
+}
+
+/*
+ * The data table's examples draw a border round the table on a plain element
+ * (`overflow-hidden rounded-md border`), which on ui.shadcn.com takes `--border` from shadcn's
+ * base layer (`* { border-color: var(--border) }`). Joinery's parts get that colour from
+ * joinery.css; this gives it to those examples' own elements, below the utilities as above.
+ */
+@layer guide {
+  :where([data-example|='data-table'], [data-parity|='data-table']) :where(*) {
+    border-color: var(--border);
+  }
+}
+
+/*
+ * Trace's chat examples (demo, thinking, tool calls) hold their messages in a column that isn't
+ * a Joinery part, `min-h-72 … py-6`, whose 288px take the padding in, as preflight's `border-box`
+ * sizing makes them in any Tailwind app. In content-box sizing the column would be 336px tall,
+ * which moves everything after it, so these examples alone get that sizing, as the chart
+ * tooltip demo does above.
+ */
+@layer guide {
+  :where(
+      [data-example='trace-demo'],
+      [data-example='trace-thinking'],
+      [data-example='trace-tool-calls'],
+      [data-parity='trace-demo'],
+      [data-parity='trace-thinking'],
+      [data-parity='trace-tool-calls']
+    )
+    :where(*),
+  :where(
+      [data-example='trace-demo'],
+      [data-example='trace-thinking'],
+      [data-example='trace-tool-calls'],
+      [data-parity='trace-demo'],
+      [data-parity='trace-thinking'],
+      [data-parity='trace-tool-calls']
+    )
+    :where(*)::before,
+  :where(
+      [data-example='trace-demo'],
+      [data-example='trace-thinking'],
+      [data-example='trace-tool-calls'],
+      [data-parity='trace-demo'],
+      [data-parity='trace-thinking'],
+      [data-parity='trace-tool-calls']
+    )
+    :where(*)::after {
+    box-sizing: border-box;
+  }
+}
+
+/*
+ * Upstream's blocks are pages of a Tailwind app, on Tailwind's preflight and shadcn's base
+ * layer: every element sizes its border box, and a border takes `--border`. login-01's and
+ * signup-01's page is `min-h-svh` with `p-6 md:p-10` round the form, the screen's height,
+ * padding and all; the dashboard's table sits in a plain `border`. Joinery's parts get both
+ * from joinery.css; this gives them to the blocks' own elements, below the utilities as above.
+ */
+@layer guide {
+  :where([data-example='login-01'], [data-parity='login-01']) :where(*),
+  :where([data-example='signup-01'], [data-parity='signup-01']) :where(*),
+  :where([data-example='dashboard-01'], [data-parity='dashboard-01']) :where(*),
+  :where([data-example='sidebar-13'], [data-parity='sidebar-13']) :where(*) {
+    box-sizing: border-box;
+    border-color: var(--border);
+  }
+}

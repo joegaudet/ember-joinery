@@ -1,0 +1,11 @@
+{
+  "examples": {
+    "carousel-demo": "carousel-demo",
+    "carousel-size": "carousel-size",
+    "carousel-spacing": "carousel-spacing",
+    "carousel-orientation": "carousel-orientation",
+    "carousel-api": "carousel-api",
+    "carousel-plugin": "carousel-plugin",
+    "carousel-rtl": "carousel-rtl"
+  }
+}

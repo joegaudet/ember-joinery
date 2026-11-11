@@ -1,0 +1,8 @@
+{
+  "examples": {
+    "table-demo": "table-demo",
+    "table-footer": "table-footer",
+    "table-actions": "table-actions",
+    "table-rtl": "table-rtl"
+  }
+}

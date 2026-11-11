@@ -1,0 +1,9 @@
+{
+  "examples": {
+    "popover-demo": "popover-demo",
+    "popover-basic": "popover-basic",
+    "popover-alignments": "popover-alignments",
+    "popover-form": "popover-form",
+    "popover-rtl": "popover-rtl"
+  }
+}

@@ -1,0 +1,18 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/progress.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="progress" in Progress */
+:where(.jn-progress) {
+  @apply relative flex w-full items-center overflow-x-hidden;
+}
+
+/* data-slot="progress-indicator" in Progress */
+:where(.jn-progress-indicator) {
+  @apply size-full flex-1 transition-all;
+}

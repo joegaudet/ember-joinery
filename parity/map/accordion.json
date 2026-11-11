@@ -1,0 +1,11 @@
+{
+  "examples": {
+    "accordion-demo": "accordion-demo",
+    "accordion-basic": "accordion-basic",
+    "accordion-multiple": "accordion-multiple",
+    "accordion-disabled": "accordion-disabled",
+    "accordion-borders": "accordion-borders",
+    "accordion-card": "accordion-card",
+    "accordion-rtl": "accordion-rtl"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "examples": {
+    "sheet-demo": "sheet-demo",
+    "sheet-side": "sheet-side",
+    "sheet-no-close-button": "sheet-no-close-button",
+    "sheet-rtl": "sheet-rtl"
+  }
+}

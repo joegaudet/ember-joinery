@@ -1,0 +1,55 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/code-block.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* in codeBlockVariants; keep on the element: group/code-block */
+:where(.jn-code-block) {
+  @apply relative flex w-full min-w-0 flex-col overflow-hidden;
+}
+
+/* data-slot="code-block-header" in CodeBlockHeader */
+:where(.jn-code-block-header) {
+  @apply flex min-w-0 shrink-0 items-center *:has-[>[data-slot=code-block-title]]:min-w-0;
+}
+
+/* data-slot="code-block-title" in CodeBlockTitle */
+:where(.jn-code-block-title) {
+  @apply min-w-0 truncate [&_svg]:pointer-events-none [&_svg]:inline-block [&_svg]:align-middle;
+}
+
+/* data-slot="code-block-actions" in CodeBlockActions */
+:where(.jn-code-block-actions) {
+  @apply ms-auto flex shrink-0 items-center [[data-slot=code-block]>&]:absolute [[data-slot=code-block]>&]:z-10 [[data-slot=code-block]>&]:opacity-0 [[data-slot=code-block]>&]:transition-opacity [[data-slot=code-block]>&]:group-focus-within/code-block:opacity-100 [[data-slot=code-block]>&]:group-hover/code-block:opacity-100 [[data-slot=code-block]>&]:pointer-coarse:opacity-100;
+}
+
+/* in CodeBlockCopyButton, no slot to attach it to: sr-only */
+
+/* data-slot="code-block-content" in CodeBlockContent */
+:where(.jn-code-block-content) {
+  @apply min-h-0 min-w-0 scroll-fade-x scrollbar-thin overflow-auto text-start font-mono outline-none data-wrap:scroll-fade-y data-wrap:wrap-break-word data-wrap:whitespace-pre-wrap;
+}
+
+/* data-slot="code-block-code" in CodeBlockContent */
+:where(.jn-code-block-code) {
+  @apply grid min-h-lh min-w-max content-start in-data-numbered:grid-cols-[auto_1fr] in-data-wrap:min-w-0;
+}
+
+/* in codeBlockLineVariants */
+:where(.jn-code-block-line) {
+  @apply relative block min-h-lh after:absolute after:top-0 after:select-none in-data-numbered:col-span-2 in-data-numbered:grid in-data-numbered:grid-cols-subgrid in-data-numbered:[counter-increment:line] in-data-numbered:before:content-[counter(line)] in-data-numbered:before:select-none in-data-numbered:supports-[content:counter(line)_/_'']:before:content-[counter(line)_/_''];
+}
+
+/* data-slot="code-block-line-content" in CodeBlockLine */
+:where(.jn-code-block-line-content) {
+  @apply min-w-0;
+}
+
+/* data-slot="code-block-footer" in CodeBlockFooter */
+:where(.jn-code-block-footer) {
+  @apply flex min-w-0 shrink-0 items-center;
+}

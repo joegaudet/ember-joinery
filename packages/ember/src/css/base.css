@@ -1,0 +1,201 @@
+/*
+ * Joinery's base, ahead of the style's rules in `@layer joinery`.
+ *
+ * The radius scale: shadcn's themes set `--radius`, and the style sheets also read the steps
+ * derived from it (`rounded-[min(var(--radius-md),10px)]`), which a Tailwind app's theme
+ * defines. Apps without Tailwind get them here.
+ */
+:where(:root) {
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/*
+ * A title in the theme's heading font, where upstream's components mark one (`cn-font-heading`,
+ * which ui.shadcn.com's CSS gives `font-heading`). Without a `--font-heading`, it inherits.
+ */
+:where(.jn-font-heading) {
+  font-family: var(--font-heading);
+}
+
+/*
+ * An icon that points along the line, mirrored right to left, where upstream's components mark
+ * one (`cn-rtl-flip`, which upstream's right-to-left build turns into `rtl:rotate-180`, as
+ * scripts/rtl.mjs does): a breadcrumb's chevron, pagination's arrows.
+ */
+:where(.jn-rtl-flip) {
+  @apply rtl:rotate-180;
+}
+
+/*
+ * What Tailwind's preflight, and the base layer of a shadcn app's CSS, give upstream's parts,
+ * for apps without Tailwind: every element sizes from its border edge, starts with no margin,
+ * padding or border, and takes its border colour and focus outline from the theme; form
+ * controls take the page's font and colour; links, its colour and decoration; lists, no
+ * markers; tables, collapsed borders; and an SVG is a block. Scoped to Joinery's parts (each
+ * has a `data-slot`) and what they contain, so the rest of the page is left alone, and first in
+ * the layer, so every style's rules win over it.
+ */
+:where([data-slot], [data-slot] *),
+:where([data-slot], [data-slot] *)::before,
+:where([data-slot], [data-slot] *)::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0 solid;
+  border-color: var(--border);
+  outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+}
+
+:where(button, input, select, optgroup, textarea):where([data-slot], [data-slot] *) {
+  font: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  border-radius: 0;
+  background-color: transparent;
+  opacity: 1;
+}
+
+:where(a):where([data-slot], [data-slot] *) {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+:where(ol, ul, menu):where([data-slot], [data-slot] *) {
+  list-style: none;
+}
+
+:where(table):where([data-slot], [data-slot] *) {
+  text-indent: 0;
+  border-color: inherit;
+  border-collapse: collapse;
+}
+
+:where(svg, img, video, canvas):where([data-slot], [data-slot] *) {
+  display: block;
+  vertical-align: middle;
+}
+
+/*
+ * An element the `hidden` attribute hides stays hidden whatever `display` a class gives it, as
+ * preflight keeps it (`until-found` aside). Joinery's parts rely on it where upstream's unmount:
+ * a closed collapsible's content stays in the document, `hidden`, and upstream's examples lay
+ * it out with `flex`.
+ */
+:where([data-slot], [data-slot] *):where([hidden]:not([hidden='until-found'])) {
+  display: none !important;
+}
+
+/*
+ * The rest of preflight's form controls, for Input, Textarea and Native Select: a file input's
+ * button starts bare, with preflight's 4px after it; a placeholder is fully opaque, in half the
+ * text colour (a style's `placeholder:` colour wins); a textarea resizes only up and down; date
+ * and time inputs are a line tall, without the padding Chrome and Safari give their fields; and
+ * the search and spin buttons are evened out, as preflight does.
+ */
+:where([data-slot], [data-slot] *)::file-selector-button {
+  box-sizing: border-box;
+  margin: 0;
+  margin-inline-end: 4px;
+  padding: 0;
+  border: 0 solid;
+  border-color: var(--border);
+  font: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  border-radius: 0;
+  background-color: transparent;
+  opacity: 1;
+  appearance: button;
+}
+
+:where([data-slot], [data-slot] *)::placeholder {
+  opacity: 1;
+  color: color-mix(in oklab, currentcolor 50%, transparent);
+}
+
+:where(textarea):where([data-slot], [data-slot] *) {
+  resize: vertical;
+}
+
+:where([data-slot], [data-slot] *)::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+:where([data-slot], [data-slot] *)::-webkit-date-and-time-value {
+  min-height: 1lh;
+  text-align: inherit;
+}
+
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit {
+  display: inline-flex;
+}
+
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-year-field,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-month-field,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-day-field,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-hour-field,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-minute-field,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-second-field,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-millisecond-field,
+:where([data-slot], [data-slot] *)::-webkit-datetime-edit-meridiem-field {
+  padding-block: 0;
+}
+
+:where([data-slot], [data-slot] *)::-webkit-calendar-picker-indicator {
+  line-height: 1;
+}
+
+:where([data-slot], [data-slot] *)::-webkit-inner-spin-button,
+:where([data-slot], [data-slot] *)::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/*
+ * A part in the browser's top layer (`{{topLayer}}` makes it a popover) starts from none of the
+ * browser's popover styles. Those centre it (`inset: 0`, `margin: auto`), size it to fit its
+ * content, and give it a border, padding, `overflow: auto` and the system's colours; upstream's
+ * parts are plain elements placed with `fixed` and their own insets, sizes and colours. (The
+ * margin, padding and border are reset above.)
+ */
+:where([data-slot][popover]) {
+  inset: auto;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  color: inherit;
+  background-color: transparent;
+}
+
+/*
+ * Code in the theme's monospace font, as preflight gives upstream's Code Block: a browser's own
+ * `monospace` for `code` would otherwise beat the font its `pre` sets.
+ */
+:where(code, kbd, samp, pre):where([data-slot], [data-slot] *) {
+  font-family: var(
+    --font-mono,
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    'Liberation Mono',
+    'Courier New',
+    monospace
+  );
+  font-size: 1em;
+}

@@ -1,0 +1,10 @@
+{
+  "$comment": "The page also shows Joinery's own drawer-snap-points, drawer-nested, drawer-non-dismissible and drawer-scale-background, of vaul's features upstream's page leaves to vaul's docs; they have no upstream counterpart, so they aren't mapped.",
+  "examples": {
+    "drawer-demo": "drawer-demo",
+    "drawer-scrollable-content": "drawer-scrollable-content",
+    "drawer-sides": "drawer-sides",
+    "drawer-dialog": "drawer-dialog",
+    "drawer-rtl": "drawer-rtl"
+  }
+}

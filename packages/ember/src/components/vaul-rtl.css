@@ -1,0 +1,53 @@
+/*
+ * Right to left, for vaul.css. Joinery's styles put a drawer's `left` and `right` at the inline
+ * start and end (`start-0`, `end-0`, as the ported sheets make every side logical), so right to
+ * left a `left` drawer is on the right. vaul's own rules slide it by its physical side; these
+ * twins, under :dir(rtl), slide each one from the edge it is on, as the Drawer's gestures (in
+ * @ember-joinery/primitives/drawer) drag it. Left to right, none of this applies. The :dir()
+ * adds to the specificity, so each twin wins over vaul's rule for the same drawer.
+ */
+
+[data-vaul-drawer][data-vaul-snap-points='false'][data-vaul-drawer-direction='left'][data-state='open']:dir(
+    rtl
+  ) {
+  animation-name: slideFromRight;
+}
+[data-vaul-drawer][data-vaul-snap-points='false'][data-vaul-drawer-direction='left'][data-state='closed']:dir(
+    rtl
+  ) {
+  animation-name: slideToRight;
+}
+[data-vaul-drawer][data-vaul-snap-points='false'][data-vaul-drawer-direction='right'][data-state='open']:dir(
+    rtl
+  ) {
+  animation-name: slideFromLeft;
+}
+[data-vaul-drawer][data-vaul-snap-points='false'][data-vaul-drawer-direction='right'][data-state='closed']:dir(
+    rtl
+  ) {
+  animation-name: slideToLeft;
+}
+
+[data-vaul-drawer][data-vaul-snap-points='true'][data-vaul-drawer-direction='left']:not(
+    [data-vaul-delayed-snap-points='true']
+  ):dir(rtl) {
+  transform: translate3d(var(--initial-transform, 100%), 0, 0);
+}
+[data-vaul-drawer][data-vaul-snap-points='true'][data-vaul-drawer-direction='right']:not(
+    [data-vaul-delayed-snap-points='true']
+  ):dir(rtl) {
+  transform: translate3d(calc(var(--initial-transform, 100%) * -1), 0, 0);
+}
+
+/* vaul's delayed snap points translate by --snap-point-height, which the Drawer measures from
+   the edge it is on, so they need no twin; and the two above skip them, as vaul's rule for them
+   comes later and wins over its own. */
+
+[data-vaul-drawer][data-vaul-drawer-direction='left']:dir(rtl)::after {
+  left: 100%;
+  right: initial;
+}
+[data-vaul-drawer][data-vaul-drawer-direction='right']:dir(rtl)::after {
+  left: initial;
+  right: 100%;
+}

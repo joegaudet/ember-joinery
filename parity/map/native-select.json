@@ -1,0 +1,10 @@
+{
+  "$comment": "Every upstream example is mapped. The page also shows Joinery's own native-select-controlled, native-select-size and native-select-icon, which have no upstream counterparts, so they aren't mapped.",
+  "examples": {
+    "native-select-demo": "native-select-demo",
+    "native-select-groups": "native-select-groups",
+    "native-select-disabled": "native-select-disabled",
+    "native-select-invalid": "native-select-invalid",
+    "native-select-rtl": "native-select-rtl"
+  }
+}

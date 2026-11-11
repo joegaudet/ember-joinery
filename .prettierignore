@@ -1,0 +1,28 @@
+dist/
+declarations/
+pnpm-lock.yaml
+.changeset/*.md
+coverage/
+.claude/
+# The plan's Glimmer snippet is laid out by hand.
+JOINERY_PLAN.md
+docs/site/demo/
+docs/site/guide/
+docs/site/404.html
+# Joinery's compiled CSS, copied in by scripts/site-css.mjs.
+docs/site/joinery/
+examples/*/dist/
+docs-app/app/templates/*/meta.json
+parity/.generated/
+parity-report/
+# Generated from upstream: upstream.mjs writes the inventory, port-styles.mjs the style sheets
+# and the base colours.
+upstream/inventory.json
+packages/ember/src/styles/
+packages/ember/src/themes/
+# Copied unchanged from the shadcn package (see its header).
+packages/ember/src/css/shadcn.css
+# Copied unchanged from sonner (see its header).
+packages/ember/src/components/sonner.css
+# Copied from vaul (see its header).
+packages/ember/src/components/vaul.css

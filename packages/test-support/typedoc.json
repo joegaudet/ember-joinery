@@ -1,0 +1,1 @@
+{ "entryPoints": ["../packages/test-support/dist/*.d.ts"] }

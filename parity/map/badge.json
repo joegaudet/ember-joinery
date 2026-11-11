@@ -1,0 +1,11 @@
+{
+  "examples": {
+    "badge-demo": "badge-demo",
+    "badge-variants": "badge-variants",
+    "badge-icon": "badge-icon",
+    "badge-spinner": "badge-spinner",
+    "badge-link": "badge-link",
+    "badge-colors": "badge-colors",
+    "badge-rtl": "badge-rtl"
+  }
+}

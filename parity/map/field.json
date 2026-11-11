@@ -1,0 +1,25 @@
+{
+  "examples": {
+    "field-demo": "field-demo",
+    "field-input": "field-input",
+    "field-textarea": "field-textarea",
+    "field-select": "field-select",
+    "field-slider": {
+      "example": "field-slider",
+      "threshold": 0.08,
+      "reason": "A FieldTitle's line height, as in field-choice-card: upstream's FieldTitle is 20px tall and Joinery's 19.25px, so the description and the slider under it sit 0.75px higher, and in a box 65px tall that moves every edge of the text, the track and both thumbs. The fix is the same one, port-styles.mjs applying tailwind-merge within each rule."
+    },
+    "field-fieldset": "field-fieldset",
+    "field-checkbox": "field-checkbox",
+    "field-radio": "field-radio",
+    "field-switch": "field-switch",
+    "field-choice-card": {
+      "example": "field-choice-card",
+      "threshold": 0.04,
+      "reason": "A FieldTitle's line height. Upstream's cn() drops the field-title rule's leading-snug for the text-sm after it in Nova, so its title is 20px tall; scripts/port-styles.mjs keeps a rule's classes as written, so Joinery's is 19.25px and what follows each title sits 0.75px higher. Fixing it means port-styles.mjs applying tailwind-merge within each rule, as upstream's cn() does (the field-title rules, Sera's label and the combobox content, across the eight sheets)."
+    },
+    "field-group": "field-group",
+    "field-rtl": "field-rtl",
+    "field-responsive": "field-responsive"
+  }
+}

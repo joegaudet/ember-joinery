@@ -1,0 +1,56 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/navigation-menu.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="navigation-menu" in NavigationMenu; keep on the element: group/navigation-menu */
+:where(.jn-navigation-menu) {
+  @apply relative flex max-w-max flex-1 items-center justify-center;
+}
+
+/* data-slot="navigation-menu-list" in NavigationMenuList; keep on the element: group */
+:where(.jn-navigation-menu-list) {
+  @apply flex flex-1 list-none items-center justify-center;
+}
+
+/* data-slot="navigation-menu-item" in NavigationMenuItem */
+:where(.jn-navigation-menu-item) {
+  @apply relative;
+}
+
+/* in navigationMenuTriggerStyle; keep on the element: group/navigation-menu-trigger */
+:where(.jn-navigation-menu-trigger) {
+  @apply inline-flex h-9 w-max items-center justify-center outline-none disabled:pointer-events-none;
+}
+
+/* :where(.jn-navigation-menu-trigger): keep on the element: group */
+
+/* data-slot="navigation-menu-content" in NavigationMenuContent */
+:where(.jn-navigation-menu-content) {
+  @apply top-0 start-0 w-full group-data-[viewport=false]/navigation-menu:top-full group-data-[viewport=false]/navigation-menu:mt-1.5 group-data-[viewport=false]/navigation-menu:overflow-hidden **:data-[slot=navigation-menu-link]:focus:ring-0 **:data-[slot=navigation-menu-link]:focus:outline-none md:absolute md:w-auto;
+}
+
+/* in NavigationMenuViewport */
+:where(.jn-navigation-menu-viewport-wrapper) {
+  @apply absolute top-full start-0 isolate z-50 flex justify-center;
+}
+
+/* data-slot="navigation-menu-viewport" in NavigationMenuViewport */
+:where(.jn-navigation-menu-viewport) {
+  @apply relative mt-1.5 h-(--radix-navigation-menu-viewport-height) w-full overflow-hidden md:w-(--radix-navigation-menu-viewport-width);
+}
+/* NOTE: upstream's list also has origin-top-center, which Tailwind has no utility for: it styles nothing on ui.shadcn.com, and @apply would fail on it, so it is left out. */
+
+/* data-slot="navigation-menu-indicator" in NavigationMenuIndicator */
+:where(.jn-navigation-menu-indicator) {
+  @apply top-full z-1 flex h-1.5 items-end justify-center overflow-hidden;
+}
+
+/* in NavigationMenuIndicator */
+:where(.jn-navigation-menu-indicator-arrow) {
+  @apply relative top-[60%] h-2 w-2 rotate-45;
+}

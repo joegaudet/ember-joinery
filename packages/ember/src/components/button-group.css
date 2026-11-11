@@ -1,0 +1,384 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/button-group.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* in buttonGroupVariants; keep on the element: group/button-group */
+:where(.jn-button-group) {
+  @apply flex w-fit items-stretch *:focus-visible:relative *:focus-visible:z-10 [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1;
+}
+
+/* in buttonGroupVariants (cva-variant orientation.horizontal) */
+:where(.jn-button-group-orientation-horizontal) {
+  @apply [&>*:not(:first-child)]:rounded-s-none [&>*:not(:first-child)]:border-s-0 [&>*:not(:last-child)]:rounded-e-none;
+}
+
+/* in buttonGroupVariants (cva-variant orientation.vertical) */
+:where(.jn-button-group-orientation-vertical) {
+  @apply flex-col [&>*:not(:first-child)]:rounded-t-none [&>*:not(:first-child)]:border-t-0 [&>*:not(:last-child)]:rounded-b-none;
+}
+
+/* in ButtonGroupText */
+:where(.jn-button-group-text) {
+  @apply flex items-center [&_svg]:pointer-events-none;
+}
+
+/* data-slot="button-group-separator" in ButtonGroupSeparator */
+:where(.jn-button-group-separator) {
+  @apply relative self-stretch data-horizontal:mx-px data-horizontal:w-auto data-vertical:my-px data-vertical:h-auto;
+}
+
+/*
+ * Written by hand, not by extract-classes.mjs, which reads one file: ButtonGroupSeparator
+ * renders upstream's Separator (apps/v4/registry/bases/radix/ui/separator.tsx), and these are
+ * that component's inline utilities, as in separator.css. They come first in Separator's cn()
+ * call, so ButtonGroupSeparator's own classes beat them: the style sheet's
+ * `jn-button-group-separator` rule (`bg-input` in every style) beats `bg-border`, and
+ * `data-horizontal:w-auto` above beats `data-horizontal:w-full`. Those two are left out, so what
+ * remains overrides nothing the sheet's rule sets. For the same reason it doesn't render
+ * Joinery's Separator: separator.css comes after this file, so its `bg-border` would win.
+ */
+:where(.jn-button-group-separator) {
+  @apply shrink-0 data-horizontal:h-px data-vertical:w-px data-vertical:self-stretch;
+}
+
+/*
+ * Through an overlay's root (edited by hand). Radix's Popover, Tooltip, Hover Card, Dialog,
+ * Sheet, Select and menu roots, vaul's Drawer and Base UI's Combobox render no element, so
+ * upstream's trigger (a dropdown's or a popover's button, a select's trigger, a tooltip's
+ * button, a combobox's input group) is the group's own child, which the rules above and each sheet's rules join to its neighbours. Joinery's roots
+ * are an element with display: contents (`data-test-jn` names each; a tooltip provider is
+ * `data-jn-tooltip-provider`), which those rules reach instead. So these restate them one root
+ * down (two, for a tooltip in a provider), on the root's children but for its content in the
+ * top layer (`[popover]`, a `<dialog>`), at each rule's weight, with the root's place in the
+ * group standing for the trigger's. scripts/button-group-css.test.mjs checks them against the
+ * rules above and the sheets.
+ */
+
+/* `*:focus-visible:relative *:focus-visible:z-10`, above. */
+:where(.jn-button-group)
+  > :where(
+    [data-test-jn='popover'],
+    [data-test-jn='tooltip'],
+    [data-test-jn='hover-card'],
+    [data-test-jn='dialog'],
+    [data-test-jn='alert-dialog'],
+    [data-test-jn='sheet'],
+    [data-test-jn='drawer'],
+    [data-test-jn='dropdown-menu'],
+    [data-test-jn='context-menu'],
+    [data-test-jn='select'],
+    [data-test-jn='combobox']
+  )
+  > :where(:not([popover], dialog)):focus-visible,
+:where(.jn-button-group)
+  > :where([data-jn-tooltip-provider])
+  > :where([data-test-jn='tooltip'])
+  > :where(:not([popover], dialog)):focus-visible {
+  @apply relative z-10;
+}
+
+/* `[&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit`, above. */
+:where(.jn-button-group)
+  > :where([data-test-jn='select'])
+  > [data-slot='select-trigger']:not([class*='w-']) {
+  @apply w-fit;
+}
+
+/* The orientations' `[&>*:not(:first-child)]` and `[&>*:not(:last-child)]`, above. */
+:where(.jn-button-group-orientation-horizontal)
+  > :where(
+    [data-test-jn='popover'],
+    [data-test-jn='tooltip'],
+    [data-test-jn='hover-card'],
+    [data-test-jn='dialog'],
+    [data-test-jn='alert-dialog'],
+    [data-test-jn='sheet'],
+    [data-test-jn='drawer'],
+    [data-test-jn='dropdown-menu'],
+    [data-test-jn='context-menu'],
+    [data-test-jn='select'],
+    [data-test-jn='combobox']
+  ):not(:first-child)
+  > :where(:not([popover], dialog)),
+:where(.jn-button-group-orientation-horizontal)
+  > :where([data-jn-tooltip-provider]):not(:first-child)
+  > :where([data-test-jn='tooltip'])
+  > :where(:not([popover], dialog)) {
+  @apply rounded-s-none border-s-0;
+}
+
+:where(.jn-button-group-orientation-horizontal)
+  > :where(
+    [data-test-jn='popover'],
+    [data-test-jn='tooltip'],
+    [data-test-jn='hover-card'],
+    [data-test-jn='dialog'],
+    [data-test-jn='alert-dialog'],
+    [data-test-jn='sheet'],
+    [data-test-jn='drawer'],
+    [data-test-jn='dropdown-menu'],
+    [data-test-jn='context-menu'],
+    [data-test-jn='select'],
+    [data-test-jn='combobox']
+  ):not(:last-child)
+  > :where(:not([popover], dialog)),
+:where(.jn-button-group-orientation-horizontal)
+  > :where([data-jn-tooltip-provider]):not(:last-child)
+  > :where([data-test-jn='tooltip'])
+  > :where(:not([popover], dialog)) {
+  @apply rounded-e-none;
+}
+
+:where(.jn-button-group-orientation-vertical)
+  > :where(
+    [data-test-jn='popover'],
+    [data-test-jn='tooltip'],
+    [data-test-jn='hover-card'],
+    [data-test-jn='dialog'],
+    [data-test-jn='alert-dialog'],
+    [data-test-jn='sheet'],
+    [data-test-jn='drawer'],
+    [data-test-jn='dropdown-menu'],
+    [data-test-jn='context-menu'],
+    [data-test-jn='select'],
+    [data-test-jn='combobox']
+  ):not(:first-child)
+  > :where(:not([popover], dialog)),
+:where(.jn-button-group-orientation-vertical)
+  > :where([data-jn-tooltip-provider]):not(:first-child)
+  > :where([data-test-jn='tooltip'])
+  > :where(:not([popover], dialog)) {
+  @apply rounded-t-none border-t-0;
+}
+
+:where(.jn-button-group-orientation-vertical)
+  > :where(
+    [data-test-jn='popover'],
+    [data-test-jn='tooltip'],
+    [data-test-jn='hover-card'],
+    [data-test-jn='dialog'],
+    [data-test-jn='alert-dialog'],
+    [data-test-jn='sheet'],
+    [data-test-jn='drawer'],
+    [data-test-jn='dropdown-menu'],
+    [data-test-jn='context-menu'],
+    [data-test-jn='select'],
+    [data-test-jn='combobox']
+  ):not(:last-child)
+  > :where(:not([popover], dialog)),
+:where(.jn-button-group-orientation-vertical)
+  > :where([data-jn-tooltip-provider]):not(:last-child)
+  > :where([data-test-jn='tooltip'])
+  > :where(:not([popover], dialog)) {
+  @apply rounded-b-none;
+}
+
+/*
+ * Each sheet's `[&>[data-slot]:not(:has(~[data-slot]))]:rounded-e-*!` (`rounded-b-*!` in a
+ * column) rounds the group's last part. A root has no `data-slot`, so that rule misses the
+ * trigger in the last root, and takes the part before the root for the last one instead,
+ * rounding its corners over the square ones above. So the trigger in a root that nothing with a
+ * `data-slot`, and no other root, follows takes each sheet's rule, and a part that only roots
+ * follow gets its square corners back: `!important`, as the sheet's rule is, at its weight
+ * (0,2,0), and after it.
+ */
+:where(.jn-button-group-orientation-horizontal)
+  > :where(
+    [data-test-jn='popover'],
+    [data-test-jn='tooltip'],
+    [data-test-jn='hover-card'],
+    [data-test-jn='dialog'],
+    [data-test-jn='alert-dialog'],
+    [data-test-jn='sheet'],
+    [data-test-jn='drawer'],
+    [data-test-jn='dropdown-menu'],
+    [data-test-jn='context-menu'],
+    [data-test-jn='select'],
+    [data-test-jn='combobox']
+  ):not(
+    :has(
+      ~ [data-slot],
+      ~ :where(
+        [data-test-jn='popover'],
+        [data-test-jn='tooltip'],
+        [data-test-jn='hover-card'],
+        [data-test-jn='dialog'],
+        [data-test-jn='alert-dialog'],
+        [data-test-jn='sheet'],
+        [data-test-jn='drawer'],
+        [data-test-jn='dropdown-menu'],
+        [data-test-jn='context-menu'],
+        [data-test-jn='select'],
+        [data-test-jn='combobox'],
+        [data-jn-tooltip-provider]
+      )
+    )
+  )
+  > :where(:not([popover], dialog)),
+:where(.jn-button-group-orientation-horizontal)
+  > :where([data-jn-tooltip-provider]):not(
+    :has(
+      ~ [data-slot],
+      ~ :where(
+        [data-test-jn='popover'],
+        [data-test-jn='tooltip'],
+        [data-test-jn='hover-card'],
+        [data-test-jn='dialog'],
+        [data-test-jn='alert-dialog'],
+        [data-test-jn='sheet'],
+        [data-test-jn='drawer'],
+        [data-test-jn='dropdown-menu'],
+        [data-test-jn='context-menu'],
+        [data-test-jn='select'],
+        [data-test-jn='combobox'],
+        [data-jn-tooltip-provider]
+      )
+    )
+  )
+  > :where([data-test-jn='tooltip'])
+  > :where(:not([popover], dialog)) {
+  @variant style-luma {
+    @apply rounded-e-4xl!;
+  }
+  @variant style-maia {
+    @apply rounded-e-4xl!;
+  }
+  @variant style-mira {
+    @apply rounded-e-md!;
+  }
+  @variant style-nova {
+    @apply rounded-e-lg!;
+  }
+  @variant style-rhea {
+    @apply rounded-e-2xl!;
+  }
+  @variant style-sera {
+    @apply rounded-none!;
+  }
+  @variant style-vega {
+    @apply rounded-e-md!;
+  }
+}
+
+:where(.jn-button-group-orientation-vertical)
+  > :where(
+    [data-test-jn='popover'],
+    [data-test-jn='tooltip'],
+    [data-test-jn='hover-card'],
+    [data-test-jn='dialog'],
+    [data-test-jn='alert-dialog'],
+    [data-test-jn='sheet'],
+    [data-test-jn='drawer'],
+    [data-test-jn='dropdown-menu'],
+    [data-test-jn='context-menu'],
+    [data-test-jn='select'],
+    [data-test-jn='combobox']
+  ):not(
+    :has(
+      ~ [data-slot],
+      ~ :where(
+        [data-test-jn='popover'],
+        [data-test-jn='tooltip'],
+        [data-test-jn='hover-card'],
+        [data-test-jn='dialog'],
+        [data-test-jn='alert-dialog'],
+        [data-test-jn='sheet'],
+        [data-test-jn='drawer'],
+        [data-test-jn='dropdown-menu'],
+        [data-test-jn='context-menu'],
+        [data-test-jn='select'],
+        [data-test-jn='combobox'],
+        [data-jn-tooltip-provider]
+      )
+    )
+  )
+  > :where(:not([popover], dialog)),
+:where(.jn-button-group-orientation-vertical)
+  > :where([data-jn-tooltip-provider]):not(
+    :has(
+      ~ [data-slot],
+      ~ :where(
+        [data-test-jn='popover'],
+        [data-test-jn='tooltip'],
+        [data-test-jn='hover-card'],
+        [data-test-jn='dialog'],
+        [data-test-jn='alert-dialog'],
+        [data-test-jn='sheet'],
+        [data-test-jn='drawer'],
+        [data-test-jn='dropdown-menu'],
+        [data-test-jn='context-menu'],
+        [data-test-jn='select'],
+        [data-test-jn='combobox'],
+        [data-jn-tooltip-provider]
+      )
+    )
+  )
+  > :where([data-test-jn='tooltip'])
+  > :where(:not([popover], dialog)) {
+  @variant style-luma {
+    @apply rounded-b-4xl!;
+  }
+  @variant style-maia {
+    @apply rounded-b-4xl!;
+  }
+  @variant style-mira {
+    @apply rounded-b-md!;
+  }
+  @variant style-nova {
+    @apply rounded-b-lg!;
+  }
+  @variant style-rhea {
+    @apply rounded-b-2xl!;
+  }
+  @variant style-sera {
+    @apply rounded-none!;
+  }
+  @variant style-vega {
+    @apply rounded-b-md!;
+  }
+}
+
+:where(.jn-button-group-orientation-horizontal)
+  > [data-slot]:not(:has(~ [data-slot])):has(
+    ~ :where(
+      [data-test-jn='popover'],
+      [data-test-jn='tooltip'],
+      [data-test-jn='hover-card'],
+      [data-test-jn='dialog'],
+      [data-test-jn='alert-dialog'],
+      [data-test-jn='sheet'],
+      [data-test-jn='drawer'],
+      [data-test-jn='dropdown-menu'],
+      [data-test-jn='context-menu'],
+      [data-test-jn='select'],
+      [data-test-jn='combobox'],
+      [data-jn-tooltip-provider]
+    )
+  ) {
+  @apply rounded-e-none!;
+}
+
+:where(.jn-button-group-orientation-vertical)
+  > [data-slot]:not(:has(~ [data-slot])):has(
+    ~ :where(
+      [data-test-jn='popover'],
+      [data-test-jn='tooltip'],
+      [data-test-jn='hover-card'],
+      [data-test-jn='dialog'],
+      [data-test-jn='alert-dialog'],
+      [data-test-jn='sheet'],
+      [data-test-jn='drawer'],
+      [data-test-jn='dropdown-menu'],
+      [data-test-jn='context-menu'],
+      [data-test-jn='select'],
+      [data-test-jn='combobox'],
+      [data-jn-tooltip-provider]
+    )
+  ) {
+  @apply rounded-b-none!;
+}

@@ -1,0 +1,25 @@
+/*
+ * Inline utilities from apps/v4/registry/bases/radix/ui/breadcrumb.tsx (shadcn-ui/ui@8ab2771),
+ * extracted by scripts/extract-classes.mjs. They go after the style sheet's rules: upstream's
+ * registry build puts a string's style rules ahead of its inline utilities (a cn() call's, ahead
+ * of all of them), so each wins over those rules. Where a later string of the same cva (a
+ * variant, a size) overrides one, its rule skips that class with :not(). Physical sides are
+ * logical, as in the ported sheets (scripts/rtl.mjs), so the rules hold in both directions.
+ */
+
+/* data-slot="breadcrumb-list" in BreadcrumbList */
+:where(.jn-breadcrumb-list) {
+  @apply flex flex-wrap items-center wrap-break-word;
+}
+
+/* data-slot="breadcrumb-item" in BreadcrumbItem */
+:where(.jn-breadcrumb-item) {
+  @apply inline-flex items-center;
+}
+
+/* data-slot="breadcrumb-ellipsis" in BreadcrumbEllipsis */
+:where(.jn-breadcrumb-ellipsis) {
+  @apply flex items-center justify-center;
+}
+
+/* in BreadcrumbEllipsis, no slot to attach it to: sr-only */

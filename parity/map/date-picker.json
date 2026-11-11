@@ -1,0 +1,12 @@
+{
+  "examples": {
+    "date-picker-demo": "date-picker-demo",
+    "date-picker-basic": "date-picker-basic",
+    "date-picker-range": "date-picker-range",
+    "date-picker-dob": "date-picker-dob",
+    "date-picker-input": "date-picker-input",
+    "date-picker-time": "date-picker-time",
+    "date-picker-natural-language": "date-picker-natural-language",
+    "date-picker-rtl": "date-picker-rtl"
+  }
+}

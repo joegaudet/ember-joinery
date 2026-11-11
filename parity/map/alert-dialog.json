@@ -1,0 +1,11 @@
+{
+  "examples": {
+    "alert-dialog-demo": "alert-dialog-demo",
+    "alert-dialog-basic": "alert-dialog-basic",
+    "alert-dialog-small": "alert-dialog-small",
+    "alert-dialog-media": "alert-dialog-media",
+    "alert-dialog-small-media": "alert-dialog-small-media",
+    "alert-dialog-destructive": "alert-dialog-destructive",
+    "alert-dialog-rtl": "alert-dialog-rtl"
+  }
+}

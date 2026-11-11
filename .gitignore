@@ -12,6 +12,8 @@ tmp/
 docs/site/demo/
 docs/site/guide/
 docs/site/404.html
+# Joinery's compiled CSS, copied in for the site by scripts/site-css.mjs (`pnpm site:css`).
+docs/site/joinery/
 # Upstream checkouts (scripts/upstream.mjs fetch), and the parity app's generated files and report.
 .upstream/
 parity/.generated/

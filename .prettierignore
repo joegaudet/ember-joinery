@@ -9,6 +9,8 @@ JOINERY_PLAN.md
 docs/site/demo/
 docs/site/guide/
 docs/site/404.html
+# Joinery's compiled CSS, copied in by scripts/site-css.mjs.
+docs/site/joinery/
 examples/*/dist/
 docs-app/app/templates/*/meta.json
 parity/.generated/

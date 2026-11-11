@@ -23,6 +23,8 @@
     "demo:build": "pnpm --filter test-app run build:demo",
     "guide:build": "pnpm --filter docs-app run build",
     "guide:start": "pnpm --filter docs-app start",
+    "site:css": "node scripts/site-css.mjs",
+    "site:screenshots": "node scripts/site-screenshots.mjs",
     "start": "pnpm --filter test-app start",
     "release": "pnpm build && node scripts/publish.mjs"
   },

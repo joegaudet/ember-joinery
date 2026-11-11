@@ -1,6 +1,7 @@
 name: pages
 
-# Publishes docs/site to GitHub Pages at joegaudet.com/ember-joinery/: the marketing page, plus
+# Publishes docs/site to GitHub Pages at joegaudet.com/ember-joinery/: the marketing page, styled
+# with Joinery's own CSS (copied from the build into docs/site/joinery by `pnpm site:css`), plus
 # the demo (built from test-app into docs/site/demo) and the guide (built from docs-app into
 # docs/site/guide, with docs/site/404.html so the guide's deep links load).
 #
@@ -17,6 +18,7 @@ on:
       - 'docs-app/**'
       - 'packages/*/src/**'
       - 'scripts/gen-*.mjs'
+      - 'scripts/site-css.mjs'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -44,6 +46,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      - run: pnpm site:css
       - run: pnpm demo:build
       - run: pnpm guide:build
       - uses: actions/configure-pages@v6

@@ -83,9 +83,9 @@ jobs:
       - run: pnpm --filter docs-app typecheck
       - run: pnpm --filter docs-app test
 
-  # The site as pages.yml builds it: the demo and the guide in production mode, under
-  # /ember-joinery/, so a break in either (or in a base path) shows on the PR, not only after
-  # a merge to main.
+  # The site as pages.yml builds it: Joinery's CSS copied in, and the demo and the guide in
+  # production mode, under /ember-joinery/, so a break in any of them (or in a base path) shows
+  # on the PR, not only after a merge to main.
   site:
     name: site (the Pages build)
     runs-on: ubuntu-latest
@@ -98,10 +98,13 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      - run: pnpm site:css
       - run: pnpm demo:build
       - run: pnpm guide:build
-      - name: Check the base paths and the 404 page
+      - name: Check the site's CSS, the base paths and the 404 page
         run: |
+          test -s docs/site/joinery/tokens.css && test -s docs/site/joinery/joinery.css
+          test -s docs/site/joinery/themes/stone.css && test -s docs/site/joinery/styles/lyra.css
           grep -q 'src="/ember-joinery/demo/assets/' docs/site/demo/index.html
           grep -q 'src="/ember-joinery/guide/assets/' docs/site/guide/index.html
           cmp docs/site/guide/index.html docs/site/404.html

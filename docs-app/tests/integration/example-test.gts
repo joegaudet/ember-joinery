@@ -1,11 +1,30 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'docs-app/tests/helpers'
-import { click, find, render, select, triggerKeyEvent, waitUntil } from '@ember/test-helpers'
+import {
+  click,
+  find,
+  findAll,
+  render,
+  select,
+  settled,
+  triggerKeyEvent,
+  waitUntil,
+} from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { NavigationMenuHarness } from '@ember-joinery/test-support'
 import { Example } from 'docs-app/components/example'
 
 const tab = (name: string) => `[data-test-example-tab="${name}"]`
+
+/** Every file in dashboard-01's folder, as the Template tab names them. */
+const dashboardFiles = Object.keys(
+  import.meta.glob([
+    '../../app/examples/dashboard-01/*.gts',
+    '../../app/examples/dashboard-01/*.ts',
+  ]),
+)
+  .map(path => path.slice('../../app/examples/'.length))
+  .sort()
 
 module('Integration | <Example>', function (hooks) {
   setupRenderingTest(hooks)
@@ -49,6 +68,53 @@ module('Integration | <Example>', function (hooks) {
       await click('.example-copy')
       assert.true(copied[0]?.includes('// lazy/revenue-summary.gts'), 'copied with the example')
       assert.true(copied[0]?.includes('const RevenueSummary'))
+      await a11yAudit()
+    } finally {
+      delete (navigator as { clipboard?: unknown }).clipboard
+    }
+  })
+
+  test("a block's Template tab, and Copy, hold every file in its folder, those its files import too", async function (assert) {
+    const copied: string[] = []
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: async (text: string) => void copied.push(text) },
+    })
+    try {
+      await render(
+        <template>
+          <Example
+            @name="dashboard-01"
+            @title="dashboard-01"
+            @block={{true}}
+            @blockHeight={{1000}}
+          />
+        </template>,
+      )
+      await click(tab('template'))
+      const shown = findAll('.example-file').map(file => file.textContent!.trim())
+      assert.deepEqual(
+        shown.slice(0, 6),
+        [
+          'dashboard-01/app-sidebar.gts',
+          'dashboard-01/chart-area-interactive.gts',
+          'dashboard-01/data-table.gts',
+          'dashboard-01/section-cards.gts',
+          'dashboard-01/site-header.gts',
+          'dashboard-01/data.ts',
+        ],
+        "the page's own imports first, in its order",
+      )
+      assert.true(shown.includes('dashboard-01/nav-main.gts'), "then app-sidebar.gts's")
+      assert.true(shown.includes('dashboard-01/sortable.ts'), "and data-table.gts's")
+      assert.deepEqual([...shown].sort(), dashboardFiles, 'every file in the folder, once')
+      assert
+        .dom('.example-code pre.shiki')
+        .exists({ count: dashboardFiles.length + 1 }, 'each with its source')
+
+      await click('.example-copy')
+      const missing = dashboardFiles.filter(path => !copied[0]?.includes(`// ${path}\n`))
+      assert.deepEqual(missing, [], 'Copy holds them all, so the copied block builds')
       await a11yAudit()
     } finally {
       delete (navigator as { clipboard?: unknown }).clipboard
@@ -434,6 +500,48 @@ module('Integration | <Example>', function (hooks) {
     assert.true(prevented, 'the submit stops at the frame')
     assert.strictEqual(frame.contentDocument, doc, 'the frame keeps its page')
     assert.dom(doc.querySelector('[data-slot="card"]')).exists('and the block in it')
+    await a11yAudit()
+  })
+
+  test('a link to a fragment in the frame moves within it, rather than loading the guide there', async function (assert) {
+    await render(<template><Example @name="login-01" @title="Login" @block={{true}} /></template>)
+    await waitUntil(() => find('iframe')?.contentDocument?.querySelector('form'))
+    const frame = find('iframe') as HTMLIFrameElement
+    const doc = frame.contentDocument!
+    const view = frame.contentWindow!
+    const prevented: boolean[] = []
+    doc.addEventListener('click', event => prevented.push(event.defaultPrevented))
+
+    // `#` resolves against the frame's base, the guide page's own address.
+    const links = [...doc.querySelectorAll<HTMLAnchorElement>('a[href="#"]')]
+    assert.deepEqual(
+      links.map(link => link.textContent?.trim()),
+      ['Forgot your password?', 'Sign up'],
+    )
+    for (const link of links) link.click()
+    assert.deepEqual(prevented, [true, true], 'each click stops at the frame')
+    await settled()
+    assert.strictEqual(frame.contentDocument, doc, 'the frame keeps its page')
+    assert.strictEqual(view.location.href, 'about:srcdoc')
+    assert.dom(doc.querySelector('[data-slot="card"]')).exists('and the block in it')
+
+    // As on a page of its own: a fragment goes to the element it names, `#` to the top.
+    const spacer = doc.createElement('div')
+    spacer.style.height = '3000px'
+    const terms = Object.assign(doc.createElement('h2'), { id: 'terms', textContent: 'Terms' })
+    const toTerms = Object.assign(doc.createElement('a'), { textContent: 'Terms' })
+    toTerms.setAttribute('href', '#terms')
+    doc.body.append(spacer, terms, toTerms)
+    try {
+      toTerms.click()
+      const top = terms.getBoundingClientRect().top
+      assert.true(top >= 0 && top < view.innerHeight, `scrolled to #terms (${top}px)`)
+      links[0]!.click()
+      assert.strictEqual(view.scrollY, 0, 'and back to the top')
+      assert.strictEqual(frame.contentDocument, doc)
+    } finally {
+      for (const node of [spacer, terms, toTerms]) node.remove()
+    }
     await a11yAudit()
   })
 

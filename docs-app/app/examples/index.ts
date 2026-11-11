@@ -7,7 +7,8 @@ import type { ComponentLike } from '@glint/template'
  * so a page pulls in only the examples it shows.
  *
  * Files an example imports from a folder here (`./lazy/revenue-summary.gts`, which it loads
- * on demand) are part of it, not examples: the frame shows them after the example's source.
+ * on demand), and the files those import, are part of it, not examples: the frame shows them
+ * after the example's source.
  */
 export interface ExampleModule {
   default: ComponentLike
@@ -25,7 +26,10 @@ export interface LoadedExample {
   component: ComponentLike
   /** The example file, exactly: the frame's Template tab. */
   source: string
-  /** The files it imports from the folders here, in the order it names them. */
+  /**
+   * The files it imports from the folders here, in the order it names them, then the files
+   * those import.
+   */
   files: ExampleFile[]
   /** Its test file, exactly: the frame's Test tab. */
   test: string | undefined
@@ -63,10 +67,43 @@ export function hasExample(name: string): boolean {
   return `./${name}.gts` in modules
 }
 
-/** The files in the folders here that `source` imports (statically or with `import()`). */
-function importedFiles(source: string): string[] {
-  const paths = [...source.matchAll(/(?:from|import\()\s*['"]\.\/([\w-]+\/[\w.-]+)['"]/g)]
-  return [...new Set(paths.map(match => `./${match[1]}`))].filter(path => path in files)
+/** The relative paths `source` imports, statically or with `import()`, in the order it names them. */
+function relativeImports(source: string): string[] {
+  return [...source.matchAll(/(?:\bfrom|\bimport\s*\()\s*['"](\.\.?\/[^'"]+)['"]/g)].map(
+    match => match[1]!,
+  )
+}
+
+/** `specifier`, imported by the file at `from` (`./dashboard-01.gts`), as a path like it. */
+function resolveImport(from: string, specifier: string): string {
+  const { pathname } = new URL(specifier, `file:///examples/${from.slice(2)}`)
+  return pathname.startsWith('/examples/') ? `./${pathname.slice('/examples/'.length)}` : pathname
+}
+
+/**
+ * The files in the folders here that an example imports, and every file those import in turn
+ * (a block's `app-sidebar.gts` imports `./nav-main.gts`), so the Template tab and its Copy
+ * button hold everything it needs. The example's own imports come first, in the order it names
+ * them, then theirs.
+ */
+async function importedFiles(name: string, source: string): Promise<ExampleFile[]> {
+  const imported: ExampleFile[] = []
+  const seen = new Set<string>()
+  let level = [{ path: `./${name}.gts`, source }]
+  while (level.length) {
+    const next: string[] = []
+    for (const file of level) {
+      for (const specifier of relativeImports(file.source)) {
+        const path = resolveImport(file.path, specifier)
+        if (!(path in files) || seen.has(path)) continue
+        seen.add(path)
+        next.push(path)
+      }
+    }
+    level = await Promise.all(next.map(async path => ({ path, source: await files[path]!() })))
+    imported.push(...level.map(file => ({ path: file.path.slice(2), source: file.source })))
+  }
+  return imported
 }
 
 /** Loads an example with its source and test, or undefined if there's no example by `name`. */
@@ -79,11 +116,6 @@ export async function loadExample(name: string): Promise<LoadedExample | undefin
     sources[`./${name}.gts`]!(),
     testFile ? testFile() : Promise.resolve(undefined),
   ])
-  const imported = await Promise.all(
-    importedFiles(source).map(async path => ({
-      path: path.slice(2),
-      source: await files[path]!(),
-    })),
-  )
+  const imported = await importedFiles(name, source)
   return { name, component: module.default, source, files: imported, test }
 }

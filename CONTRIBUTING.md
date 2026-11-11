@@ -557,8 +557,12 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   example's own test is what audits the block. The Blocks section's pages each show one of
   upstream's blocks (`registry/bases/radix/blocks`): its `page.tsx` is the example
   (`dashboard-01.gts`), and its components are files in a folder of the same name beside it
-  (`dashboard-01/app-sidebar.gts`), which the Template tab shows after it. A form in a frame
-  that submits to nowhere is stopped there, as upstream's block pages reload. Where a
+  (`dashboard-01/app-sidebar.gts`), which the Template tab shows after it, with every file
+  they import in turn (`app-sidebar.gts`'s `./nav-main.gts`), so Copy takes the whole block;
+  `docs-app/tests/unit/examples-test.ts` fails if a file in a block's folder isn't shown. A
+  form in a frame that submits to nowhere is stopped there, and a link to a fragment
+  (`href="#"`) moves within the frame, as on upstream's block pages, each a frame of its own
+  address; neither loads the guide into the frame. Where a
   component keeps upstream's colours though they fall short of WCAG AA's contrast (see
   "Upstream's colours and AA"), it lists those elements, with the reason, in its own
   `docs-app/tests/acceptance/upstream-contrast/<component>.ts`: the pages test leaves them out

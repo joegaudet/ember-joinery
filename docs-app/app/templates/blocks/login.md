@@ -6,7 +6,8 @@ A simple login form.
 
 ## Installation
 
-Blocks aren't exported from a package: copy the block's files into your app. It uses
+Blocks aren't exported from a package: copy the block's files into your app (its Template
+tab shows every one, and Copy takes them all). It uses
 `@ember-joinery/ember`:
 
 ```bash

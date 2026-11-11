@@ -13,7 +13,8 @@ its chart and form. Pick 375 to see it on a phone, with the sidebar in a sheet. 
 
 ## Installation
 
-Blocks aren't exported from a package: copy the block's files into your app. It uses
+Blocks aren't exported from a package: copy the block's files into your app (its Template
+tab shows every one, and Copy takes them all). It uses
 `@ember-joinery/ember`, the chart and data table add-ons, and lucide's icons:
 
 ```bash

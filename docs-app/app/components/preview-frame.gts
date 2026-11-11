@@ -55,6 +55,40 @@ function stayPut(event: Event): void {
 }
 
 /**
+ * Keeps a link to a fragment (`href="#"`, `href="#terms"`) within the frame. The frame's
+ * `about:srcdoc` document takes the page's address as its base, so `#` is the guide page's own
+ * address, and following it would load the whole guide into the frame. Upstream's block pages,
+ * each in a frame of their own address, only move within the block, so this does what a
+ * browser's fragment navigation does there: it scrolls to the element the fragment names, or to
+ * the top for `#` and `#top`. A link that opens elsewhere (another `target`, or a click with a
+ * modifier key) goes on as it would, as does a click something in the example has handled.
+ */
+function stayOnFragment(event: MouseEvent): void {
+  if (event.defaultPrevented || event.button !== 0) return
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+  // The frame's own elements, which `instanceof` on the page's classes wouldn't recognise.
+  const link = (event.target as Element | null)?.closest?.('a[href], area[href]')
+  const href = link?.getAttribute('href')
+  if (!link || !href?.startsWith('#')) return
+  const target = link.getAttribute('target')
+  if (target && target.toLowerCase() !== '_self') return
+  event.preventDefault()
+  const doc = link.ownerDocument
+  const fragment = href.slice(1)
+  let decoded = fragment
+  try {
+    decoded = decodeURIComponent(fragment)
+  } catch {
+    // Not percent-encoded as a URL would be: look for it as written.
+  }
+  const named = (id: string) =>
+    doc.getElementById(id) ?? doc.querySelector(`a[name="${CSS.escape(id)}"]`)
+  const element = fragment ? (named(fragment) ?? named(decoded)) : null
+  if (element) element.scrollIntoView()
+  else if (!fragment || decoded.toLowerCase() === 'top') doc.defaultView?.scrollTo(0, 0)
+}
+
+/**
  * An example at a given viewport width. The preview renders inside an `<iframe>` that wide, so
  * the example's breakpoints (`sm:`, `md:`) and its components' respond to that width, as they
  * would on a phone or a tablet. The block renders into the frame's body (Glimmer's
@@ -85,6 +119,7 @@ export default class PreviewFrame extends Component<PreviewFrameSignature> {
         observer.observe(doc.body)
       }
       doc.addEventListener('submit', stayPut)
+      doc.addEventListener('click', stayOnFragment)
       this.body = doc.body
       done()
     }
@@ -94,6 +129,7 @@ export default class PreviewFrame extends Component<PreviewFrameSignature> {
     return () => {
       iframe.removeEventListener('load', onLoad)
       iframe.contentDocument?.removeEventListener('submit', stayPut)
+      iframe.contentDocument?.removeEventListener('click', stayOnFragment)
       observer?.disconnect()
       done()
     }

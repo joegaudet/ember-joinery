@@ -43,10 +43,11 @@ const formSchema = z.object({
 })
 
 /*
- * Upstream's form-rhf-complex (form-tanstack-complex, form-formisch-complex and
- * form-next-complex, the same form), on Formwright: a radio field of cards, a select, a
+ * Upstream's form-rhf-complex (and form-tanstack-complex and form-formisch-complex, the same
+ * form in the other two libraries), on Formwright: a radio field of cards, a select, a
  * checkbox group whose choices have descriptions, and a switch. The switch's error goes in its
  * FieldContent, as every horizontal field's does here (upstream puts that one after the switch).
+ * form-next-complex is another form on the same fields: formwright-next-complex.
  */
 export default class FormwrightComplex extends Component {
   model = { plan: 'basic', billingPeriod: '', addons: [] as string[], emailNotifications: false }
@@ -91,10 +92,7 @@ export default class FormwrightComplex extends Component {
               @placeholder="Select"
               @options={{billingPeriods}}
               @storeKey={{true}}
-              as |field|
-            >
-              <field.Control @position="popper" />
-            </f.Field>
+            />
             <FieldSeparator />
             <f.Field
               @for="addons"

@@ -67,7 +67,8 @@ field's errors after a submit and as they are fixed, keeps the field's ids, labe
 `FieldDescription` and `FieldError`, and each control the Joinery component of that name.
 Formwright's `f.Submit`, `f.Reset` and `f.Button` take Joinery's Button with `{{asButton}}`.
 
-The [Forms](/formwright/forms.md) page builds shadcn's form examples this way, one for each of
-upstream's.
+The [Forms](/formwright/forms.md) page builds every one of shadcn's form examples this way.
+Upstream writes most of its forms once for each form library (React Hook Form, TanStack Form and
+Formisch); each of those forms is one example here, and its two Next.js forms are one each.
 
 <SectionList @section="formwright" />

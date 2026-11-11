@@ -66,12 +66,13 @@ Formwright's own `@form` on the `FormHarness`.
 | `RadioGroupFieldHarness`    | `radio`                           | `value`, `options`, `select(key)`, `radioGroup`                                    |
 | `ToggleGroupFieldHarness`   | `toggle-group`                    | `value`, `options`, `select(keys)`, `toggle(key)`, `toggleGroup`                   |
 | `SliderFieldHarness`        | `slider`, `range`                 | `value`, `press(key, thumb?)`, `slideTo(percent)`, `slider`                        |
+| `RatingFieldHarness`        | `rating`                          | `value`, `options`, `stars`, `select(value)`, `press(key)`, `focus()`, `rating`    |
 | `InputOTPFieldHarness`      | `input-otp`                       | `value`, `isComplete`, `fillIn(code)`, `typeIn(text)`, `paste(text)`, `otp`        |
 | `DatePickerFieldHarness`    | `date-picker`                     | `text`, `isEmpty`, `pick(day)`, `datePicker`                                       |
 
 Every one is a `FieldHarness`, so it has Formwright's `label`, `hint`, `errors`, `isInvalid`,
 `isDirty`, `isRequired`, `isDisabled` and `control` too. The member named after a component
-(`checkbox`, `radioGroup`, `slider`…, and `selectHarness`, since `select(key)` is Formwright's
+(`checkbox`, `radioGroup`, `slider`, `rating`…, and `selectHarness`, since `select(key)` is Formwright's
 name for choosing) is Joinery's own harness for it, for what it reads and does beyond the
 field: `form.plan.radioGroup.press('ArrowDown')`. Formwright's `CurrencyHarness` drives a
 `currency` field.

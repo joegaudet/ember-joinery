@@ -16,8 +16,9 @@ const formSchema = z.object({
 })
 
 /*
- * Upstream's form-rhf-demo (and form-tanstack-demo, form-formisch-demo and form-next-demo, the
- * same form), on Formwright. The form wraps the card's content and footer, so its Reset and
+ * Upstream's form-rhf-demo (and form-tanstack-demo and form-formisch-demo, the same form in the
+ * other two libraries), on Formwright; form-next-demo, which submits to a server action, is
+ * formwright-next-demo. The form wraps the card's content and footer, so its Reset and
  * Submit are its own (`f.Reset`, `f.Submit`, drawn as Joinery's Button with `asButton`);
  * `class="contents"` keeps the card's own spacing between them.
  */

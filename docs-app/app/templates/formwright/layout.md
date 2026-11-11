@@ -88,7 +88,11 @@ checkbox beside a `FieldContent` comes down a pixel, and a `FieldSet` of checkbo
 sets them closer. So a field looks as upstream's does in every style.
 
 Formwright's inline and confirm modes (`@inline`, `@requireConfirm`) keep Formwright's own
-markup for the value shown and the ✔ and ✘ buttons, which Joinery doesn't style.
+markup for the value shown and the ✔ and ✘ buttons, which Joinery doesn't style. In an inline
+form's callout (`@callout`), which is a popover, the controls with floating parts of their own
+(Select, Combobox, Date Picker) need nothing of Formwright's `@callout`: their lists and calendar
+open in the top layer above the callout, as popovers inside it, so picking in them leaves the
+callout open.
 
 ## API Reference
 

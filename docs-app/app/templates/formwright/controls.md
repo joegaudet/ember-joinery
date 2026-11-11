@@ -1,8 +1,8 @@
 # Controls
 
-Joinery's inputs as Formwright controls (all but Rating and FileDrop; see
-[Not here yet](#not-here-yet)). `setupJoineryForms()` (or `registerJoineryControls()`)
-registers them, so a field names one with `@control`:
+Joinery's inputs as Formwright controls (all but FileDrop; see [Not here](#not-here)).
+`setupJoineryForms()` (or `registerJoineryControls()`) registers them, so a field names one
+with `@control`:
 
 | `@control`                                                                                                      | Joinery component                                 | Stores                                       |
 | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------- |
@@ -20,6 +20,7 @@ registers them, so a field names one with `@control`:
 | `toggle`                                                                                                        | [Toggle](/components/toggle.md)                   | `true` (pressed) or `false`                  |
 | `toggle-group`                                                                                                  | [Toggle Group](/components/toggle-group.md)       | the option pressed, or a list of them        |
 | `slider`, `range`                                                                                               | [Slider](/components/slider.md)                   | a number, or a list for a range              |
+| `rating`                                                                                                        | [Rating](/components/rating.md)                   | the rating, a number, or `null` for none     |
 | `input-otp`                                                                                                     | [Input OTP](/components/input-otp.md)             | the code, a string                           |
 | `date-picker`                                                                                                   | [Date Picker](/components/date-picker.md)         | a `Date`, or `null`                          |
 
@@ -35,8 +36,11 @@ Each control is also exported (`SelectControl`, `SwitchControl`…), for `@contr
 or `registerControl('language', SelectControl)`, and `joineryControls` lists them by name. A
 control takes the field's arguments (`@options`, `@optionKey`, `@optionLabel`, `@storeKey`,
 `@placeholder`, `@min`, `@max`, `@step`, `@maxLength`, `@disabled`, `@readonly`, `@required`),
-and its own through the field's block, `<field.Control @variant="card" />`; attributes on
-`field.Control` go on its focusable element.
+and its own through the field's block, `<field.Control @variant="card" />`. Attributes on
+`field.Control` go on the control's focusable element (an input, a select's trigger, a
+combobox's input, a date picker's button), or, for a control made of several (a radio group,
+checkbox group, toggle group, slider or rating), on the element around them: the Radio Group's
+or Toggle Group's root, the checkboxes' `FieldGroup`, or the Slider's or Rating's root.
 
 The [Forms](/formwright/forms.md) page shows the input, textarea, select, checkbox, checkbox
 group, radio group and switch, each in one of upstream's forms. Joinery's other inputs follow.
@@ -57,6 +61,27 @@ Slider's root, so a class sizes it.
 | ---------------- | ---------------------------------------- |
 | `@orientation`   | `horizontal` (the default) or `vertical` |
 | `@onValueCommit` | Called once a drag or a key press ends   |
+
+## Rating
+
+A `rating` field stores the rating picked, a number from `@step` (1 by default; `0.5` gives half
+stars) to `@max` (5 by default), or `null` for none: picking the rating already picked clears
+it. Each star is a native radio, so the arrow keys move between them and pick, and the stars are
+one tab stop. A `<label>` can't name the Rating's `<fieldset role="radiogroup">`, so the group
+is named after the field's label (`aria-label`), and it is the field's one group: the field is a
+`Field`, not a `FieldSet` around a second, unnamed group. The radios take the focus, so each
+carries what a field gives its control: the hint and errors describe it, it is `aria-invalid`
+while the field is, and a failed submit focuses the first. Read-only, the stars show the
+rating and take the focus but can't change it (`aria-readonly`). Attributes on `field.Control`
+go on the Rating's root.
+
+<Example @name="formwright-rating" @title="Rating" />
+
+| Argument     | On `field.Control`                                                |
+| ------------ | ----------------------------------------------------------------- |
+| `@size`      | `sm` (16px stars), `default` (20px) or `lg` (24px), as Rating's   |
+| `@icon`      | The star: a `lucide` icon (lucide's `Star` by default)            |
+| `@itemLabel` | Each star's name for assistive technology: `(value) => '3 stars'` |
 
 ## Toggle Group and Toggle
 
@@ -120,7 +145,10 @@ Joinery's Input) a number it shows formatted in `@currency` and `@locale`.
 The input and textarea controls render as an [Input Group](/components/input-group.md)'s own
 when you give them the group's parts, `@group`: the group's focus and invalid rings then go
 around all of it, as the [demo](/formwright/forms.md#demo)'s count and the
-[array](/formwright/forms.md#array-fields)'s remove button show.
+[array](/formwright/forms.md#array-fields)'s remove button show. A textarea field's
+`@showCount`, which Formwright's own textarea shows as a count after it, does this for you: the
+textarea goes in an Input Group with its length (and `@maxLength`) in an addon under it,
+announced as it changes (`aria-live="polite"`, and Formwright's `data-test-fw-count`).
 
 | Argument        | On `field.Control`                                                  |
 | --------------- | ------------------------------------------------------------------- |
@@ -138,25 +166,17 @@ around all of it, as the [demo](/formwright/forms.md#demo)'s count and the
 | `@variant`           | `radio`                             | `list` (the default) or `card`                                 |
 | `@optionDescription` | `radio`, `checkbox-group`           | Each option's description: a key or a function (`description`) |
 
-## Not here yet
+## Not here
 
 Joinery's opt-in add-ons on Formwright's libraries (File Upload, Rich Text Editor, Power
 Calendar, Masked Input and Phone Input) aren't registered as controls: Formwright's own add-on
 packages already offer each, and this package takes no dependency on Joinery's add-ons.
 
-Two of Joinery's own inputs aren't controls yet either:
-
-- **Rating.** Its root is a `<fieldset>` of native radios, and the styled Rating passes nothing
-  to the radios, which take the focus. So a field's hint, errors and `aria-invalid` couldn't
-  reach them, as a slider's once couldn't reach its thumbs, and a group field's `FieldSet` and
-  legend would wrap a second, unnamed group. A Rating control has to render the primitive's
-  items itself, as the slider control renders its thumbs, naming its group with `aria-label`.
-  Until then, pass a control of your own to `@control`.
-- **FileDrop.** It keeps no value: it hands the files dropped or picked to `@onFiles`, and
-  shows nothing of them. Its root is the `<label>` of its own hidden file input, which a field's
-  label would repeat. A control would have to keep the files and list them, which is what
-  Joinery's File Upload add-on does; Formwright's own file-upload add-on is the Formwright
-  control for that.
+Nor is one of Joinery's own inputs, **FileDrop**. It keeps no value: it hands the files dropped
+or picked to `@onFiles`, and shows nothing of them. Its root is the `<label>` of its own hidden
+file input, which a field's label would repeat. A control would have to keep the files and list
+them, which is what Joinery's File Upload add-on does; Formwright's own file-upload add-on is
+the Formwright control for that.
 
 ## Upstream
 

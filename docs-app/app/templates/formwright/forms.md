@@ -4,10 +4,11 @@ Build forms in Ember with Formwright and Zod, in Joinery's Field anatomy: upstre
 [React Hook Form](https://ui.shadcn.com/docs/forms/react-hook-form) guide, and its forms, on
 Formwright.
 
-Upstream builds each of its forms three times, once for each library (React Hook Form, TanStack
-Form and Formisch), and two of them a fourth time with Next.js's server actions. They are the
-same forms, so each is built once here, on Formwright, and each example names the upstream ones
-it rebuilds.
+Upstream builds most of its forms three times, once for each library (React Hook Form, TanStack
+Form and Formisch). Those are the same form each time, so each is built once here, on
+Formwright, and each example names the upstream ones it rebuilds. Its two Next.js forms, which
+submit to a server action, are forms of their own (`form-next-demo` and `form-next-complex`),
+and each has its own example here, under [Submitting](#submitting).
 
 ## Demo
 
@@ -346,11 +347,11 @@ const formSchema = z.object({
 
 ## Submitting
 
-Upstream's Next.js forms (`form-next-demo`, `form-next-complex`) are the demo and the complex
-form, submitted to a server action: while it runs, the fields and the button are disabled and
-the button shows a Spinner, and once it succeeds the form empties and a toast says so.
-Formwright's `@onSubmit` can return a promise: the form waits for it, `f.state.isSubmitting` is
-true meanwhile, and `f.Submit` is `aria-busy`. Here is the demo, submitted that way:
+Upstream's Next.js forms (`form-next-demo`, `form-next-complex`) submit to a server action:
+while it runs, the fields and the button are disabled and the button shows a Spinner, and once
+it succeeds a toast says so. Formwright's `@onSubmit` can return a promise: the form waits for
+it, `f.state.isSubmitting` is true meanwhile, and `f.Submit` is `aria-busy`. Here is
+`form-next-demo`, the bug report submitted that way, which empties once it is saved:
 
 <Example @name="formwright-next-demo" @title="Submitting" />
 
@@ -364,8 +365,23 @@ true meanwhile, and `f.Submit` is `aria-busy`. Here is the demo, submitted that 
 
 Upstream's server checks the schema once the action runs; Formwright checks it before
 `@onSubmit`, so an invalid form shows its errors at once and never starts saving.
-`form-next-complex` is the [complex form](#complex-forms) submitted the same way, with a
-`Preferences saved` toast.
+
+### A Complex Form, Submitted
+
+`form-next-complex` has the [complex form](#complex-forms)'s fields, but in a card of its own:
+it has no header, its billing period starts as Monthly, the plan's legend is a section's
+(FieldLegend's default variant), and its footer is one button at the end. While it saves, every
+field is disabled; once it is saved, a `Preferences saved` toast says so, and the form keeps
+what it saved.
+
+<Example @name="formwright-next-complex" @title="Complex Form, submitted" />
+
+```gts
+onSubmit = async () => {
+  await savePreferences()
+  toast.success('Preferences saved', { description: 'Your subscription plan has been updated.' })
+}
+```
 
 ## Accessibility
 
@@ -404,5 +420,7 @@ These examples aren't in the [parity](https://github.com/joegaudet/ember-joinery
 comparison yet. Upstream's form examples are new-york-v4 registry examples shown on the
 `docs/forms` pages, and `upstream/inventory.json` and the parity reference app cover the
 component pages' examples (`examples/radix`, in a radix style) and the charts gallery only, so
-there is nothing to map them to. Comparing them needs both to take the new-york-v4 examples and
-style, as they do the charts.
+there is nothing to map them to. Comparing them needs both to take the `docs/forms` pages'
+examples and their new-york-v4 style, as they do the charts, and the reference app to render
+each library's (React Hook Form, TanStack Form, Formisch and Next.js's `<Form>`). The plan
+records the gap, so it is closed before 1.0.

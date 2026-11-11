@@ -1,110 +1,157 @@
 /*
- * The Joinery site: a placeholder style sheet for the page's skeleton. The finished site is
- * styled with Joinery's own tokens.css and joinery.css (JOINERY_PLAN.md, "Marketing site and
- * demo"); until those ship, these rules use the same token names, so the switch is a deletion.
+ * The Joinery site's own rules: its layout, type and brand. Everything a component on the page
+ * draws comes from Joinery's own CSS, as in an app: joinery/tokens.css and joinery/joinery.css,
+ * which `pnpm site:css` copies in from the package's build, and which the theme picker swaps for
+ * another base colour (joinery/themes/) and style (joinery/styles/). The site's colours are the
+ * theme's tokens too, so the whole page follows the picker; only the brand's amber is its own.
+ *
+ * This sheet loads before Joinery's, to put the layers in order: the site's element defaults
+ * (site-base) sit below Joinery's layer, so a component keeps its own look; the site's classes
+ * are unlayered, as an app's own CSS is, and win.
  */
+@layer site-base, joinery;
+
+/* ---- tokens -------------------------------------------------------------------------------- */
+
 :root {
-  /* Formwright's and real-enums' type. The guide uses Geist, as ui.shadcn.com does. */
-  --font: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --background: #ffffff;
-  --foreground: #1c1a17;
-  --muted: #f7f6f3;
-  --muted-foreground: #5f5a52;
-  --border: #e6e2da;
-  /* Joinery's accent: walnut amber, as in the logo and the guide. */
-  --primary: #a3480a;
-  --primary-foreground: #ffffff;
-  --code: #1c1a17;
-  --code-foreground: #f3efe8;
-  --radius: 0.625rem;
-  --gutter: 16px;
-  color-scheme: light dark;
+  /* Formwright's and real-enums' type. Joinery's parts read --font-sans, so they set in it too. */
+  --font-sans:
+    Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  /* Joinery's accent: walnut amber, as in the logo. Dark enough on white for AA text. */
+  --site-accent: #b45309;
+  --site-glow: rgb(217 119 6 / 0.3);
+  /* The hero and the code blocks are dark in both schemes, like an editor. */
+  --site-ink: #12110f;
+  --site-ink-text: #f6f2ea;
+  --site-ink-muted: #cfc8bc;
+  --site-ink-accent: #f5b04c;
+  --site-code: #15130f;
+  --site-code-text: #ece6dc;
+  /* Spacing: every gap on the page comes from these. */
+  --space-gutter: clamp(1rem, 4vw, 2rem);
+  --space-section: clamp(4rem, 9vw, 7rem);
+  --space-block: 2.5rem;
+  --space-gap: 1.5rem;
+  --measure: 42rem;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #12110f;
-    --foreground: #ece9e3;
-    --muted: #1a1916;
-    --muted-foreground: #a8a196;
-    --border: #2c2a26;
-    --primary: #f5b04c;
-    --primary-foreground: #1c1a17;
-    --code: #0c0b0a;
+:root.dark {
+  --site-accent: #f5b04c;
+  --site-glow: rgb(245 158 11 / 0.22);
+  color-scheme: dark;
+}
+
+/* ---- element defaults, below Joinery's layer -------------------------------------------- */
+
+@layer site-base {
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-padding-top: 5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font: 400 1rem/1.65 var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--site-accent);
+    text-underline-offset: 0.2em;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  h1,
+  h2,
+  h3 {
+    color: var(--foreground);
+    text-wrap: balance;
+  }
+
+  code,
+  kbd,
+  pre {
+    font-family: var(--font-mono);
+  }
+
+  /* In the foreground colour even in muted text: muted on muted falls short of AA. */
+  :not(pre) > code {
+    padding: 0.1em 0.35em;
+    color: var(--foreground);
+    white-space: nowrap;
+    border-radius: calc(var(--radius) * 0.6);
+    background: var(--muted);
+    font-size: 0.88em;
+  }
+
+  table {
+    border-collapse: collapse;
   }
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-padding-top: 5rem;
-}
-
-body {
-  margin: 0;
-  background: var(--background);
-  color: var(--foreground);
-  font: 17px/1.65 var(--font);
-}
-
-a {
-  color: var(--primary);
-}
-
-code {
-  font: 0.9em var(--mono);
-}
-
-:not(pre) > code {
-  padding: 0.1em 0.35em;
-  border-radius: 5px;
-  background: var(--muted);
-}
-
-pre {
-  margin: 1.25rem 0;
-  padding: 1rem 1.25rem;
-  overflow-x: auto;
-  border-radius: var(--radius);
-  background: var(--code);
-  color: var(--code-foreground);
-  font: 0.86rem/1.6 var(--mono);
-}
+/* ---- layout ----------------------------------------------------------------------------- */
 
 .container {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 0 clamp(var(--gutter), 4vw, 2rem);
+  width: 100%;
+  max-width: calc(1200px + 2 * var(--space-gutter));
+  margin-inline: auto;
+  padding-inline: var(--space-gutter);
 }
 
 .skip-link {
   position: absolute;
-  left: -999px;
+  inset-inline-start: -999px;
+  inset-block-start: 0.75rem;
+  z-index: 20;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  background: var(--background);
+  color: var(--foreground);
 }
 
 .skip-link:focus {
-  left: 1rem;
-  top: 1rem;
-  z-index: 10;
-  padding: 0.5rem 1rem;
-  background: var(--background);
+  inset-inline-start: 0.75rem;
 }
 
-/* ---- nav ----------------------------------------------------------------------------- */
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: var(--site-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.muted {
+  color: var(--muted-foreground);
+}
+
+/* ---- nav -------------------------------------------------------------------------------- */
 
 .site-nav {
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 10;
   border-bottom: 1px solid var(--border);
-  background: color-mix(in srgb, var(--background) 85%, transparent);
+  background: color-mix(in oklab, var(--background) 82%, transparent);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
 
-.site-nav .container {
+.site-nav > .container {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -114,15 +161,18 @@ pre {
 
 .brand {
   display: flex;
+  flex: none;
   align-items: center;
   gap: 0.5rem;
-  color: inherit;
+  color: var(--foreground);
+  font-weight: 700;
   text-decoration: none;
 }
 
 .site-nav ul {
   display: flex;
-  gap: 1.25rem;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.25rem);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -130,6 +180,7 @@ pre {
 
 .site-nav ul a {
   color: var(--muted-foreground);
+  font-size: 0.925rem;
   font-weight: 500;
   text-decoration: none;
 }
@@ -138,201 +189,627 @@ pre {
   color: var(--foreground);
 }
 
-@media (max-width: 820px) {
-  .wide-only {
+/* Below a wide desktop, the nav keeps the sections people jump to most. */
+@media (max-width: 1099px) {
+  .site-nav .roomy-only {
     display: none;
   }
 }
 
-/* ---- hero ---------------------------------------------------------------------------- */
+/* Keeps the nav on one row at a phone's width. */
+@media (max-width: 639px) {
+  .site-nav .wide-only {
+    display: none;
+  }
+}
+
+/* The light/dark toggle shows the icon of the scheme it switches to. */
+.mode-toggle .when-dark,
+.dark .mode-toggle .when-light {
+  display: none;
+}
+
+.dark .mode-toggle .when-dark {
+  display: block;
+}
+
+/* ---- hero: dark in both schemes, as Formwright's is ------------------------------------- */
 
 .hero-band {
-  border-bottom: 1px solid var(--border);
-  background: radial-gradient(40rem 24rem at 85% 30%, rgb(217 119 6 / 0.14), transparent 70%);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--site-ink);
+  color: var(--site-ink-text);
+}
+
+/* A faint grid, faded out towards the edges. */
+.hero-band::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 40%, #000 25%, transparent 75%);
+  mask-image: radial-gradient(ellipse at 50% 40%, #000 25%, transparent 75%);
+}
+
+.hero-band::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(40rem 28rem at 75% 45%, rgb(217 119 6 / 0.3), transparent 70%);
 }
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: clamp(2.5rem, 5vw, 4rem);
   align-items: center;
-  gap: 2rem;
-  padding-block: clamp(3rem, 8vw, 6rem);
+  padding-block: var(--space-section);
 }
 
-.hero-mark {
-  justify-self: center;
-  width: min(220px, 60%);
-  height: auto;
+.hero > *,
+.hero-copy > * {
+  min-width: 0;
 }
 
-@media (max-width: 820px) {
+@media (min-width: 992px) {
   .hero {
-    grid-template-columns: 1fr;
-  }
-
-  .hero-mark {
-    display: none;
+    grid-template-columns: 1.1fr 1fr;
   }
 }
 
-.eyebrow {
-  margin: 0 0 0.5rem;
-  color: var(--primary);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+/* The copy sits on the dark band, so it takes the theme's dark tokens (`.dark` on it). */
+.hero-copy {
+  color: var(--site-ink-text);
 }
 
-h1 {
-  margin: 0 0 1rem;
-  font-size: clamp(2.4rem, 6vw, 3.8rem);
+.hero-copy .eyebrow {
+  color: var(--site-ink-accent);
+}
+
+.hero h1 {
+  margin: 0 0 1.25rem;
+  color: var(--site-ink-text);
+  font-size: clamp(2.5rem, 6vw, 4.25rem);
   font-weight: 800;
+  line-height: 1.05;
   letter-spacing: -0.035em;
-  line-height: 1.04;
 }
 
 .accent-text {
   display: block;
-  color: var(--primary);
+  background: linear-gradient(90deg, #f5b04c, #ea580c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .hero-sub {
-  max-width: 40rem;
-  color: var(--muted-foreground);
-  font-size: 1.15rem;
+  max-width: 36rem;
+  margin: 0 0 2rem;
+  color: var(--site-ink-muted);
+  font-size: 1.125rem;
+}
+
+.hero-copy :not(pre) > code {
+  background: rgb(255 255 255 / 0.08);
+  color: inherit;
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin: 1.5rem 0;
-}
-
-.button {
-  display: inline-block;
-  padding: 0.6rem 1.1rem;
-  border: 1px solid var(--primary);
-  border-radius: var(--radius);
-  background: var(--primary);
-  color: var(--primary-foreground);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.button.ghost {
-  background: transparent;
-  color: var(--foreground);
-  border-color: var(--border);
+  margin-bottom: 1.5rem;
 }
 
 .install {
-  display: inline-flex;
-  gap: 0.6rem;
-  padding: 0.6rem 1rem;
-  border-radius: var(--radius);
-  background: var(--code);
-  color: var(--code-foreground);
-}
-
-.install code {
-  padding: 0;
-  background: none;
-  color: inherit;
-  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.6rem 1.25rem;
+  overflow-x: auto;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.04);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .install .prompt {
-  color: #f5b04c;
-  font-family: var(--mono);
+  color: #8a8275;
+  user-select: none;
+}
+
+.hero-copy .install code {
+  padding: 0;
+  background: none;
+  color: #ece6dc;
+  font-size: inherit;
 }
 
 .install-note {
-  color: var(--muted-foreground);
-  font-size: 0.92rem;
+  margin: 0.6rem 0 0;
+  color: #a39b8e;
+  font-size: 0.85rem;
 }
 
-/* ---- sections ------------------------------------------------------------------------ */
-
-section {
-  padding-block: clamp(2.5rem, 6vw, 4rem);
-  border-bottom: 1px solid var(--border);
+.install-note a {
+  color: var(--site-ink-accent);
 }
 
-section:last-child {
-  border-bottom: 0;
+/* The hero's card: real Joinery components, in the page's theme. */
+.hero-specimen {
+  width: 100%;
+  max-width: 28rem;
+  justify-self: center;
+  border-radius: calc(var(--radius) * 1.8);
+  box-shadow:
+    0 30px 80px -20px rgb(217 119 6 / 0.55),
+    0 0 0 1px rgb(255 255 255 / 0.06);
 }
 
-h2 {
+.hero-specimen [data-slot='card-footer'] {
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* ---- sections ----------------------------------------------------------------------------- */
+
+main {
+  padding-bottom: var(--space-section);
+}
+
+main > section {
+  padding-top: var(--space-section);
+}
+
+main > section > h2 {
   margin: 0 0 1rem;
-  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
-  font-weight: 800;
-  letter-spacing: -0.025em;
+  font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1.15;
 }
 
-h3 {
-  margin: 0 0 0.4rem;
-  font-size: 1.1rem;
+/* The intro paragraph under a heading: readable width, then a fixed gap. */
+main > section > h2 + p {
+  margin-bottom: var(--space-block);
+  color: var(--muted-foreground);
+  font-size: 1.0625rem;
 }
+
+main > section > h2:not(:has(+ p)) {
+  margin-bottom: var(--space-block);
+}
+
+main > section > h3 {
+  margin: var(--space-block) 0 0.75rem;
+  font-size: 1.15rem;
+}
+
+main > section p {
+  max-width: var(--measure);
+}
+
+/* The "#" link a section heading gets for sharing; shown on hover or focus. */
+.section-link {
+  margin-inline-start: 0.4rem;
+  color: var(--muted-foreground);
+  font-weight: 400;
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+h2:hover > .section-link,
+.section-link:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .section-link {
+    opacity: 0.6;
+  }
+}
+
+/* Two blocks side by side, once each is wide enough to read. */
+.pair {
+  display: grid;
+  gap: var(--space-gap);
+  align-items: start;
+}
+
+.pair > * {
+  min-width: 0;
+  margin: 0;
+}
+
+@media (min-width: 1100px) {
+  .pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.pair + *,
+.features + *,
+.gallery + * {
+  margin-top: var(--space-gap);
+}
+
+.label-above {
+  margin: 0 0 0.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ---- features: a grid of Joinery Cards ----------------------------------------------------- */
 
 .features {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
+  gap: var(--space-gap);
+  margin-top: var(--space-block);
 }
 
-.features article {
-  padding: 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: calc(var(--radius) + 4px);
-  background: var(--muted);
+@media (min-width: 640px) {
+  .features {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .features {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .features.siblings {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.features .icon {
+  width: 22px;
+  height: 22px;
+  color: var(--site-accent);
+}
+
+.features [data-slot='card-title'] {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
 }
 
 .features p {
   margin: 0;
-  color: var(--muted-foreground);
 }
 
-.features :not(pre) > code {
-  background: var(--background);
+/* A card whose title is a link (the siblings): Joinery's base gives a link its parent's colour. */
+.features [data-slot='card-title'] a {
+  color: var(--site-accent);
+  text-decoration: underline;
 }
 
-.component-groups {
+/* ---- code blocks: one editor-style surface in both schemes ------------------------------- */
+
+pre,
+pre[class*='language-'] {
+  margin: 0 0 var(--space-gap);
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: calc(var(--radius) * 1.4);
+  background: var(--site-code);
+  color: var(--site-code-text);
+  font-size: clamp(0.75rem, 0.65rem + 0.35vw, 0.875rem);
+  line-height: 1.65;
+  tab-size: 2;
+}
+
+pre > code,
+pre > code[class*='language-'] {
+  display: block;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--font-mono);
+  font-size: inherit;
+  line-height: inherit;
+  text-shadow: none;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+:root:not(.dark) pre {
+  border-color: transparent;
+}
+
+.pair pre {
+  margin: 0;
+}
+
+/* ---- the component gallery: screenshots of the guide's examples ------------------------- */
+
+.gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: 0.75rem 1.5rem;
+  gap: var(--space-gap);
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.component-groups strong {
-  display: block;
+@media (min-width: 640px) {
+  .gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
+
+@media (min-width: 1024px) {
+  .gallery {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.gallery a {
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 1.8);
+  background: var(--card);
+  color: var(--foreground);
+  text-decoration: none;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.gallery a:hover {
+  border-color: var(--site-accent);
+  transform: translateY(-2px);
+}
+
+.gallery img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Each shot comes in the page's two schemes; the page shows the one it is in. */
+.dark .gallery .shot-light,
+:root:not(.dark) .gallery .shot-dark,
+.dark .guide-shot .shot-light,
+:root:not(.dark) .guide-shot .shot-dark {
+  display: none;
+}
+
+.gallery .caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+  padding: 0.75rem 1rem;
+}
+
+.gallery .caption strong {
+  font-weight: 600;
+}
+
+.gallery .caption span {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery a {
+    transition: none;
+  }
+
+  .gallery a:hover {
+    transform: none;
+  }
+}
+
+/* Every page of the guide's Components section, grouped. */
+.component-groups {
+  display: grid;
+  gap: 1.25rem 2rem;
+  margin: var(--space-block) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .component-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .component-groups {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.component-groups h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+}
+
+.component-groups p {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.925rem;
+}
+
+.component-groups a {
+  text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
+}
+
+.component-groups a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* ---- theming: the picker and its specimen ----------------------------------------------- */
+
+.theming {
+  display: grid;
+  gap: var(--space-gap);
+  align-items: start;
+}
+
+.theming > * {
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .theming {
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+  }
+}
+
+.specimen {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.specimen [data-slot='card-content'] {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.specimen pre {
+  margin: 0;
+}
+
+.specimen .row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.specimen [data-slot='progress'] {
+  max-width: 20rem;
+}
+
+/* ---- tables ----------------------------------------------------------------------------- */
+
+.site-table code {
+  white-space: nowrap;
+}
+
+.site-table th[scope='row'] {
+  text-align: start;
+}
+
+/* At a phone's width, each row stacks: the name, then what it is. */
+@media (max-width: 639px) {
+  .site-table thead {
+    display: none;
+  }
+
+  .site-table tr {
+    display: grid;
+    padding-block: 0.5rem;
+  }
+
+  .site-table [data-slot='table-cell'] {
+    padding-block: 0.15rem;
+  }
+}
+
+.site-table [data-slot='table-cell'] {
+  white-space: normal;
+  vertical-align: top;
+}
+
+/* ---- the live demo, in a window frame ------------------------------------------------- */
 
 .demo-window {
   overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: calc(var(--radius) + 4px);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: calc(var(--radius) * 2);
+  background: var(--site-ink);
+  box-shadow:
+    0 30px 80px -20px var(--site-glow),
+    0 0 0 1px rgb(255 255 255 / 0.04);
+}
+
+.demo-window .chrome {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  color: #a39b8e;
+  font-size: 0.75rem;
+}
+
+.demo-window .chrome i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3f3a33;
+}
+
+.demo-window .chrome span {
+  margin-inline-start: auto;
+  font-family: var(--font-mono);
 }
 
 .demo-window iframe {
   display: block;
   width: 100%;
-  height: 32rem;
+  height: min(900px, 85vh);
   border: 0;
-  background: var(--background);
+  background: #fff;
 }
 
-/* ---- footer -------------------------------------------------------------------------- */
+/* ---- the guide's frame, as a picture ---------------------------------------------------- */
+
+.guide-shot {
+  margin: 0 0 var(--space-gap);
+}
+
+.guide-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 1.8);
+}
+
+.guide-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* ---- footer ------------------------------------------------------------------------------- */
 
 .site-footer {
-  padding-block: 2rem;
+  padding-block: 2.5rem;
   border-top: 1px solid var(--border);
   color: var(--muted-foreground);
   font-size: 0.9rem;
+}
+
+.site-footer p {
+  max-width: 60rem;
+  margin: 0 0 0.75rem;
 }
 
 .site-footer a {

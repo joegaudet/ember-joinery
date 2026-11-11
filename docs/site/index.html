@@ -6,7 +6,7 @@
     <title>Joinery: shadcn/ui for Ember</title>
     <meta
       name="description"
-      content="Every shadcn/ui component for Ember: modern .gts components on a headless primitives layer, shadcn's styles and theme tokens, and a test harness for each one."
+      content="Every shadcn/ui component and example for Ember: modern .gts components on a headless primitives layer, shadcn's own styles and theme tokens with Tailwind optional, and a test harness for every one."
     />
     <link rel="canonical" href="https://joegaudet.com/ember-joinery/" />
     <!-- Link previews (Slack, X, LinkedIn, iMessage). The card's source is docs/social-card.html. -->
@@ -21,15 +21,44 @@
     <meta property="og:image" content="https://joegaudet.com/ember-joinery/social-card.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Joinery: shadcn/ui for Ember." />
+    <meta
+      property="og:image:alt"
+      content="Joinery: every shadcn/ui component, joined to Ember. A profile dialog drawn with Joinery's components."
+    />
     <meta name="twitter:card" content="summary_large_image" />
+    <!-- The remembered light or dark choice, else the system's, before the page draws (site.js). -->
+    <script>
+      try {
+        const saved = localStorage.getItem('joinery-site-scheme')
+        const dark = saved
+          ? saved === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.classList.toggle('dark', dark)
+      } catch {
+        // Storage is off: follow the system's scheme alone.
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.classList.add('dark')
+        }
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
     />
+    <!-- Code blocks are dark in both schemes, like an editor, so one theme. -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
+      integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A"
+      crossorigin="anonymous"
+    />
+    <!-- site.css first: it puts its layer below Joinery's. -->
     <link rel="stylesheet" href="site.css" />
+    <!-- Joinery's own CSS, as an app imports it (copied in by `pnpm site:css`). -->
+    <link id="jn-tokens" rel="stylesheet" href="joinery/tokens.css" />
+    <link id="jn-style" rel="stylesheet" href="joinery/joinery.css" />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   </head>
   <body>
@@ -38,112 +67,663 @@
     <nav class="site-nav" aria-label="Site">
       <div class="container">
         <a href="./" class="brand"
-          ><img src="logo.svg" alt="" width="28" height="28" /><strong>Joinery</strong></a
+          ><img src="logo.svg" alt="" width="28" height="28" /><span>Joinery</span></a
         >
         <ul>
-          <li class="wide-only"><a href="#why">Why</a></li>
-          <li class="wide-only"><a href="#usage">Usage</a></li>
+          <li class="wide-only roomy-only"><a href="#why">Why</a></li>
+          <li class="wide-only roomy-only"><a href="#install">Install</a></li>
           <li class="wide-only"><a href="#theming">Theming</a></li>
           <li class="wide-only"><a href="#components">Components</a></li>
-          <li class="wide-only"><a href="#testing">Testing</a></li>
-          <li><a href="guide/">Guide</a></li>
+          <li class="wide-only roomy-only"><a href="#testing">Testing</a></li>
+          <li class="wide-only roomy-only"><a href="#formwright">Forms</a></li>
           <li><a href="#demo">Demo</a></li>
+          <li><a href="guide/">Guide</a></li>
           <li><a href="https://github.com/joegaudet/ember-joinery">GitHub</a></li>
+          <li>
+            <button
+              type="button"
+              class="jn-button group/button jn-button-variant-ghost jn-button-size-icon-sm mode-toggle"
+              data-slot="button"
+              data-variant="ghost"
+              data-size="icon-sm"
+              aria-label="Dark mode"
+              aria-pressed="false"
+              data-site-scheme-toggle
+            >
+              <svg
+                class="lucide when-light"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+              </svg>
+              <svg
+                class="lucide when-dark"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2" />
+                <path d="M12 20v2" />
+                <path d="m4.93 4.93 1.41 1.41" />
+                <path d="m17.66 17.66 1.41 1.41" />
+                <path d="M2 12h2" />
+                <path d="M20 12h2" />
+                <path d="m6.34 17.66-1.41 1.41" />
+                <path d="m19.07 4.93-1.41 1.41" />
+              </svg>
+            </button>
+          </li>
         </ul>
       </div>
     </nav>
 
     <header class="hero-band">
       <div class="container hero">
-        <div class="hero-copy">
+        <div class="hero-copy dark">
           <p class="eyebrow">shadcn/ui for Ember 6.12 LTS and 7</p>
           <h1>
             Every shadcn/ui component.
             <span class="accent-text">Joined to Ember.</span>
           </h1>
           <p class="hero-sub">
-            Every component on ui.shadcn.com, written as modern <code>.gts</code> components with
-            yielded parts and full Glint types, on a headless primitives layer. shadcn's own styles
-            and theme tokens, compiled so Tailwind is optional. And a test harness for every one.
+            Every component and example on ui.shadcn.com, written as modern <code>.gts</code>
+            components with yielded parts and Glint types, on a headless primitives layer. shadcn's
+            own styles and theme tokens, compiled so Tailwind is optional. And a test harness for
+            every one.
           </p>
           <div class="hero-actions">
-            <a href="guide/" class="button">Read the guide</a>
-            <a href="https://github.com/joegaudet/ember-joinery" class="button ghost">GitHub</a>
+            <a
+              href="guide/"
+              class="jn-button group/button jn-button-variant-default jn-button-size-lg"
+              data-slot="button"
+              data-variant="default"
+              data-size="lg"
+              >Read the guide</a
+            >
+            <a
+              href="#demo"
+              class="jn-button group/button jn-button-variant-outline jn-button-size-lg"
+              data-slot="button"
+              data-variant="outline"
+              data-size="lg"
+              >Try the demo</a
+            >
+            <a
+              href="https://github.com/joegaudet/ember-joinery"
+              class="jn-button group/button jn-button-variant-ghost jn-button-size-lg"
+              data-slot="button"
+              data-variant="ghost"
+              data-size="lg"
+            >
+              <svg
+                data-icon="inline-start"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+                />
+              </svg>
+              GitHub
+            </a>
           </div>
           <div class="install">
             <span class="prompt" aria-hidden="true">$</span>
-            <code>npm i @ember-joinery/ember</code>
+            <code>pnpm add @ember-joinery/ember</code>
           </div>
           <p class="install-note">
-            <strong>Pre-release:</strong> Joinery is being built, and nothing is on npm yet. The
-            plan is in
-            <a href="https://github.com/joegaudet/ember-joinery/blob/main/JOINERY_PLAN.md"
-              >JOINERY_PLAN.md</a
-            >.
+            Add <code>@ember-joinery/test-support</code> for the harnesses. Joinery publishes to npm
+            with 1.0; until then, the <a href="guide/getting-started/installation.md">guide</a> has
+            the steps.
           </p>
         </div>
-        <img class="hero-mark" src="logo.svg" alt="" width="220" height="220" />
+
+        <!-- Joinery's own Card, Field, Input, Switch and Buttons, in the page's theme. -->
+        <form id="hero-profile" class="hero-specimen" aria-label="Edit profile, a Joinery card">
+          <div class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <div class="jn-card-title jn-font-heading" data-slot="card-title">Edit profile</div>
+              <div class="jn-card-description" data-slot="card-description">
+                Make changes to your profile here. Click save when you're done.
+              </div>
+            </div>
+            <div class="jn-card-content" data-slot="card-content">
+              <div class="jn-field-group group/field-group" data-slot="field-group">
+                <div
+                  class="jn-field group/field jn-field-orientation-vertical"
+                  role="group"
+                  data-slot="field"
+                  data-orientation="vertical"
+                >
+                  <label
+                    class="jn-label jn-field-label group/field-label peer/field-label"
+                    data-slot="field-label"
+                    for="hero-name"
+                    >Name</label
+                  >
+                  <input
+                    class="jn-input"
+                    data-slot="input"
+                    id="hero-name"
+                    name="name"
+                    value="Pedro Duarte"
+                    autocomplete="off"
+                  />
+                </div>
+                <div
+                  class="jn-field group/field jn-field-orientation-vertical"
+                  role="group"
+                  data-slot="field"
+                  data-orientation="vertical"
+                >
+                  <label
+                    class="jn-label jn-field-label group/field-label peer/field-label"
+                    data-slot="field-label"
+                    for="hero-username"
+                    >Username</label
+                  >
+                  <input
+                    class="jn-input"
+                    data-slot="input"
+                    id="hero-username"
+                    name="username"
+                    value="@peduarte"
+                    autocomplete="off"
+                  />
+                </div>
+                <div
+                  class="jn-field group/field jn-field-orientation-horizontal"
+                  role="group"
+                  data-slot="field"
+                  data-orientation="horizontal"
+                >
+                  <label
+                    class="jn-label jn-field-label group/field-label peer/field-label"
+                    data-slot="field-label"
+                    for="hero-updates"
+                    >Email me about new components</label
+                  >
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked="true"
+                    data-state="checked"
+                    data-default-checked
+                    class="jn-switch peer group/switch"
+                    data-slot="switch"
+                    data-size="default"
+                    id="hero-updates"
+                  >
+                    <span
+                      data-state="checked"
+                      class="jn-switch-thumb"
+                      data-slot="switch-thumb"
+                    ></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="jn-card-footer" data-slot="card-footer">
+              <button
+                type="reset"
+                class="jn-button group/button jn-button-variant-outline jn-button-size-default"
+                data-slot="button"
+                data-variant="outline"
+                data-size="default"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="jn-button group/button jn-button-variant-default jn-button-size-default"
+                data-slot="button"
+                data-variant="default"
+                data-size="default"
+              >
+                Save changes
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
     </header>
 
     <main id="main" class="container">
       <section id="why">
         <p class="eyebrow">Why</p>
-        <h2>shadcn's design, the Ember way</h2>
+        <h2>
+          shadcn's design, the Ember way<a
+            class="section-link"
+            href="#why"
+            aria-label="Link to “shadcn's design, the Ember way”"
+            >#</a
+          >
+        </h2>
+        <p>
+          Joinery ports shadcn/ui from its source, component by component and example by example,
+          and compares every example's screenshots with shadcn's own, light and dark. What changes
+          is the framework: React's props and <code>asChild</code> become Glimmer's named arguments,
+          yielded parts and modifiers.
+        </p>
+        <div class="pair">
+          <div>
+            <p class="label-above">shadcn/ui, in React</p>
+            <pre><code class="language-markup">&lt;Dialog&gt;
+  &lt;DialogTrigger asChild&gt;
+    &lt;Button variant="outline"&gt;Open Dialog&lt;/Button&gt;
+  &lt;/DialogTrigger&gt;
+  &lt;DialogContent&gt;
+    &lt;DialogHeader&gt;
+      &lt;DialogTitle&gt;Edit profile&lt;/DialogTitle&gt;
+    &lt;/DialogHeader&gt;
+    …
+    &lt;DialogFooter&gt;
+      &lt;DialogClose asChild&gt;
+        &lt;Button variant="outline"&gt;Cancel&lt;/Button&gt;
+      &lt;/DialogClose&gt;
+      &lt;Button type="submit"&gt;Save changes&lt;/Button&gt;
+    &lt;/DialogFooter&gt;
+  &lt;/DialogContent&gt;
+&lt;/Dialog&gt;</code></pre>
+          </div>
+          <div>
+            <p class="label-above">Joinery, in Ember</p>
+            <pre><code class="language-handlebars">&lt;Dialog as |d|&gt;
+  &lt;Button @variant="outline" {{d.trigger}}&gt;Open Dialog&lt;/Button&gt;
+  &lt;d.Content&gt;
+    &lt;d.Header&gt;
+      &lt;d.Title&gt;Edit profile&lt;/d.Title&gt;
+    &lt;/d.Header&gt;
+    …
+    &lt;d.Footer&gt;
+      &lt;Button @variant="outline" {{d.close}}&gt;Cancel&lt;/Button&gt;
+      &lt;Button type="submit"&gt;Save changes&lt;/Button&gt;
+    &lt;/d.Footer&gt;
+  &lt;/d.Content&gt;
+&lt;/Dialog&gt;</code></pre>
+          </div>
+        </div>
+
         <div class="features">
-          <article>
-            <h3>Parts you compose</h3>
-            <p>
-              Each component yields its parts, <code>&lt;Dialog as |d|&gt;</code> then
-              <code>&lt;d.Trigger&gt;</code> and <code>&lt;d.Content&gt;</code>, typed with Glint.
-              Swap in your own element with <code>@as</code> or a yielded modifier.
-            </p>
+          <article class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">
+                <svg
+                  class="lucide icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M15.536 11.293a1 1 0 0 0 0 1.414l2.376 2.377a1 1 0 0 0 1.414 0l2.377-2.377a1 1 0 0 0 0-1.414l-2.377-2.377a1 1 0 0 0-1.414 0z"
+                  />
+                  <path
+                    d="M2.297 11.293a1 1 0 0 0 0 1.414l2.377 2.377a1 1 0 0 0 1.414 0l2.377-2.377a1 1 0 0 0 0-1.414L6.088 8.916a1 1 0 0 0-1.414 0z"
+                  />
+                  <path
+                    d="M8.916 17.912a1 1 0 0 0 0 1.415l2.377 2.376a1 1 0 0 0 1.414 0l2.377-2.376a1 1 0 0 0 0-1.415l-2.377-2.376a1 1 0 0 0-1.414 0z"
+                  />
+                  <path
+                    d="M8.916 4.674a1 1 0 0 0 0 1.414l2.377 2.376a1 1 0 0 0 1.414 0l2.377-2.376a1 1 0 0 0 0-1.414l-2.377-2.377a1 1 0 0 0-1.414 0z"
+                  />
+                </svg>
+                Parts you compose
+              </h3>
+              <p class="jn-card-description" data-slot="card-description">
+                A component yields its parts, typed with Glint. Render any part as your own element
+                with <code>@as</code>, or put its modifier on a component of yours:
+                <code>&lt;LinkTo {{d.trigger}}&gt;</code>.
+              </p>
+            </div>
           </article>
-          <article>
-            <h3>Controlled or not</h3>
-            <p>
-              Leave state to the component, or own it with <code>@open</code> and
-              <code>@onOpenChange</code>, <code>@value</code> and <code>@onValueChange</code>, as in
-              Radix.
-            </p>
+          <article class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">
+                <svg
+                  class="lucide icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect width="20" height="12" x="2" y="6" rx="6" ry="6" />
+                  <circle cx="16" cy="12" r="2" />
+                </svg>
+                Controlled or not
+              </h3>
+              <p class="jn-card-description" data-slot="card-description">
+                Leave state to the component, or own it, as in Radix: <code>@open</code> and
+                <code>@onOpenChange</code>, <code>@value</code> and <code>@onValueChange</code>,
+                with a <code>@default…</code> for each.
+              </p>
+            </div>
           </article>
-          <article>
-            <h3>Headless primitives</h3>
-            <p>
-              <code>@ember-joinery/primitives</code> is the behaviour underneath, unstyled: focus,
-              keyboard, layering and ARIA, covering everything ember-primitives offers.
-            </p>
+          <article class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">
+                <svg
+                  class="lucide icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"
+                  />
+                  <path
+                    d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"
+                  />
+                  <path
+                    d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"
+                  />
+                </svg>
+                Headless primitives
+              </h3>
+              <p class="jn-card-description" data-slot="card-description">
+                <code>@ember-joinery/primitives</code> is the behaviour underneath, unstyled: focus,
+                keyboard, layering with the Popover API, anchoring and ARIA, and everything
+                ember-primitives offers.
+              </p>
+            </div>
           </article>
-          <article>
-            <h3>Accessible</h3>
-            <p>
-              WCAG 2.2 AA, the WAI-ARIA keyboard patterns, and right-to-left layouts. Every test
-              ends in an axe audit.
-            </p>
+          <article class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">
+                <svg
+                  class="lucide icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="16" cy="4" r="1" />
+                  <path d="m18 19 1-7-6 1" />
+                  <path d="m5 8 3-3 5.5 3-2.36 3.5" />
+                  <path d="M4.24 14.5a5 5 0 0 0 6.88 6" />
+                  <path d="M13.76 17.5a5 5 0 0 0-6.88-6" />
+                </svg>
+                Accessible
+              </h3>
+              <p class="jn-card-description" data-slot="card-description">
+                WCAG 2.2 AA and the WAI-ARIA keyboard patterns, and every test ends in an axe audit.
+                Where shadcn's markup falls short, Joinery's is fixed and the pixels stay shadcn's.
+              </p>
+            </div>
+          </article>
+          <article class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">
+                <svg
+                  class="lucide icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m5 8 6 6" />
+                  <path d="m4 14 6-6 2-3" />
+                  <path d="M2 5h12" />
+                  <path d="M7 2h1" />
+                  <path d="m22 22-5-10-5 10" />
+                  <path d="M14 18h6" />
+                </svg>
+                Right to left
+              </h3>
+              <p class="jn-card-description" data-slot="card-description">
+                Logical properties, a direction from the nearest <code>dir</code>, arrow keys that
+                flip, and every built-in string an argument with an English default.
+              </p>
+            </div>
+          </article>
+          <article class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">
+                <svg
+                  class="lucide icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+                  <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+                  <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+                  <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+                  <path
+                    d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"
+                  />
+                </svg>
+                Tailwind optional
+              </h3>
+              <p class="jn-card-description" data-slot="card-description">
+                shadcn's style sheets, compiled to plain CSS in a cascade layer of their own. Apps
+                without Tailwind import two files; Tailwind apps can override any part with a class.
+              </p>
+            </div>
           </article>
         </div>
       </section>
 
       <section id="install">
         <p class="eyebrow">Install</p>
-        <h2>Vite or classic, Tailwind or not</h2>
+        <h2>
+          Vite or classic, Tailwind or not<a
+            class="section-link"
+            href="#install"
+            aria-label="Link to “Vite or classic, Tailwind or not”"
+            >#</a
+          >
+        </h2>
         <p>
-          Joinery's packages are v2 addons. Vite (Embroider) apps import them directly; classic
-          ember-cli apps use ember-auto-import 2. Import the theme and the components' CSS once:
+          Joinery's packages are v2 addons for Ember 6.12 LTS and 7. Vite (Embroider) apps import
+          them directly, and classic ember-cli apps through ember-auto-import 2. Add the components
+          and the harnesses, then import the theme's tokens and the components' CSS once.
         </p>
-        <pre><code>import '@ember-joinery/ember/tokens.css'
+        <div class="pair">
+          <pre><code class="language-bash">pnpm add @ember-joinery/ember
+pnpm add --save-dev @ember-joinery/test-support</code></pre>
+          <pre><code class="language-typescript">// app/app.ts
+import '@ember-joinery/ember/tokens.css'
 import '@ember-joinery/ember/joinery.css'</code></pre>
+        </div>
         <p>
-          Every kind of app has an example in the repository, built and tested in CI. The
-          <a href="guide/getting-started/installation.md">installation guide</a> has the steps.
+          In a Tailwind app, put Joinery's layer between Tailwind's <code>base</code> and
+          <code>components</code>, and add <code>tailwind.css</code>, which maps the tokens to
+          Tailwind's theme (<code>bg-primary</code>, <code>rounded-lg</code>) and adds the
+          <code>dark:</code> variant:
+        </p>
+        <pre><code class="language-css">@layer theme, base, joinery, components, utilities;
+@import 'tailwindcss';
+@import '@ember-joinery/ember/tailwind.css';</code></pre>
+        <p>
+          The heavier components come in packages of their own, each around the one library it
+          needs, so an app installs only what it uses:
+        </p>
+        <div class="jn-table-container site-table" data-slot="table-container">
+          <table class="jn-table" data-slot="table">
+            <thead class="jn-table-header" data-slot="table-header">
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-head" data-slot="table-head" scope="col">Package</th>
+                <th class="jn-table-head" data-slot="table-head" scope="col">What it holds</th>
+              </tr>
+            </thead>
+            <tbody class="jn-table-body" data-slot="table-body">
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>@ember-joinery/ember</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  The components, styled: <code>joinery.css</code> (the Nova style) and shadcn's
+                  seven other styles, <code>tokens.css</code> and the base colours,
+                  <code>tailwind.css</code>, and <code>&lt;Icon&gt;</code> for lucide's icons.
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>@ember-joinery/primitives</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  The headless layer: every component's behaviour, unstyled, and ember-primitives'
+                  utilities, one subpath each (<code>/color-scheme</code>, <code>/qp</code>,
+                  <code>/viewport</code>…).
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>@ember-joinery/test-support</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  A harness for every primitive and component, and the
+                  <code>data-test-jn-*</code> selectors they use.
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>@ember-joinery/chart</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  Charts (area, bar, line, pie, radar and radial) as Glimmer SVG on d3-scale and
+                  d3-shape, with an API shaped like recharts.
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>@ember-joinery/carousel</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  Carousel, on Embla Carousel: slides with motion, swipe and keyboard control.
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>@ember-joinery/data-table</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  Data Table: sorting, filtering, pagination, row selection and column visibility,
+                  on TanStack Table's core.
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>@ember-joinery/code-block</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  Code Block: code, terminal output and diffs, with line numbers, a copy button and
+                  Shiki's highlighting.
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>@ember-joinery/formwright</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  Forms on <a href="#formwright">Formwright</a>: every Joinery input as a Formwright
+                  control, in shadcn's Field anatomy, with field harnesses.
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>@ember-joinery/file-upload</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  File uploads, on ember-file-upload: a drop zone, a file list and an upload queue
+                  with progress.
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>@ember-joinery/tiptap</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  A rich-text editor, on Tiptap: a toolbar of toggles, a heading menu and tooltips,
+                  stored as HTML or JSON.
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>@ember-joinery/power-calendar</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  Calendars and date pickers, on ember-power-calendar: a day, a range or several
+                  days, inline or in a popover.
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>@ember-joinery/maskito</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  Masked inputs, on Maskito, with number, date and time presets, and a phone input
+                  with a country picker that stores E.164.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          The <a href="guide/getting-started/installation.md">installation guide</a> has the steps
+          for each kind of app, and the repository's
+          <a href="https://github.com/joegaudet/ember-joinery/tree/main/examples">examples</a> are
+          one of each, built and tested in CI.
         </p>
       </section>
 
       <section id="usage">
         <p class="eyebrow">Usage</p>
-        <h2>Strict mode, named args, typed parts</h2>
-        <pre><code>import { on } from '@ember/modifier'
-import { Dialog, Button, Input } from '@ember-joinery/ember'
+        <h2>
+          Strict mode, named args, typed parts<a
+            class="section-link"
+            href="#usage"
+            aria-label="Link to “Strict mode, named args, typed parts”"
+            >#</a
+          >
+        </h2>
+        <p>
+          Import what you use into a <code>.gts</code> file. A compound component yields its parts,
+          each as a component and as a modifier, already wired to it: ids, ARIA, focus and state.
+        </p>
+        <pre><code class="language-typescript">import { on } from '@ember/modifier'
+import { Button, Dialog, Field, FieldGroup, Input, Label } from '@ember-joinery/ember'
 
 &lt;template&gt;
   &lt;Dialog @name="edit-profile" as |d|&gt;
@@ -153,153 +733,1206 @@ import { Dialog, Button, Input } from '@ember-joinery/ember'
         &lt;d.Title&gt;Edit profile&lt;/d.Title&gt;
         &lt;d.Description&gt;Make changes to your profile here.&lt;/d.Description&gt;
       &lt;/d.Header&gt;
-      &lt;Input @name="name" @value={{this.name}} @onValueChange={{this.setName}} /&gt;
+      &lt;FieldGroup&gt;
+        &lt;Field&gt;
+          &lt;Label for="name"&gt;Name&lt;/Label&gt;
+          &lt;Input id="name" @name="name" @value={{@user.name}} @onValueChange={{@rename}} /&gt;
+        &lt;/Field&gt;
+      &lt;/FieldGroup&gt;
       &lt;d.Footer&gt;
         &lt;Button @variant="outline" {{d.close}}&gt;Cancel&lt;/Button&gt;
-        &lt;Button @name="save" {{d.close}} {{on "click" this.save}}&gt;Save changes&lt;/Button&gt;
+        &lt;Button @name="save" {{d.close}} {{on "click" @save}}&gt;Save changes&lt;/Button&gt;
       &lt;/d.Footer&gt;
     &lt;/d.Content&gt;
   &lt;/Dialog&gt;
 &lt;/template&gt;</code></pre>
+        <div class="pair">
+          <div>
+            <p class="label-above">Your own element: <code>@as</code>, or a part's modifier</p>
+            <pre><code class="language-handlebars">&lt;Button @as="a" href="/pricing"&gt;Pricing&lt;/Button&gt;
+&lt;LinkTo @route="login" {{asButton variant="outline"}}&gt;
+  Log in
+&lt;/LinkTo&gt;</code></pre>
+          </div>
+          <div>
+            <p class="label-above">Controlled, when the app owns the state</p>
+            <pre><code class="language-handlebars">&lt;Dialog @open={{this.isEditing}}
+  @onOpenChange={{this.setEditing}} as |d|&gt;
+  …
+&lt;/Dialog&gt;</code></pre>
+          </div>
+        </div>
       </section>
 
       <section id="theming">
         <p class="eyebrow">Theming</p>
-        <h2>shadcn's tokens, so any shadcn theme pastes in</h2>
+        <h2>
+          shadcn's styles and colours, so any shadcn theme pastes in<a
+            class="section-link"
+            href="#theming"
+            aria-label="Link to “shadcn's styles and colours, so any shadcn theme pastes in”"
+            >#</a
+          >
+        </h2>
         <p>
-          Joinery uses shadcn's token names in OKLCH (<code>--background</code>,
-          <code>--primary</code>, <code>--ring</code>, <code>--radius</code>,
-          <code>--chart-1</code> to <code>--chart-5</code>…), dark mode is a
-          <code>.dark</code> class, and all eight of shadcn's styles ship: Nova by default, plus
-          Luma, Lyra, Maia, Mira, Rhea, Sera and Vega. Pick a base colour the same way:
+          The tokens are shadcn's, in OKLCH (<code>--background</code>, <code>--primary</code>,
+          <code>--ring</code>, <code>--radius</code>, <code>--chart-1</code> to
+          <code>--chart-5</code>…), and dark mode is a <code>.dark</code> class. All eight of
+          shadcn's styles ship, Nova by default, and all seven base colours. This page is styled
+          with them: pick a style and a base colour, and the whole page changes.
         </p>
-        <pre><code>import '@ember-joinery/ember/themes/stone.css'   // in place of tokens.css
-import '@ember-joinery/ember/styles/lyra.css'   // in place of joinery.css</code></pre>
+        <div class="theming">
+          <div class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">Theme this page</h3>
+              <p class="jn-card-description" data-slot="card-description">
+                The same choices as every example in the guide.
+              </p>
+            </div>
+            <div class="jn-card-content" data-slot="card-content">
+              <div class="jn-field-group group/field-group" data-slot="field-group">
+                <div
+                  class="jn-field group/field jn-field-orientation-vertical"
+                  role="group"
+                  data-slot="field"
+                  data-orientation="vertical"
+                >
+                  <label
+                    class="jn-label jn-field-label group/field-label peer/field-label"
+                    data-slot="field-label"
+                    for="theme-style"
+                    >Style</label
+                  >
+                  <div
+                    class="jn-native-select-wrapper group/native-select"
+                    data-slot="native-select-wrapper"
+                    data-size="default"
+                  >
+                    <select
+                      class="jn-native-select"
+                      data-slot="native-select"
+                      data-size="default"
+                      id="theme-style"
+                      data-site-theme="style"
+                    >
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="nova"
+                      >
+                        Nova (default)
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="luma"
+                      >
+                        Luma
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="lyra"
+                      >
+                        Lyra
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="maia"
+                      >
+                        Maia
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="mira"
+                      >
+                        Mira
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="rhea"
+                      >
+                        Rhea
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="sera"
+                      >
+                        Sera
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="vega"
+                      >
+                        Vega
+                      </option>
+                    </select>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide jn-native-select-icon jn-size-own"
+                      aria-hidden="true"
+                      data-slot="native-select-icon"
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </div>
+                </div>
+                <div
+                  class="jn-field group/field jn-field-orientation-vertical"
+                  role="group"
+                  data-slot="field"
+                  data-orientation="vertical"
+                >
+                  <label
+                    class="jn-label jn-field-label group/field-label peer/field-label"
+                    data-slot="field-label"
+                    for="theme-base"
+                    >Base colour</label
+                  >
+                  <div
+                    class="jn-native-select-wrapper group/native-select"
+                    data-slot="native-select-wrapper"
+                    data-size="default"
+                  >
+                    <select
+                      class="jn-native-select"
+                      data-slot="native-select"
+                      data-size="default"
+                      id="theme-base"
+                      data-site-theme="base"
+                    >
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="neutral"
+                      >
+                        Neutral (default)
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="stone"
+                      >
+                        Stone
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="zinc"
+                      >
+                        Zinc
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="mauve"
+                      >
+                        Mauve
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="olive"
+                      >
+                        Olive
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="mist"
+                      >
+                        Mist
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="taupe"
+                      >
+                        Taupe
+                      </option>
+                    </select>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide jn-native-select-icon jn-size-own"
+                      aria-hidden="true"
+                      data-slot="native-select-icon"
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </div>
+                </div>
+                <div
+                  class="jn-field group/field jn-field-orientation-vertical"
+                  role="group"
+                  data-slot="field"
+                  data-orientation="vertical"
+                >
+                  <label
+                    class="jn-label jn-field-label group/field-label peer/field-label"
+                    data-slot="field-label"
+                    for="theme-radius"
+                    >Radius</label
+                  >
+                  <div
+                    class="jn-native-select-wrapper group/native-select"
+                    data-slot="native-select-wrapper"
+                    data-size="default"
+                  >
+                    <select
+                      class="jn-native-select"
+                      data-slot="native-select"
+                      data-size="default"
+                      id="theme-radius"
+                      data-site-theme="radius"
+                    >
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="0"
+                      >
+                        0
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="0.3"
+                      >
+                        0.3
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="0.5"
+                      >
+                        0.5
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="0.625"
+                      >
+                        0.625 (default)
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="0.75"
+                      >
+                        0.75
+                      </option>
+                      <option
+                        class="jn-native-select-option"
+                        data-slot="native-select-option"
+                        value="1"
+                      >
+                        1
+                      </option>
+                    </select>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide jn-native-select-icon jn-size-own"
+                      aria-hidden="true"
+                      data-slot="native-select-icon"
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </div>
+                </div>
+                <div
+                  class="jn-field group/field jn-field-orientation-horizontal"
+                  role="group"
+                  data-slot="field"
+                  data-orientation="horizontal"
+                >
+                  <label
+                    class="jn-label jn-field-label group/field-label peer/field-label"
+                    data-slot="field-label"
+                    for="theme-dark"
+                    >Dark mode</label
+                  >
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked="false"
+                    data-state="unchecked"
+                    class="jn-switch peer group/switch"
+                    data-slot="switch"
+                    data-size="default"
+                    id="theme-dark"
+                    data-site-scheme-switch
+                  >
+                    <span
+                      data-state="unchecked"
+                      class="jn-switch-thumb"
+                      data-slot="switch-thumb"
+                    ></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="jn-card-footer" data-slot="card-footer">
+              <button
+                type="button"
+                class="jn-button group/button jn-button-variant-outline jn-button-size-sm"
+                data-slot="button"
+                data-variant="outline"
+                data-size="sm"
+                data-site-theme-reset
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="specimen">
+            <div class="jn-card group/card" data-slot="card" data-size="default">
+              <div class="jn-card-header group/card-header" data-slot="card-header">
+                <h3 class="jn-card-title jn-font-heading" data-slot="card-title">In your app</h3>
+                <p class="jn-card-description" data-slot="card-description">
+                  The two imports that give an app this page's look.
+                </p>
+              </div>
+              <div class="jn-card-content" data-slot="card-content">
+                <pre><code id="theme-code" class="language-typescript">import '@ember-joinery/ember/tokens.css'
+import '@ember-joinery/ember/joinery.css'</code></pre>
+                <div class="row">
+                  <button
+                    type="button"
+                    class="jn-button group/button jn-button-variant-default jn-button-size-default"
+                    data-slot="button"
+                    data-variant="default"
+                    data-size="default"
+                  >
+                    Default
+                  </button>
+                  <button
+                    type="button"
+                    class="jn-button group/button jn-button-variant-secondary jn-button-size-default"
+                    data-slot="button"
+                    data-variant="secondary"
+                    data-size="default"
+                  >
+                    Secondary
+                  </button>
+                  <button
+                    type="button"
+                    class="jn-button group/button jn-button-variant-outline jn-button-size-default"
+                    data-slot="button"
+                    data-variant="outline"
+                    data-size="default"
+                  >
+                    Outline
+                  </button>
+                  <button
+                    type="button"
+                    class="jn-button group/button jn-button-variant-ghost jn-button-size-default"
+                    data-slot="button"
+                    data-variant="ghost"
+                    data-size="default"
+                  >
+                    Ghost
+                  </button>
+                  <button
+                    type="button"
+                    class="jn-button group/button jn-button-variant-link jn-button-size-default"
+                    data-slot="button"
+                    data-variant="link"
+                    data-size="default"
+                  >
+                    Link
+                  </button>
+                </div>
+                <div class="row">
+                  <span
+                    class="jn-badge group/badge jn-badge-variant-default"
+                    data-slot="badge"
+                    data-variant="default"
+                    >Badge</span
+                  >
+                  <span
+                    class="jn-badge group/badge jn-badge-variant-secondary"
+                    data-slot="badge"
+                    data-variant="secondary"
+                    >Secondary</span
+                  >
+                  <span
+                    class="jn-badge group/badge jn-badge-variant-outline"
+                    data-slot="badge"
+                    data-variant="outline"
+                    >Outline</span
+                  >
+                  <kbd class="jn-kbd-group" data-slot="kbd-group"
+                    ><kbd class="jn-kbd" data-slot="kbd">⌘</kbd
+                    ><kbd class="jn-kbd" data-slot="kbd">K</kbd></kbd
+                  >
+                </div>
+                <div
+                  role="progressbar"
+                  aria-label="Progress"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow="66"
+                  aria-valuetext="66%"
+                  data-state="loading"
+                  data-value="66"
+                  data-max="100"
+                  class="jn-progress"
+                  data-slot="progress"
+                >
+                  <div
+                    data-state="loading"
+                    data-value="66"
+                    data-max="100"
+                    class="jn-progress-indicator"
+                    data-slot="progress-indicator"
+                    style="transform: translateX(-34%)"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <p>
-          Every example in the guide can switch style, base colour, radius, light and dark, and
-          right to left, and show itself at a phone's or a tablet's width. See
+          A theme from <a href="https://ui.shadcn.com/create">ui.shadcn.com</a> pastes in unchanged:
+          its <code>:root</code> and <code>.dark</code> blocks go in your own CSS, after
+          <code>tokens.css</code>, and win, because Joinery's rules sit in the
+          <code>joinery</code> cascade layer. See
           <a href="guide/getting-started/theming.md">Theming</a>.
         </p>
       </section>
 
       <section id="components">
         <p class="eyebrow">Components</p>
-        <h2>All of ui.shadcn.com</h2>
+        <h2>
+          All of ui.shadcn.com, and the rest of ember-primitives<a
+            class="section-link"
+            href="#components"
+            aria-label="Link to “All of ui.shadcn.com, and the rest of ember-primitives”"
+            >#</a
+          >
+        </h2>
+        <p>
+          Every component on shadcn's docs pages, every example on them, the charts gallery and a
+          set of its blocks. Each picture here is a guide example, as the guide renders it.
+        </p>
+        <ul class="gallery">
+          <li>
+            <a href="guide/components/card.md">
+              <img
+                class="shot-light"
+                src="img/components/card-light.png"
+                alt="A login card with email and password fields, a Login button and a Login with Google button."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <img
+                class="shot-dark"
+                src="img/components/card-dark.png"
+                alt="A login card with email and password fields, a Login button and a Login with Google button."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <span class="caption"><strong>Card</strong><span>@ember-joinery/ember</span></span>
+            </a>
+          </li>
+          <li>
+            <a href="guide/components/calendar.md">
+              <img
+                class="shot-light"
+                src="img/components/calendar-light.png"
+                alt="A month calendar with month and year dropdowns, today selected."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <img
+                class="shot-dark"
+                src="img/components/calendar-dark.png"
+                alt="A month calendar with month and year dropdowns, today selected."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <span class="caption"
+                ><strong>Calendar</strong><span>Intl, no date library</span></span
+              >
+            </a>
+          </li>
+          <li>
+            <a href="guide/charts/bar.md">
+              <img
+                class="shot-light"
+                src="img/components/chart-light.png"
+                alt="An interactive bar chart of three months of visitors, with desktop and mobile totals to switch between."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <img
+                class="shot-dark"
+                src="img/components/chart-dark.png"
+                alt="An interactive bar chart of three months of visitors, with desktop and mobile totals to switch between."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <span class="caption"><strong>Charts</strong><span>@ember-joinery/chart</span></span>
+            </a>
+          </li>
+          <li>
+            <a href="guide/components/dialog.md">
+              <img
+                class="shot-light"
+                src="img/components/dialog-light.png"
+                alt="An open Edit profile dialog with name and username fields, Cancel and Save changes."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <img
+                class="shot-dark"
+                src="img/components/dialog-dark.png"
+                alt="An open Edit profile dialog with name and username fields, Cancel and Save changes."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <span class="caption"><strong>Dialog</strong><span>@ember-joinery/ember</span></span>
+            </a>
+          </li>
+          <li>
+            <a href="guide/components/command.md">
+              <img
+                class="shot-light"
+                src="img/components/command-light.png"
+                alt="A command menu with a search field, suggestions and settings, each with an icon and some with shortcuts."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <img
+                class="shot-dark"
+                src="img/components/command-dark.png"
+                alt="A command menu with a search field, suggestions and settings, each with an icon and some with shortcuts."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <span class="caption"><strong>Command</strong><span>@ember-joinery/ember</span></span>
+            </a>
+          </li>
+          <li>
+            <a href="guide/components/dropdown-menu.md">
+              <img
+                class="shot-light"
+                src="img/components/dropdown-menu-light.png"
+                alt="An open dropdown menu: My Account, profile, billing and settings with shortcuts, a submenu and Log out."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <img
+                class="shot-dark"
+                src="img/components/dropdown-menu-dark.png"
+                alt="An open dropdown menu: My Account, profile, billing and settings with shortcuts, a submenu and Log out."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <span class="caption"
+                ><strong>Dropdown Menu</strong><span>@ember-joinery/ember</span></span
+              >
+            </a>
+          </li>
+          <li>
+            <a href="guide/components/field.md">
+              <img
+                class="shot-light"
+                src="img/components/field-light.png"
+                alt="A compute environment field of two choice cards, Kubernetes chosen and Virtual Machine not."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <img
+                class="shot-dark"
+                src="img/components/field-dark.png"
+                alt="A compute environment field of two choice cards, Kubernetes chosen and Virtual Machine not."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <span class="caption"><strong>Field</strong><span>@ember-joinery/ember</span></span>
+            </a>
+          </li>
+          <li>
+            <a href="guide/components/data-table.md">
+              <img
+                class="shot-light"
+                src="img/components/data-table-light.png"
+                alt="A data table of payments with a filter, a columns menu, row checkboxes, a sortable email column and pagination."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <img
+                class="shot-dark"
+                src="img/components/data-table-dark.png"
+                alt="A data table of payments with a filter, a columns menu, row checkboxes, a sortable email column and pagination."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <span class="caption"
+                ><strong>Data Table</strong><span>@ember-joinery/data-table</span></span
+              >
+            </a>
+          </li>
+          <li>
+            <a href="guide/components/input-otp.md">
+              <img
+                class="shot-light"
+                src="img/components/input-otp-light.png"
+                alt="A one-time password input of six slots."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <img
+                class="shot-dark"
+                src="img/components/input-otp-dark.png"
+                alt="A one-time password input of six slots."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <span class="caption"
+                ><strong>Input OTP</strong><span>@ember-joinery/ember</span></span
+              >
+            </a>
+          </li>
+          <li>
+            <a href="guide/components/tabs.md">
+              <img
+                class="shot-light"
+                src="img/components/tabs-light.png"
+                alt="Tabs for Overview, Analytics, Reports and Settings, the Overview panel showing a card."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <img
+                class="shot-dark"
+                src="img/components/tabs-dark.png"
+                alt="Tabs for Overview, Analytics, Reports and Settings, the Overview panel showing a card."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <span class="caption"><strong>Tabs</strong><span>@ember-joinery/ember</span></span>
+            </a>
+          </li>
+          <li>
+            <a href="guide/components/message.md">
+              <img
+                class="shot-light"
+                src="img/components/message-light.png"
+                alt="A chat of messages in bubbles with avatars, a delivered marker, a reaction and a typing line."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <img
+                class="shot-dark"
+                src="img/components/message-dark.png"
+                alt="A chat of messages in bubbles with avatars, a delivered marker, a reaction and a typing line."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <span class="caption"><strong>Message</strong><span>the chat set</span></span>
+            </a>
+          </li>
+          <li>
+            <a href="guide/components/rich-text-editor.md">
+              <img
+                class="shot-light"
+                src="img/components/rich-text-editor-light.png"
+                alt="A rich-text editor with a toolbar of a heading menu, marks, lists, undo and redo, over a heading, a paragraph and a list."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <img
+                class="shot-dark"
+                src="img/components/rich-text-editor-dark.png"
+                alt="A rich-text editor with a toolbar of a heading menu, marks, lists, undo and redo, over a heading, a paragraph and a list."
+                width="640"
+                height="480"
+                loading="lazy"
+              />
+              <span class="caption"
+                ><strong>Rich Text Editor</strong><span>@ember-joinery/tiptap</span></span
+              >
+            </a>
+          </li>
+        </ul>
+
         <ul class="component-groups">
-          <li><strong>Display</strong> Button, Badge, Alert, Card, Avatar, Table, Pagination…</li>
-          <li><strong>Inputs</strong> Input, Field, Checkbox, Switch, Rating, File Drop…</li>
-          <li><strong>Overlays</strong> Dialog, Sheet, Drawer, Popover, Tooltip, Toast…</li>
           <li>
-            <strong>Menus</strong> Dropdown Menu, <a href="guide/components/menubar.md">Menubar</a>,
-            <a href="guide/components/navigation-menu.md">Navigation Menu</a>, Select, Combobox,
-            Command, Tabs…
+            <h3>Display</h3>
+            <p>
+              <a href="guide/components/alert.md">Alert</a>,
+              <a href="guide/components/aspect-ratio.md">Aspect Ratio</a>,
+              <a href="guide/components/avatar.md">Avatar</a>,
+              <a href="guide/components/badge.md">Badge</a>,
+              <a href="guide/components/breadcrumb.md">Breadcrumb</a>,
+              <a href="guide/components/button.md">Button</a>,
+              <a href="guide/components/button-group.md">Button Group</a>,
+              <a href="guide/components/card.md">Card</a>,
+              <a href="guide/components/empty.md">Empty</a>,
+              <a href="guide/components/icon.md">Icon</a>,
+              <a href="guide/components/item.md">Item</a>,
+              <a href="guide/components/kbd.md">Kbd</a>,
+              <a href="guide/components/label.md">Label</a>,
+              <a href="guide/components/pagination.md">Pagination</a>,
+              <a href="guide/components/progress.md">Progress</a>,
+              <a href="guide/components/separator.md">Separator</a>,
+              <a href="guide/components/skeleton.md">Skeleton</a>,
+              <a href="guide/components/spinner.md">Spinner</a>,
+              <a href="guide/components/table.md">Table</a>,
+              <a href="guide/components/typography.md">Typography</a>
+            </p>
           </li>
           <li>
-            <strong>Dates</strong> <a href="guide/components/calendar.md">Calendar</a>, with no date
-            library, and <a href="guide/components/date-picker.md">Date Picker</a>
+            <h3>Inputs</h3>
+            <p>
+              <a href="guide/components/checkbox.md">Checkbox</a>,
+              <a href="guide/components/field.md">Field</a>,
+              <a href="guide/components/file-drop.md">File Drop</a>,
+              <a href="guide/components/input.md">Input</a>,
+              <a href="guide/components/input-group.md">Input Group</a>,
+              <a href="guide/components/input-otp.md">Input OTP</a>,
+              <a href="guide/components/native-select.md">Native Select</a>,
+              <a href="guide/components/radio-group.md">Radio Group</a>,
+              <a href="guide/components/rating.md">Rating</a>,
+              <a href="guide/components/slider.md">Slider</a>,
+              <a href="guide/components/switch.md">Switch</a>,
+              <a href="guide/components/textarea.md">Textarea</a>,
+              <a href="guide/components/toggle.md">Toggle</a>,
+              <a href="guide/components/toggle-group.md">Toggle Group</a>
+            </p>
           </li>
           <li>
-            <strong>App shell</strong> <a href="guide/components/sidebar.md">Sidebar</a>, Resizable,
-            Scroll Area, Direction
+            <h3>Overlays</h3>
+            <p>
+              <a href="guide/components/accordion.md">Accordion</a>,
+              <a href="guide/components/alert-dialog.md">Alert Dialog</a>,
+              <a href="guide/components/collapsible.md">Collapsible</a>,
+              <a href="guide/components/dialog.md">Dialog</a>,
+              <a href="guide/components/drawer.md">Drawer</a>,
+              <a href="guide/components/hover-card.md">Hover Card</a>,
+              <a href="guide/components/popover.md">Popover</a>,
+              <a href="guide/components/sheet.md">Sheet</a>,
+              <a href="guide/components/sonner.md">Sonner</a> and
+              <a href="guide/components/toast.md">Toast</a>,
+              <a href="guide/components/tooltip.md">Tooltip</a>
+            </p>
           </li>
           <li>
-            <strong>Add-ons</strong> <a href="guide/components/carousel.md">Carousel</a>,
-            <a href="guide/components/data-table.md">Data Table</a>,
-            <a href="guide/components/code-block.md">Code Block</a>,
-            <a href="guide/components/chart.md">Charts</a>,
-            <a href="guide/components/file-upload.md">File Upload</a>,
-            <a href="guide/components/rich-text-editor.md">Rich Text Editor</a>,
-            <a href="guide/components/power-calendar.md">Power Calendar</a>,
-            <a href="guide/components/masked-input.md">Masked Input</a> and
-            <a href="guide/components/phone-input.md">Phone Input</a>, each in its own package
-            (<code>@ember-joinery/carousel</code>, on Embla, <code>@ember-joinery/data-table</code>,
-            on TanStack Table, <code>@ember-joinery/code-block</code>, highlighted with Shiki,
-            <code>@ember-joinery/chart</code>, drawn as SVG on d3,
-            <code>@ember-joinery/file-upload</code>, on ember-file-upload,
-            <code>@ember-joinery/tiptap</code>, on Tiptap,
-            <code>@ember-joinery/power-calendar</code>, calendars and date pickers on
-            ember-power-calendar, and <code>@ember-joinery/maskito</code>, on Maskito)
+            <h3>Menus and selection</h3>
+            <p>
+              <a href="guide/components/combobox.md">Combobox</a>,
+              <a href="guide/components/command.md">Command</a>,
+              <a href="guide/components/context-menu.md">Context Menu</a>,
+              <a href="guide/components/dropdown-menu.md">Dropdown Menu</a>,
+              <a href="guide/components/menubar.md">Menubar</a>,
+              <a href="guide/components/navigation-menu.md">Navigation Menu</a>,
+              <a href="guide/components/select.md">Select</a>,
+              <a href="guide/components/tabs.md">Tabs</a>
+            </p>
           </li>
           <li>
-            <strong>Chat</strong> <a href="guide/components/message.md">Message</a>,
-            <a href="guide/components/bubble.md">Bubble</a>,
-            <a href="guide/components/marker.md">Marker</a>,
-            <a href="guide/components/attachment.md">Attachment</a>,
-            <a href="guide/components/message-scroller.md">Message Scroller</a>,
-            <a href="guide/components/questionnaire.md">Questionnaire</a> and
-            <a href="guide/components/trace.md">Trace</a>
+            <h3>Dates</h3>
+            <p>
+              <a href="guide/components/calendar.md">Calendar</a> and
+              <a href="guide/components/date-picker.md">Date Picker</a>, on <code>Date</code> and
+              <code>Intl</code>, with no date library
+            </p>
+          </li>
+          <li>
+            <h3>App shell</h3>
+            <p>
+              <a href="guide/components/direction.md">Direction</a>,
+              <a href="guide/components/resizable.md">Resizable</a>,
+              <a href="guide/components/scroll-area.md">Scroll Area</a>,
+              <a href="guide/components/sidebar.md">Sidebar</a>
+            </p>
+          </li>
+          <li>
+            <h3>Chat</h3>
+            <p>
+              <a href="guide/components/attachment.md">Attachment</a>,
+              <a href="guide/components/bubble.md">Bubble</a>,
+              <a href="guide/components/marker.md">Marker</a>,
+              <a href="guide/components/message.md">Message</a>,
+              <a href="guide/components/message-scroller.md">Message Scroller</a>,
+              <a href="guide/components/questionnaire.md">Questionnaire</a>,
+              <a href="guide/components/trace.md">Trace</a>
+            </p>
+          </li>
+          <li>
+            <h3>In packages of their own</h3>
+            <p>
+              <a href="guide/components/carousel.md">Carousel</a>,
+              <a href="guide/components/chart.md">Chart</a>,
+              <a href="guide/components/code-block.md">Code Block</a>,
+              <a href="guide/components/data-table.md">Data Table</a>, and on Formwright's
+              libraries: <a href="guide/components/file-upload.md">File Upload</a>,
+              <a href="guide/components/masked-input.md">Masked Input</a>,
+              <a href="guide/components/phone-input.md">Phone Input</a>,
+              <a href="guide/components/power-calendar.md">Power Calendar</a> (and its
+              <a href="guide/components/power-calendar-range.md">range</a> and
+              <a href="guide/components/power-calendar-multiple.md">multiple</a> kinds),
+              <a href="guide/components/power-date-picker.md">Power Date Picker</a>,
+              <a href="guide/components/power-date-range-picker.md">Power Date Range Picker</a>,
+              <a href="guide/components/rich-text-editor.md">Rich Text Editor</a>
+            </p>
+          </li>
+          <li>
+            <h3>Charts, blocks and primitives</h3>
+            <p>
+              shadcn's <a href="guide/charts/index.md">charts gallery</a> (area, bar, line, pie,
+              radar, radial and tooltips), its login, signup, dashboard and settings
+              <a href="guide/blocks/index.md">blocks</a>, and the
+              <a href="guide/primitives/index.md">primitives</a> underneath, from Accordion to
+              Zoetrope
+            </p>
           </li>
         </ul>
       </section>
 
       <section id="testing">
         <p class="eyebrow">Testing</p>
-        <h2>A harness for every component</h2>
+        <h2>
+          A harness for every component<a
+            class="section-link"
+            href="#testing"
+            aria-label="Link to “A harness for every component”"
+            >#</a
+          >
+        </h2>
         <p>
-          <code>@ember-joinery/test-support</code> drives each component the way a user does, and
-          reads its state through ARIA, so every test checks the ARIA contract too.
+          <code>@ember-joinery/test-support</code> has a harness class for every primitive and
+          component. It finds its component by stable <code>data-test-jn-*</code> attributes, drives
+          it the way a user does, with clicks, keys and typing, and reads its state through ARIA, so
+          every test checks the ARIA contract too. Joinery's own tests are written with them, and
+          every example in the guide shows its test.
         </p>
-        <pre><code>import { DialogHarness, ButtonHarness, InputHarness, child } from '@ember-joinery/test-support'
+        <div class="pair">
+          <pre><code class="language-typescript">import {
+  ButtonHarness, DialogHarness, InputHarness, child,
+} from '@ember-joinery/test-support'
 
-class EditProfile extends DialogHarness {
+// A page object: the dialog, its field and its button.
+export class EditProfile extends DialogHarness {
   static named = 'edit-profile'
+
   @child(InputHarness, 'name') declare name: InputHarness
   @child(ButtonHarness, 'save') declare save: ButtonHarness
-}
+}</code></pre>
+          <pre><code class="language-typescript">test('renaming', async function (assert) {
+  await render(&lt;template&gt;&lt;Profile /&gt;&lt;/template&gt;)
+  const dialog = new EditProfile()
 
-const dialog = new EditProfile()
-await dialog.open()
-await dialog.name.fillIn('Ada')
-await dialog.save.click()
-assert.false(dialog.isOpen)</code></pre>
+  await dialog.open()
+  assert.strictEqual(dialog.label, 'Edit profile')
+  await dialog.name.fillIn('Ada')
+  await dialog.save.click()
+
+  assert.false(dialog.isOpen)
+  assert.dom(dialog.trigger).isFocused()
+  await a11yAudit()
+})</code></pre>
+        </div>
+        <div class="jn-table-container site-table" data-slot="table-container">
+          <table class="jn-table" data-slot="table">
+            <thead class="jn-table-header" data-slot="table-header">
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-head" data-slot="table-head" scope="col">Attribute</th>
+                <th class="jn-table-head" data-slot="table-head" scope="col">On</th>
+              </tr>
+            </thead>
+            <tbody class="jn-table-body" data-slot="table-body">
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>data-test-jn="dialog"</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  The root of a component, which its harness is scoped to
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>data-test-jn-name="edit-profile"</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  The same root, given <code>@name</code>, to tell it from others
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>data-test-jn-part="trigger"</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  A part: a trigger, content, an item, an option…
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>data-test-jn-owner</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  A part in the top layer, or portalled: the root it belongs to, which its harness
+                  follows
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>data-test-jn-value</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  An option, item, tab or toggle, by its key
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          The attributes render in production, as Formwright's do, and are public API. Each
+          component's guide page lists its harness's members under Testing (see
+          <a href="guide/components/dialog.md">Dialog's</a>), and the package's
+          <a
+            href="https://github.com/joegaudet/ember-joinery/tree/main/packages/test-support#readme"
+            >README</a
+          >
+          covers the base class, for writing harnesses of your own.
+        </p>
       </section>
 
       <section id="formwright">
         <p class="eyebrow">Forms</p>
-        <h2>Formwright, built in</h2>
+        <h2>
+          Formwright, built in<a
+            class="section-link"
+            href="#formwright"
+            aria-label="Link to “Formwright, built in”"
+            >#</a
+          >
+        </h2>
         <p>
-          shadcn's <code>Form</code> is react-hook-form. Joinery's is
-          <a href="https://joegaudet.com/ember-formwright/">Formwright</a>: every Joinery input as a
-          Formwright control, through <code>@ember-joinery/formwright</code>.
+          shadcn's forms are built on react-hook-form. Joinery's are built on
+          <a href="https://joegaudet.com/ember-formwright/">Formwright</a>, through
+          <code>@ember-joinery/formwright</code>: every Joinery input as a Formwright control, a
+          field layout in shadcn's Field anatomy, and field harnesses on Formwright's own. Call
+          <code>setupJoineryForms()</code> once, and a field names its control.
+        </p>
+        <pre><code class="language-handlebars">&lt;Form @model={{@profile}} @validator={{schema}} @onSubmit={{@save}} as |f|&gt;
+  &lt;FieldGroup&gt;
+    &lt;f.Field @for="name" @label="Name" @hint="Your public display name." /&gt;
+    &lt;f.Field @for="language" @control="select" @label="Language" @options={{@languages}} /&gt;
+    &lt;f.Field @for="newsletter" @control="switch" @label="Send me the newsletter" /&gt;
+  &lt;/FieldGroup&gt;
+  &lt;f.Submit {{asButton}}&gt;Save&lt;/f.Submit&gt;
+&lt;/Form&gt;</code></pre>
+        <p>
+          Formwright reads and writes the model, validates it with any Standard Schema, and keeps
+          the labels, hints, errors and <code>aria-invalid</code> in step; Joinery draws it. The
+          <a href="guide/formwright/index.md">Formwright guide</a> rebuilds each of shadcn's form
+          examples on it.
         </p>
       </section>
 
       <section id="demo">
         <p class="eyebrow">Demo</p>
-        <h2>The live demo</h2>
+        <h2>
+          The live demo<a class="section-link" href="#demo" aria-label="Link to “The live demo”"
+            >#</a
+          >
+        </h2>
         <p>
-          shadcn's dashboard block, built with Joinery: an inset sidebar, section cards, an
-          interactive chart, and a data table to select, page through and reorder by dragging. Its
-          sidebar's Settings opens the settings block, a dialog with a section per link.
-          <a href="demo/">Open the demo</a>, or see each block, and its code and tests, in the
-          <a href="guide/blocks/index.md">guide's Blocks</a>.
+          shadcn's dashboard block, built with Joinery from the repository's test app: an inset
+          sidebar, section cards, an interactive chart, and a data table to select, page through and
+          reorder by dragging. The sidebar's Settings opens the settings block, a dialog with a
+          section per link. <a href="demo/">Open it on its own</a>, or see each block, and its code
+          and tests, in the <a href="guide/blocks/index.md">guide's Blocks</a>.
         </p>
         <div class="demo-window">
-          <iframe src="demo/" title="Joinery live demo" loading="lazy"></iframe>
+          <div class="chrome" aria-hidden="true">
+            <i></i><i></i><i></i><span>joegaudet.com/ember-joinery/demo</span>
+          </div>
+          <iframe src="demo/" title="Joinery live demo: a dashboard" loading="lazy"></iframe>
         </div>
       </section>
 
       <section id="guide">
         <p class="eyebrow">Guide</p>
-        <h2>Every component, every example, tested</h2>
+        <h2>
+          Every component, every example, tested<a
+            class="section-link"
+            href="#guide"
+            aria-label="Link to “Every component, every example, tested”"
+            >#</a
+          >
+        </h2>
         <p>
           The guide has a page for each component, laid out like its ui.shadcn.com page, with every
-          upstream example ported, live and tested.
+          upstream example ported, live, and tested with its harness. Each example switches style,
+          base colour, radius, light and dark, and right to left, shows itself at a phone's or a
+          tablet's width, and has Template and Test tabs to copy from.
         </p>
-        <p><a href="guide/" class="button">Read the guide</a></p>
+        <figure class="guide-shot">
+          <img
+            class="shot-light"
+            src="img/guide-example-light.png"
+            width="752"
+            height="568"
+            alt="The guide's frame around the Card page's login card: Preview, Template and Test tabs, and switchers for the style, base colour, radius, dark mode, right to left and width."
+            loading="lazy"
+          />
+          <img
+            class="shot-dark"
+            src="img/guide-example-dark.png"
+            width="752"
+            height="568"
+            alt="The guide's frame around the Card page's login card: Preview, Template and Test tabs, and switchers for the style, base colour, radius, dark mode, right to left and width."
+            loading="lazy"
+          />
+        </figure>
+        <div class="guide-links">
+          <a
+            href="guide/getting-started/introduction.md"
+            class="jn-button group/button jn-button-variant-default jn-button-size-default"
+            data-slot="button"
+            data-variant="default"
+            data-size="default"
+            >Getting started</a
+          >
+          <a
+            href="guide/components/index.md"
+            class="jn-button group/button jn-button-variant-outline jn-button-size-default"
+            data-slot="button"
+            data-variant="outline"
+            data-size="default"
+            >Components</a
+          >
+          <a
+            href="guide/primitives/index.md"
+            class="jn-button group/button jn-button-variant-outline jn-button-size-default"
+            data-slot="button"
+            data-variant="outline"
+            data-size="default"
+            >Primitives</a
+          >
+          <a
+            href="guide/charts/index.md"
+            class="jn-button group/button jn-button-variant-outline jn-button-size-default"
+            data-slot="button"
+            data-variant="outline"
+            data-size="default"
+            >Charts</a
+          >
+          <a
+            href="guide/blocks/index.md"
+            class="jn-button group/button jn-button-variant-outline jn-button-size-default"
+            data-slot="button"
+            data-variant="outline"
+            data-size="default"
+            >Blocks</a
+          >
+          <a
+            href="guide/formwright/index.md"
+            class="jn-button group/button jn-button-variant-outline jn-button-size-default"
+            data-slot="button"
+            data-variant="outline"
+            data-size="default"
+            >Formwright</a
+          >
+          <a
+            href="guide/reference/index.md"
+            class="jn-button group/button jn-button-variant-outline jn-button-size-default"
+            data-slot="button"
+            data-variant="outline"
+            data-size="default"
+            >Reference</a
+          >
+        </div>
       </section>
 
       <section id="siblings">
         <p class="eyebrow">Siblings</p>
-        <h2>More for Ember</h2>
-        <div class="features">
-          <article>
-            <h3><a href="https://joegaudet.com/ember-formwright/">Formwright</a></h3>
-            <p>Declarative, accessible forms, with any validator and any data layer.</p>
+        <h2>
+          More for Ember<a
+            class="section-link"
+            href="#siblings"
+            aria-label="Link to “More for Ember”"
+            >#</a
+          >
+        </h2>
+        <p>Joinery follows the methods of its siblings, and works with them.</p>
+        <div class="features siblings">
+          <article class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">
+                <a href="https://joegaudet.com/ember-formwright/">Formwright</a>
+              </h3>
+              <p class="jn-card-description" data-slot="card-description">
+                Declarative, accessible forms for Ember: any validator, any data layer, and
+                harnesses that read like your users. Joinery's forms are built on it.
+              </p>
+            </div>
           </article>
-          <article>
-            <h3><a href="https://joegaudet.com/real-enums/">real-enums</a></h3>
-            <p>Enums as classes, with members, labels and options, for TypeScript.</p>
+          <article class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">
+                <a href="https://joegaudet.com/real-enums/">real-enums</a>
+              </h3>
+              <p class="jn-card-description" data-slot="card-description">
+                Enums as classes for TypeScript, with members, labels and options, which a select or
+                radio group can take as its choices.
+              </p>
+            </div>
           </article>
         </div>
       </section>
@@ -308,26 +1941,72 @@ assert.false(dialog.isOpen)</code></pre>
     <footer class="site-footer">
       <div class="container">
         <p>
-          Joinery is an independent project, not affiliated with shadcn/ui. Its design, component
-          APIs and examples are ported from <a href="https://ui.shadcn.com/">shadcn/ui</a> (MIT, ©
-          shadcn), and its headless layer covers the features of
-          <a href="https://github.com/universal-ember/ember-primitives">ember-primitives</a>
-          (MIT). Its toasts port <a href="https://github.com/emilkowalski/sonner">sonner</a> (MIT, ©
-          Emil Kowalski), its charts port
-          <a href="https://github.com/recharts/recharts">recharts</a> (MIT, © recharts), its Drawer
-          ports <a href="https://github.com/emilkowalski/vaul">vaul</a> (MIT, © Emil Kowalski), its
-          Command follows <a href="https://github.com/dip/cmdk">cmdk</a> (MIT, © Paco Coursey), and
-          its Calendar follows
+          Joinery is an independent project, not affiliated with shadcn/ui. Design and API ported
+          from <a href="https://ui.shadcn.com/">shadcn/ui</a> (MIT, © shadcn): its components,
+          styles, examples and blocks. Its headless layer covers the features of
+          <a href="https://github.com/universal-ember/ember-primitives">ember-primitives</a> (MIT).
+          Its toasts port <a href="https://github.com/emilkowalski/sonner">sonner</a> (MIT, © Emil
+          Kowalski), its charts port <a href="https://github.com/recharts/recharts">recharts</a>
+          (MIT, © recharts), its Drawer ports
+          <a href="https://github.com/emilkowalski/vaul">vaul</a> (MIT, © Emil Kowalski), its
+          Command ports <a href="https://github.com/dip/cmdk">cmdk</a> (MIT, © Paco Coursey), and
+          its Calendar ports
           <a href="https://github.com/gpbl/react-day-picker">React DayPicker</a> (MIT, © Giampaolo
           Bellavite).
         </p>
         <p>
-          MIT licensed. More open source from <a href="https://joegaudet.com/">Joe Gaudet</a>:
-          <a href="https://joegaudet.com/ember-formwright/">Formwright</a> ·
+          Built on <a href="https://lucide.dev/">lucide</a>,
+          <a href="https://floating-ui.com/">Floating UI</a>,
+          <a href="https://www.embla-carousel.com/">Embla Carousel</a>,
+          <a href="https://tanstack.com/table">TanStack Table</a>,
+          <a href="https://shiki.style/">Shiki</a>, <a href="https://d3js.org/">d3</a>,
+          <a href="https://github.com/adopted-ember-addons/ember-file-upload">ember-file-upload</a>,
+          <a href="https://tiptap.dev/">Tiptap</a>,
+          <a href="https://github.com/cibernox/ember-power-calendar">ember-power-calendar</a>,
+          <a href="https://maskito.dev/">Maskito</a> and
+          <a href="https://github.com/catamphetamine/libphonenumber-js">libphonenumber-js</a>. The
+          full notices are in
+          <a href="https://github.com/joegaudet/ember-joinery/blob/main/NOTICE">NOTICE</a>.
+        </p>
+        <p>
+          MIT © Joe Gaudet ·
+          <a href="https://github.com/joegaudet/ember-joinery#readme">README</a> ·
+          <a href="https://github.com/joegaudet/ember-joinery/blob/main/CONTRIBUTING.md"
+            >Contributing</a
+          >
+          ·
+          <a href="https://github.com/joegaudet/ember-joinery/blob/main/JOINERY_PLAN.md">Plan</a>
+        </p>
+        <p>
+          More open source from <a href="https://joegaudet.com/">Joe Gaudet</a>:
+          <a href="https://joegaudet.com/harnessed/">harnessed</a> ·
           <a href="https://joegaudet.com/real-enums/">real-enums</a> ·
+          <a href="https://joegaudet.com/ember-formwright/">Formwright</a> ·
           <a href="./" aria-current="page">Joinery</a>
         </p>
       </div>
     </footer>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"
+      integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"
+      integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js"
+      integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-handlebars.min.js"
+      integrity="sha384-ztX0VXoOKuZtIC5fdYHz1UPQzBgLQ+IS5Q3mhfHTv2vLoKSRSU0r15sc/9cnlWp5"
+      crossorigin="anonymous"
+    ></script>
+    <script src="site.js"></script>
   </body>
 </html>

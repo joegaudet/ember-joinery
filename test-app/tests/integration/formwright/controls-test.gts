@@ -1,5 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
 import { render, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { array } from '@ember/helper'
@@ -471,7 +472,7 @@ module('Integration | formwright | controls', function (hooks) {
     const form = new SettingsForm()
     const markup = (root: HTMLElement): string[] =>
       [root, ...root.querySelectorAll<HTMLElement>('[data-slot]')].map(
-        element => `${element.dataset['slot']}: ${element.className}`,
+        element => `${element.dataset['slot']}: ${rendering(element).classes.join(' ')}`,
       )
     const plain = new SliderHarness('plain')
     assert.deepEqual(markup(form.price.slider.element), markup(plain.element))
@@ -601,7 +602,7 @@ module('Integration | formwright | controls', function (hooks) {
     const plain = new RatingHarness('plain')
     const markup = (root: HTMLElement): string[] =>
       [root, ...root.querySelectorAll<HTMLElement>('[data-slot]')].map(
-        element => `${element.dataset['slot']}: ${element.className}`,
+        element => `${element.dataset['slot']}: ${rendering(element).classes.join(' ')}`,
       )
     assert.deepEqual(markup(form.stars.rating.element), markup(plain.element))
     assert.deepEqual(markup(plain.element).slice(0, 3), [
@@ -629,7 +630,9 @@ module('Integration | formwright | controls', function (hooks) {
         attributesOf(item.querySelector('input')!),
         item
           .querySelector('label')!
-          .innerHTML.replace(/<!---->/g, '')
+          // Before Ember 7.1 `As` renders through a classic component, whose id is Ember's own.
+          .innerHTML.replace(/ id="ember\d+"/g, '')
+          .replace(/<!---->/g, '')
           .replace(/\s+/g, ' ')
           .replace(/> | </g, m => m.trim()),
       ])

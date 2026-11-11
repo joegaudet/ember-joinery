@@ -109,8 +109,7 @@ jobs:
           grep -q 'src="/ember-joinery/guide/assets/' docs/site/guide/index.html
           cmp docs/site/guide/index.html docs/site/404.html
 
-  # Each example app's smoke test. ember-formwright passes with nothing to do until its app
-  # exists under examples/.
+  # Each example app's smoke test.
   examples:
     name: example (${{ matrix.example }})
     runs-on: ubuntu-latest

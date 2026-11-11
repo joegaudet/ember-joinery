@@ -413,6 +413,112 @@ importers:
         specifier: ^5.111.0
         version: 5.112.2(postcss@8.5.32)
 
+  examples/ember-formwright:
+    dependencies:
+      '@ember-formwright/ember':
+        specifier: ^1.3.0
+        version: 1.3.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))
+      '@ember-joinery/ember':
+        specifier: workspace:*
+        version: link:../../packages/ember
+      '@ember-joinery/formwright':
+        specifier: workspace:*
+        version: link:../../packages/formwright
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.29.7
+        version: 7.29.13
+      '@babel/plugin-transform-runtime':
+        specifier: ^7.29.7
+        version: 7.29.7(@babel/core@7.29.13)
+      '@babel/runtime':
+        specifier: ^7.29.7
+        version: 7.29.13
+      '@ember-formwright/test-support':
+        specifier: ^1.3.0
+        version: 1.3.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))
+      '@ember-joinery/test-support':
+        specifier: workspace:*
+        version: link:../../packages/test-support
+      '@ember/optional-features':
+        specifier: ^3.0.0
+        version: 3.0.0(@types/node@26.6.6)
+      '@ember/test-helpers':
+        specifier: ^5.7.0
+        version: 5.8.0(@babel/core@7.29.13)
+      '@embroider/compat':
+        specifier: ^4.1.25
+        version: 4.1.28(@embroider/core@4.6.10(@glint/template@1.11.1))(@glint/template@1.11.1)
+      '@embroider/config-meta-loader':
+        specifier: ^1.0.0
+        version: 1.0.1
+      '@embroider/core':
+        specifier: ^4.6.7
+        version: 4.6.10(@glint/template@1.11.1)
+      '@embroider/legacy-inspector-support':
+        specifier: ^0.1.3
+        version: 0.1.3
+      '@embroider/macros':
+        specifier: ^1.21.1
+        version: 1.21.4(@babel/core@7.29.13)(@glint/template@1.11.1)
+      '@embroider/router':
+        specifier: ^3.0.6
+        version: 3.0.6(@embroider/core@4.6.10(@glint/template@1.11.1))
+      '@embroider/vite':
+        specifier: ^1.7.13
+        version: 1.8.0(@babel/core@7.29.13)(@embroider/core@4.6.10(@glint/template@1.11.1))(@glint/template@1.11.1)(vite@8.3.6(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))
+      '@glimmer/component':
+        specifier: ^2.2.1
+        version: 2.2.1
+      '@glimmer/tracking':
+        specifier: ^1.1.2
+        version: 1.1.2
+      '@rollup/plugin-babel':
+        specifier: ^7.1.0
+        version: 7.1.0(@babel/core@7.29.13)(rollup@4.68.0)
+      axe-core:
+        specifier: ^4.14.0
+        version: 4.14.0
+      babel-plugin-ember-template-compilation:
+        specifier: ^4.0.1
+        version: 4.0.1
+      decorator-transforms:
+        specifier: ^2.4.0
+        version: 2.4.0(@babel/core@7.29.13)
+      ember-a11y-testing:
+        specifier: ^8.0.1
+        version: 8.0.1(@babel/core@7.29.13)(@ember/test-helpers@5.8.0(@babel/core@7.29.13))(@ember/test-waiters@4.1.2)(axe-core@4.14.0)(qunit@2.26.0)
+      ember-cli:
+        specifier: ~7.3.0
+        version: 7.3.0(@babel/core@7.29.13)(@types/node@26.6.6)(ejs@3.1.10)(handlebars@4.7.10)(underscore@1.13.8)
+      ember-cli-babel:
+        specifier: ^8.3.2
+        version: 8.3.2(@babel/core@7.29.13)
+      ember-load-initializers:
+        specifier: ^3.0.1
+        version: 3.0.1(ember-source@7.3.1(@glimmer/component@2.2.1))
+      ember-qunit:
+        specifier: ^9.2.0
+        version: 9.2.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))(qunit@2.26.0)
+      ember-resolver:
+        specifier: ^13.2.0
+        version: 13.2.0
+      ember-source:
+        specifier: ~7.3.0
+        version: 7.3.1(@glimmer/component@2.2.1)
+      qunit:
+        specifier: ^2.26.0
+        version: 2.26.0
+      qunit-dom:
+        specifier: ^3.6.0
+        version: 3.6.0
+      testem:
+        specifier: ^3.21.0
+        version: 3.21.5(@babel/core@7.29.13)(ejs@3.1.10)(handlebars@4.7.10)(underscore@1.13.8)
+      vite:
+        specifier: ^8.3.0
+        version: 8.3.6(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)
+
   examples/ember-tailwind:
     dependencies:
       '@ember-joinery/ember':

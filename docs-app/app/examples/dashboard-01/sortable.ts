@@ -67,9 +67,13 @@ function register(
  * `announcement` in a live region and `SORTABLE_INSTRUCTIONS` under `instructionsId`. While a
  * row is dragged it follows the pointer up and down, the rows it passes make room for it, and
  * dropping it calls `onMove(activeId, overId)`, as upstream's `handleDragEnd` gets `active`
- * and `over`. From the keyboard, Space or Enter picks the row up, the arrow keys move it a row
- * at a time (dnd-kit's sortable keyboard coordinates), Space, Enter or Tab drops it, and Escape
- * puts it back. Each step is announced with dnd-kit's own words.
+ * and `over`. A finger drags it as a mouse does (upstream's `TouchSensor`): the handle has
+ * `touch-action: none`, so the browser doesn't take the touch for a scroll and cancel the drag,
+ * and the handle keeps the pointer (`setPointerCapture`) until it lets go. From the keyboard,
+ * Space or Enter picks the row up, the up and down arrows move it a row at a time (dnd-kit's
+ * sortable keyboard coordinates; left and right do nothing, as they find no row beside it in a
+ * column), Space, Enter or Tab drops it, and Escape puts it back. Each step is announced with
+ * dnd-kit's own words.
  */
 export class SortableRows {
   /** The row being dragged, while one is. */
@@ -111,6 +115,10 @@ export class SortableRows {
     element.setAttribute('aria-describedby', this.instructionsId)
     element.setAttribute('tabindex', '0')
     element.setAttribute('aria-disabled', 'false')
+    // A touch on the handle drags, rather than scrolls the page: the browser would otherwise
+    // take it for a pan and cancel the pointer (`pointercancel`), and the drag with it.
+    const touchAction = element.style.touchAction
+    element.style.touchAction = 'none'
     const onPointerDown = (event: PointerEvent) => {
       if (event.button !== 0 || this.#drag) return
       event.preventDefault()
@@ -123,6 +131,7 @@ export class SortableRows {
     return () => {
       element.removeEventListener('pointerdown', onPointerDown)
       element.removeEventListener('keydown', onKeyDown)
+      element.style.touchAction = touchAction
       unregister()
     }
   })
@@ -160,6 +169,13 @@ export class SortableRows {
   #startPointer(id: SortableId, event: PointerEvent, handle: HTMLElement): void {
     const drag = this.#start(id, 'pointer', event.clientY)
     if (!drag) return
+    // The handle keeps the pointer while it drags, wherever the finger or mouse goes. (A
+    // pointer the browser doesn't know, such as a test's, can't be captured, and needn't be.)
+    try {
+      handle.setPointerCapture(event.pointerId)
+    } catch {
+      // Not a live pointer: its events still reach the document.
+    }
     const doc = handle.ownerDocument
     const onMove = (move: PointerEvent) => {
       drag.deltaY = move.clientY - drag.startY
@@ -207,14 +223,18 @@ export class SortableRows {
     if (drag.by !== 'keyboard' || drag.id !== id) return
     switch (event.key) {
       case 'ArrowDown':
-      case 'ArrowRight':
         event.preventDefault()
         this.#moveOver(Math.min(drag.items.length - 1, drag.over + 1))
         break
       case 'ArrowUp':
-      case 'ArrowLeft':
         event.preventDefault()
         this.#moveOver(Math.max(0, drag.over - 1))
+        break
+      // dnd-kit's sortable keyboard coordinates look for a row to the left or right of the
+      // dragged one, and in a column there is none: the row stays, and the page doesn't scroll.
+      case 'ArrowLeft':
+      case 'ArrowRight':
+        event.preventDefault()
         break
       case ' ':
       case 'Enter':

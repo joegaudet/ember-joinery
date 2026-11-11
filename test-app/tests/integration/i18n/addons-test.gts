@@ -21,6 +21,7 @@ import {
 } from '@ember-joinery/power-calendar'
 import { DatePickerHarness } from '@ember-joinery/power-calendar/test-support'
 import { RichTextEditor } from '@ember-joinery/tiptap'
+import { RichTextEditorHarness } from '@ember-joinery/tiptap/test-support'
 
 // What a test passes in itself is written pseudo-localized, so only Joinery's own strings can
 // show up unwrapped.
@@ -104,6 +105,29 @@ module('Integration | i18n | add-ons', function (hooks) {
       assert.true(one.rejected?.startsWith('⟦'), one.rejected)
       assert.deepEqual(unlocalized(undefined, ACCEPT), [], 'turned away')
       await a11yAudit()
+    })
+
+    test("the rich text editor's tooltips and text styles, with Ctrl's keys", async function (assert) {
+      // The keys are words (Ctrl, Shift, Alt) off Apple's systems, which show ⌘, ⇧ and ⌥.
+      const platform = Object.getOwnPropertyDescriptor(Navigator.prototype, 'platform')!
+      Object.defineProperty(Navigator.prototype, 'platform', {
+        get: () => 'Linux x86_64',
+        configurable: true,
+      })
+      try {
+        await render(<template><RichTextEditor @label="⟦body⟧" /></template>)
+        const editor = new RichTextEditorHarness()
+        // A key's own letter is the key's.
+        const KEYS = [/^[A-Z0-9]$/]
+        await editor.hoverTool('bold')
+        assert.true(editor.tooltip('bold').startsWith('⟦'), editor.tooltip('bold'))
+        assert.deepEqual(unlocalized(undefined, KEYS), [], 'a tooltip open')
+        await editor.blockTypeMenu.open()
+        assert.deepEqual(unlocalized(undefined, KEYS), [], 'the text style menu open')
+        await a11yAudit()
+      } finally {
+        Object.defineProperty(Navigator.prototype, 'platform', platform)
+      }
     })
 
     test('an explicit argument beats the translator', async function (assert) {

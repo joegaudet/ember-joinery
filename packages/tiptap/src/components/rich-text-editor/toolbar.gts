@@ -103,7 +103,7 @@ export default class RichTextToolbar extends Component<RichTextToolbarSignature>
           return {
             spec,
             label: labels[spec.name],
-            keys: shortcutKeys(spec.shortcut),
+            keys: shortcutKeys(spec.shortcut, this),
             ariaKeys: ariaShortcut(spec.shortcut),
           }
         })
@@ -143,7 +143,7 @@ export default class RichTextToolbar extends Component<RichTextToolbarSignature>
     const option = (value: BlockType, label: string): BlockTypeOption => ({
       value,
       label,
-      keys: shortcutKeys(blockTypeShortcut(value)).join(''),
+      keys: shortcutKeys(blockTypeShortcut(value), this).join(''),
     })
     return [
       option('paragraph', labels.paragraph),

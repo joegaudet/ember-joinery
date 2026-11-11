@@ -82,7 +82,7 @@ its arrow keys flip.
 | `@id`                                    | `string`                     |                                                        | The button's (or input's) id, for a `<label for>`                             |
 | `@placeholder`                           | `string`                     | `Pick a date`                                          | What shows with no date                                                       |
 | `@format`                                | `Intl.DateTimeFormatOptions` | `{ dateStyle: 'long' }`                                | How the date is written                                                       |
-| `@locale`                                | `string`                     | the browser's                                          | The date's and the calendar's language                                        |
+| `@locale`                                | `string`                     | the translator's                                       | The date's and the calendar's language                                        |
 | `@disabled`, `@invalid`                  | `boolean`                    | `false`                                                | It can't be opened; it is `aria-invalid`                                      |
 | `@describedBy`                           | `string`                     |                                                        | The ids that describe it (`aria-describedby`)                                 |
 | `@icon`, `@iconPosition`                 | lucide icon \| `null`, side  | `chevron-down`, `inline-end` (`calendar` for an input) | The button's icon, and its side                                               |

@@ -26,4 +26,11 @@ export const messages = {
   codeBlock: { id: 'joinery.rich-text-editor.codeBlock', message: 'Code block' },
   undo: { id: 'joinery.rich-text-editor.undo', message: 'Undo' },
   redo: { id: 'joinery.rich-text-editor.redo', message: 'Redo' },
+  keyCtrl: {
+    id: 'joinery.rich-text-editor.keyCtrl',
+    message: 'Ctrl',
+    description: 'The Control key, as a shortcut shows it off Apple’s systems.',
+  },
+  keyShift: { id: 'joinery.rich-text-editor.keyShift', message: 'Shift' },
+  keyAlt: { id: 'joinery.rich-text-editor.keyAlt', message: 'Alt' },
 } satisfies Record<string, Message>

@@ -102,7 +102,7 @@ month's button is on the right with its chevron mirrored, and the arrow keys fli
 | `@onCenterChange`                        | `(center: Date)`             |                                | Called with a day of the month shown, whenever it changes            |
 | `@minDate`, `@maxDate`                   | `Date \| string`             |                                | The first and last days that can be chosen (`YYYY-MM-DD` too)        |
 | `@disabledDates`                         | `Array<Date \| string>`      |                                | Days that can't be chosen: dates, `YYYY-MM-DD`, weekdays (`'Sat'`)   |
-| `@locale`                                | `string`                     | the browser's                  | The month's, the weekdays' and the days' language                    |
+| `@locale`                                | `string`                     | the translator's               | The month's, the weekdays' and the days' language                    |
 | `@startOfWeek`                           | `number`                     | the locale's                   | The week's first day, 0 (Sunday) to 6                                |
 | `@weekdayFormat`                         | `'min' \| 'short' \| 'long'` | `short`                        | How the weekdays are written over the columns                        |
 | `@showDaysAround`                        | `boolean`                    | `true`                         | Show the days of the months around, to fill the first and last weeks |

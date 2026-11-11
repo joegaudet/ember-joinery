@@ -99,12 +99,15 @@ export function isApple(): boolean {
   return typeof navigator !== 'undefined' && /Mac|iP(hone|[oa]d)/.test(navigator.platform)
 }
 
-/** How a shortcut's keys are shown, one `<Kbd>` each: `["Ctrl", "Shift", "S"]`, or `["⌘", "⇧", "S"]`. */
-export function shortcutKeys(keys: readonly Key[], apple = isApple()): string[] {
+/**
+ * How a shortcut's keys are shown, one `<Kbd>` each: `["Ctrl", "Shift", "S"]` in `context`'s
+ * translator's words, or `["⌘", "⇧", "S"]`.
+ */
+export function shortcutKeys(keys: readonly Key[], context: object, apple = isApple()): string[] {
   return keys.map(key => {
-    if (key === 'Mod') return apple ? '⌘' : 'Ctrl'
-    if (key === 'Shift') return apple ? '⇧' : 'Shift'
-    if (key === 'Alt') return apple ? '⌥' : 'Alt'
+    if (key === 'Mod') return apple ? '⌘' : translate(context, messages.keyCtrl)
+    if (key === 'Shift') return apple ? '⇧' : translate(context, messages.keyShift)
+    if (key === 'Alt') return apple ? '⌥' : translate(context, messages.keyAlt)
     return key.toUpperCase()
   })
 }

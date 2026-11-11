@@ -2,9 +2,10 @@
 
 Status: built, in review (2026-11-11). The plan was agreed through a 40-question intake and built
 unattended by subagents onto one stacked PR, now ready for review; see "Autonomous execution".
-Every docs-page example and chart is mapped and compared (CI's parity runs with
-`--require-complete`), and upstream had nothing new since the pins. Nothing is published; what
-stays with Joe is listed under "Autonomous execution".
+Every component page's example and every chart is mapped and compared (CI's parity runs with
+`--require-complete`), and upstream had nothing new since the pins. One gap stays open at 1.0:
+the forms pages' examples are rebuilt on Formwright but not compared (see the forms deviation
+below). Nothing is published; what stays with Joe is listed under "Autonomous execution".
 
 Deviations from the intake, and why:
 
@@ -52,21 +53,24 @@ Deviations from the intake, and why:
   and Formwright supplies `Form`. Of the 27 blocks, the four ported are `login-01`, `signup-01`,
   `dashboard-01` and, for settings, `sidebar-13` (a sidebar in a settings dialog), the one
   settings screen among them; the demo opens it over the dashboard, at `/settings`.
-- **The forms, built once each, and not yet compared** (changes Phase 12, and item 6 of the
-  definition of done for its examples, until a later unit closes the gap). Upstream's
+- **The forms, built once each, and not compared at 1.0** (changes Phase 12, and item 6 of the
+  definition of done for its examples; Phase 14's parity audit leaves them out). Upstream's
   `registry/new-york-v4/examples/form-*` are 34 files: 30 examples, and the schema and action
   files of its two Next.js forms. Most are one form written three times, for React Hook Form,
   TanStack Form and Formisch; Formwright is the one form library here, so each form is one guide
   example, which names the upstream ones it rebuilds: 12 in all, the nine forms every library
   has, React Hook Form's password form, and the two Next.js forms (`form-next-demo`,
-  `form-next-complex`), which are forms of their own. They aren't in the parity comparison yet:
-  they are the `docs/forms` pages' examples, in new-york-v4, which neither
+  `form-next-complex`), which are forms of their own. They aren't in the parity comparison, and
+  1.0 ships without it: they are the `docs/forms` pages' examples, in new-york-v4, which neither
   `upstream/inventory.json` nor the reference app covers (it renders new-york-v4 only for the
   charts), so `--require-complete` doesn't count them either. Comparing them needs the inventory
   to list those pages' examples and the reference app to render them with their libraries
-  (React Hook Form, TanStack Form, Formisch, and Next.js's `<Form>`); until then the gap is listed
-  in the PR's Known gaps and on the guide's Forms page. Of Joinery's inputs, FileDrop isn't a
-  Formwright control: it keeps no value, and File Upload is what keeps files.
+  (React Hook Form, TanStack Form, Formisch, and Next.js's `<Form>`), then a map from each
+  upstream example to the Formwright example that rebuilds it. That is work for after 1.0; until
+  then the gap is listed in the PR's Known gaps and on the guide's Forms page, and the upstream
+  watch reports changes to the `docs/forms` pages and the `form-*` examples, so none goes
+  unseen. Of Joinery's inputs, FileDrop isn't a Formwright control: it keeps no value, and File
+  Upload is what keeps files.
 
 **What we're copying:** [ui.shadcn.com](https://ui.shadcn.com/): every component, every example
 on its component pages, a subset of its blocks, and its theming. The source of truth is the code
@@ -416,11 +420,13 @@ deploys `docs/site`.
   fails over a threshold (1% of the box's pixels by default; an override
   for an example needs a written reason in `parity/map/<component>.json`), and a side-by-side report is
   uploaded. With `--require-complete`, an upstream example missing from the map also fails, which
-  keeps coverage complete. CI runs with that flag: every docs-page example and chart is mapped.
+  keeps coverage complete. CI runs with that flag: every component page's example and every
+  chart is mapped (the forms pages' examples are not; see the forms deviation).
 - **Upstream watch** (`scripts/upstream.mjs changes`, a weekly `upstream.yml`): lists upstream
   changes since the pinned shas in shadcn's `registry/bases/radix/{ui,blocks}`, `registry/styles`
   (down to the rules that changed), `examples/radix`, `registry/new-york-v4/charts`, its docs
-  pages, `packages/react` (the chat set's headless parts), and `ember-primitives/src`, mapped to
+  pages, the `docs/forms` pages and their `registry/new-york-v4/examples/form-*`, `packages/react`
+  (the chat set's headless parts), and `ember-primitives/src`, mapped to
   Joinery components, plus new upstream components, and updates one tracking issue. A sync PR
   ports the changes and bumps `upstream.json`.
 
@@ -533,7 +539,8 @@ pages.
 
 ### Phase 14: 1.0
 
-A parity audit: every upstream example is mapped and passing with `--require-complete`. A last
+A parity audit: every upstream example is mapped and passing with `--require-complete` (but
+for the forms pages', which stay uncompared at 1.0; see the forms deviation). A last
 upstream sync. The full gate, including the 6.12 run. PRs to ember-formwright and real-enums for
 the cross-links (opened, not merged). Then the stacked PR is marked ready for review. Joe merges
 it and releases 1.0.0.
@@ -712,4 +719,6 @@ workspace.
 
 1. Done: every unit is on `build/joinery-1.0`, and the PR is ready for review.
 2. Joe reviews it, merges it, and releases 1.0.0 (see "What stays with Joe" and "Releasing" in
-   CONTRIBUTING.md), then merges the sibling PRs on ember-formwright and real-enums.
+   CONTRIBUTING.md), then merges the sibling PRs, joegaudet/ember-formwright#32 and
+   joegaudet/real-enums#17.
+3. After 1.0: compare the forms pages' examples (see the forms deviation).

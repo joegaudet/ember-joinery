@@ -1,7 +1,7 @@
 # Contributing
 
-> **Building.** Joinery lands in stages (see [JOINERY_PLAN.md](JOINERY_PLAN.md)). Anything
-> marked † isn't there yet; a gate command marked † runs and passes, with nothing to check.
+> **1.0.0, in review.** Everything in [JOINERY_PLAN.md](JOINERY_PLAN.md) is built, and nothing is
+> published yet; the plan's "Next steps" say what is left.
 
 ## Setup
 
@@ -402,7 +402,9 @@ and a line saying what it comes with, and stays out of the parity map (so
 parity/map/*.json`), port the examples that waited for it onto their pages, map them, and take
 them out of the `$comment`. So Button's page waited for Dropdown Menu (and for an overlay to join a
 group): its `button-group-demo` (mapped on Button Group's page) went back in Button's Button Group
-section once both had landed. At 1.0 nothing waits: every docs-page example is ported and mapped.
+section once both had landed. At 1.0 nothing waits: every component page's example is ported and
+mapped. (The forms pages' examples are ported but not mapped, since the parity reference app
+doesn't render them; see the plan's forms deviation.)
 
 **The parity map** lists every example on the page. One shown on two pages
 (`button-group-demo` is on Button's and Button Group's) is mapped on the page the inventory

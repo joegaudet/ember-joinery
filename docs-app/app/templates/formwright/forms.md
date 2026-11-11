@@ -417,10 +417,12 @@ Each example's Test tab drives it with Formwright's `FormHarness` and Joinery's 
 shadcn-ui/ui@8ab2771.
 
 These examples aren't in the [parity](https://github.com/joegaudet/ember-joinery/blob/main/CONTRIBUTING.md#parity)
-comparison yet. Upstream's form examples are new-york-v4 registry examples shown on the
-`docs/forms` pages, and `upstream/inventory.json` and the parity reference app cover the
-component pages' examples (`examples/radix`, in a radix style) and the charts gallery only, so
-there is nothing to map them to. Comparing them needs both to take the `docs/forms` pages'
-examples and their new-york-v4 style, as they do the charts, and the reference app to render
-each library's (React Hook Form, TanStack Form, Formisch and Next.js's `<Form>`). The plan
-records the gap, so it is closed before 1.0.
+comparison, and Joinery 1.0 ships without it: it is the one gap the 1.0 parity audit leaves
+open. Upstream's form examples are new-york-v4 registry examples shown on the `docs/forms`
+pages, and `upstream/inventory.json` and the parity reference app cover the component pages'
+examples (`examples/radix`, in a radix style) and the charts gallery only, so there is nothing
+to map them to. Comparing them needs both to take the `docs/forms` pages' examples and their
+new-york-v4 style, as they do the charts, and the reference app to render each library's (React
+Hook Form, TanStack Form, Formisch and Next.js's `<Form>`). The plan records the gap as work for
+after 1.0. Until then, the upstream watch reports any change to the `docs/forms` pages or the
+`form-*` examples, so a change upstream still reaches these forms.

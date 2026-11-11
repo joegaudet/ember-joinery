@@ -20,8 +20,8 @@ written the modern Ember way, on a headless primitives layer, and each with a te
 
 <div class="callout">
 
-**Joinery is being built.** It lands in stages, and nothing is on npm yet. The plan, and every
-decision behind it, is in
+**Joinery 1.0.0 is in review.** Every component is built, and nothing is on npm yet: the
+packages publish once the release is merged. The plan, and every decision behind it, is in
 [JOINERY_PLAN.md](https://github.com/joegaudet/ember-joinery/blob/main/JOINERY_PLAN.md).
 
 </div>

@@ -423,7 +423,10 @@ the matching Ember example in the guide's `/parity/<name>` route, then compares 
 light and dark: the same fixed viewport, fonts and Chromium on both sides, with animations off.
 Each page's images have loaded (or failed) first, both those in the page and those an avatar
 loads off it (`new Image()`, as Radix's and Joinery's do) before it swaps out its fallback, so
-both sides show the same state. The diff is measured over the content's bounding box, the smallest box holding everything on
+both sides show the same state. While a screenshot is taken, both pages' `resize` and media
+query `change` listeners are held back: to capture a page taller than the viewport, Chromium
+resizes the window and back, and on a busy page it can draw a frame with the window a pixel
+wide, which a page that listens takes for a phone (dashboard-01's sidebar and chart would). The diff is measured over the content's bounding box, the smallest box holding everything on
 either page that isn't the background (the whole page, if the two backgrounds differ), so an
 empty stage or a missing part fails however small the example is. Two pixels count as different
 when they are more than about 8 levels of grey apart, so a 1px `--border` line or a `--muted`
@@ -568,7 +571,9 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   `"fullWidth": true` too, so both parity stages widen them; `@block={{true}}` for a whole
   screen, which upstream previews as `type="block"` in an `<iframe>`, as the sidebar's: the
   preview renders in a frame 600px tall, so its fixed parts, `svh` heights and breakpoints are
-  the frame's, and a component that measures its window (the Sidebar) measures the frame's).
+  the frame's, and a component that measures its window (the Sidebar) measures the frame's; a
+  Blocks page adds `@blockHeight`, the height ui.shadcn.com/blocks frames that block at, its
+  registry entry's `meta.iframeHeight` or 930, so `@blockHeight={{1000}}` for dashboard-01).
   Where upstream's
   `<ComponentPreview>` sizes its preview (`previewClassName`) or lets it overflow its frame
   (`className="overflow-visible"`), as `upstream/inventory.json` records, pass the same:

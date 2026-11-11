@@ -2,7 +2,7 @@
 
 A dashboard with sidebar, charts and data table.
 
-<Example @name="dashboard-01" @title="dashboard-01" @block={{true}} />
+<Example @name="dashboard-01" @title="dashboard-01" @block={{true}} @blockHeight={{1000}} />
 
 An inset [Sidebar](/components/sidebar.md) that slides off the screen, a header with its
 trigger, four section cards, an interactive area [Chart](/components/chart.md), and a
@@ -49,12 +49,17 @@ The sidebar's parts take the `SidebarProvider`'s yield (`@sidebar`), where upstr
 
 - **Drag and drop.** Upstream's table reorders its rows with dnd-kit. Joinery has no
   drag-and-drop package, so the block carries `SortableRows`: the handle drags its row with a
-  pointer, up and down only, the other rows making room, and dropping it reorders the data
-  (dnd-kit's `closestCenter`, `restrictToVerticalAxis` and `verticalListSortingStrategy`). From
-  the keyboard, Space or Enter picks a row up, the arrow keys move it a row at a time (dnd-kit's
-  sortable keyboard coordinates; its default moves 25px a press), Space, Enter or Tab drops it,
-  and Escape puts it back. The handle is described by dnd-kit's instructions, and a live region
-  says each step in dnd-kit's words.
+  mouse, a pen or a finger (upstream's mouse and touch sensors), up and down only, the other
+  rows making room, and dropping it reorders the data (dnd-kit's `closestCenter`,
+  `restrictToVerticalAxis` and `verticalListSortingStrategy`). The handle has
+  `touch-action: none` and keeps the pointer while it drags, so a touch on it drags the row
+  rather than scrolling the page. From the keyboard, Space or Enter picks a row up, the up and
+  down arrows move it a row at a time (dnd-kit's sortable keyboard coordinates; its default
+  moves 25px a press), Space, Enter or Tab drops it, and Escape puts it back. Left and right
+  move nothing, as in upstream's, whose coordinates find no row beside one in a column, so text
+  direction doesn't change them. The handle is described by dnd-kit's instructions, and a live
+  region says each step in dnd-kit's words. Upstream's dnd-kit also scrolls the page as a row
+  is dragged near its edge; `SortableRows` doesn't.
 - **The row's type.** Upstream infers it from a zod schema; Joinery takes no zod, so it is an
   interface (`Section`, in `data.ts`).
 - **Headers.** Upstream's drag column has an empty header and its actions column none; a header
@@ -65,8 +70,21 @@ The sidebar's parts take the `SidebarProvider`'s yield (`@sidebar`), where upstr
 - `DataTable` from `@ember-joinery/data-table` goes around upstream's Tabs, as
   `display: contents`, so `DataTableHarness` can find each part (`dt.head`, `dt.row`,
   `dt.viewOptions`…) and the header cells carry `aria-sort`.
+- **The section cards' titles** add `leading-8 @[250px]/card:leading-9`. Upstream's
+  `CardTitle` runs its classes through tailwind-merge, whose `text-2xl` and
+  `@[250px]/card:text-3xl` drop the Card title's own `leading-snug`, so the title takes their
+  line heights (2rem, then 2.25rem). Joinery merges no classes: its Card title keeps
+  `leading-snug`, which Tailwind's `text-*` utilities read before their own line height, so
+  without these the titles stand about 5px taller than upstream's, and everything below them
+  with them. An app that copies the block keeps them for the same reason; the same goes for any
+  `text-*` class given to a Joinery part whose style sets its leading.
+- **The chart's range on a phone.** Upstream's effect switches the chart to the last 7 days
+  each time the window becomes a phone's; Joinery's does it when the Sidebar's provider says the
+  window is narrower than 768px (its `isMobile`, read through `<UseSidebar>`), in the microtask
+  after the render that saw it, as an effect runs after its render.
 
-The pixels are upstream's.
+Pixel for pixel, the block is upstream's: its parity check compares the whole page, sidebar,
+cards, chart and table, in light and dark (`parity/map/blocks.json`).
 
 ## Accessibility
 
@@ -89,10 +107,13 @@ The pixels are upstream's.
 ## Testing
 
 The block's test drives it with `SidebarHarness`, `CardHarness`, `ChartHarness`,
-`ToggleGroupHarness`, `DataTableHarness`, `SelectHarness`, `DropdownMenuHarness`,
-`DrawerHarness` and `ToasterHarness`, with the table as a page object (see its Test tab): the
-chart's ranges, selecting and paging the rows, hiding a column, dragging a row with the keyboard
-and with a pointer, a row's drawer, and the toast its target's form shows as it saves.
+`ToggleGroupHarness`, `TabsHarness`, `DataTableHarness`, `SelectHarness`,
+`DropdownMenuHarness`, `DrawerHarness` and `ToasterHarness`, with the table as a page object
+(see its Test tab): the chart's ranges, selecting and paging the rows, hiding a column, the
+views' tabs and select, dragging a row with the keyboard, a mouse and a finger, a row's drawer,
+and the toast its target's form shows as it saves. It also shows the block in the guide's frame
+at 375px, as a phone does: the sidebar in a sheet, the chart on the last 7 days, and a row's
+drawer from the bottom of the screen, without its chart.
 
 ## Upstream
 

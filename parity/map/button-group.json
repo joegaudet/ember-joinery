@@ -1,10 +1,17 @@
 {
-  "$comment": "Waiting: button-group-demo, button-group-rtl and button-group-dropdown (button-group-demo is shown on Button's page too, and mapped here, its inventory page) each put a Dropdown Menu inside a group, and button-group-select (Select) a Select; Dropdown Menu has landed. Each of those, and button-group-popover (whose components, Field, Popover and Textarea, have all landed), waits for an overlay inside a group to work: the overlay's root, an element with display: contents where Radix's renders none, is the group's child, so the group's child rules (joined corners, one border between items) reach it and miss the trigger inside. The unit that makes that work ports them onto the Button Group page (button-group-demo onto Button's too) and maps them here. button-group-nested and button-group-input-group wait for the same, though their components have all landed (Input Group, Tooltip): each puts a Tooltip's root inside an Input Group, around an addon or around an addon's button, where the rules for what is directly inside (the input's end padding beside an inline-end addon, a button's pull into its addon's padding) miss it.",
+  "$comment": "button-group-demo is shown on Button's page too, and mapped here, its inventory page. The examples that put an overlay in a group (button-group-demo, button-group-rtl, button-group-dropdown, button-group-select, button-group-popover, kbd-tooltip on Kbd's page) rely on button-group.css restating the group's rules one overlay root down, and button-group-nested on input-group.css doing the same for an addon that is a tooltip's trigger (see their comments).",
   "examples": {
+    "button-group-demo": "button-group-demo",
     "button-group-orientation": "button-group-orientation",
     "button-group-size": "button-group-size",
+    "button-group-nested": "button-group-nested",
     "button-group-separator": "button-group-separator",
     "button-group-split": "button-group-split",
-    "button-group-input": "button-group-input"
+    "button-group-input": "button-group-input",
+    "button-group-input-group": "button-group-input-group",
+    "button-group-dropdown": "button-group-dropdown",
+    "button-group-select": "button-group-select",
+    "button-group-popover": "button-group-popover",
+    "button-group-rtl": "button-group-rtl"
   }
 }

@@ -2,9 +2,7 @@
 
 A container that groups related buttons together with consistent styling.
 
-Upstream's first example (`button-group-demo`, a mail toolbar) puts a Dropdown Menu inside a
-group, which doesn't work yet (see [Nested](#nested)), so it waits for that. The examples below
-show the group with buttons, separators and sizes.
+<Example @name="button-group-demo" @title="Button Group" />
 
 ## Installation
 
@@ -74,13 +72,12 @@ Control the size of buttons using `@size` on individual buttons.
 
 ## Nested
 
-Nest `<ButtonGroup>` components to create button groups with spacing. Upstream's example
-(`button-group-nested`) has a Tooltip on an [Input Group](/components/input-group.md)'s addon, which
-doesn't work in a group yet. A Joinery Tooltip renders an element of its own around its trigger
-(with `display: contents`, so it adds no box, where Radix's renders none), and the group's rules,
-which join the elements directly inside it, reach that element and miss the button: the button keeps
-its rounded corners and its own border. The same goes for a Popover, a Dropdown Menu or a Select in
-a group, so the examples below that have one wait for that to be fixed too.
+Nest `<ButtonGroup>` components to create button groups with spacing.
+
+<Example @name="button-group-nested" @title="Nested" />
+
+Upstream's icon button and input are unnamed; Joinery's are named (`aria-label`). The addon is
+the tooltip's trigger (`<g.Addon {{t.trigger}}>`, upstream's `TooltipTrigger asChild`).
 
 ## Separator
 
@@ -106,32 +103,34 @@ Wrap an `Input` component with buttons.
 ## Input Group
 
 Wrap an [`InputGroup`](/components/input-group.md) component to create complex input layouts.
-Upstream's example (`button-group-input-group`) has a Tooltip on a button in the input group's
-addon, so it waits for that to work (see [Nested](#nested)).
+
+<Example @name="button-group-input-group" @title="Input Group" />
 
 ## Dropdown Menu
 
-Create a split button group with a `DropdownMenu` component. Upstream's example
-(`button-group-dropdown`) waits for a Dropdown Menu inside a group to work (see
-[Nested](#nested)); [Dropdown Menu](/components/dropdown-menu.md) has landed.
+Create a split button group with a [`DropdownMenu`](/components/dropdown-menu.md) component.
+
+<Example @name="button-group-dropdown" @title="Dropdown Menu" />
 
 ## Select
 
-Pair with a `Select` component. Upstream's example (`button-group-select`) comes with Select (see
-[Nested](#nested)).
+Pair with a [`Select`](/components/select.md) component.
+
+<Example @name="button-group-select" @title="Select" />
 
 ## Popover
 
-Use with a `Popover` component. Upstream's example (`button-group-popover`) waits for a Popover
-inside a group to work (see [Nested](#nested)); its Field has landed.
+Use with a [`Popover`](/components/popover.md) component.
+
+<Example @name="button-group-popover" @title="Popover" />
 
 ## RTL
 
 Joinery's styles use logical properties, so a group joins its buttons right to left inside any
 element with `dir="rtl"` (see [Direction](/primitives/direction.md)): the first button is on the
-right, with its rounded corners there. Upstream's right-to-left example (`button-group-rtl`)
-is the mail toolbar, which waits for a Dropdown Menu inside a group to work (see
-[Nested](#nested)).
+right, with its rounded corners there.
+
+<Example @name="button-group-rtl" @title="RTL" @dir="rtl" />
 
 ## API Reference
 
@@ -228,6 +227,15 @@ give `@as` a tag, or put the `text` modifier on your own component:
 |             | `data-test-jn-part`  | `separator`                                                                       |
 | Text        | `class`              | `jn-button-group-text` (no `data-slot`, as upstream's)                            |
 |             | `data-test-jn-part`  | `text`                                                                            |
+
+### Overlays in a group
+
+A trigger can be a group's part: a Dropdown Menu's, a Popover's, a Select's or a Tooltip's, as in
+the examples above. Radix's overlay roots render no element, so upstream's trigger is the group's
+own child; a Joinery overlay's root is an element with `display: contents` around its trigger, so
+it adds no box, and `button-group.css` restates the group's rules one root down, so the trigger
+joins its neighbours as upstream's does. The same goes for an Input Group's addon that is an
+overlay's trigger (`button-group-nested`).
 
 ## Keyboard interactions
 

@@ -112,9 +112,9 @@ correct spacing.
 ## Button Group
 
 To create a button group, use the `ButtonGroup` component. See the
-[Button Group](/components/button-group.md) page for more details. Upstream's example here
-(`button-group-demo`) puts a Dropdown Menu inside a group, which doesn't work yet, so it waits
-for that (see that page's Nested section).
+[Button Group](/components/button-group.md) page for more details.
+
+<Example @name="button-group-demo" @title="Button Group" />
 
 ## As Child
 

@@ -636,16 +636,39 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
 
 ## The website
 
-`docs/site/` is hand-written HTML, not generated. For now `site.css` is a placeholder that uses
-shadcn's token names; the finished site is styled with Joinery's own CSS. The live demo is
-`test-app/app`, built into `docs/site/demo/` by `pnpm demo:build`, and `pages.yml` builds the
-demo and the guide into `docs/site/` and deploys it from `main` (CI's `site` job runs the same
-builds on every PR, so a break shows before the merge). The deploy needs the
-repository's Pages source set to "GitHub Actions" (Settings, Pages), a repository setting only
-the maintainer can change. When a change touches anything
-the site shows (packages, components, arguments, an API used in a snippet), update `docs/site/`
-in the same PR. `docs/social-card.html` is the source of `docs/site/social-card.png`; its header
-has the command that renders it.
+`docs/site/` is hand-written HTML, not generated, styled with Joinery's own CSS as an app is.
+`pnpm site:css` (`scripts/site-css.mjs`) copies `tokens.css`, `joinery.css`, the base colours
+(`themes/`) and the other styles (`styles/`) from `packages/ember/dist` into `docs/site/joinery/`
+(gitignored), where the page links them. `site.css` holds only the site's layout, type and brand
+(its amber), in the theme's tokens; it loads first, so its element defaults (`@layer site-base`)
+sit below Joinery's layer and its classes, unlayered, above. The components on the page are
+Joinery's markup, written out as the components render it (`jn-` classes, `data-slot`, ARIA),
+and `site.js` does in plain JavaScript what the components do in an app: the switches toggle,
+the light/dark toggle puts `.dark` on `<html>` and remembers it, and the theme picker swaps the
+base colour's and the style's sheets and sets `--radius`, so the whole page shows the theme
+picked.
+
+The site's images are made from the real thing by `pnpm site:screenshots`
+(`scripts/site-screenshots.mjs`, after `pnpm build && pnpm guide:build && pnpm site:css`; it
+needs the network, for the fonts): the Components section's tiles, light and dark, each a guide
+example on the built guide's parity route (its `SHOTS` list names each one and the page its tile
+links to), the guide's example frame, and `docs/site/social-card.png`, rendered from
+`docs/social-card.html`, whose card is Joinery's own markup too. `--only card,social` retakes
+some. `scripts/site.test.mjs`, in the gate, holds the page to the repository: each section's
+heading links to itself, every local link and image resolves (a guide link to a page in
+`docs-app/app/templates`), every `jn-` class and `data-slot` is one Joinery's sources render, the
+theme picker offers every style and base colour the package ships and the guide's radii, the
+Components section links every component page and shows every shot the script takes, and the
+Install section names every published package. So a new component page or package fails it until
+the site lists it.
+
+The live demo is `test-app/app`, built into `docs/site/demo/` by `pnpm demo:build`, and
+`pages.yml` copies Joinery's CSS in and builds the demo and the guide into `docs/site/`, then
+deploys it from `main` (CI's `site` job runs the same builds on every PR, so a break shows before
+the merge). The deploy needs the repository's Pages source set to "GitHub Actions" (Settings,
+Pages), a repository setting only the maintainer can change. When a change touches anything the
+site shows (packages, components, arguments, an API used in a snippet), update `docs/site/` in
+the same PR.
 
 The demo is the guide's dashboard block (`docs-app/app/examples/dashboard-01`), with its
 settings block (`sidebar-13`) over it at `/settings`, copied into `test-app/app/components/demo`

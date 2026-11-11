@@ -135,11 +135,12 @@ ember-joinery/
   docs-app/        the Kolay guide → docs/site/guide/
   parity/          private: React 19 + Tailwind 4 reference app that renders shadcn's own examples
   examples/        ember-vite-basic, ember-classic, ember-tailwind, ember-formwright (each runs in CI)
-  docs/site/       hand-written marketing page (index.html, site.css, logo.svg, favicon.svg, social-card.png)
+  docs/site/       hand-written marketing page (index.html, site.css, site.js, logo.svg, favicon.svg,
+                   img/, social-card.png; joinery/, Joinery's built CSS, copied in by site-css.mjs)
   docs/social-card.html
   scripts/         publish.mjs, publish-plan.mjs (from Formwright), upstream.mjs, parity.mjs,
-                   port-styles.mjs, extract-classes.mjs, site-screenshots.mjs, gen-barrels.mjs,
-                   entrypoints.mjs, *.test.mjs
+                   port-styles.mjs, extract-classes.mjs, site-css.mjs, site-screenshots.mjs,
+                   gen-barrels.mjs, entrypoints.mjs, *.test.mjs
   upstream.json    the shadcn-ui/ui and ember-primitives commits last synced
   upstream/        inventory.json: every docs page's examples and their styles, the ui, charts, blocks
   CLAUDE.md  CONTRIBUTING.md  README.md  LICENSE.md  NOTICE  JOINERY_PLAN.md
@@ -370,11 +371,15 @@ current counts).
 ## Marketing site and demo
 
 `docs/site/index.html` is hand-written and styled with Joinery's own `tokens.css` and
-`joinery.css`. Sections: a hero (with the dovetail logo), why Joinery, install, usage, theming,
-a component grid (screenshots made by `site-screenshots.mjs`), testing with harnesses,
-Formwright, the live demo (`test-app` built into `docs/site/demo/`: the dashboard and settings
-blocks), the guide, and siblings (Formwright, real-enums). The footer credits shadcn/ui and
-ember-primitives. `pages.yml` builds the demo and guide, then deploys `docs/site`.
+`joinery.css` (copied from the build by `site-css.mjs`), its components written out as
+Joinery's markup. Sections: a hero (with the dovetail logo), why Joinery, install, usage, theming
+(a picker that restyles the whole page in any of the eight styles and seven base colours),
+a component grid (screenshots made by `site-screenshots.mjs`, which also renders the social
+card), testing with harnesses, Formwright, the live demo (`test-app` built into
+`docs/site/demo/`: the dashboard and settings blocks), the guide, and siblings (Formwright,
+real-enums). The footer credits shadcn/ui and ember-primitives. `scripts/site.test.mjs` holds
+the page to the repository. `pages.yml` copies the CSS in, builds the demo and guide, then
+deploys `docs/site`.
 
 ## Parity and upstream watch
 

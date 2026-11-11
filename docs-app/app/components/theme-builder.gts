@@ -6,6 +6,7 @@ import { htmlSafe } from '@ember/template'
 import { waitForPromise } from '@ember/test-waiters'
 import { modifier } from 'ember-modifier'
 import { Button, Input, Label, NativeSelect, Switch } from '@ember-joinery/ember'
+import { bodyClass } from '@ember-joinery/primitives/body-class'
 import type { ComponentLike } from '@glint/template'
 import { baseColors } from 'virtual:joinery-themes'
 import {
@@ -217,6 +218,8 @@ export class ThemeBuilder extends Component {
   }
 
   <template>
+    {{! The page's whole width, while the builder shows (app.css). }}
+    {{bodyClass "guide-wide"}}
     <div class="theme-builder" data-test-theme-builder>
       <div
         class="tb-panel guide-stage {{if this.panelDark 'dark'}}"

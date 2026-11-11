@@ -44,6 +44,7 @@ module('Integration | <ThemeBuilder>', function (hooks) {
 
   test("every component page's demo, in the style and colours picked", async function (assert) {
     await renderBuilder()
+    assert.dom(document.body).hasClass('guide-wide', "the builder takes the page's width")
     const builder = new Builder()
     const demos = findAll('[data-test-theme-demo]').map(each =>
       each.getAttribute('data-test-theme-demo'),

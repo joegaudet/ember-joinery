@@ -822,12 +822,19 @@
 
   /* ---- the theme builder (theme-builder.gts) ---------------------------------------------- */
 
-  /* The builder needs the page's whole width: its controls beside the components. */
-  .guide-prose:has(.theme-builder) {
+  /*
+   * The builder needs the window's whole width: its controls beside the components, as many
+   * columns of them as fit. The page's own prose keeps its measure. The builder puts
+   * `guide-wide` on <body> while it shows, rather than a `.guide-prose:has(.theme-builder)`
+   * here, which every page would pay for: Chromium rechecks a `:has()` as rows are added, and
+   * IncrementalEach's page adds 20,000.
+   */
+  .guide-wide .guide-layout,
+  .guide-wide .guide-prose {
     max-width: none;
   }
 
-  .guide-prose:has(.theme-builder) > :not(.theme-builder) {
+  .guide-wide .guide-prose :is(h1, h2, h3, p, ul, ol, pre, table, .callout):not(.theme-builder *) {
     max-width: 50rem;
   }
 

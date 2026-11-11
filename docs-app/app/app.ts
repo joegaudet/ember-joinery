@@ -3,6 +3,7 @@ import compatModules from '@embroider/virtual/compat-modules'
 import Resolver from 'ember-resolver'
 import loadInitializers from 'ember-load-initializers'
 import config from 'docs-app/config/environment'
+import { setupJoineryForms } from '@ember-joinery/formwright'
 // The guide's CSS first: it declares the cascade layers, so Joinery's rules win over the guide's.
 import './styles/app.css'
 // The default theme, for anything outside a preview; each preview sets its own (example.gts).
@@ -19,3 +20,6 @@ export default class App extends Application {
 }
 
 loadInitializers(App, config.modulePrefix, compatModules)
+
+// Formwright's forms in Joinery: every Joinery input a control, and Joinery's field layout.
+setupJoineryForms()

@@ -625,7 +625,7 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
 - The guide's own CSS (`docs-app/app/styles/app.css`) sits in `@layer guide`, below
   `@layer joinery`, so Joinery's rules win wherever a component renders. The example's preview
   and the parity route are a `guide-stage`, and the guide's rules stop there: its prose and
-  link rules are `@scope`d to stop at an example, its `box-sizing: border-box` reset covers the
+  link rules are `@scope`d to stop at an example or a stage, its `box-sizing: border-box` reset covers the
   stage but not what's inside, and the text styles the page would pass down (font, size, line
   height, colour) start over, as in upstream's preview, with `--font-sans` and `--font-mono` set
   to Geist's, as ui.shadcn.com sets them, for a part that sets its own font (Kbd's keys). The
@@ -635,6 +635,11 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   joinery.css gives Joinery's parts the same (`src/css/base.css`, scoped to `[data-slot]`), so
   the parity comparison catches a part that misses it. Keep new guide rules inside the layer, and scope any that select bare elements or
   every element.
+- The Theme Builder (`getting-started/theme-builder.md`, `docs-app/app/components/theme-builder.gts`)
+  shows each component page's first `<Example>` (a block's left out), read from the pages
+  themselves, so a new page shows there with nothing to list. Each demo is a stage of its own, as
+  an example's preview is, in the style, base colour, radius and tokens picked, and renders as it
+  nears the viewport. Its controls are Joinery's own components, in Nova on Neutral.
 - The Reference section is generated: `docs-app/app/templates/reference/<package>.md` for each
   published package renders `<PackageReference @package="…">`, which lists the package's public
   modules from its type declarations, each opening to Kolay's `<APIDocs>` (a component's

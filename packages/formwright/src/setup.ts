@@ -3,23 +3,35 @@ import {
   registerLayout,
   setDefaultLayout,
   type ControlComponent,
+  type ControlSignature,
+  type ControlWiring,
+  type ItemOf,
+  type LengthArgs,
+  type OptionArgs,
+  type RangeArgs,
 } from '@ember-formwright/ember'
-import { CheckboxControl } from './controls/checkbox.gts'
-import { CheckboxGroupControl } from './controls/checkbox-group.gts'
-import { ComboboxControl } from './controls/combobox.gts'
-import { CurrencyControl } from './controls/currency.gts'
-import { DatePickerControl } from './controls/date-picker.gts'
-import { InputControl } from './controls/input.gts'
-import { InputOTPControl } from './controls/input-otp.gts'
-import { NativeSelectControl } from './controls/native-select.gts'
-import { RadioGroupControl } from './controls/radio-group.gts'
-import { RatingControl } from './controls/rating.gts'
-import { SelectControl } from './controls/select.gts'
-import { SliderControl } from './controls/slider.gts'
-import { SwitchControl } from './controls/switch.gts'
-import { TextareaControl } from './controls/textarea.gts'
-import { ToggleControl } from './controls/toggle.gts'
-import { ToggleGroupControl } from './controls/toggle-group.gts'
+import { CheckboxControl, type CheckboxControlSignature } from './controls/checkbox.gts'
+import {
+  CheckboxGroupControl,
+  type CheckboxGroupControlSignature,
+} from './controls/checkbox-group.gts'
+import { ComboboxControl, type ComboboxControlSignature } from './controls/combobox.gts'
+import { CurrencyControl, type CurrencyControlSignature } from './controls/currency.gts'
+import { DatePickerControl, type DatePickerControlSignature } from './controls/date-picker.gts'
+import { InputControl, type InputControlSignature } from './controls/input.gts'
+import { InputOTPControl, type InputOTPControlSignature } from './controls/input-otp.gts'
+import {
+  NativeSelectControl,
+  type NativeSelectControlSignature,
+} from './controls/native-select.gts'
+import { RadioGroupControl, type RadioGroupControlSignature } from './controls/radio-group.gts'
+import { RatingControl, type RatingControlSignature } from './controls/rating.gts'
+import { SelectControl, type SelectControlSignature } from './controls/select.gts'
+import { SliderControl, type SliderControlSignature } from './controls/slider.gts'
+import { SwitchControl, type SwitchControlSignature } from './controls/switch.gts'
+import { TextareaControl, type TextareaControlSignature } from './controls/textarea.gts'
+import { ToggleControl, type ToggleControlSignature } from './controls/toggle.gts'
+import { ToggleGroupControl, type ToggleGroupControlSignature } from './controls/toggle-group.gts'
 import { JoineryFieldLayout } from './layout.gts'
 
 /**
@@ -131,4 +143,75 @@ export function setupJoineryForms(options: RegisterJoineryControlsOptions = {}):
   registerJoineryControls(options)
   registerJoineryLayouts()
   setDefaultLayout('joinery')
+}
+
+/** A control's own args: all but the wiring every control gets (and its options, if any). */
+type OwnArgs<S extends { Args: object }> = Omit<
+  S['Args'],
+  keyof ControlWiring<unknown> | 'options' | 'optionKey' | 'optionLabel' | 'storeKey'
+>
+
+/** A Joinery control as a Formwright one: storing `V`, with its own args and element. */
+type Joinery<
+  S extends { Args: object; Element: Element },
+  V,
+  Extra extends object = object,
+> = ControlSignature<V, OwnArgs<S> & Extra, S['Element']>
+
+type TextInput = Joinery<InputControlSignature, string, Pick<LengthArgs, 'maxLength'>>
+type DateInput = Joinery<InputControlSignature, string, RangeArgs>
+
+/** A toggle group stores a list when its path is one, else the option pressed or null. */
+type ToggleGroupStored<T> =
+  NonNullable<T> extends readonly unknown[] ? ItemOf<NonNullable<T>>[] : NonNullable<T> | null
+
+/** A slider stores a list of numbers when its path is one (a range), else a number. */
+type SliderStored<T> = NonNullable<T> extends readonly number[] ? number[] : number
+
+declare module '@ember-formwright/ember' {
+  /**
+   * Joinery's controls by the names `joineryControls` registers. The types always declare all
+   * of them, whichever `registerJoineryControls({ only, except })` registers.
+   */
+  interface FormwrightControls {
+    input: TextInput
+    text: TextInput
+    email: TextInput
+    password: TextInput
+    search: TextInput
+    tel: TextInput
+    url: TextInput
+    color: TextInput
+    date: DateInput
+    datetime: DateInput
+    time: DateInput
+    number: Joinery<InputControlSignature, number | null, RangeArgs>
+    textarea: Joinery<TextareaControlSignature, string>
+    currency: Joinery<CurrencyControlSignature, number | null>
+    checkbox: Joinery<CheckboxControlSignature, boolean>
+    switch: Joinery<SwitchControlSignature, boolean>
+    toggle: Joinery<ToggleControlSignature, boolean>
+    rating: Joinery<RatingControlSignature, number | null>
+    'input-otp': Joinery<InputOTPControlSignature, string>
+    'date-picker': Joinery<DatePickerControlSignature, Date | null>
+  }
+
+  interface FormwrightChoiceControls<T> {
+    select: Joinery<SelectControlSignature, NonNullable<T> | null, OptionArgs<NonNullable<T>>>
+    'native-select': Joinery<
+      NativeSelectControlSignature,
+      NonNullable<T> | null,
+      OptionArgs<NonNullable<T>>
+    >
+    combobox: Joinery<ComboboxControlSignature, NonNullable<T> | null, OptionArgs<NonNullable<T>>>
+    radio: Joinery<RadioGroupControlSignature, NonNullable<T>, OptionArgs<NonNullable<T>>>
+    'checkbox-group': Joinery<CheckboxGroupControlSignature, ItemOf<T>[], OptionArgs<ItemOf<T>>>
+    'toggle-group': Joinery<
+      ToggleGroupControlSignature,
+      ToggleGroupStored<T>,
+      OptionArgs<NonNullable<ToggleGroupStored<T>> extends (infer E)[] ? E : NonNullable<T>>
+    >
+    slider: Joinery<SliderControlSignature, SliderStored<T>>
+    range: Joinery<SliderControlSignature, SliderStored<T>>
+  }
 }

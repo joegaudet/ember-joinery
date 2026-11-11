@@ -1,5 +1,5 @@
 import Component from '@glimmer/component'
-import type { ControlSignature } from '@ember-formwright/ember'
+import type { ControlSignature, OptionArgs } from '@ember-formwright/ember'
 import {
   Field,
   FieldContent,
@@ -23,19 +23,20 @@ import {
 export type RadioGroupControlVariant = 'list' | 'card'
 
 export interface RadioGroupControlSignature {
-  Args: ControlSignature['Args'] & {
-    /**
-     * `list` (the default): each choice a radio and its label. `card`: each choice a card
-     * (a `FieldLabel` around a horizontal `Field`) with its title and description, and the radio
-     * at its end, which highlights while it is chosen.
-     */
-    variant?: RadioGroupControlVariant
-    /**
-     * Each option's description, shown under its label: a property name or a function. Default:
-     * the option's `description`, if it has one.
-     */
-    optionDescription?: OptionAccessor
-  }
+  Args: ControlSignature['Args'] &
+    OptionArgs & {
+      /**
+       * `list` (the default): each choice a radio and its label. `card`: each choice a card
+       * (a `FieldLabel` around a horizontal `Field`) with its title and description, and the radio
+       * at its end, which highlights while it is chosen.
+       */
+      variant?: RadioGroupControlVariant
+      /**
+       * Each option's description, shown under its label: a property name or a function. Default:
+       * the option's `description`, if it has one.
+       */
+      optionDescription?: OptionAccessor
+    }
   /** The RadioGroup's root, a `<div role="radiogroup">`. */
   Element: HTMLDivElement
 }

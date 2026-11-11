@@ -14,7 +14,11 @@ const statuses = [
  * `number` and a `currency` field are Joinery's Input.
  */
 export default class FormwrightNativeSelect extends Component {
-  model = { status: 'todo', estimate: 3, budget: 1200 }
+  model = {
+    status: 'todo' as string | null,
+    estimate: 3 as number | null,
+    budget: 1200 as number | null,
+  }
 
   <template>
     <Form @model={{this.model}} @name="task" class="w-full max-w-xs" as |f|>

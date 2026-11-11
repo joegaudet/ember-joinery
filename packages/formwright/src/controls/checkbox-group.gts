@@ -1,6 +1,6 @@
 import Component from '@glimmer/component'
 import { fn } from '@ember/helper'
-import type { ControlSignature } from '@ember-formwright/ember'
+import type { ControlSignature, MaxArgs, OptionArgs } from '@ember-formwright/ember'
 import {
   Checkbox,
   Field,
@@ -21,13 +21,15 @@ import {
 } from '../-private/options.ts'
 
 export interface CheckboxGroupControlSignature {
-  Args: ControlSignature<unknown[]>['Args'] & {
-    /**
-     * Each option's description, shown under its label: a property name or a function. Default:
-     * the option's `description`, if it has one.
-     */
-    optionDescription?: OptionAccessor
-  }
+  Args: ControlSignature<unknown[]>['Args'] &
+    OptionArgs &
+    MaxArgs & {
+      /**
+       * Each option's description, shown under its label: a property name or a function. Default:
+       * the option's `description`, if it has one.
+       */
+      optionDescription?: OptionAccessor
+    }
   /** The `FieldGroup` of checkboxes, `data-slot="checkbox-group"`. */
   Element: HTMLElement
 }

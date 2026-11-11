@@ -1,5 +1,5 @@
 import Component from '@glimmer/component'
-import type { ControlSignature } from '@ember-formwright/ember'
+import type { ControlSignature, OptionArgs } from '@ember-formwright/ember'
 import { Combobox } from '@ember-joinery/ember'
 import {
   isEmpty,
@@ -11,12 +11,13 @@ import {
 } from '../-private/options.ts'
 
 export interface ComboboxControlSignature {
-  Args: ControlSignature['Args'] & {
-    /** What the list says when no option matches what was typed. Default `No items found.` */
-    emptyText?: string
-    /** Shows a button that clears the choice, as Combobox's input's `@showClear`. */
-    showClear?: boolean
-  }
+  Args: ControlSignature['Args'] &
+    OptionArgs & {
+      /** What the list says when no option matches what was typed. Default `No items found.` */
+      emptyText?: string
+      /** Shows a button that clears the choice, as Combobox's input's `@showClear`. */
+      showClear?: boolean
+    }
   /** The combobox's input, which the field's label names. */
   Element: HTMLInputElement
 }

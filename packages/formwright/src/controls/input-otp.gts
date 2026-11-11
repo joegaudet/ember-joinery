@@ -1,19 +1,20 @@
 import Component from '@glimmer/component'
-import type { ControlSignature } from '@ember-formwright/ember'
+import type { ControlSignature, LengthArgs } from '@ember-formwright/ember'
 import { InputOTP, type InputOTPParts } from '@ember-joinery/ember'
 
 export interface InputOTPControlSignature {
-  Args: ControlSignature<string>['Args'] & {
-    /**
-     * How many slots each group holds, with a separator between groups: `[3, 3]` shows two
-     * groups of three. Default: one group of `@maxLength` slots.
-     */
-    groups?: readonly number[]
-    /** The characters it takes, as a regular expression's source (`REGEXP_ONLY_DIGITS`). */
-    pattern?: string
-    /** Called with the code once every slot is filled. */
-    onComplete?: (code: string) => void
-  }
+  Args: ControlSignature<string>['Args'] &
+    Pick<LengthArgs, 'maxLength'> & {
+      /**
+       * How many slots each group holds, with a separator between groups: `[3, 3]` shows two
+       * groups of three. Default: one group of `@maxLength` slots.
+       */
+      groups?: readonly number[]
+      /** The characters it takes, as a regular expression's source (`REGEXP_ONLY_DIGITS`). */
+      pattern?: string
+      /** Called with the code once every slot is filled. */
+      onComplete?: (code: string) => void
+    }
   Blocks: {
     /** The slots, groups and separators, laid out as Input OTP's: `<otp.Slot @index={{0}} />`. */
     default: [otp: InputOTPParts]

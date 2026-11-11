@@ -1,6 +1,6 @@
 import Component from '@glimmer/component'
 import { on } from '@ember/modifier'
-import type { ControlSignature } from '@ember-formwright/ember'
+import type { ControlSignature, LengthArgs, RangeArgs } from '@ember-formwright/ember'
 import { inputClasses, type InputGroupParts } from '@ember-joinery/ember'
 
 /** Formwright's control names whose `<input>` takes another `type`. */
@@ -10,18 +10,20 @@ const NATIVE_TYPES: Record<string, string> = { input: 'text', datetime: 'datetim
 const NUMERIC = new Set(['number'])
 
 export interface InputControlSignature {
-  Args: ControlSignature<string | number | null>['Args'] & {
-    /**
-     * The parts an `<InputGroup>` yields, to render as the group's input (`g.Input`) inside it:
-     * `<InputGroup as |g|><field.Control @group={{g}} />…</InputGroup>`.
-     */
-    group?: InputGroupParts
-    /**
-     * Its `autocomplete`: what the browser may fill in (`username`, `email`, `new-password`,
-     * `off`). An argument, since a field's `Control` takes only global attributes.
-     */
-    autocomplete?: string
-  }
+  Args: ControlSignature<string | number | null>['Args'] &
+    Pick<LengthArgs, 'maxLength'> &
+    RangeArgs & {
+      /**
+       * The parts an `<InputGroup>` yields, to render as the group's input (`g.Input`) inside it:
+       * `<InputGroup as |g|><field.Control @group={{g}} />…</InputGroup>`.
+       */
+      group?: InputGroupParts
+      /**
+       * Its `autocomplete`: what the browser may fill in (`username`, `email`, `new-password`,
+       * `off`). An argument, since a field's `Control` takes only global attributes.
+       */
+      autocomplete?: string
+    }
   Element: HTMLInputElement
 }
 

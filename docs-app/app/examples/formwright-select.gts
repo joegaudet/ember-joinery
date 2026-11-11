@@ -30,7 +30,7 @@ const formSchema = z.object({
  * upstream's do, with Auto and a separator ahead of the languages.
  */
 export default class FormwrightSelect extends Component {
-  model = { language: '' }
+  model = { language: '' as string | null }
 
   <template>
     <Card class="w-full sm:max-w-lg" as |c|>

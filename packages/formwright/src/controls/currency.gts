@@ -1,10 +1,10 @@
 import type { TOC } from '@ember/component/template-only'
-import type { ControlSignature } from '@ember-formwright/ember'
+import type { ControlSignature, CurrencyArgs } from '@ember-formwright/ember'
 import Currency from '@ember-formwright/ember/controls/currency'
 import { inputClasses } from '@ember-joinery/ember'
 
 export interface CurrencyControlSignature {
-  Args: ControlSignature<number | null>['Args']
+  Args: ControlSignature<number | null>['Args'] & CurrencyArgs
   /** Formwright's currency `<input>`. */
   Element: HTMLElement
 }
@@ -31,9 +31,6 @@ export const CurrencyControl: TOC<CurrencyControlSignature> = <template>
     @describedBy={{@describedBy}}
     @placeholder={{@placeholder}}
     @label={{@label}}
-    @min={{@min}}
-    @max={{@max}}
-    @step={{@step}}
     @currency={{@currency}}
     @locale={{@locale}}
     class={{CLASSES}}

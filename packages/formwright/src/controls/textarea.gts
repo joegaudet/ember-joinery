@@ -1,23 +1,24 @@
 import Component from '@glimmer/component'
 import { on } from '@ember/modifier'
-import type { ControlSignature } from '@ember-formwright/ember'
+import type { ControlSignature, LengthArgs } from '@ember-formwright/ember'
 import { InputGroup, textareaClasses, type InputGroupParts } from '@ember-joinery/ember'
 
 export interface TextareaControlSignature {
-  Args: ControlSignature<string>['Args'] & {
-    /**
-     * The parts an `<InputGroup>` yields, to render as the group's textarea (`g.Textarea`)
-     * inside it, with a count or buttons in an addon beside it.
-     */
-    group?: InputGroupParts
-    /**
-     * Its `rows`. An argument, since a field's `Control` takes only global attributes: give
-     * it here, as upstream's examples do (`rows={6}`).
-     */
-    rows?: number
-    /** Its `autocomplete`, as the Input control's. */
-    autocomplete?: string
-  }
+  Args: ControlSignature<string>['Args'] &
+    LengthArgs & {
+      /**
+       * The parts an `<InputGroup>` yields, to render as the group's textarea (`g.Textarea`)
+       * inside it, with a count or buttons in an addon beside it.
+       */
+      group?: InputGroupParts
+      /**
+       * Its `rows`. An argument, since a field's `Control` takes only global attributes: give
+       * it here, as upstream's examples do (`rows={6}`).
+       */
+      rows?: number
+      /** Its `autocomplete`, as the Input control's. */
+      autocomplete?: string
+    }
   Element: HTMLTextAreaElement
 }
 

@@ -313,9 +313,11 @@ menus) render no element, so upstream's trigger is its parent's child, and a rul
 writes for that child (a Field's `*:w-full`, an Input Group addon's `has-[>button]` margin)
 reaches it. Joinery's root is an element with `display: contents` (its `data-test-jn` names
 it), which such a rule reaches instead, so restate the rule one root down, by hand, at its
-weight: `select.css` does for a Field's, `trace.css` for a trigger around a Trace's line, and
-`input-group.css` for an addon's, each style's utilities under its `style-<name>` variant (see
-"Porting a component", step 3), with a test that holds the copy to the sheets.
+weight: `select.css` does for a Field's, `trace.css` for a trigger around a Trace's line,
+`input-group.css` for an addon's, and `button-group.css` for a group's parts (a dropdown's,
+popover's, select's or tooltip's trigger as a part), each style's utilities under its
+`style-<name>` variant (see "Porting a component", step 3), with a test that holds the copy to
+the sheets.
 
 **Your own element.** Every part takes `@as`, a tag (`<Button @as="a" href="/login">`), through
 `As`. For a component of the caller's own, such as `LinkTo`, there is a part modifier made with
@@ -448,7 +450,7 @@ written to `parity-report/index.html` (CI uploads it from `parity.yml`).
 
 `parity/map/<component>.json`, one file per docs page, maps upstream example ids to Joinery
 examples (the format is in `parity/map/README.md`). With `--require-complete`, an upstream example
-missing from the map fails the check too; CI turns that on when the last component lands. With
+missing from the map fails the check too, and CI's `parity.yml` runs with it. With
 nothing mapped, `pnpm parity` has nothing to compare and passes. To compare locally:
 
 ```bash

@@ -4,8 +4,27 @@ import { render } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { Minus, Plus } from 'lucide'
 import { DirectionProvider } from '@ember-joinery/primitives/direction'
-import { Button, ButtonGroup, Icon, buttonGroupClasses } from '@ember-joinery/ember'
-import { ButtonGroupHarness, ButtonHarness, tab } from '@ember-joinery/test-support'
+import {
+  Button,
+  ButtonGroup,
+  DropdownMenu,
+  Icon,
+  Input,
+  InputGroup,
+  Popover,
+  Select,
+  Tooltip,
+  TooltipProvider,
+  buttonGroupClasses,
+} from '@ember-joinery/ember'
+import {
+  ButtonGroupHarness,
+  ButtonHarness,
+  DropdownMenuHarness,
+  InputHarness,
+  SelectHarness,
+  tab,
+} from '@ember-joinery/test-support'
 
 /** A rendered length in pixels. */
 const px = (value: string) => Number.parseFloat(value)
@@ -293,6 +312,131 @@ module('Integration | components | button-group', function (hooks) {
     assert.strictEqual(new ButtonGroupHarness('unnamed').label, '')
     assert.deepEqual(new ButtonGroupHarness('unnamed').separators, [])
     assert.throws(() => new ButtonGroupHarness('missing').element, /no button-group "missing"/)
+    await a11yAudit()
+  })
+
+  test("an overlay's trigger joins the group through the overlay's root", async function (assert) {
+    await render(
+      <template>
+        <ButtonGroup aria-label="Conversation">
+          <Button @variant="outline" @name="follow">Follow</Button>
+          <DropdownMenu as |m|>
+            <Button @variant="outline" @name="more" {{m.trigger}}>More</Button>
+            <m.Content>
+              <m.Item>Mute</m.Item>
+            </m.Content>
+          </DropdownMenu>
+        </ButtonGroup>
+      </template>,
+    )
+    const follow = new ButtonHarness('follow').element
+    const more = new ButtonHarness('more').element
+    // Radix's root renders no element, so upstream's trigger is the group's child; Joinery's
+    // root is an element with display: contents, and the group's rules reach through it.
+    assert.strictEqual(corners(follow).topRight, 0, 'the part before the root squares its end')
+    assert.strictEqual(corners(follow).bottomRight, 0)
+    assert.strictEqual(corners(follow).topLeft, 10)
+    assert.strictEqual(corners(more).topLeft, 0, 'the trigger squares its start')
+    assert.strictEqual(getComputedStyle(more).borderLeftWidth, '0px', 'one border between them')
+    assert.strictEqual(corners(more).topRight, 10, 'the last part rounds its end')
+
+    const menu = new DropdownMenuHarness()
+    await menu.open()
+    assert.strictEqual(
+      corners(menu.content!).topLeft,
+      corners(menu.content!).topRight,
+      "the menu's own corners are left alone",
+    )
+    assert.notStrictEqual(corners(menu.content!).topLeft, 0)
+    await a11yAudit()
+  })
+
+  test('roots side by side, in a column, and a tooltip in a provider', async function (assert) {
+    await render(
+      <template>
+        <ButtonGroup @orientation="vertical" aria-label="Zoom">
+          <Tooltip as |t|>
+            <Button @variant="outline" @name="in" {{t.trigger}}>In</Button>
+            <t.Content>Zoom in</t.Content>
+          </Tooltip>
+          <Popover as |p|>
+            <Button @variant="outline" @name="fit" {{p.trigger}}>Fit</Button>
+            <p.Content>Fit to the window</p.Content>
+          </Popover>
+          <TooltipProvider>
+            <Tooltip as |t|>
+              <Button @variant="outline" @name="out" {{t.trigger}}>Out</Button>
+              <t.Content>Zoom out</t.Content>
+            </Tooltip>
+          </TooltipProvider>
+        </ButtonGroup>
+      </template>,
+    )
+    const zoomIn = new ButtonHarness('in').element
+    const fit = new ButtonHarness('fit').element
+    const zoomOut = new ButtonHarness('out').element
+    assert.strictEqual(corners(zoomIn).topLeft, 10)
+    assert.strictEqual(corners(zoomIn).bottomLeft, 0, 'joined below')
+    assert.deepEqual(
+      [corners(fit).topLeft, corners(fit).bottomLeft],
+      [0, 0],
+      'the middle one is square at both ends',
+    )
+    assert.strictEqual(getComputedStyle(fit).borderTopWidth, '0px')
+    assert.strictEqual(corners(zoomOut).topLeft, 0, 'two roots down, in a provider')
+    assert.strictEqual(getComputedStyle(zoomOut).borderTopWidth, '0px')
+    assert.strictEqual(corners(zoomOut).bottomLeft, 10, 'the last rounds its bottom')
+    await a11yAudit()
+  })
+
+  test("a select's trigger joins the input after it, and fits its value", async function (assert) {
+    await render(
+      <template>
+        <ButtonGroup aria-label="Amount">
+          <Select @defaultValue="$" as |s|>
+            <s.Trigger aria-label="Currency">$</s.Trigger>
+            <s.Content>
+              <s.Item @value="$">$</s.Item>
+              <s.Item @value="€">€</s.Item>
+            </s.Content>
+          </Select>
+          <Input aria-label="Amount" placeholder="10.00" />
+        </ButtonGroup>
+      </template>,
+    )
+    const trigger = new SelectHarness().trigger
+    const input = new InputHarness().element
+    assert.strictEqual(corners(trigger).topRight, 0)
+    assert.strictEqual(corners(input).topLeft, 0)
+    assert.strictEqual(getComputedStyle(input).borderLeftWidth, '0px')
+    assert.strictEqual(corners(input).topRight, 10)
+    assert.true(
+      trigger.getBoundingClientRect().width < input.getBoundingClientRect().width,
+      'w-fit: the trigger is as wide as its value',
+    )
+    await a11yAudit()
+  })
+
+  test("an input group's addon that is a tooltip's trigger still narrows the input's padding", async function (assert) {
+    await render(
+      <template>
+        <InputGroup as |g|>
+          <g.Input aria-label="Message" placeholder="Send a message..." />
+          <Tooltip as |t|>
+            <g.Addon @align="inline-end" {{t.trigger}}>Voice</g.Addon>
+            <t.Content>Voice Mode</t.Content>
+          </Tooltip>
+        </InputGroup>
+        <InputGroup as |g|>
+          <g.Input aria-label="Plain" placeholder="No addon" />
+        </InputGroup>
+      </template>,
+    )
+    const [message, plain] = document.querySelectorAll<HTMLInputElement>(
+      '[data-slot="input-group-control"]',
+    )
+    assert.strictEqual(getComputedStyle(message!).paddingRight, '6px', 'pe-1.5 beside the addon')
+    assert.notStrictEqual(getComputedStyle(plain!).paddingRight, '6px', 'and only there')
     await a11yAudit()
   })
 })

@@ -40,3 +40,30 @@ for (const align of ['inline-start', 'inline-end']) {
     }
   })
 }
+
+for (const align of ['inline-start', 'inline-end']) {
+  test(`input-group.css restates each sheet's input padding beside an ${align} addon through an overlay's root`, () => {
+    const css = withoutComments(read('components/input-group.css'))
+    const start = css.search(
+      new RegExp(`:where\\(\\.jn-input-group\\):has\\([^{]*\\[data-align='${align}'\\]`),
+    )
+    assert.ok(start >= 0, `input-group.css restates the input's padding beside an ${align} addon`)
+    const block = css.slice(start, css.indexOf('\n}\n', start))
+    const prefix = `has-[>[data-align=${align}]]:[&>input]:`
+    for (const style of styles()) {
+      const sheet = withoutComments(read(`styles/${style}.css`))
+      const rule = /^:where\(\.jn-input-group\) \{\s*@apply ([^;]+);/m.exec(sheet)
+      const expected = (rule?.[1] ?? '')
+        .split(/\s+/)
+        .filter(utility => utility.startsWith(prefix))
+        .map(utility => utility.slice(prefix.length))
+      const copy = new RegExp(`@variant style-${style} \\{\\s*@apply ([^;]+);`).exec(block)
+      if (expected.length === 0) {
+        assert.equal(copy, null, `${style}'s sheet has no ${align} padding rule, nor the copy`)
+        continue
+      }
+      assert.ok(copy, `input-group.css has a style-${style} block for ${align}`)
+      assert.deepStrictEqual(copy[1].split(/\s+/), expected, `the copy matches ${style}'s sheet`)
+    }
+  })
+}

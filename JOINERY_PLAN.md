@@ -413,8 +413,7 @@ deploys `docs/site`.
   fails over a threshold (1% of the box's pixels by default; an override
   for an example needs a written reason in `parity/map/<component>.json`), and a side-by-side report is
   uploaded. With `--require-complete`, an upstream example missing from the map also fails, which
-  keeps coverage complete. CI turns that flag on for the final unit; until then, the check covers
-  the examples that are mapped.
+  keeps coverage complete. CI runs with that flag: every docs-page example and chart is mapped.
 - **Upstream watch** (`scripts/upstream.mjs changes`, a weekly `upstream.yml`): lists upstream
   changes since the pinned shas in shadcn's `registry/bases/radix/{ui,blocks}`, `registry/styles`
   (down to the rules that changed), `examples/radix`, `registry/new-york-v4/charts`, its docs

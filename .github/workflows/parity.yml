@@ -2,8 +2,8 @@ name: parity
 
 # Screenshots every mapped upstream example in shadcn/ui's own rendering (parity/) and in the
 # Joinery guide, in light and dark, and fails over each example's threshold. See "Parity" in
-# CONTRIBUTING.md. The final unit of the 1.0 build adds --require-complete, so an upstream
-# example without a mapping fails too.
+# CONTRIBUTING.md. With --require-complete, an upstream example (a docs page's, or the charts
+# gallery's) without a mapping fails too.
 
 on:
   pull_request:
@@ -49,7 +49,7 @@ jobs:
           PARITY_REQUIRE_BROWSER: '1'
       - run: pnpm build
       - run: pnpm guide:build
-      - run: pnpm parity
+      - run: pnpm parity --require-complete
       - name: Upload the report
         if: always()
         uses: actions/upload-artifact@v7

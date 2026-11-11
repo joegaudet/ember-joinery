@@ -1,7 +1,8 @@
 import Component from '@glimmer/component'
 import { tracked } from '@glimmer/tracking'
 import { array, hash } from '@ember/helper'
-import { registerDestructor } from '@ember/destroyable'
+import { isDestroyed, isDestroying, registerDestructor } from '@ember/destroyable'
+import { getOwner } from '@ember/owner'
 import type Owner from '@ember/owner'
 import Modifier, { modifier } from 'ember-modifier'
 import type { TOC } from '@ember/component/template-only'
@@ -188,6 +189,11 @@ interface TriggerSignature {
 const TooltipTrigger: TOC<TriggerSignature> = <template>
   <As @as={{@as}} @tag="button" type="button" ...attributes {{@part}}>{{yield}}</As>
 </template>
+
+/** Whether `destroyable` is being destroyed, or has been. */
+function isGoing(destroyable: object | undefined): boolean {
+  return destroyable !== undefined && (isDestroying(destroyable) || isDestroyed(destroyable))
+}
 
 /** Focus moving elsewhere doesn't close a tooltip: its trigger losing focus does. */
 function keepOnFocusOutside(event: FocusOutsideEvent): void {
@@ -468,6 +474,10 @@ export class Tooltip extends Component<TooltipSignature> {
   }
 
   setOpen = (open: boolean): void => {
+    // A focused trigger blurs as the browser removes it, which, as the app is torn down, can be
+    // after its provider has gone and while the owner the app's group comes from is going too:
+    // a tooltip that is going, or whose app is, changes nothing.
+    if (isGoing(this) || isGoing(getOwner(this))) return
     this.openDelay.cancel()
     if (open) this.wasOpenDelayed = false
     this.openState.set(open)

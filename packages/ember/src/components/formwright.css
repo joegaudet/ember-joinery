@@ -1,0 +1,115 @@
+/*
+ * Formwright's fields in shadcn's Field anatomy, for @ember-joinery/formwright (edited by hand;
+ * nothing in the core imports it). Its layout renders a Field, FieldSet, FieldLabel and the rest
+ * inside Formwright's own wrappers: the field's `div.fw-field`, and the control's
+ * `div.fw-control-area`. Upstream's parts have no such boxes, so both take none
+ * (`display: contents`), but for a control in a callout, which is a popover.
+ */
+:where(.fw-field):has(> :where([data-slot='field'], [data-slot='field-set'])) {
+  display: contents;
+}
+
+:where([data-slot='field'], [data-slot='field-set'], [data-slot='field-content'])
+  > :where(.fw-control-area:not(.fw-callout)) {
+  display: contents;
+}
+
+/*
+ * A field's rules for the elements directly inside it reach the control's wrapper instead of
+ * the control, so these restate them one level down, at the weight they have there (see
+ * "Through an overlay's root" in CONTRIBUTING.md). A vertical or responsive field stretches
+ * its control (`*:w-full`, field.css), but for a visually hidden one, and a responsive one, once
+ * its group is 28rem wide, sizes it to its content.
+ */
+:where(.jn-field-orientation-vertical, .jn-field-orientation-responsive)
+  > :where(.fw-control-area)
+  > :not(template) {
+  @apply w-full;
+}
+
+:where(.jn-field-orientation-vertical, .jn-field-orientation-responsive)
+  > :where(.fw-control-area)
+  > :where(.sr-only):nth-child(n) {
+  @apply w-auto;
+}
+
+:where(.jn-field-orientation-responsive) > :where(.fw-control-area) > :not(template) {
+  @apply @md/field-group:w-auto;
+}
+
+/*
+ * The same, a root further down, for a control whose root has `display: contents` (select.css
+ * restates the field's rule for a Select's root; this is that rule through the wrapper): the
+ * Select's trigger, and the date picker's, in its Popover's root.
+ */
+:where(.jn-field-orientation-vertical, .jn-field-orientation-responsive)
+  > :where(.fw-control-area)
+  > :where([data-test-jn='select'], [data-test-jn='popover'])
+  > :where(.jn-select-trigger, .jn-formwright-date-picker-trigger):not(template) {
+  @apply w-full;
+}
+
+:where(.jn-field-orientation-responsive)
+  > :where(.fw-control-area)
+  > :where([data-test-jn='select'], [data-test-jn='popover'])
+  > :where(.jn-select-trigger, .jn-formwright-date-picker-trigger):not(template) {
+  @apply @md/field-group:w-auto;
+}
+
+/*
+ * A horizontal field with a FieldContent nudges a checkbox or radio beside it down a pixel
+ * (field.css's `has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px`,
+ * and a responsive field's, once its group is 28rem wide).
+ */
+:where(.jn-field-orientation-horizontal):has(> [data-slot='field-content'])
+  > :where(.fw-control-area)
+  > :is([role='checkbox'], [role='radio']) {
+  @apply mt-px;
+}
+
+:where(.jn-field-orientation-responsive):has(> [data-slot='field-content'])
+  > :where(.fw-control-area)
+  > :is([role='checkbox'], [role='radio']) {
+  @apply @md/field-group:mt-px;
+}
+
+/*
+ * A FieldSet holding a set of checkboxes or radios sets them closer (every sheet's
+ * `has-[>[data-slot=checkbox-group]]:gap-3 has-[>[data-slot=radio-group]]:gap-3`, the same
+ * gap in all eight; scripts/formwright-css.test.mjs holds this copy to them).
+ */
+:where(.jn-field-set):has(
+  > :where(.fw-control-area) > :is([data-slot='checkbox-group'], [data-slot='radio-group'])
+) {
+  @apply gap-3;
+}
+
+/*
+ * A field's errors: Formwright lists them in a `ul`, which Joinery's base resets. Upstream's
+ * FieldError shows one as text and several as a list, `ml-4 flex list-disc flex-col gap-1`.
+ */
+:where(.jn-formwright-errors) > ul:has(> li + li) {
+  @apply ms-4 flex list-disc flex-col gap-1;
+}
+
+/*
+ * A choice's label beside its checkbox or radio, with no description under it, as upstream's
+ * examples set it (`className="font-normal"`).
+ */
+:where(.jn-formwright-option-label) {
+  @apply font-normal;
+}
+
+/*
+ * The date picker's trigger and popover, as upstream's Date Picker example styles them:
+ * `justify-between text-left font-normal data-[empty=true]:text-muted-foreground` on the
+ * Button, and `w-auto p-0` on the content, over the Popover content's own size and padding
+ * (popover.css comes later, so this rule is one class heavier).
+ */
+:where(.jn-formwright-date-picker-trigger) {
+  @apply justify-between text-start font-normal data-[empty=true]:text-muted-foreground;
+}
+
+:where(.jn-popover-content):is(.jn-formwright-date-picker-content) {
+  @apply w-auto overflow-hidden p-0;
+}

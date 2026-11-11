@@ -11,6 +11,7 @@ overrides:
   '@ember-joinery/data-table': workspace:*
   '@ember-joinery/ember': workspace:*
   '@ember-joinery/file-upload': workspace:*
+  '@ember-joinery/formwright': workspace:*
   '@ember-joinery/maskito': workspace:*
   '@ember-joinery/power-calendar': workspace:*
   '@ember-joinery/primitives': workspace:*
@@ -86,6 +87,12 @@ importers:
       '@babel/runtime':
         specifier: ^7.29.7
         version: 7.29.13
+      '@ember-formwright/ember':
+        specifier: ^1.3.0
+        version: 1.3.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))
+      '@ember-formwright/test-support':
+        specifier: ^1.3.0
+        version: 1.3.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))
       '@ember-joinery/carousel':
         specifier: workspace:*
         version: link:../packages/carousel
@@ -104,6 +111,9 @@ importers:
       '@ember-joinery/file-upload':
         specifier: workspace:*
         version: link:../packages/file-upload
+      '@ember-joinery/formwright':
+        specifier: workspace:*
+        version: link:../packages/formwright
       '@ember-joinery/maskito':
         specifier: workspace:*
         version: link:../packages/maskito
@@ -254,6 +264,9 @@ importers:
       vite:
         specifier: ^8.3.0
         version: 8.3.6(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
 
   examples/ember-classic:
     dependencies:
@@ -1092,6 +1105,82 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
 
+  packages/formwright:
+    dependencies:
+      '@ember-joinery/primitives':
+        specifier: workspace:*
+        version: link:../primitives
+      '@embroider/addon-shim':
+        specifier: ^1.10.3
+        version: 1.11.0
+      decorator-transforms:
+        specifier: ^2.4.0
+        version: 2.4.0(@babel/core@7.29.13)
+      ember-modifier:
+        specifier: ^4.3.0
+        version: 4.3.0(@babel/core@7.29.13)
+      lucide:
+        specifier: ^0.474.0
+        version: 0.474.0
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.29.7
+        version: 7.29.13
+      '@babel/plugin-transform-typescript':
+        specifier: ^7.29.7
+        version: 7.29.9(@babel/core@7.29.13)
+      '@babel/runtime':
+        specifier: ^7.29.7
+        version: 7.29.13
+      '@ember-formwright/ember':
+        specifier: ^1.3.0
+        version: 1.3.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))
+      '@ember-formwright/test-support':
+        specifier: ^1.3.0
+        version: 1.3.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))
+      '@ember-joinery/ember':
+        specifier: workspace:*
+        version: link:../ember
+      '@ember-joinery/test-support':
+        specifier: workspace:*
+        version: link:../test-support
+      '@ember/library-tsconfig':
+        specifier: ^3.0.0
+        version: 3.0.0
+      '@ember/test-helpers':
+        specifier: ^5.7.0
+        version: 5.8.0(@babel/core@7.29.13)
+      '@embroider/addon-dev':
+        specifier: ^8.4.2
+        version: 8.5.0(@glint/template@1.11.1)(rollup@4.68.0)
+      '@glimmer/component':
+        specifier: ^2.2.1
+        version: 2.2.1
+      '@glimmer/tracking':
+        specifier: ^1.1.2
+        version: 1.1.2
+      '@glint/ember-tsc':
+        specifier: ^1.14.2
+        version: 1.14.3(ember-source@7.3.1(@glimmer/component@2.2.1))(typescript@6.0.3)
+      '@glint/template':
+        specifier: ^1.9.0
+        version: 1.11.1
+      '@rollup/plugin-babel':
+        specifier: ^7.1.0
+        version: 7.1.0(@babel/core@7.29.13)(rollup@4.68.0)
+      babel-plugin-ember-template-compilation:
+        specifier: ^4.0.1
+        version: 4.0.1
+      ember-source:
+        specifier: ~7.3.0
+        version: 7.3.1(@glimmer/component@2.2.1)
+      rollup:
+        specifier: ^4.64.6
+        version: 4.68.0
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+
   packages/maskito:
     dependencies:
       '@ember-joinery/primitives':
@@ -1435,6 +1524,12 @@ importers:
       '@babel/runtime':
         specifier: ^7.29.7
         version: 7.29.13
+      '@ember-formwright/ember':
+        specifier: ^1.3.0
+        version: 1.3.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))
+      '@ember-formwright/test-support':
+        specifier: ^1.3.0
+        version: 1.3.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))
       '@ember-joinery/carousel':
         specifier: workspace:*
         version: link:../packages/carousel
@@ -1453,6 +1548,9 @@ importers:
       '@ember-joinery/file-upload':
         specifier: workspace:*
         version: link:../packages/file-upload
+      '@ember-joinery/formwright':
+        specifier: workspace:*
+        version: link:../packages/formwright
       '@ember-joinery/maskito':
         specifier: workspace:*
         version: link:../packages/maskito
@@ -1591,6 +1689,9 @@ importers:
       vite:
         specifier: ^8.3.0
         version: 8.3.6(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
 
 packages:
 
@@ -2380,6 +2481,19 @@ packages:
 
   '@ember-data/rfc395-data@0.0.4':
     resolution: {integrity: sha512-tGRdvgC9/QMQSuSuJV45xoyhI0Pzjm7A9o/MVVA3HakXIImJbbzx/k/6dO9CUEQXIyS2y0fW6C1XaYOG7rY0FQ==}
+
+  '@ember-formwright/ember@1.3.0':
+    resolution: {integrity: sha512-eHMCRwwEXw8rE5jw/mvihY5GGt6ttZxyRfGzFCeh57jVGfVGDFrDfKH3SK8F8CLL8+SwbxhH9nng6hMkzsbWfw==}
+    engines: {node: '>=22.12.0'}
+    peerDependencies:
+      '@glimmer/component': '>= 2.0.0'
+      ember-source: '>= 6.12.0'
+
+  '@ember-formwright/test-support@1.3.0':
+    resolution: {integrity: sha512-FIbgjmubATJhKY+PhASUY6sutJ4Ly8qkDfWsLLOWg7e0CpjBOvC0iIOWRexqdHhzBCpljAxb+/mZ78zjow+Z6A==}
+    engines: {node: '>=22.12.0'}
+    peerDependencies:
+      '@ember/test-helpers': '>= 5.0.0'
 
   '@ember-tooling/blueprint-blueprint@0.3.0':
     resolution: {integrity: sha512-9mwMGda8OC9oEJbvxnXX1DT5ZFR6YQumfmPwV+uUJCbGsaUkgr1UeTkcpgdL+Izvb4kjF/+BWcOtnaSvmR7Yig==}
@@ -3438,6 +3552,9 @@ packages:
 
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
+
+  '@standard-schema/spec@1.1.0':
+    resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
   '@tailwindcss/cli@4.3.5':
     resolution: {integrity: sha512-+evrrLZEgNPDXgdIxD6Zfc23WhSYZQeGwniO5u9M4zC92kbEtIjKd8l2QWeO7du8kl4gF8z7YArnUGHG4y2Jzg==}
@@ -8769,6 +8886,9 @@ packages:
     resolution: {integrity: sha512-xYqdZFUK/VYazNl/oCDYN+3WloWQwMfZxBoiNt6qNyk+xfOdi598muWE42rNZFp1kNOiqW936q5RhUdnpqElSg==}
     engines: {node: '>=18'}
 
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
+
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
@@ -9956,6 +10076,23 @@ snapshots:
 
   '@ember-data/rfc395-data@0.0.4': {}
 
+  '@ember-formwright/ember@1.3.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))':
+    dependencies:
+      '@ember/test-waiters': 4.1.2
+      '@embroider/addon-shim': 1.11.0
+      '@glimmer/component': 2.2.1
+      '@standard-schema/spec': 1.1.0
+      decorator-transforms: 2.4.0(@babel/core@7.29.13)
+      ember-modifier: 4.3.0(@babel/core@7.29.13)
+      ember-source: 7.3.1(@glimmer/component@2.2.1)
+    transitivePeerDependencies:
+      - '@babel/core'
+
+  '@ember-formwright/test-support@1.3.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))':
+    dependencies:
+      '@ember/test-helpers': 5.8.0(@babel/core@7.29.13)
+      '@embroider/addon-shim': 1.11.0
+
   '@ember-tooling/blueprint-blueprint@0.3.0': {}
 
   '@ember-tooling/blueprint-model@0.7.1':
@@ -11064,6 +11201,8 @@ snapshots:
   '@sindresorhus/merge-streams@4.0.0': {}
 
   '@socket.io/component-emitter@3.1.2': {}
+
+  '@standard-schema/spec@1.1.0': {}
 
   '@tailwindcss/cli@4.3.5':
     dependencies:
@@ -17827,5 +17966,7 @@ snapshots:
   yocto-queue@1.2.2: {}
 
   yoctocolors@2.2.0: {}
+
+  zod@4.6.7: {}
 
   zwitch@2.0.4: {}

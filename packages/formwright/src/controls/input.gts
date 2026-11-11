@@ -16,6 +16,11 @@ export interface InputControlSignature {
      * `<InputGroup as |g|><field.Control @group={{g}} />…</InputGroup>`.
      */
     group?: InputGroupParts
+    /**
+     * Its `autocomplete`: what the browser may fill in (`username`, `email`, `new-password`,
+     * `off`). An argument, since a field's `Control` takes only global attributes.
+     */
+    autocomplete?: string
   }
   Element: HTMLInputElement
 }
@@ -66,6 +71,7 @@ export class InputControl extends Component<InputControlSignature> {
       min={{@min}}
       max={{@max}}
       step={{@step}}
+      autocomplete={{@autocomplete}}
       data-slot={{this.slot}}
       data-test-jn="input"
       data-test-fw-control={{@type}}

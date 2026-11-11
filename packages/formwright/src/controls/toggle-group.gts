@@ -27,7 +27,11 @@ export interface ToggleGroupControlSignature {
     orientation?: 'horizontal' | 'vertical'
   }
   Blocks: {
-    /** What each item shows, an icon or text, given its option. Default: the option's label. */
+    /**
+     * What each item shows, an icon or text, given its option. Default: the option's label.
+     * With a block, each item is named by its option's label (`aria-label`), so an icon-only
+     * item has a name.
+     */
     default: [option: unknown, pressed: boolean]
   }
   /** The ToggleGroup's root, a `<div role="group">`. */
@@ -106,6 +110,7 @@ export class ToggleGroupControl extends Component<ToggleGroupControlSignature> {
           <g.Item
             @value={{this.keyFor option}}
             @disabled={{this.isDisabled option}}
+            aria-label={{if (has-block) (this.labelFor option)}}
             aria-invalid={{if @invalid "true"}}
             data-test-fw-option={{this.keyFor option}}
             as |pressed|
@@ -133,6 +138,7 @@ export class ToggleGroupControl extends Component<ToggleGroupControlSignature> {
           <g.Item
             @value={{this.keyFor option}}
             @disabled={{this.isDisabled option}}
+            aria-label={{if (has-block) (this.labelFor option)}}
             aria-invalid={{if @invalid "true"}}
             data-test-fw-option={{this.keyFor option}}
             as |pressed|

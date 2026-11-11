@@ -58,6 +58,11 @@ export interface JoineryFieldLayoutOptions {
    * section's heading, `label` as a field's label.
    */
   legend?: FieldLegendVariant
+  /**
+   * Classes for the field's label (or legend), as upstream's examples give a FieldLabel its
+   * own (`font-normal`, for a checkbox's).
+   */
+  labelClass?: string
 }
 
 export interface JoineryFieldLayoutSignature {
@@ -118,7 +123,7 @@ export class JoineryFieldLayout extends Component<JoineryFieldLayoutSignature> {
         data-invalid={{if @field.isInvalid "true"}}
         data-disabled={{if @field.disabled "true"}}
       >
-        <@parts.Label {{asFieldLegend variant=this.legend}} />
+        <@parts.Label class={{@labelClass}} {{asFieldLegend variant=this.legend}} />
         <@parts.Hint {{asFieldDescription}} />
         <@parts.Control as |control|>{{yield control}}</@parts.Control>
         {{#if @field.isInvalid}}
@@ -127,7 +132,7 @@ export class JoineryFieldLayout extends Component<JoineryFieldLayoutSignature> {
       </@parts.Group>
     {{else if this.isVertical}}
       <div {{asField orientation="vertical" invalid=@field.isInvalid disabled=@field.disabled}}>
-        <@parts.Label {{asFieldLabel}} />
+        <@parts.Label class={{@labelClass}} {{asFieldLabel}} />
         <@parts.Control as |control|>{{yield control}}</@parts.Control>
         <@parts.Hint {{asFieldDescription}} />
         {{#if @field.isInvalid}}
@@ -143,14 +148,14 @@ export class JoineryFieldLayout extends Component<JoineryFieldLayoutSignature> {
         {{/if}}
         {{#if this.hasContent}}
           <div {{asFieldContent}}>
-            <@parts.Label {{asFieldLabel}} />
+            <@parts.Label class={{@labelClass}} {{asFieldLabel}} />
             <@parts.Hint {{asFieldDescription}} />
             {{#if @field.isInvalid}}
               <@parts.Errors {{asFieldErrors}} />
             {{/if}}
           </div>
         {{else}}
-          <@parts.Label {{asFieldLabel}} />
+          <@parts.Label class={{@labelClass}} {{asFieldLabel}} />
         {{/if}}
         {{#unless this.controlFirst}}
           <@parts.Control as |control|>{{yield control}}</@parts.Control>

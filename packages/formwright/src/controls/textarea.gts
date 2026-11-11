@@ -15,6 +15,8 @@ export interface TextareaControlSignature {
      * it here, as upstream's examples do (`rows={6}`).
      */
     rows?: number
+    /** Its `autocomplete`, as the Input control's. */
+    autocomplete?: string
   }
   Element: HTMLTextAreaElement
 }
@@ -55,6 +57,7 @@ export class TextareaControl extends Component<TextareaControlSignature> {
       aria-describedby={{@describedBy}}
       maxlength={{@maxLength}}
       rows={{@rows}}
+      autocomplete={{@autocomplete}}
       data-slot={{this.slot}}
       data-test-jn="textarea"
       data-test-fw-control={{@type}}

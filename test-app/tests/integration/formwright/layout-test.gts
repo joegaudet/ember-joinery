@@ -235,15 +235,28 @@ module('Integration | formwright | layout', function (hooks) {
             @layout={{component JoineryFieldLayout orientation="responsive"}}
           />
           <f.Field @for="terms" @control="checkbox" @label="Terms" @layout="joinery-vertical" />
+          <f.Field
+            @for="twoFactor"
+            @control="switch"
+            @label="Two-factor"
+            @layout={{component JoineryFieldLayout labelClass="extra" controlFirst=true}}
+          />
         </Form>
       </template>,
     )
     const form = new ProfileForm()
-    const orientation = (harness: InputHarness | CheckboxFieldHarness) =>
+    const orientation = (harness: InputHarness | CheckboxFieldHarness | SwitchFieldHarness) =>
       harness.element.querySelector('[data-slot="field"]')!.getAttribute('data-orientation')
     assert.strictEqual(orientation(form.name), 'horizontal')
     assert.strictEqual(orientation(form.bio), 'responsive')
     assert.strictEqual(orientation(form.terms), 'vertical')
+    const group = form.twoFactor.element.querySelector('[data-slot="field"]')!
+    assert.dom(group.querySelector('label')).hasClass('extra', '@labelClass goes on the label')
+    assert.strictEqual(
+      group.firstElementChild!.className,
+      'fw-control-area',
+      '@controlFirst puts the switch first',
+    )
     await a11yAudit()
   })
 })

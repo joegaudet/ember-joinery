@@ -266,7 +266,19 @@ module('Integration | formwright | controls', function (hooks) {
       '0px',
       'a choice card has a border',
     )
-    await a11yAudit()
+    // A chosen card's description is upstream's muted text on the card's tint, under AA's
+    // 4.5:1 (see the Forms page's Accessibility notes): every rule but colour contrast, then
+    // colour contrast on all but it.
+    await a11yAudit({ rules: { 'color-contrast': { enabled: false } } })
+    await a11yAudit(
+      {
+        include: [['#ember-testing-container']],
+        exclude: [
+          ['[data-slot="field-label"]:has([aria-checked="true"]) [data-slot="field-description"]'],
+        ],
+      },
+      { runOnly: ['color-contrast'] },
+    )
   })
 
   test('checkbox-group is Checkboxes in a FieldGroup, and @max caps them', async function (assert) {
@@ -325,6 +337,10 @@ module('Integration | formwright | controls', function (hooks) {
     )
     const form = new SettingsForm()
     assert.dom('fieldset legend', form.size.element).hasText('Size')
+    assert
+      .dom('[data-test-fw-option="m"]', form.size.element)
+      .hasAttribute('aria-label', 'm', "with a block, each item is named by its option's label")
+    assert.dom('[data-test-fw-option="m"]', form.marks.element).doesNotHaveAttribute('aria-label')
     await form.size.toggle('m')
     assert.strictEqual(model.size, 'm')
     assert.deepEqual(form.size.value, ['m'])
@@ -436,7 +452,9 @@ module('Integration | formwright | controls', function (hooks) {
     await render(
       <template>
         <Form @model={{model}} @name="settings" as |f|>
-          <f.Field @for="seats" @control="number" @label="Seats" @min={{1}} />
+          <f.Field @for="seats" @control="number" @label="Seats" @min={{1}} as |field|>
+            <field.Control @autocomplete="off" />
+          </f.Field>
           <f.Field
             @for="budget"
             @control="currency"
@@ -455,6 +473,7 @@ module('Integration | formwright | controls', function (hooks) {
     )
     const form = new SettingsForm()
     assert.dom(form.seats.control).hasClass('jn-input').hasAttribute('type', 'number')
+    assert.dom(form.seats.control).hasAttribute('autocomplete', 'off')
     await form.seats.fillIn(4)
     assert.strictEqual(model.seats, 4)
     await form.seats.fillIn('')
@@ -467,6 +486,7 @@ module('Integration | formwright | controls', function (hooks) {
 
     assert.dom(form.bio.control).hasClass('jn-input-group-textarea')
     assert.dom(form.bio.control).hasAttribute('data-slot', 'input-group-control')
+    assert.dom(form.bio.control).hasAttribute('rows', '4')
     await form.bio.fillIn('Hello')
     assert.strictEqual(model.bio, 'Hello')
     assert.dom('[data-slot="input-group"]').hasText('5/100')

@@ -395,6 +395,15 @@ test('classifyChange maps upstream files to Joinery components', () => {
       { kind: 'headless', component: 'message-scroller' },
     ],
     ['packages/react/src/message-scroller/x.test.tsx', { kind: 'ignored', component: null }],
+    [`${PATHS.formsDocs}/react-hook-form.mdx`, { kind: 'forms-docs', component: 'forms' }],
+    [
+      `${PATHS.formExamples}/form-rhf-demo.tsx`,
+      { kind: 'form-example', component: 'forms', example: 'form-rhf-demo' },
+    ],
+    [
+      `${PATHS.formExamples}/form-next-demo-schema.ts`,
+      { kind: 'form-example', component: 'forms', example: 'form-next-demo-schema' },
+    ],
   ]
   for (const [path, expected] of cases)
     assert.deepEqual(classifyChange('shadcn-ui', path, inventory), expected, path)
@@ -521,9 +530,13 @@ test('changes fetches each branch head and reports what differs from the pins', 
     const shadcn = remote('shadcn', upstreamFiles())
     const shadcnPin = commit(shadcn, 'one')
     // Upstream moves on: a ui source changes, a component arrives, an example goes, a style rule
-    // changes and a block changes.
+    // changes, a block changes, and a forms page and a form example arrive (beside a new-york-v4
+    // example that isn't a form, which nothing watches).
     fixture(
       {
+        [`${PATHS.formsDocs}/tanstack-form.mdx`]: '---\ntitle: TanStack Form\n---\n',
+        [`${PATHS.formExamples}/form-rhf-demo.tsx`]: 'export default function Form() {}',
+        [`${PATHS.formExamples}/button-demo.tsx`]: 'export default function Demo() {}',
         [`${PATHS.ui}/button.tsx`]: 'export const changed = true',
         [`${PATHS.ui}/gauge.tsx`]: 'export {}',
         [`${PATHS.docs}/gauge.mdx`]: '---\ntitle: Gauge\n---\n',
@@ -597,6 +610,10 @@ test('changes fetches each branch head and reports what differs from the pins', 
     for (const component of ['dropdown-menu', 'context-menu', 'menubar']) {
       assert.deepEqual(summary(report.components[component]), [['primitive', 'M', 'menu.gts']])
     }
+    assert.deepEqual(summary(report.components.forms), [
+      ['forms-docs', 'A', 'tanstack-form.mdx'],
+      ['form-example', 'A', 'form-rhf-demo'],
+    ])
     assert.deepEqual(summary(report.blocks['login-01']), [['block', 'M', 'page.tsx']])
     assert.deepEqual(
       report.other.map(entry => entry.path),

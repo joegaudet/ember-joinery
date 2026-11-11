@@ -35,8 +35,10 @@ export const SOURCES = {
       `/${V4}/registry/styles/`,
       `/${V4}/examples/radix/`,
       `/${V4}/content/docs/components/radix/`,
-      // The charts gallery, and the new-york-v4 ui its charts import.
+      // The charts gallery, and the new-york-v4 ui its charts import (and the forms' examples).
       `/${V4}/registry/new-york-v4/`,
+      // The forms pages, whose examples the guide's Formwright section rebuilds.
+      `/${V4}/content/docs/forms/`,
       // A few docs pages (Combobox, the chart RTL example) show Base UI examples.
       `/${V4}/registry/bases/base/`,
       `/${V4}/examples/base/`,
@@ -64,6 +66,9 @@ export const SOURCES = {
       `${V4}/examples/base`,
       `${V4}/registry/new-york-v4/charts`,
       `${V4}/content/docs/components/radix`,
+      // The forms pages and their examples: not in the parity comparison, so watched here.
+      `${V4}/content/docs/forms`,
+      `${V4}/registry/new-york-v4/examples/form-*`,
       'packages/react/src',
     ],
   },
@@ -80,7 +85,12 @@ export const PATHS = {
   charts: `${V4}/registry/new-york-v4/charts`,
   blocks: `${V4}/registry/bases/radix/blocks`,
   examples: base => `${V4}/examples/${base}`,
+  formsDocs: `${V4}/content/docs/forms`,
+  formExamples: `${V4}/registry/new-york-v4/examples`,
 }
+
+/** The guide's Formwright Forms page, which rebuilds the `docs/forms` pages' examples. */
+export const FORMS_PAGE = 'forms'
 
 // ---------------------------------------------------------------------------------------------
 // Pins and git
@@ -650,6 +660,10 @@ export function classifyChange(source, path, inventory) {
   }
   if (path.startsWith(`${PATHS.docs}/`))
     return { kind: 'docs', component: stem === 'meta' ? null : stem }
+  // The forms pages and their examples all land on the guide's one Forms page.
+  if (path.startsWith(`${PATHS.formsDocs}/`)) return { kind: 'forms-docs', component: FORMS_PAGE }
+  if (path.startsWith(`${PATHS.formExamples}/form-`))
+    return { kind: 'form-example', component: FORMS_PAGE, example: stem }
   if (path.startsWith(`${PATHS.styles}/`))
     return { kind: 'style', component: null, style: stem.replace(/^style-/, '') }
   if (path.startsWith(`${PATHS.charts}/`))

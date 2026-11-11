@@ -469,8 +469,9 @@ out the docs pages' preview classes.
 ## Upstream sync
 
 `node scripts/upstream.mjs changes` lists what changed upstream since the commits in
-`upstream.json` (ui sources, style rules, examples, docs pages, charts, blocks, and
-ember-primitives' `src`), mapped to Joinery components, plus any new upstream components.
+`upstream.json` (ui sources, style rules, examples, docs pages, charts, blocks, the `docs/forms`
+pages and their `form-*` examples, and ember-primitives' `src`), mapped to Joinery components
+(the forms to `forms`, the guide's Formwright Forms page), plus any new upstream components.
 ember-primitives' modules map to Joinery's through `EMBER_PRIMITIVES` in the script, so add a
 module there when Joinery covers a new one. A weekly workflow (`upstream.yml`) keeps a tracking
 issue up to date with it. When the report is longer than an issue can hold, the issue gets the

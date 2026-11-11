@@ -1,23 +1,28 @@
 <!doctype html>
-<!-- Source of site/social-card.png. Render at 1200x630:
-     chrome --headless --window-size=1200,630 --screenshot=site/social-card.png social-card.html -->
+<!-- Source of site/social-card.png (1200x630). Its card is Joinery's own Card, Field, Input,
+     Switch and Buttons, styled by Joinery's CSS, which `pnpm site:css` copies into site/joinery/.
+     Render it with the site's other images:
+       pnpm build && pnpm guide:build && pnpm site:css && pnpm site:screenshots --only social -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>Joinery social card</title>
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
     />
     <style>
+      :root {
+        --font-sans: Inter, system-ui, sans-serif;
+      }
       body {
         margin: 0;
         width: 1200px;
         height: 630px;
         display: grid;
-        grid-template-columns: 1.25fr 1fr;
+        grid-template-columns: 1.3fr 1fr;
         align-items: center;
-        gap: 48px;
+        gap: 56px;
         padding: 0 80px;
         box-sizing: border-box;
         font-family: Inter, system-ui, sans-serif;
@@ -35,74 +40,35 @@
       }
       h1 {
         margin: 0;
-        font-size: 64px;
+        font-size: 62px;
         line-height: 1.04;
         letter-spacing: -0.035em;
         font-weight: 800;
       }
       .accent {
-        color: #f5b04c;
+        background: linear-gradient(90deg, #f5b04c, #ea580c);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
       }
       p {
         margin: 26px 0 0;
         color: #cfc8bc;
-        font-size: 26px;
+        font-size: 25px;
         font-weight: 500;
       }
-      /* A dialog, the way shadcn draws one. */
       .card {
-        background: #fff;
-        color: #0a0a0a;
-        border-radius: 14px;
-        padding: 28px;
+        zoom: 1.15;
+        border-radius: 16px;
         box-shadow: 0 30px 80px -20px rgb(217 119 6 / 0.6);
       }
-      .title {
-        font-weight: 700;
-        font-size: 22px;
-      }
-      .desc {
-        margin: 6px 0 22px;
-        color: #737373;
-        font-size: 17px;
-      }
-      .label {
-        font-weight: 600;
-        font-size: 16px;
-        margin-bottom: 8px;
-      }
-      .input {
-        border: 1px solid #e5e5e5;
-        border-radius: 8px;
-        height: 42px;
-        margin-bottom: 18px;
-        display: flex;
-        align-items: center;
-        padding: 0 12px;
-        font-size: 17px;
-      }
-      .actions {
-        display: flex;
+      .card [data-slot='card-footer'] {
         justify-content: flex-end;
-        gap: 10px;
-      }
-      .btn {
-        border-radius: 8px;
-        padding: 10px 16px;
-        font-weight: 600;
-        font-size: 16px;
-        border: 1px solid #e5e5e5;
-      }
-      .btn.primary {
-        background: #171717;
-        border-color: #171717;
-        color: #fafafa;
-      }
-      code {
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 0.85em;
+        gap: 0.5rem;
       }
     </style>
+    <link rel="stylesheet" href="site/joinery/tokens.css" />
+    <link rel="stylesheet" href="site/joinery/joinery.css" />
   </head>
   <body>
     <div>
@@ -111,14 +77,76 @@
       <p>Headless primitives, shadcn's styles, and a test harness for each one.</p>
     </div>
     <div class="card">
-      <div class="title">Edit profile</div>
-      <div class="desc">Make changes to your profile here.</div>
-      <div class="label">Name</div>
-      <div class="input">Ada Lovelace</div>
-      <div class="label">Username</div>
-      <div class="input">@ada</div>
-      <div class="actions">
-        <span class="btn">Cancel</span><span class="btn primary">Save changes</span>
+      <div class="jn-card group/card" data-slot="card" data-size="default">
+        <div class="jn-card-header group/card-header" data-slot="card-header">
+          <div class="jn-card-title jn-font-heading" data-slot="card-title">Edit profile</div>
+          <div class="jn-card-description" data-slot="card-description">
+            Make changes to your profile here.
+          </div>
+        </div>
+        <div class="jn-card-content" data-slot="card-content">
+          <div class="jn-field-group group/field-group" data-slot="field-group">
+            <div
+              class="jn-field group/field jn-field-orientation-vertical"
+              role="group"
+              data-slot="field"
+              data-orientation="vertical"
+            >
+              <label
+                class="jn-label jn-field-label group/field-label peer/field-label"
+                data-slot="field-label"
+                for="name"
+                >Name</label
+              >
+              <input class="jn-input" data-slot="input" id="name" value="Pedro Duarte" />
+            </div>
+            <div
+              class="jn-field group/field jn-field-orientation-horizontal"
+              role="group"
+              data-slot="field"
+              data-orientation="horizontal"
+            >
+              <label
+                class="jn-label jn-field-label group/field-label peer/field-label"
+                data-slot="field-label"
+                for="updates"
+                >Email me about new components</label
+              >
+              <button
+                type="button"
+                role="switch"
+                aria-checked="true"
+                data-state="checked"
+                class="jn-switch peer group/switch"
+                data-slot="switch"
+                data-size="default"
+                id="updates"
+              >
+                <span data-state="checked" class="jn-switch-thumb" data-slot="switch-thumb"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="jn-card-footer" data-slot="card-footer">
+          <button
+            type="button"
+            class="jn-button group/button jn-button-variant-outline jn-button-size-default"
+            data-slot="button"
+            data-variant="outline"
+            data-size="default"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="jn-button group/button jn-button-variant-default jn-button-size-default"
+            data-slot="button"
+            data-variant="default"
+            data-size="default"
+          >
+            Save changes
+          </button>
+        </div>
       </div>
     </div>
   </body>

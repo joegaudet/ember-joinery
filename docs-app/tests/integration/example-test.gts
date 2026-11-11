@@ -396,6 +396,31 @@ module('Integration | <Example>', function (hooks) {
     await a11yAudit()
   })
 
+  test('@blockHeight frames a Blocks page’s block as ui.shadcn.com/blocks does', async function (assert) {
+    await render(
+      <template>
+        <Example @name="login-01" @title="login-01" @block={{true}} @blockHeight={{930}} />
+      </template>,
+    )
+    await waitUntil(() => find('iframe')?.contentDocument?.querySelector('form'))
+    const frame = find('iframe') as HTMLIFrameElement
+    assert.strictEqual(frame.style.height, '930px', "the blocks viewer's height, not 600px")
+    assert.strictEqual(
+      frame.contentWindow!.innerHeight,
+      frame.clientHeight,
+      'its window, which svh measures, is the frame inside its border',
+    )
+
+    await click('[data-test-example-width="375"]')
+    await waitUntil(() =>
+      (find('iframe[width="375"]') as HTMLIFrameElement | null)?.contentDocument?.querySelector(
+        'form',
+      ),
+    )
+    assert.strictEqual((find('iframe') as HTMLIFrameElement).style.height, '930px', 'at any width')
+    await a11yAudit()
+  })
+
   test("a form in the frame that submits to nowhere doesn't empty it", async function (assert) {
     await render(<template><Example @name="login-01" @title="Login" @block={{true}} /></template>)
     await waitUntil(() => find('iframe')?.contentDocument?.querySelector('form'))

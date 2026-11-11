@@ -2,7 +2,7 @@
 
 A simple signup form.
 
-<Example @name="signup-01" @title="signup-01" @block={{true}} />
+<Example @name="signup-01" @title="signup-01" @block={{true}} @blockHeight={{930}} />
 
 ## Installation
 

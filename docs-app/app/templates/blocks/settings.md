@@ -2,7 +2,7 @@
 
 A sidebar in a dialog: settings, a section at a time.
 
-<Example @name="sidebar-13" @title="sidebar-13" @block={{true}} />
+<Example @name="sidebar-13" @title="sidebar-13" @block={{true}} @blockHeight={{930}} />
 
 The dialog opens as the page does, as upstream's (`useState(true)`); close it and its button
 opens it again. From the `md` breakpoint up, a [Sidebar](/components/sidebar.md) that doesn't

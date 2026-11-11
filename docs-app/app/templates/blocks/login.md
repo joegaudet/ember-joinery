@@ -2,7 +2,7 @@
 
 A simple login form.
 
-<Example @name="login-01" @title="login-01" @block={{true}} />
+<Example @name="login-01" @title="login-01" @block={{true}} @blockHeight={{930}} />
 
 ## Installation
 

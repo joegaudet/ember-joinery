@@ -65,10 +65,19 @@ interface ExampleSignature {
      * parts, its `svh` heights and its breakpoints are the frame's, as in upstream's `<iframe>`.
      */
     block?: boolean
+    /**
+     * A block's frame height, in CSS pixels, where upstream's isn't `BLOCK_HEIGHT`: on the Blocks
+     * pages, the height ui.shadcn.com/blocks frames the block at, its registry entry's
+     * `meta.iframeHeight` or 930 (dashboard-01's is 1000).
+     */
+    blockHeight?: number
   }
 }
 
-/** A block preview's height, in CSS pixels: upstream's is 4:2.5 of its width, about this tall. */
+/**
+ * A block preview's height on a docs page, in CSS pixels: upstream's is 4:2.5 of its width,
+ * about this tall.
+ */
 const BLOCK_HEIGHT = 600
 
 /**
@@ -172,7 +181,7 @@ export class Example extends Component<ExampleSignature> {
   }
 
   get frameHeight(): number | undefined {
-    return this.args.block ? BLOCK_HEIGHT : undefined
+    return this.args.block ? (this.args.blockHeight ?? BLOCK_HEIGHT) : undefined
   }
 
   isStyle = (name: string) => name === this.styleName

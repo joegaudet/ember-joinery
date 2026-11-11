@@ -34,6 +34,7 @@ import {
   toast,
 } from '@ember-joinery/ember'
 import type { CheckedState } from '@ember-joinery/primitives/checkbox'
+import { idFor } from '@ember-joinery/primitives/id'
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@ember-joinery/chart'
 import {
   DataTable as DataTableRoot,
@@ -98,7 +99,7 @@ const toggleRow = (row: Row<Features, Section>, value: CheckedState) => row.togg
 const isDone = (status: string) => status === 'Done'
 const isAssigned = (reviewer: string) => reviewer !== 'Assign reviewer'
 const not = (value: boolean) => !value
-const idFor = (id: number, field: string) => `${id}-${field}`
+const fieldId = (id: number, field: string) => `${id}-${field}`
 
 const save = (header: string, event: SubmitEvent) => {
   event.preventDefault()
@@ -185,26 +186,26 @@ const LimitHeader = <template>
 
 const TargetCell: TOC<CellComponentSignature<Features, Section>> = <template>
   <form {{on "submit" (fn save @row.original.header)}}>
-    <Label for={{idFor @row.original.id "target"}} class="sr-only">
+    <Label for={{fieldId @row.original.id "target"}} class="sr-only">
       Target
     </Label>
     <Input
       class="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30"
       @defaultValue={{@row.original.target}}
-      id={{idFor @row.original.id "target"}}
+      id={{fieldId @row.original.id "target"}}
     />
   </form>
 </template>
 
 const LimitCell: TOC<CellComponentSignature<Features, Section>> = <template>
   <form {{on "submit" (fn save @row.original.header)}}>
-    <Label for={{idFor @row.original.id "limit"}} class="sr-only">
+    <Label for={{fieldId @row.original.id "limit"}} class="sr-only">
       Limit
     </Label>
     <Input
       class="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30"
       @defaultValue={{@row.original.limit}}
-      id={{idFor @row.original.id "limit"}}
+      id={{fieldId @row.original.id "limit"}}
     />
   </form>
 </template>
@@ -213,14 +214,14 @@ const ReviewerCell: TOC<CellComponentSignature<Features, Section>> = <template>
   {{#if (isAssigned @row.original.reviewer)}}
     {{@row.original.reviewer}}
   {{else}}
-    <Label for={{idFor @row.original.id "reviewer"}} class="sr-only">
+    <Label for={{fieldId @row.original.id "reviewer"}} class="sr-only">
       Reviewer
     </Label>
     <Select as |s|>
       <s.Trigger
         class="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
         @size="sm"
-        id={{idFor @row.original.id "reviewer"}}
+        id={{fieldId @row.original.id "reviewer"}}
       >
         <s.Value @placeholder="Assign reviewer" />
       </s.Trigger>
@@ -495,7 +496,6 @@ function arrayMove<T>(array: T[], from: number, to: number): T[] {
 }
 
 const PAGE_SIZES = [10, 20, 30, 40, 50]
-let instances = 0
 
 // DataTable (Joinery's, from @ember-joinery/data-table) marks each part for
 // DataTableHarness (dt.head, dt.row, dt.viewOptions…) around upstream's Tabs; it renders
@@ -516,7 +516,8 @@ export default class DataTable extends Component<{ Args: { data: Section[] } }> 
     pageIndex: 0,
     pageSize: 10,
   })
-  sortableId = `dnd-describedby-${++instances}`
+  // What the handles' aria-describedby names: dnd-kit's DndDescribedBy-<id>, one per table.
+  sortableId = idFor(this, 'dnd-describedby')
 
   get dataIds(): SortableId[] {
     return this.data.map(({ id }) => id)

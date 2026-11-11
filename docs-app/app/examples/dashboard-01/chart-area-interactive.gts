@@ -1,5 +1,6 @@
 import Component from '@glimmer/component'
 import { tracked } from '@glimmer/tracking'
+import { modifier } from 'ember-modifier'
 import { Card, Select, ToggleGroup, UseSidebar } from '@ember-joinery/ember'
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@ember-joinery/chart'
 
@@ -126,23 +127,23 @@ const shortDate = (value: unknown) => {
  * `<UseSidebar>`, at the same breakpoint (768px), in the window the dashboard renders in.
  */
 export default class ChartAreaInteractive extends Component {
-  @tracked picked = '90d'
+  @tracked timeRange = '90d'
 
-  // Upstream's effect sets the range to "7d" each time the viewport becomes a phone's. A range
-  // picked after that stands.
-  #mobile = false
-  #forced = false
+  setTimeRange = (value: string) => (this.timeRange = value)
 
-  timeRangeFor = (isMobile: boolean): string => {
-    if (isMobile && !this.#mobile) this.#forced = true
-    this.#mobile = isMobile
-    return this.#forced ? '7d' : this.picked
-  }
+  // Upstream's effect: each time the viewport becomes a phone's, the range becomes "7d"; a
+  // range picked after that stands. The modifier runs as `isMobile` changes, after the render
+  // that read it, and sets the range in the next microtask, as the effect runs after its own.
+  #wasMobile = false
 
-  setTimeRange = (value: string) => {
-    this.#forced = false
-    this.picked = value
-  }
+  followMobile = modifier((_element: HTMLElement, [isMobile]: [boolean]) => {
+    const became = isMobile && !this.#wasMobile
+    this.#wasMobile = isMobile
+    if (!became) return
+    queueMicrotask(() => {
+      if (!this.isDestroying) this.setTimeRange('7d')
+    })
+  })
 
   filteredData = (timeRange: string) =>
     chartData.filter(item => {
@@ -161,8 +162,8 @@ export default class ChartAreaInteractive extends Component {
 
   <template>
     <UseSidebar as |sidebar|>
-      {{#let (this.timeRangeFor sidebar.isMobile) as |timeRange|}}
-        <Card class="@container/card" as |c|>
+      {{#let this.timeRange as |timeRange|}}
+        <Card class="@container/card" {{this.followMobile sidebar.isMobile}} as |c|>
           <c.Header>
             <c.Title>Total Visitors</c.Title>
             <c.Description>

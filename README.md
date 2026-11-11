@@ -7,7 +7,7 @@ on a headless primitives layer, and each with a test harness.
 > [JOINERY_PLAN.md](JOINERY_PLAN.md). The work lands as one stacked PR, and nothing publishes until
 > it has been reviewed and merged. The first release is 1.0.0.
 
-## What it will be
+## What it is
 
 - **Every shadcn/ui component**, written the modern Ember way: `.gts` template-tag components
   with full Glint types, yielded parts (`<Dialog as |d|><d.Trigger>`), state you can control or
@@ -15,8 +15,8 @@ on a headless primitives layer, and each with a test harness.
 - **Headless primitives** (`@ember-joinery/primitives`): the unstyled, accessible behaviour
   underneath, including everything [ember-primitives](https://github.com/universal-ember/ember-primitives)
   offers.
-- **shadcn's theme tokens**, so any shadcn theme pastes in unchanged. The CSS ships compiled, so
-  Tailwind is optional.
+- **All eight of shadcn's styles and its base colours**, with its theme tokens, so any shadcn
+  theme pastes in unchanged. The CSS ships compiled, so Tailwind is optional.
 - **A harness for every component** (`@ember-joinery/test-support`). Tests drive components the
   way users do, and check ARIA as they go.
 - **Accessible:** WCAG 2.2 AA, WAI-ARIA keyboard patterns, and right-to-left layouts.
@@ -26,28 +26,72 @@ on a headless primitives layer, and each with a test harness.
   a rich-text editor, calendars and date pickers on ember-power-calendar, masked and phone
   inputs, and a [Formwright](https://joegaudet.com/ember-formwright/) bridge.
 
+## Installation
+
+```bash
+pnpm add @ember-joinery/ember lucide
+pnpm add --save-dev @ember-joinery/test-support
+```
+
+Import the theme's tokens and the components' CSS once, in `app/app.ts` (or `app/app.js`):
+
+```ts
+import '@ember-joinery/ember/tokens.css'
+import '@ember-joinery/ember/joinery.css'
+```
+
+Classic ember-cli apps also need `ember-auto-import` 2 and `ember-template-imports`. Tailwind
+apps put Joinery's layer between Tailwind's `base` and `components` and add its
+`tailwind.css`; the guide's [Installation](https://joegaudet.com/ember-joinery/guide/getting-started/installation.md)
+page has the steps for each.
+
+## Usage
+
 ```gts
-import { Dialog, Button, Input } from '@ember-joinery/ember'
+import { on } from '@ember/modifier'
+import { Button, Dialog, Field, Input, Label } from '@ember-joinery/ember'
 
 <template>
+  {{! uncontrolled; pass @open and @onOpenChange to control it }}
   <Dialog @name="edit-profile" as |d|>
-    <d.Trigger>Edit profile</d.Trigger>
+    <Button @variant="outline" {{d.trigger}}>Edit profile</Button>
     <d.Content>
       <d.Header>
         <d.Title>Edit profile</d.Title>
         <d.Description>Make changes to your profile here.</d.Description>
       </d.Header>
-      <Input @name="name" @value={{this.name}} @onValueChange={{this.setName}} />
+      <Field>
+        <Label for="name">Name</Label>
+        <Input id="name" @name="name" @value={{this.name}} @onValueChange={{this.setName}} />
+      </Field>
       <d.Footer>
-        <d.Close>Cancel</d.Close>
-        <Button>Save changes</Button>
+        <Button @variant="outline" {{d.close}}>Cancel</Button>
+        <Button @name="save" {{on "click" this.save}}>Save changes</Button>
       </d.Footer>
     </d.Content>
   </Dialog>
 </template>
 ```
 
-## Packages (planned)
+And test it with its harness, the way a user would use it:
+
+```ts
+import { ButtonHarness, DialogHarness, InputHarness, child } from '@ember-joinery/test-support'
+
+class EditProfile extends DialogHarness {
+  static named = 'edit-profile'
+  @child(InputHarness, 'name') declare name: InputHarness
+  @child(ButtonHarness, 'save') declare save: ButtonHarness
+}
+
+const dialog = new EditProfile()
+await dialog.open()
+await dialog.name.fillIn('Ada')
+await dialog.save.click()
+assert.dom(dialog.trigger).isFocused() // focus went back
+```
+
+## Packages
 
 | Package                         |                                                                                    |
 | ------------------------------- | ---------------------------------------------------------------------------------- |
@@ -64,12 +108,15 @@ import { Dialog, Button, Input } from '@ember-joinery/ember'
 | `@ember-joinery/maskito`        | Masked input and phone input (country picker, E.164), on Maskito                   |
 | `@ember-joinery/formwright`     | Joinery's inputs as [Formwright](https://joegaudet.com/ember-formwright/) controls |
 
-These will support Ember 6.12 LTS and 7.x, in Vite (Embroider) apps and classic ember-cli apps.
+They support Ember 6.12 LTS and 7.x, in Vite (Embroider) apps and classic ember-cli apps. The
+guide's [API reference](https://joegaudet.com/ember-joinery/guide/reference/index.md) documents
+each, generated from its types.
 
 ## Links
 
 - Site and live demo: https://joegaudet.com/ember-joinery/ (not live yet)
-- Guide: https://joegaudet.com/ember-joinery/guide/ (not live yet)
+- Guide: https://joegaudet.com/ember-joinery/guide/ (not live yet): getting started, every
+  component with its examples, the theme builder and the API reference
 - Sibling projects: [Formwright](https://joegaudet.com/ember-formwright/) (forms) and
   [real-enums](https://joegaudet.com/real-enums/).
 

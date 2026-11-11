@@ -1226,7 +1226,9 @@ import '@ember-joinery/ember/joinery.css'</code></pre>
           its <code>:root</code> and <code>.dark</code> blocks go in your own CSS, after
           <code>tokens.css</code>, and win, because Joinery's rules sit in the
           <code>joinery</code> cascade layer. See
-          <a href="guide/getting-started/theming.md">Theming</a>.
+          <a href="guide/getting-started/theming.md">Theming</a>, or make one in the guide's
+          <a href="guide/getting-started/theme-builder.md">Theme Builder</a>: pick a style and a
+          base colour, edit any token, see every component follow, and copy the CSS.
         </p>
       </section>
 
@@ -1742,12 +1744,9 @@ export class EditProfile extends DialogHarness {
         <p>
           The attributes render in production, as Formwright's do, and are public API. Each
           component's guide page lists its harness's members under Testing (see
-          <a href="guide/components/dialog.md">Dialog's</a>), and the package's
-          <a
-            href="https://github.com/joegaudet/ember-joinery/tree/main/packages/test-support#readme"
-            >README</a
-          >
-          covers the base class, for writing harnesses of your own.
+          <a href="guide/components/dialog.md">Dialog's</a>), and the guide's
+          <a href="guide/getting-started/testing.md">Testing</a> page covers page objects, the
+          helpers and the base class, for writing harnesses of your own.
         </p>
       </section>
 
@@ -1820,7 +1819,9 @@ export class EditProfile extends DialogHarness {
           The guide has a page for each component, laid out like its ui.shadcn.com page, with every
           upstream example ported, live, and tested with its harness. Each example switches style,
           base colour, radius, light and dark, and right to left, shows itself at a phone's or a
-          tablet's width, and has Template and Test tabs to copy from.
+          tablet's width, and has Template and Test tabs to copy from. A theme builder shows every
+          component in the theme you make, and the API reference is generated from each package's
+          types.
         </p>
         <figure class="guide-shot">
           <img

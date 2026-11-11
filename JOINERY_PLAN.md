@@ -369,8 +369,9 @@ current counts).
 ## Guide (`docs-app/`, Kolay)
 
 - **Sections:** Getting started (Introduction, Installation for Vite, classic and Tailwind apps;
-  Theming; Dark mode; RTL; Testing) · Components (A–Z, like ui.shadcn.com) · Primitives (headless
-  use and the utilities) · Charts · Blocks · Formwright · Reference (`<APIDocs>`).
+  Theming; Styles; the theme builder; Dark mode; RTL; Testing) · Components (A–Z, like
+  ui.shadcn.com) · Primitives (headless use and the utilities) · Charts · Blocks · Formwright ·
+  Reference (`<APIDocs>`, a page per package, generated from its types).
 - **A component page:** a preview, installation and import, usage, Examples (each upstream
   example in Formwright's `<Example>` frame with Preview, Template and Test tabs), API (args,
   yields and data attributes for each part), keyboard interactions, accessibility, Testing (the
@@ -378,7 +379,8 @@ current counts).
 - **The example frame**, as in Formwright, plus a theme switcher (base colour, radius,
   light/dark), an RTL toggle, and width presets (375, 768, 1440). `@dir="rtl"` shows one of
   upstream's right-to-left (`*-rtl`) examples, as the parity route's `?dir=rtl` does.
-- **Theme builder page:** edit the tokens, watch every component update live, and copy the CSS.
+- **Theme builder page:** edit the tokens, watch every component update live (each component
+  page's first example), and copy the CSS.
 - The acceptance test renders every page (its `PAGES` come from the templates directory), and
   every example has `docs-app/tests/examples/<name>-test.gts`, written with harnesses and ending
   in an axe audit.

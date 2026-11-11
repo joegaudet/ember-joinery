@@ -36,6 +36,10 @@ blocks). Each maps upstream example ids to the Joinery guide examples that port 
   Joinery's styles is, so comparing the card would only measure that difference, and could hide
   a broken chart under the threshold it needs. The tooltip charts, full width, where that card
   makes upstream's chart narrower, compare their tooltip (`.recharts-tooltip-wrapper`).
+- `wait`, in milliseconds (up to 10000), holds both screenshots back that long after the page is
+  ready, for an example that changes on a timer of its own: `progress-demo` moves its bar from
+  13% to 66% half a second after it renders, so it waits a second. Animations are off, so once
+  the timer has fired both sides show where it ends.
 - `skip` marks an example that can't be compared, with the reason. It still counts as mapped.
 
 An example shown on two pages is mapped once, in either page's file. `pnpm parity` checks every

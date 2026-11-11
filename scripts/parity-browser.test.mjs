@@ -377,6 +377,39 @@ test(
 )
 
 test(
+  'a wait holds the screenshots back past a timer the example starts',
+  { skip, timeout: 60_000 },
+  async () => {
+    // As progress-demo moves its bar half a second after it renders, the reference page draws
+    // its button without a border, then adds it 1.5s later; the guide draws the bordered one at
+    // once. Caught when the page is ready, the two differ; after a 2s wait, they match.
+    const { code, results } = await run(['--themes', 'light'], {
+      map: {
+        'button-demo': { example: 'same', wait: 2000 },
+        'button-outline': 'same',
+      },
+      files: {
+        'reference/index.html': PAGE(`
+          setTimeout(() => {
+            document.body.innerHTML = stage(name, button('no-border'))
+            document.documentElement.dataset.parityReady = 'true'
+            setTimeout(() => {
+              document.querySelector('.button').classList.remove('no-border')
+            }, 1500)
+          }, 50)
+        `),
+      },
+    })
+    assert.equal(code, 1)
+    const result = byKey(results)
+    const waited = result['button-demo light']
+    assert.equal(waited.status, 'pass', waited.error ?? 'after the timer, the two match')
+    assert.equal(waited.ratio, 0)
+    assert.equal(result['button-outline light'].status, 'fail', 'before it, they differ')
+  },
+)
+
+test(
   "while held, a page's resize and media query listeners hear nothing, and after, they do",
   { skip, timeout: 60_000 },
   async () => {

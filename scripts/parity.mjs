@@ -110,7 +110,18 @@ export function layoutFor(id, inventory) {
   return { dir: 'ltr', align: starts ? 'start' : 'center' }
 }
 
-const ENTRY_KEYS = new Set(['example', 'threshold', 'reason', 'fullWidth', 'region', 'skip'])
+const ENTRY_KEYS = new Set([
+  'example',
+  'threshold',
+  'reason',
+  'fullWidth',
+  'region',
+  'wait',
+  'skip',
+])
+
+/** The longest `wait` a map entry may ask for, in milliseconds. */
+export const MAX_WAIT = 10_000
 
 const isFraction = value => typeof value === 'number' && value > 0 && value < 1
 
@@ -136,8 +147,10 @@ export function thresholdFor(entry, theme) {
  * `{ example, threshold?, reason?, fullWidth? }`, or `{ skip: reason }` for an example that can't
  * be compared (it still counts as mapped). A threshold is one fraction for both themes, or
  * `{ "light": …, "dark": … }`, and needs a reason. `fullWidth: true` stretches the example across
- * both stages, as upstream widens it, and `region` (a CSS selector) compares only the first
- * element it matches on each page (see parity/map/README.md).
+ * both stages, as upstream widens it, `region` (a CSS selector) compares only the first
+ * element it matches on each page, and `wait` (milliseconds) holds both screenshots back that
+ * long after the page is ready, for an example that changes on a timer of its own (see
+ * parity/map/README.md).
  */
 export function validateMapFile(component, json, inventory) {
   const errors = []
@@ -203,6 +216,14 @@ export function validateMapFile(component, json, inventory) {
     if (entry.region !== undefined && (typeof entry.region !== 'string' || !entry.region.trim())) {
       errors.push(`${where}: "${id}": "region" is a CSS selector for the element to compare`)
     }
+    if (
+      entry.wait !== undefined &&
+      !(Number.isInteger(entry.wait) && entry.wait > 0 && entry.wait <= MAX_WAIT)
+    ) {
+      errors.push(
+        `${where}: "${id}": "wait" is a whole number of milliseconds, from 1 to ${MAX_WAIT}`,
+      )
+    }
     entries.push({
       id,
       component,
@@ -211,6 +232,7 @@ export function validateMapFile(component, json, inventory) {
       ...(entry.reason && { reason: entry.reason }),
       ...(entry.fullWidth === true && { fullWidth: true }),
       ...(typeof entry.region === 'string' && entry.region.trim() && { region: entry.region }),
+      ...(Number.isInteger(entry.wait) && entry.wait > 0 && { wait: entry.wait }),
     })
   }
   return { entries, errors }
@@ -811,9 +833,10 @@ async function settleImages(timeout) {
 
 /**
  * Opens a page, waits until it has rendered, and screenshots it: the whole page, or with
- * `region`, only the first element that selector matches.
+ * `region`, only the first element that selector matches. With `wait`, it waits that many
+ * milliseconds more first, past a timer the example starts as it renders.
  */
-async function screenshot(context, url, { theme, ready, fontsUrl, fonts, region }) {
+async function screenshot(context, url, { theme, ready, fontsUrl, fonts, region, wait }) {
   const page = await context.newPage()
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
@@ -841,6 +864,12 @@ async function screenshot(context, url, { theme, ready, fontsUrl, fonts, region 
       return fonts.filter((_font, index) => !faces[index].length).map(font => font.family)
     }, fonts)
     if (unloaded.length) throw new Error(`these fonts didn't load: ${unloaded.join(', ')}`)
+    if (wait) {
+      await page.waitForTimeout(wait)
+      await page.evaluate(
+        () => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))),
+      )
+    }
     const options = { fullPage: true, animations: 'disabled', caret: 'hide' }
     let clip
     if (region) {
@@ -1023,6 +1052,7 @@ export async function parity(options, { log = console.log, root = repoRoot, font
             fontsUrl,
             fonts,
             region: entry.region,
+            wait: entry.wait,
           })
           writeFileSync(join(reportDir, file('upstream')), upstream)
           const joinery = await screenshot(context, urls.joinery, {
@@ -1031,6 +1061,7 @@ export async function parity(options, { log = console.log, root = repoRoot, font
             fontsUrl,
             fonts,
             region: entry.region,
+            wait: entry.wait,
           })
           writeFileSync(join(reportDir, file('joinery')), joinery)
           const comparison = await comparePngs(upstream, joinery)

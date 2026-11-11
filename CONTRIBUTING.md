@@ -446,7 +446,9 @@ when they are more than about 8 levels of grey apart, so a 1px `--border` line o
 fill registers; pixelmatch still leaves anti-aliased edges out. A diff over the threshold (1% of
 the box's pixels) fails, unless the map gives that example its own threshold (one for both
 themes, or one for each) along with a written reason, or compares only a `region` of it (a
-CSS selector, such as the chart inside a charts gallery card). Both pages showing nothing but
+CSS selector, such as the chart inside a charts gallery card). An example that changes on a timer
+of its own (`progress-demo`'s bar moves half a second after it renders) gets a `wait` in the
+map, which holds both screenshots back past it. Both pages showing nothing but
 the background is an error. The report, with the compared areas and their diff side by side, is
 written to `parity-report/index.html` (CI uploads it from `parity.yml`).
 

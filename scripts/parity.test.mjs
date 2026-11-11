@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path'
 import { PNG } from 'pngjs'
 import {
   DEFAULT_THRESHOLD,
+  MAX_WAIT,
   PIXEL_TOLERANCE,
   comparePngs,
   fontMounts,
@@ -241,6 +242,35 @@ test('validateMapFile takes a region to compare, as a CSS selector', () => {
       'parity/map/chart.json: "chart-area-default": "region" is a CSS selector for the element to compare',
     ],
   )
+})
+
+test('validateMapFile takes a wait, in whole milliseconds up to MAX_WAIT', () => {
+  const { entries, errors } = validateMapFile(
+    'button',
+    { examples: { 'button-demo': { example: 'button-demo', wait: 1000 } } },
+    INVENTORY,
+  )
+  assert.deepEqual(errors, [])
+  assert.equal(entries[0].wait, 1000)
+  assert.equal(
+    validateMapFile('button', { examples: { 'button-demo': 'button-demo' } }, INVENTORY).entries[0]
+      .wait,
+    undefined,
+    'no wait unless the map asks for one',
+  )
+  for (const wait of [0, -5, 1.5, '1000', MAX_WAIT + 1]) {
+    assert.deepEqual(
+      validateMapFile(
+        'button',
+        { examples: { 'button-demo': { example: 'button-demo', wait } } },
+        INVENTORY,
+      ).errors,
+      [
+        `parity/map/button.json: "button-demo": "wait" is a whole number of milliseconds, from 1 to ${MAX_WAIT}`,
+      ],
+      `wait: ${JSON.stringify(wait)}`,
+    )
+  }
 })
 
 test('validateMapFile reports what is wrong with an entry', () => {

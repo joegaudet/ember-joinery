@@ -1,9 +1,7 @@
 {
-  "$comment": "Every Progress example is ported. progress-label and progress-rtl name the bar with aria-labelledby, which upstream's leave off: a FieldLabel's for doesn't name a progressbar.",
+  "$comment": "Every Progress example is ported. progress-label and progress-rtl name the bar with aria-labelledby, which upstream's leave off: a FieldLabel's for doesn't name a progressbar. progress-demo moves from 13% to 66% half a second after it renders, on each side, so both screenshots wait a second, past that timer.",
   "examples": {
-    "progress-demo": {
-      "skip": "It moves from 13% to 66% half a second after it renders, on each side, so a screenshot catches whichever the clock gives. Joinery's example is progress-demo; the bar is compared in progress-label, progress-controlled and progress-rtl."
-    },
+    "progress-demo": { "example": "progress-demo", "wait": 1000 },
     "progress-controlled": "progress-controlled",
     "progress-label": "progress-label",
     "progress-rtl": "progress-rtl"

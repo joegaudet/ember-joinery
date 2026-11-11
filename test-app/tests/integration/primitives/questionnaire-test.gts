@@ -1,5 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
 import { click, focus, render, settled } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
@@ -63,9 +64,13 @@ module('Integration | primitives | questionnaire', function (hooks) {
       </template>,
     )
     const q = new QuestionnaireHarness('q')
-    assert.dom(q.form).hasTagName('form').doesNotHaveAttribute('class')
+    // Before 7.1, Ember gives an element rendered through `As` `ember-view`; rendering() leaves
+    // that out.
+    assert.dom(q.form).hasTagName('form')
+    assert.deepEqual(rendering(q.form).classes, [], 'the form has no classes')
     assert.dom(q.form).doesNotHaveAttribute('data-slot', 'headless: no styled slots')
-    assert.dom(q.item()).hasTagName('fieldset').doesNotHaveAttribute('class')
+    assert.dom(q.item()).hasTagName('fieldset')
+    assert.deepEqual(rendering(q.item()).classes, [], 'nor has an item')
     assert.dom(q.item().querySelector('legend')).hasText('What should we prototype next?')
     assert.strictEqual(q.progressText, 'Question 1 of 2')
     assert.strictEqual(q.shortcut('delegation'), 'A')

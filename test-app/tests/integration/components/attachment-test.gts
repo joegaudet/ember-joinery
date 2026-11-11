@@ -1,5 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
 import { click, render, settled } from '@ember/test-helpers'
 import { on } from '@ember/modifier'
 import { tracked } from '@glimmer/tracking'
@@ -546,8 +547,10 @@ module('Integration | components | attachment', function (hooks) {
     )
     const components = new AttachmentHarness('components')
     const modifiers = new AttachmentHarness('modifiers')
+    // Before 7.1, Ember gives a part rendered through `As` `ember-view` too; rendering() leaves
+    // that out.
     const describe = (element: HTMLElement) => ({
-      classes: [...element.classList].sort(),
+      classes: rendering(element).classes,
       slot: element.getAttribute('data-slot'),
       part: element.getAttribute('data-test-jn-part'),
       variant: element.getAttribute('data-variant'),

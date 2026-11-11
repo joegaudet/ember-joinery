@@ -1,5 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
+import { rendering } from 'test-app/tests/helpers/rendering'
 import { render } from '@ember/test-helpers'
 import { on } from '@ember/modifier'
 import { htmlSafe } from '@ember/template'
@@ -128,7 +129,10 @@ module('Integration | primitives | message-scroller', function (hooks) {
       const chat = new MessageScrollerHarness('chat')
       await chat.settle()
       assert.strictEqual(chat.element.parentElement?.style.height, '300px', 'the root is its child')
-      assert.dom(chat.element).doesNotHaveAttribute('data-slot').doesNotHaveAttribute('class')
+      assert.dom(chat.element).doesNotHaveAttribute('data-slot')
+      // Before 7.1, Ember gives an element rendered through `As` `ember-view`; rendering() leaves
+      // that out.
+      assert.deepEqual(rendering(chat.element).classes, [], 'no classes')
       assert
         .dom(chat.viewport)
         .hasAttribute('role', 'region')

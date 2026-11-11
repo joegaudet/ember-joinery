@@ -7,6 +7,7 @@ import { DirectionProvider } from '@ember-joinery/primitives/direction'
 import {
   Button,
   ButtonGroup,
+  Combobox,
   DropdownMenu,
   Icon,
   Input,
@@ -20,6 +21,7 @@ import {
 import {
   ButtonGroupHarness,
   ButtonHarness,
+  ComboboxHarness,
   DropdownMenuHarness,
   InputHarness,
   SelectHarness,
@@ -414,6 +416,38 @@ module('Integration | components | button-group', function (hooks) {
       trigger.getBoundingClientRect().width < input.getBoundingClientRect().width,
       'w-fit: the trigger is as wide as its value',
     )
+    await a11yAudit()
+  })
+
+  test("a combobox's input joins the group through the combobox's root", async function (assert) {
+    const frameworks = ['Next.js', 'SvelteKit', 'Nuxt.js']
+    await render(
+      <template>
+        <ButtonGroup aria-label="Framework">
+          <Button @variant="outline" @name="pick">Pick</Button>
+          <Combobox @items={{frameworks}} as |c|>
+            <c.Input placeholder="Select a framework" />
+            <c.Content>
+              <c.Empty>No items found.</c.Empty>
+              <c.List as |item|>
+                <c.Item @value={{item}}>{{item}}</c.Item>
+              </c.List>
+            </c.Content>
+          </Combobox>
+        </ButtonGroup>
+      </template>,
+    )
+    const pick = new ButtonHarness('pick').element
+    const combobox = new ComboboxHarness()
+    // Base UI's root renders no element, so upstream's input group is the group's child.
+    const group = combobox.input!.closest('[data-slot="input-group"]')!
+    assert.strictEqual(corners(pick).topRight, 0, 'the part before the root squares its end')
+    assert.strictEqual(corners(group).topLeft, 0, 'the input group squares its start')
+    assert.strictEqual(getComputedStyle(group).borderLeftWidth, '0px', 'one border between them')
+    assert.strictEqual(corners(group).topRight, 10, 'the last part rounds its end')
+
+    await combobox.open()
+    assert.notStrictEqual(corners(combobox.content!).topLeft, 0, "the list's corners are its own")
     await a11yAudit()
   })
 

@@ -48,9 +48,9 @@
 
 /*
  * Through an overlay's root (edited by hand). Radix's Popover, Tooltip, Hover Card, Dialog,
- * Sheet, Select and menu roots, and vaul's Drawer, render no element, so upstream's trigger (a
- * dropdown's or a popover's button, a select's trigger, a tooltip's button) is the group's own
- * child, which the rules above and each sheet's rules join to its neighbours. Joinery's roots
+ * Sheet, Select and menu roots, vaul's Drawer and Base UI's Combobox render no element, so
+ * upstream's trigger (a dropdown's or a popover's button, a select's trigger, a tooltip's
+ * button, a combobox's input group) is the group's own child, which the rules above and each sheet's rules join to its neighbours. Joinery's roots
  * are an element with display: contents (`data-test-jn` names each; a tooltip provider is
  * `data-jn-tooltip-provider`), which those rules reach instead. So these restate them one root
  * down (two, for a tooltip in a provider), on the root's children but for its content in the
@@ -71,7 +71,8 @@
     [data-test-jn='drawer'],
     [data-test-jn='dropdown-menu'],
     [data-test-jn='context-menu'],
-    [data-test-jn='select']
+    [data-test-jn='select'],
+    [data-test-jn='combobox']
   )
   > :where(:not([popover], dialog)):focus-visible,
 :where(.jn-button-group)
@@ -100,7 +101,8 @@
     [data-test-jn='drawer'],
     [data-test-jn='dropdown-menu'],
     [data-test-jn='context-menu'],
-    [data-test-jn='select']
+    [data-test-jn='select'],
+    [data-test-jn='combobox']
   ):not(:first-child)
   > :where(:not([popover], dialog)),
 :where(.jn-button-group-orientation-horizontal)
@@ -121,7 +123,8 @@
     [data-test-jn='drawer'],
     [data-test-jn='dropdown-menu'],
     [data-test-jn='context-menu'],
-    [data-test-jn='select']
+    [data-test-jn='select'],
+    [data-test-jn='combobox']
   ):not(:last-child)
   > :where(:not([popover], dialog)),
 :where(.jn-button-group-orientation-horizontal)
@@ -142,7 +145,8 @@
     [data-test-jn='drawer'],
     [data-test-jn='dropdown-menu'],
     [data-test-jn='context-menu'],
-    [data-test-jn='select']
+    [data-test-jn='select'],
+    [data-test-jn='combobox']
   ):not(:first-child)
   > :where(:not([popover], dialog)),
 :where(.jn-button-group-orientation-vertical)
@@ -163,7 +167,8 @@
     [data-test-jn='drawer'],
     [data-test-jn='dropdown-menu'],
     [data-test-jn='context-menu'],
-    [data-test-jn='select']
+    [data-test-jn='select'],
+    [data-test-jn='combobox']
   ):not(:last-child)
   > :where(:not([popover], dialog)),
 :where(.jn-button-group-orientation-vertical)
@@ -193,7 +198,8 @@
     [data-test-jn='drawer'],
     [data-test-jn='dropdown-menu'],
     [data-test-jn='context-menu'],
-    [data-test-jn='select']
+    [data-test-jn='select'],
+    [data-test-jn='combobox']
   ):not(
     :has(
       ~ [data-slot],
@@ -208,6 +214,7 @@
         [data-test-jn='dropdown-menu'],
         [data-test-jn='context-menu'],
         [data-test-jn='select'],
+        [data-test-jn='combobox'],
         [data-jn-tooltip-provider]
       )
     )
@@ -228,6 +235,7 @@
         [data-test-jn='dropdown-menu'],
         [data-test-jn='context-menu'],
         [data-test-jn='select'],
+        [data-test-jn='combobox'],
         [data-jn-tooltip-provider]
       )
     )
@@ -268,7 +276,8 @@
     [data-test-jn='drawer'],
     [data-test-jn='dropdown-menu'],
     [data-test-jn='context-menu'],
-    [data-test-jn='select']
+    [data-test-jn='select'],
+    [data-test-jn='combobox']
   ):not(
     :has(
       ~ [data-slot],
@@ -283,6 +292,7 @@
         [data-test-jn='dropdown-menu'],
         [data-test-jn='context-menu'],
         [data-test-jn='select'],
+        [data-test-jn='combobox'],
         [data-jn-tooltip-provider]
       )
     )
@@ -303,6 +313,7 @@
         [data-test-jn='dropdown-menu'],
         [data-test-jn='context-menu'],
         [data-test-jn='select'],
+        [data-test-jn='combobox'],
         [data-jn-tooltip-provider]
       )
     )
@@ -345,6 +356,7 @@
       [data-test-jn='dropdown-menu'],
       [data-test-jn='context-menu'],
       [data-test-jn='select'],
+      [data-test-jn='combobox'],
       [data-jn-tooltip-provider]
     )
   ) {
@@ -364,6 +376,7 @@
       [data-test-jn='dropdown-menu'],
       [data-test-jn='context-menu'],
       [data-test-jn='select'],
+      [data-test-jn='combobox'],
       [data-jn-tooltip-provider]
     )
   ) {

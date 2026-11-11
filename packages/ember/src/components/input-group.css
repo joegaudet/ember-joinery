@@ -60,8 +60,8 @@
 /*
  * Through an overlay's root (edited by hand). Each sheet pulls an inline addon toward the
  * group's edge when it holds a button directly (`has-[>button]:-ms-*`, `has-[>button]:-me-*`).
- * Radix's Popover, Tooltip, Hover Card, Dialog, Sheet, Select and menu roots render no element,
- * so upstream's trigger (a date picker's calendar button, a tooltip's or dropdown's button) is
+ * Radix's Popover, Tooltip, Hover Card, Dialog, Sheet, Select and menu roots (and Base UI's
+ * Combobox) render no element, so upstream's trigger (a date picker's calendar button, a tooltip's or dropdown's button) is
  * that button. Joinery's roots are an element with display: contents (`data-test-jn` names
  * each; a tooltip provider is `data-jn-tooltip-provider`), so this restates the rule one or two
  * such roots down, at the sheet's weight (0,0,1), under the `style-<name>` variant build-css.mjs
@@ -79,7 +79,8 @@
       [data-test-jn='drawer'],
       [data-test-jn='dropdown-menu'],
       [data-test-jn='context-menu'],
-      [data-test-jn='select']
+      [data-test-jn='select'],
+      [data-test-jn='combobox']
     )
     > button,
   > :where([data-jn-tooltip-provider]) > :where([data-test-jn='tooltip']) > button
@@ -118,7 +119,8 @@
       [data-test-jn='drawer'],
       [data-test-jn='dropdown-menu'],
       [data-test-jn='context-menu'],
-      [data-test-jn='select']
+      [data-test-jn='select'],
+      [data-test-jn='combobox']
     )
     > button,
   > :where([data-jn-tooltip-provider]) > :where([data-test-jn='tooltip']) > button
@@ -169,7 +171,8 @@
         [data-test-jn='drawer'],
         [data-test-jn='dropdown-menu'],
         [data-test-jn='context-menu'],
-        [data-test-jn='select']
+        [data-test-jn='select'],
+        [data-test-jn='combobox']
       )
       > [data-align='inline-start'],
     > :where([data-jn-tooltip-provider])
@@ -211,7 +214,8 @@
         [data-test-jn='drawer'],
         [data-test-jn='dropdown-menu'],
         [data-test-jn='context-menu'],
-        [data-test-jn='select']
+        [data-test-jn='select'],
+        [data-test-jn='combobox']
       )
       > [data-align='inline-end'],
     > :where([data-jn-tooltip-provider])

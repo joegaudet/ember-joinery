@@ -309,13 +309,13 @@ select's list, `min-w-(--radix-select-trigger-width)`) calls `ignoreROError()` f
 "ResizeObserver loop" message would otherwise fail the test.
 
 **Through an overlay's root.** Radix's overlay roots (Popover, Tooltip, Dialog, Select, the
-menus) render no element, so upstream's trigger is its parent's child, and a rule upstream
+menus) and Base UI's Combobox render no element, so upstream's trigger is its parent's child, and a rule upstream
 writes for that child (a Field's `*:w-full`, an Input Group addon's `has-[>button]` margin)
 reaches it. Joinery's root is an element with `display: contents` (its `data-test-jn` names
 it), which such a rule reaches instead, so restate the rule one root down, by hand, at its
 weight: `select.css` does for a Field's, `trace.css` for a trigger around a Trace's line,
 `input-group.css` for an addon's, and `button-group.css` for a group's parts (a dropdown's,
-popover's, select's or tooltip's trigger as a part), each style's utilities under its
+popover's, select's or tooltip's trigger, or a combobox's input, as a part), each style's utilities under its
 `style-<name>` variant (see "Porting a component", step 3), with a test that holds the copy to
 the sheets.
 

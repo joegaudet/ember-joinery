@@ -231,7 +231,8 @@ give `@as` a tag, or put the `text` modifier on your own component:
 ### Overlays in a group
 
 A trigger can be a group's part: a Dropdown Menu's, a Popover's, a Select's or a Tooltip's, as in
-the examples above. Radix's overlay roots render no element, so upstream's trigger is the group's
+the examples above, and so can a Combobox's input. Radix's overlay roots (and Base UI's Combobox)
+render no element, so upstream's trigger is the group's
 own child; a Joinery overlay's root is an element with `display: contents` around its trigger, so
 it adds no box, and `button-group.css` restates the group's rules one root down, so the trigger
 joins its neighbours as upstream's does. The same goes for an Input Group's addon that is an

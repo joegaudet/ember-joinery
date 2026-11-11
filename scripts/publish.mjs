@@ -44,6 +44,7 @@ import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
+import { LEGAL_FILES } from './legal-files.mjs'
 import { preflight, publishAll, succeeded } from './publish-plan.mjs'
 
 const DRY_RUN = process.argv.includes('--dry-run')
@@ -126,6 +127,12 @@ const publish = pkg => {
       `workspace protocol survived packing: ${unresolved.map(([n, r]) => `${n}@${r}`).join(', ')}`,
     )
   }
+
+  // The package's prepack copies the root's licence and notices in (scripts/legal-files.mjs);
+  // a tarball without them would ship the ported code without the notices its licences ask for.
+  const contents = execFileSync('tar', ['-tzf', packed], { encoding: 'utf8' }).split('\n')
+  const missing = LEGAL_FILES.filter(file => !contents.includes(`package/${file}`))
+  if (missing.length) throw new Error(`the tarball has no ${missing.join(' or ')}`)
 
   const args = ['publish', packed, '--access', 'public']
   if (inCI) args.push('--provenance')

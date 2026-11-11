@@ -514,6 +514,13 @@ neither OIDC nor provenance; its header explains. `node scripts/publish.mjs --dr
 checks every package without publishing anything (it asks the registry what is already there, so
 it needs the network).
 
+Every tarball carries the root's `LICENSE.md` and `NOTICE` (the notices of shadcn/ui,
+ember-primitives, sonner, recharts and the rest of what Joinery ports): each package lists both in
+its `files`, and its `prepack` copies them in from the root (`scripts/legal-files.mjs`), so the
+root files are the only ones to edit and the copies are gitignored. `publish.mjs` refuses a
+tarball without them, and `scripts/legal-files.test.mjs` fails for a package that doesn't list
+and copy both, so give a new package the same `files` and `prepack`.
+
 **A brand-new package** can't publish through OIDC, because npm only configures a trusted
 publisher for a name that already exists. Its first release goes out once through
 `bootstrap-publish.yml`, behind the `npm-bootstrap` environment, using a short-lived `NPM_TOKEN`

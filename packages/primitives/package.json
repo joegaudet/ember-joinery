@@ -41,13 +41,15 @@
     "declarations",
     "dist",
     "README.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "LICENSE.md",
+    "NOTICE"
   ],
   "scripts": {
     "build": "node ../../scripts/gen-barrels.mjs . && rm -rf declarations && rollup --config",
     "start": "node ../../scripts/gen-barrels.mjs . && rm -rf declarations && rollup --config --watch",
     "typecheck": "node ../../scripts/gen-barrels.mjs . && ember-tsc --noEmit",
-    "prepack": "node ../../scripts/gen-barrels.mjs . && rm -rf declarations && rollup --config"
+    "prepack": "node ../../scripts/gen-barrels.mjs . && node ../../scripts/legal-files.mjs . && rm -rf declarations && rollup --config"
   },
   "dependencies": {
     "@ember/test-waiters": "^4.1.2",

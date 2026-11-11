@@ -25,3 +25,6 @@ packages/*/src/test-support/index.ts
 # writes on every build; the hand-ordered sections keep theirs.
 docs-app/app/templates/*/meta.json
 !docs-app/app/templates/getting-started/meta.json
+# Each package's prepack copies the root's LICENSE.md and NOTICE in (scripts/legal-files.mjs).
+packages/*/LICENSE.md
+packages/*/NOTICE

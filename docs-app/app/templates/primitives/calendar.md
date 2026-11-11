@@ -25,10 +25,10 @@ import { Calendar } from '@ember-joinery/primitives/calendar'
 
 - **No date library.** Days go in and out as `Date`s at local midnight, a range as
   `{ from, to }`, and day arithmetic is native. Names, numbers and week starts come from `Intl`
-  in `@locale` (`en-US` by default, as DayPicker's), so `@locale="es"` starts the week on a
-  Monday and names it `lunes`. `@calendar` takes any calendar `Intl` knows (`persian`,
-  `islamic-umalqura`, `hebrew`…), whose months are worked out from `Intl`'s own reading of each
-  day; `@numerals` the digits (`arabext`).
+  in `@locale` (the app's [translator](/getting-started/i18n.md)'s, else `en-US`, as
+  DayPicker's), so `@locale="es"` starts the week on a Monday and names it `lunes`. `@calendar`
+  takes any calendar `Intl` knows (`persian`, `islamic-umalqura`, `hebrew`…), whose months are
+  worked out from `Intl`'s own reading of each day; `@numerals` the digits (`arabext`).
 - **Selection.** `@mode` is `single`, `multiple` or `range`. `@value` with `@onValueChange`
   controls it (even unset, as DayPicker's `selected` with `onSelect`); `@defaultValue`, or
   neither, leaves it to the calendar. `@required`, `@min`, `@max` and `@excludeDisabled` are
@@ -51,7 +51,9 @@ import { Calendar } from '@ember-joinery/primitives/calendar'
   shows.
 
 The state behind it is `CalendarState`, which the styled Calendar renders from too: build one
-with `new CalendarState(() => this.args)` for markup of your own. The module also exports its
+with `new CalendarState(() => this.args, () => this.args.classNames, this)` for markup of your
+own (the component, last, is where its labels and locale find the app's translator). The module
+also exports its
 date helpers: `addDays`, `startOfDay`, `isSameDay`, `isoDate` and `parseIsoDate` (`yyyy-MM-dd`
 in local time), `isMatch(date, matchers)`, `rangeIncludesDate`, `addToRange` (DayPicker's),
 `calendarSystem(id)` (a calendar's months and years), `calendarLocale(locale, calendar,

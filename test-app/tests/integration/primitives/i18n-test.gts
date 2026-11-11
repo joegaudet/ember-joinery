@@ -29,6 +29,11 @@ module('Integration | primitives | i18n', function (hooks) {
     assert.strictEqual(format(greeting), 'Hello, {name}')
     assert.strictEqual(format(greeting, { other: 1 }), 'Hello, {name}')
     assert.strictEqual(format(greeting, { name: 0 }), 'Hello, 0', 'String() of any value')
+    assert.strictEqual(
+      format({ id: 'test.own', message: '{constructor}' }, {}),
+      '{constructor}',
+      'only its own values',
+    )
   })
 
   test("format picks the plural by English's plural rules", function (assert) {

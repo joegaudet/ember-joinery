@@ -47,7 +47,7 @@ export function format(message: Message, values?: Record<string, unknown>): stri
       : message.message
   if (!values) return text
   return text.replace(PLACEHOLDER, (placeholder, name: string) =>
-    name in values ? String(values[name]) : placeholder,
+    Object.hasOwn(values, name) ? String(values[name]) : placeholder,
   )
 }
 

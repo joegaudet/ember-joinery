@@ -5,6 +5,12 @@ The area charts of shadcn's [charts gallery](https://ui.shadcn.com/charts/area),
 `@ember-joinery/chart` in a [Card](/components/card.md); see [Chart](/components/chart.md) for
 the parts they use.
 
+## Area Chart - Interactive
+
+The time range is a [Select](/components/select.md), which filters the chart's rows.
+
+<Example @name="chart-area-interactive" @title="Area Chart - Interactive" @fullWidth={{true}} />
+
 ## Area Chart
 
 <Example @name="chart-area-default" @title="Area Chart" />
@@ -42,11 +48,6 @@ The gradients are `<defs>` in the chart's block, which renders inside its `<svg>
 ## Area Chart - Axes
 
 <Example @name="chart-area-axes" @title="Area Chart - Axes" />
-
-## Area Chart - Interactive
-
-Upstream's interactive area chart picks its time range with a
-[Select](/components/select.md). Select has landed, but the example isn't ported yet.
 
 ## Testing
 

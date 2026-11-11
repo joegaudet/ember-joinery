@@ -1,5 +1,5 @@
 {
-  "$comment": "The Chart docs page's examples and the charts gallery (registry/new-york-v4/charts) map here. Not yet ported: chart-area-interactive, whose Select has landed; the chart port (91 days of data, stacked natural areas with gradients, tooltip and legend, and a time-range Select in the header) is left to a chart unit. The gallery draws each chart in the new-york-v4 registry's Card, which none of Joinery's eight styles is, so a gallery chart's entry compares its chart's region ([data-slot=\"chart\"]) alone, at the default threshold: the card around it differs by design, and Card's own page compares Joinery's. The bar, line and area interactive examples are shown full width upstream (fullWidth), and compared whole, header and chart. chart-pie-legend and chart-pie-interactive have no footer, so on a plain stage each card shrinks to its header and its chart to nothing; the gallery's grid cell gives them a width, so they are stretched across both stages (fullWidth), and their chart compared, as the other pie charts' are. The tooltip charts have no width of their own (the gallery stretches each across its grid cell; on a plain stage the card, whose header is a size container, shrinks to nothing), so they are shown full width (fullWidth). There new-york-v4's 1px border and 24px padding leave upstream's chart 18px narrower than in Nova's card, which moves every bar, so those entries compare what the examples are about, the tooltip at @defaultIndex (.recharts-tooltip-wrapper); the stacked bars under it are drawn as the gallery's bar charts draw theirs.",
+  "$comment": "The Chart docs page's examples and the charts gallery (registry/new-york-v4/charts) map here. The gallery draws each chart in the new-york-v4 registry's Card, which none of Joinery's eight styles is, so a gallery chart's entry compares its chart's region ([data-slot=\"chart\"]) alone, at the default threshold: the card around it differs by design, and Card's own page compares Joinery's. The area, bar and line interactive examples are shown full width upstream (fullWidth), and compared whole, header and chart. chart-pie-legend and chart-pie-interactive have no footer, so on a plain stage each card shrinks to its header and its chart to nothing; the gallery's grid cell gives them a width, so they are stretched across both stages (fullWidth), and their chart compared, as the other pie charts' are. The tooltip charts have no width of their own (the gallery stretches each across its grid cell; on a plain stage the card, whose header is a size container, shrinks to nothing), so they are shown full width (fullWidth). There new-york-v4's 1px border and 24px padding leave upstream's chart 18px narrower than in Nova's card, which moves every bar, so those entries compare what the examples are about, the tooltip at @defaultIndex (.recharts-tooltip-wrapper); the stacked bars under it are drawn as the gallery's bar charts draw theirs.",
   "examples": {
     "chart-demo": {
       "example": "chart-demo",
@@ -20,6 +20,15 @@
     "chart-area-default": {
       "example": "chart-area-default",
       "region": "[data-slot=\"chart\"]"
+    },
+    "chart-area-interactive": {
+      "example": "chart-area-interactive",
+      "fullWidth": true,
+      "threshold": {
+        "light": 0.1,
+        "dark": 0.12
+      },
+      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is: Nova's header sits lower, and new-york-v4's 1px border (Nova's Card draws a ring) leaves the chart 2px narrower, so every area's curve, its gradient and the x-axis are a little off, as in chart-bar-interactive and chart-line-interactive. The stacked natural areas are recharts' own (chart-area-stacked and chart-area-gradient, compared by their chart's region, match). Each theme's threshold is its measurement rounded up, plus a point: 8.47% light, 10.81% dark."
     },
     "chart-area-linear": {
       "example": "chart-area-linear",
@@ -105,7 +114,7 @@
         "light": 0.07,
         "dark": 0.09
       },
-      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is: Nova's header sits lower, and new-york-v4's 1px border (Nova's Card draws a ring) leaves the chart 2px narrower, so every bar is a little off and the x-axis keeps other dates (Apr 2, Apr 7\u2026 upstream; Apr 3, Apr 8\u2026 here). At upstream's width the bars are recharts' own (the chart's bar tests compare them). Each theme's threshold is its measurement rounded up, plus a point: 5.38% light, 7.04% dark."
+      "reason": "Upstream's example imports the new-york-v4 registry's Card, which none of Joinery's eight styles is: Nova's header sits lower, and new-york-v4's 1px border (Nova's Card draws a ring) leaves the chart 2px narrower, so every bar is a little off and the x-axis keeps other dates (Apr 2, Apr 7… upstream; Apr 3, Apr 8… here). At upstream's width the bars are recharts' own (the chart's bar tests compare them). Each theme's threshold is its measurement rounded up, plus a point: 5.38% light, 7.04% dark."
     },
     "chart-bar-default": {
       "example": "chart-bar-default",

@@ -3,9 +3,11 @@
 Status: built, in review (2026-11-11). The plan was agreed through a 40-question intake and built
 unattended by subagents onto one stacked PR, now ready for review; see "Autonomous execution".
 Every component page's example and every chart is mapped and compared (CI's parity runs with
-`--require-complete`), and upstream had nothing new since the pins. One gap stays open at 1.0:
-the forms pages' examples are rebuilt on Formwright but not compared (see the forms deviation
-below). Nothing is published; what stays with Joe is listed under "Autonomous execution".
+`--require-complete`), and nothing Joinery tracks has changed upstream since the pins (shadcn-ui's
+one later commit, `dd41d19`, only lists community registries in `registry/directory.json`, so
+the pins stay). One gap stays open at 1.0: the forms pages' examples are rebuilt on Formwright
+but not compared (see the forms deviation below). Nothing is published; what stays with Joe is
+listed under "Autonomous execution".
 
 Deviations from the intake, and why:
 
@@ -54,7 +56,9 @@ Deviations from the intake, and why:
   `dashboard-01` and, for settings, `sidebar-13` (a sidebar in a settings dialog), the one
   settings screen among them; the demo opens it over the dashboard, at `/settings`.
 - **The forms, built once each, and not compared at 1.0** (changes Phase 12, and item 6 of the
-  definition of done for its examples; Phase 14's parity audit leaves them out). Upstream's
+  definition of done for its examples; Phase 14's parity audit leaves them out, where it first
+  said it would compare them before 1.0. That narrowing was made during the unattended build,
+  without Joe's agreement, so it is his to confirm or overturn in review). Upstream's
   `registry/new-york-v4/examples/form-*` are 34 files: 30 examples, and the schema and action
   files of its two Next.js forms. Most are one form written three times, for React Hook Form,
   TanStack Form and Formisch; Formwright is the one form library here, so each form is one guide

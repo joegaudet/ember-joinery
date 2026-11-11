@@ -29,7 +29,7 @@ pnpm typecheck
 node --test scripts/*.test.mjs
 pnpm test                          # test-app, Ember 7.3
 pnpm --filter docs-app test        # every guide example and page
-pnpm test:examples                 # vite-basic, classic, tailwind (formwright †), one at a time
+pnpm test:examples                 # vite-basic, classic, tailwind, formwright, one at a time
 pnpm parity                        # screenshot comparison with shadcn/ui (see "Parity")
 ```
 
@@ -128,6 +128,15 @@ Dropdown Menu; Power Calendar draws shadcn's Calendar, and its rules are calenda
 utilities), and its own rules go in that file all the same (`file-upload.css`,
 `rich-text-editor.css`, `power-calendar.css`, `phone-input.css`). Nothing in the core packages
 imports an add-on or lists its library.
+
+`packages/formwright` is built the same way, around Formwright instead of a library of its own.
+`@ember-formwright/ember` is a peer, not a dependency, as `@ember-joinery/ember` is: Formwright
+keeps its controls and layouts in one registry, which the app and the package must share. Its
+harnesses extend `@ember-formwright/test-support`'s, an optional peer. Its controls render
+Joinery's components, and its layout draws shadcn's Field with Field's own part modifiers. What
+Formwright's wrappers (`div.fw-field`, `div.fw-control-area`) need, `display: contents` and the
+Field's rules restated one wrapper down, is in `packages/ember/src/components/formwright.css`,
+and `scripts/formwright-css.test.mjs` holds it to `field.css`.
 
 ## Porting a component
 
@@ -688,8 +697,9 @@ harnesses.
 ## The example apps
 
 `examples/` holds an app for each way Joinery is consumed: `ember-vite-basic` (Vite and
-Embroider), `ember-classic` (classic ember-cli with ember-auto-import 2) and `ember-tailwind`
-(Vite with Tailwind CSS v4). Each asks for the published version ranges, which the workspace
+Embroider), `ember-classic` (classic ember-cli with ember-auto-import 2), `ember-tailwind`
+(Vite with Tailwind CSS v4) and `ember-formwright` (Vite, with Joinery's inputs as Formwright
+controls). Each asks for the published version ranges, which the workspace
 overrides with the local packages, and each has a smoke test that `pnpm test:examples` and CI
 run.
 
@@ -697,9 +707,9 @@ The Tailwind app declares `@layer theme, base, joinery, components, utilities;` 
 importing Tailwind: Joinery's layer above `base`, so preflight's resets don't undo its rules,
 and below `utilities`, so a class on a component overrides them. Its tests check both.
 
-Each app imports `tokens.css` and `joinery.css`, and the Tailwind one `tailwind.css` too, and
-renders a Button with a lucide icon, which its smoke test drives with `ButtonHarness`: that is
-what proves a classic app consumes `.gts` v2 addon components. The Vite and classic apps also
+Each app imports `tokens.css` and `joinery.css`, and the Tailwind one `tailwind.css` too. The
+first three render a Button with a lucide icon, which their smoke tests drive with `ButtonHarness`:
+that proves a classic app consumes `.gts` v2 addon components. The Vite and classic apps also
 render seven add-ons: a Code Block, highlighted, which proves an add-on and the Shiki it loads on
 demand build in both, a Carousel, which their smoke tests move with `CarouselHarness`, so an
 add-on with a dependency of its own (Embla) builds both ways too, a File Upload, which they
@@ -712,3 +722,9 @@ addon whose app tree carries a service (ember-power-calendar) does too, and a Ma
 Phone Input, which they type into with `MaskedInputHarness` and `PhoneInputHarness`, so an add-on
 with several dependencies of its own (Maskito's packages and libphonenumber-js's metadata) does
 too.
+
+The Formwright app calls `setupJoineryForms()` from `app/app.js` and renders a Formwright form
+of Joinery's Input, Select, Switch and Checkbox in a Card. Its smoke test describes the form
+with Formwright's `FormHarness` and Joinery's field harnesses, declares it in a `CardHarness`
+with `@form`, and submits it: so Formwright's registry, Joinery's controls and both packages'
+harnesses build and work together in an app.

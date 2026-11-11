@@ -6,9 +6,6 @@ and diffs, with a header, line numbers, highlighted lines, wrapping and a copy b
 highlighting is optional: `highlightedCode` runs [Shiki](https://shiki.style) with its
 JavaScript engine (no WASM), and Shiki and each language load the first time they are used.
 
-> **Pre-release.** Nothing is published yet; see the
-> [repository](https://github.com/joegaudet/ember-joinery#readme).
-
 ```bash
 npm install @ember-joinery/code-block @ember-joinery/ember
 ```

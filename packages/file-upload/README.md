@@ -5,9 +5,6 @@ File uploads in shadcn/ui's look for Ember, an opt-in add-on to
 previews, sizes and remove buttons) and an upload queue with a progress bar for each file, on
 [ember-file-upload](https://ember-file-upload.pages.dev) 10.
 
-> **Pre-release.** Nothing is published yet; see the
-> [repository](https://github.com/joegaudet/ember-joinery#readme).
-
 ```bash
 npm install @ember-joinery/file-upload @ember-joinery/ember tracked-built-ins
 ```

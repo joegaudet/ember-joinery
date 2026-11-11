@@ -6,9 +6,6 @@ radial bar charts drawn as declarative Glimmer SVG on [d3-scale](https://d3js.or
 [d3-shape](https://d3js.org/d3-shape), with an API shaped like
 [recharts](https://recharts.org/), which shadcn's charts use.
 
-> **Pre-release.** Nothing is published yet; see the
-> [repository](https://github.com/joegaudet/ember-joinery#readme).
-
 ```bash
 npm install @ember-joinery/chart @ember-joinery/ember
 ```

@@ -6,9 +6,6 @@ Calendars and date pickers in shadcn/ui's look for Ember, an opt-in add-on to
 several days, and pickers that open one in a Popover from a button or an input. Dates are the
 browser's `Date`, worked out and written with `Intl`; there is no date library to install.
 
-> **Pre-release.** Nothing is published yet; see the
-> [repository](https://github.com/joegaudet/ember-joinery#readme).
-
 ```bash
 pnpm add @ember-joinery/power-calendar @ember-joinery/ember ember-concurrency
 ```

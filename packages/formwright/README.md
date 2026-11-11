@@ -5,9 +5,6 @@
 controls, a field layout in shadcn/ui's Field anatomy, and harnesses built on Formwright's own.
 shadcn/ui builds its forms with react-hook-form; this is that, in Ember.
 
-> **Pre-release.** Nothing is published yet; see the
-> [repository](https://github.com/joegaudet/ember-joinery#readme).
-
 ```bash
 npm install @ember-joinery/formwright @ember-joinery/ember @ember-formwright/ember
 npm install --save-dev @ember-formwright/test-support @ember-joinery/test-support

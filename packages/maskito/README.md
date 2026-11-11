@@ -5,9 +5,6 @@ Masked inputs in shadcn/ui's look for Ember, an opt-in add-on to
 Input with number, date and time presets, a `{{maskito}}` modifier for inputs of your own, and a
 Phone Input with a country picker that stores E.164.
 
-> **Pre-release.** Nothing is published yet; see the
-> [repository](https://github.com/joegaudet/ember-joinery#readme).
-
 ```bash
 npm install @ember-joinery/maskito @ember-joinery/ember
 ```

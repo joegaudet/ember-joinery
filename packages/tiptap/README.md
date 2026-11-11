@@ -5,9 +5,6 @@ A rich-text editor in shadcn/ui's look for Ember, an opt-in add-on to
 style menu, toggles for the marks and blocks, undo and redo, each with a tooltip), stored as
 HTML or JSON, on [Tiptap](https://tiptap.dev) 3 and its StarterKit.
 
-> **Pre-release.** Nothing is published yet; see the
-> [repository](https://github.com/joegaudet/ember-joinery#readme).
-
 ```bash
 npm install @ember-joinery/tiptap @ember-joinery/ember @tiptap/core @tiptap/pm
 ```

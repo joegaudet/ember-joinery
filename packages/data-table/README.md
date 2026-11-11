@@ -5,9 +5,6 @@ opt-in add-on to [Joinery](https://joegaudet.com/ember-joinery/): sorting, filte
 pagination, row selection and column visibility, on [TanStack Table](https://tanstack.com/table)
 v9's framework-agnostic core, `@tanstack/table-core`.
 
-> **Pre-release.** Nothing is published yet; see the
-> [repository](https://github.com/joegaudet/ember-joinery#readme).
-
 ```bash
 npm install @ember-joinery/data-table @ember-joinery/ember
 ```

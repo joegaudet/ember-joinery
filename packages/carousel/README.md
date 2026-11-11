@@ -5,9 +5,6 @@ opt-in add-on to [Joinery](https://joegaudet.com/ember-joinery/): slides with mo
 keyboard control, on [Embla Carousel](https://www.embla-carousel.com/)'s framework-agnostic
 core.
 
-> **Pre-release.** Nothing is published yet; see the
-> [repository](https://github.com/joegaudet/ember-joinery#readme).
-
 ```bash
 npm install @ember-joinery/carousel @ember-joinery/ember
 ```

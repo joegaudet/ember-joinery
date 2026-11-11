@@ -84,15 +84,13 @@ export default class ButtonGroupRtl extends Component {
                   <Icon @icon={{Tag}} />
                   {{t.labelAs}}
                 </s.Trigger>
-                <m.Portal>
-                  <s.Content data-lang="ar">
-                    <m.RadioGroup @value={{this.label}} @onValueChange={{this.setLabel}} as |g|>
-                      <g.Item @value="personal">{{t.personal}}</g.Item>
-                      <g.Item @value="work">{{t.work}}</g.Item>
-                      <g.Item @value="other">{{t.other}}</g.Item>
-                    </m.RadioGroup>
-                  </s.Content>
-                </m.Portal>
+                <s.Content data-lang="ar">
+                  <m.RadioGroup @value={{this.label}} @onValueChange={{this.setLabel}} as |g|>
+                    <g.Item @value="personal">{{t.personal}}</g.Item>
+                    <g.Item @value="work">{{t.work}}</g.Item>
+                    <g.Item @value="other">{{t.other}}</g.Item>
+                  </m.RadioGroup>
+                </s.Content>
               </m.Sub>
             </m.Group>
             <m.Separator />

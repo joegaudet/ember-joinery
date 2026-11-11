@@ -152,6 +152,8 @@ in `@ember-joinery/primitives/dismiss`. These drive them as a user does:
 | `setupAnchorFallback(hooks)`   | Forces the Floating UI fallback for a module's tests, as CI's fallback run does       |
 | `hover(element, options?)`     | Rests the pointer on an element, as a mouse does, and waits for a delay it sets off   |
 | `unhover(element, options?)`   | Moves the pointer off an element (`away` from another), and waits as `hover()` does   |
+| `setupTranslator(hooks, t)`    | Registers a translator as `translator:main` for a module's tests                      |
+| `pseudoTranslator`             | A pseudo-locale translator, `⟦Ćĺóśé⟧`, that shows a string that skipped translation   |
 
 `click()` sends no pointer events, and the dismiss stack listens for `pointerdown`, as Radix's
 does, so use `press()` and `pressOutside()` for presses that should dismiss something.

@@ -25,6 +25,7 @@ import {
   ensureId,
   popperOptions,
 } from './-private/popper.gts'
+import { translator } from './i18n.ts'
 
 // Base UI's Combobox (@base-ui/react 1.6.0, the version shadcn-ui/ui@8ab2771 pins), which
 // shadcn's Combobox is built on: an input that filters a list of items, with the list's
@@ -183,7 +184,7 @@ export type ComboboxArgs = ControllableArgs<'open', boolean> & {
   filter?: ComboboxFilterFunction | null
   /** The most items to show. Default: all. */
   limit?: number
-  /** The locale the default filter compares in. */
+  /** The locale the default filter compares in. Default: the app's translator's. */
   locale?: string
   /** Open the list when the input is pressed. Default `true`. */
   openOnInputClick?: boolean
@@ -1120,7 +1121,7 @@ export class Combobox extends Component<ComboboxSignature> {
   }
 
   get collator(): ComboboxFilter {
-    return comboboxFilter({ locale: this.args.locale })
+    return comboboxFilter({ locale: this.args.locale ?? translator(this)?.locale })
   }
 
   get selectedLabel(): string {

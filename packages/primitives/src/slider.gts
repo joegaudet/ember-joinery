@@ -9,6 +9,8 @@ import { As, type TagName } from './as.gts'
 import { ControllableState } from './controllable-state.ts'
 import { getDirection, type Direction } from './direction.gts'
 import { ignoreROError } from './resize-observer.ts'
+import { translate } from './i18n.ts'
+import { messages } from './messages.ts'
 
 /** Which way a slider runs: left to right (right to left in RTL text), or bottom to top. */
 export type SliderOrientation = 'horizontal' | 'vertical'
@@ -88,13 +90,15 @@ function ticksOf(step: number | readonly number[] | undefined): number[] | null 
 
 /**
  * A thumb's default name: `Value` for a slider's only thumb (as ember-primitives'), `Minimum` and
- * `Maximum` for a range, and `Value 2 of 3` past two (as Radix's). Pass `@getThumbLabel` for
- * other words, or another language.
+ * `Maximum` for a range, and `Value 2 of 3` past two (as Radix's), in the language of `context`'s
+ * translator (English without one). Pass `@getThumbLabel` for other words.
  */
-export function defaultSliderThumbLabel(index: number, count: number): string {
-  if (count > 2) return `Value ${index + 1} of ${count}`
-  if (count === 2) return index === 0 ? 'Minimum' : 'Maximum'
-  return 'Value'
+export function defaultSliderThumbLabel(index: number, count: number, context?: object): string {
+  if (count > 2) return translate(context, messages.sliderNthValue, { index: index + 1, count })
+  if (count === 2) {
+    return translate(context, index === 0 ? messages.sliderMinimum : messages.sliderMaximum)
+  }
+  return translate(context, messages.sliderValue)
 }
 
 /** What a slider reads from its arguments. */
@@ -253,10 +257,11 @@ export class SliderStore {
     return sliderPercent(value, this.internalMin, this.internalMax)
   }
 
-  /** A thumb's `aria-label`. */
-  labelAt = (index: number): string | undefined => {
-    const label = this.#args().getThumbLabel ?? defaultSliderThumbLabel
-    return label(index, this.values.length)
+  /** A thumb's `aria-label`; the default's words are `context`'s translator's. */
+  labelAt = (index: number, context?: object): string | undefined => {
+    const label = this.#args().getThumbLabel
+    const count = this.values.length
+    return label ? label(index, count) : defaultSliderThumbLabel(index, count, context)
   }
 
   /** Where the range starts and ends along the track, from 0 to 100. */
@@ -663,7 +668,7 @@ export class SliderThumb extends Component<SliderThumbSignature> {
           @as={{@as}}
           @tag="span"
           role="slider"
-          aria-label={{@store.labelAt this.index}}
+          aria-label={{@store.labelAt this.index this}}
           aria-valuemin={{@store.min}}
           aria-valuenow={{this.value}}
           aria-valuemax={{@store.max}}

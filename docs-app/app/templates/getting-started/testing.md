@@ -159,6 +159,8 @@ Overlays close on Escape or a press outside, through the dismiss stack, which li
 | `hover(element, options?)`     | Rests the pointer on an element, as a mouse does, and waits for the delay it sets off |
 | `unhover(element, options?)`   | Moves the pointer off an element, and waits as `hover()` does                         |
 | `sendPointer(target, type, …)` | One real `PointerEvent`, for drags (a Resizable handle, a Scroll Area thumb)          |
+| `setupTranslator(hooks, t)`    | Registers a translator as `translator:main` for a module's tests                      |
+| `pseudoTranslator`             | A pseudo-locale translator, `⟦Ćĺóśé⟧`, that shows a string that skipped translation   |
 
 `{ pointerType: 'touch' }` presses as a finger does. A harness that drags takes distances in CSS
 pixels, since the test container is scaled.

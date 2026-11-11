@@ -1,6 +1,8 @@
 import type { TOC } from '@ember/component/template-only'
 import { get, hash } from '@ember/helper'
 import { As, type TagName } from './as.gts'
+import { t } from './i18n.ts'
+import { messages } from './messages.ts'
 
 /** The ARIA a breadcrumb's separator renders. */
 export interface BreadcrumbSeparatorAria {
@@ -82,7 +84,7 @@ export interface BreadcrumbSignature {
  */
 export const Breadcrumb: TOC<BreadcrumbSignature> = <template>
   <nav
-    aria-label={{if @label @label "Breadcrumb"}}
+    aria-label={{if @label @label (t messages.breadcrumbLabel)}}
     data-test-jn="breadcrumb"
     data-test-jn-name={{@name}}
     ...attributes

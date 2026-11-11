@@ -339,7 +339,11 @@ one spec, as Alert's, Card's and Empty's are; a part that takes arguments, such 
 **Icons and strings.** Upstream's `lucide-react` icons are `lucide`'s, drawn by `<Icon>`
 (`ArrowUpIcon` is `<Icon @icon={{ArrowUp}} />`). An icon a component draws itself can be
 replaced, and every string it shows is an argument with upstream's English as the default
-(Spinner's `@label`, `Loading`). An icon upstream marks `cn-rtl-flip` (a breadcrumb's chevron,
+(Spinner's `@label`, `Loading`). That default is a `Message` in the package's `src/messages.ts`
+(`joinery.<component>.<name>`), shown through `translate(this, messages.x)` or `{{t messages.x}}`
+from `@ember-joinery/primitives/i18n`, so an app's translator words it; a string made of parts
+(`Value 2 of 3`) is one message with placeholders. Its pseudo-locale test, with
+`setupTranslator(hooks, pseudoTranslator)`, checks that each one is wrapped. An icon upstream marks `cn-rtl-flip` (a breadcrumb's chevron,
 pagination's arrows) keeps `jn-rtl-flip`, which `src/css/base.css` mirrors right to left, as
 upstream's right-to-left build does.
 

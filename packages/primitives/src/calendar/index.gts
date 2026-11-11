@@ -119,6 +119,7 @@ export class Calendar extends Component<CalendarSignature> {
   state = new CalendarState(
     () => this.args,
     () => this.args.classNames,
+    this,
   )
 
   get cls(): CalendarClassNames {

@@ -7,6 +7,8 @@ import { modifier } from 'ember-modifier'
 import { isRTL } from './direction.gts'
 import { adoptLayoutStyles } from './-private/layout-styles.ts'
 import { scrollEnd } from './-private/scroll-end.ts'
+import { translate } from './i18n.ts'
+import { messages } from './messages.ts'
 
 const waiter = buildWaiter('@ember-joinery/primitives:zoetrope')
 
@@ -176,11 +178,11 @@ export class Zoetrope extends Component<ZoetropeSignature> {
   }
 
   get scrollLeftLabel(): string {
-    return this.args.scrollLeftLabel ?? 'Left'
+    return this.args.scrollLeftLabel ?? translate(this, messages.zoetropeScrollLeft)
   }
 
   get scrollRightLabel(): string {
-    return this.args.scrollRightLabel ?? 'Right'
+    return this.args.scrollRightLabel ?? translate(this, messages.zoetropeScrollRight)
   }
 
   get canScroll(): boolean {

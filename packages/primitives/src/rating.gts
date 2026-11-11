@@ -7,6 +7,8 @@ import type { ComponentLike, WithBoundArgs } from '@glint/template'
 import { ControllableState } from './controllable-state.ts'
 import { idFor } from './id.ts'
 import { VisuallyHidden } from './visually-hidden.gts'
+import { format, translate } from './i18n.ts'
+import { messages } from './messages.ts'
 
 /** What a component given as a rating's `@icon` receives, for each item. */
 export interface RatingIconSignature {
@@ -63,12 +65,12 @@ function lte(a: number, b: number): boolean {
 
 /** The English default for an item's name: `1 star`, `2 stars`, `2.5 stars`. */
 export function defaultRatingItemLabel(value: number): string {
-  return `${value} star${value === 1 ? '' : 's'}`
+  return format(messages.ratingItem, { count: value })
 }
 
 /** The English default for a display-only rating's summary: `Rated 3 out of 5`. */
 export function defaultRatingSummary({ value, total }: RatingSummary): string {
-  return `Rated ${value} out of ${total}`
+  return format(messages.ratingSummary, { value, total })
 }
 
 interface RatingItemSignature {
@@ -107,7 +109,9 @@ class RatingItem extends Component<RatingItemSignature> {
   }
 
   get label(): string {
-    return (this.args.rating.args.itemLabel ?? defaultRatingItemLabel)(this.args.value)
+    const { itemLabel } = this.args.rating.args
+    const value = this.args.value
+    return itemLabel ? itemLabel(value) : translate(this, messages.ratingItem, { count: value })
   }
 
   <template>
@@ -366,7 +370,9 @@ export class Rating extends Component<RatingSignature> {
   }
 
   get summary(): string {
-    return (this.args.summary ?? defaultRatingSummary)(this.state)
+    const { summary } = this.args
+    const { value, total } = this.state
+    return summary ? summary(this.state) : translate(this, messages.ratingSummary, { value, total })
   }
 
   /** @internal Picks `value`, or clears the rating when it is the one already picked. */

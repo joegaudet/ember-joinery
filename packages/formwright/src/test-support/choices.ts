@@ -17,10 +17,13 @@ abstract class ChoicesFieldHarness extends FieldHarness {
       .map(option => option.getAttribute('data-test-fw-option')!)
   }
 
-  /** Whether the option with this key can't be chosen. */
+  /**
+   * Whether the option with this key can't be chosen, read as assistive technology reads it: a
+   * native `disabled` (a button's, or its fieldset's), or `aria-disabled="true"`.
+   */
   isOptionDisabled(key: string): boolean {
     const option = optionElement(this, key)
-    return option.hasAttribute('disabled') || option.hasAttribute('data-disabled')
+    return option.matches(':disabled') || option.getAttribute('aria-disabled') === 'true'
   }
 
   /** A press on the option with this key. */

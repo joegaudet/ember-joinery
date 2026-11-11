@@ -14,9 +14,9 @@ export default {
       'declarations',
       'ember-tsc --declaration --emitDeclarationOnly --noEmit false',
     ),
-    // The barrels, plus a subpath per module: src/components/phone-input.gts becomes
-    // `@ember-joinery/maskito/components/phone-input`, src/presets.ts `@ember-joinery/maskito/presets`,
-    // and src/test-support/index.ts `@ember-joinery/maskito/test-support`. It goes after
+    // The barrels, plus a subpath per module: src/layout.gts becomes
+    // `@ember-joinery/formwright/layout`, src/setup.ts `@ember-joinery/formwright/setup`, and
+    // src/test-support/index.ts `@ember-joinery/formwright/test-support`. It goes after
     // declarations() (see the plugin).
     entrypoints({ srcDir: 'src', declarationsDir: 'declarations' }),
     addon.clean(),

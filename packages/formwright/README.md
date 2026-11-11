@@ -45,9 +45,9 @@ import { Button, FieldGroup, asButton } from '@ember-joinery/ember'
 - **Controls**: Formwright's names render Joinery's components (`input` and its types,
   `number`, `textarea`, `currency`, `select`, `checkbox`, `checkbox-group`, `radio`, `range`),
   and Joinery adds `native-select`, `combobox`, `switch`, `toggle`, `toggle-group`, `slider`,
-  `input-otp` and `date-picker`. Each is also exported (`SelectControl`…) and listed in
-  `joineryControls`. Rating and FileDrop aren't controls yet; the guide's Controls page says
-  why.
+  `rating`, `input-otp` and `date-picker`. Each is also exported (`SelectControl`…) and listed
+  in `joineryControls`. FileDrop isn't a control, since it keeps no value; the guide's Controls
+  page says more.
 - **The layout**, `JoineryFieldLayout` (`@layout="joinery"`, `"joinery-vertical"`,
   `"joinery-horizontal"`, `"joinery-responsive"`), renders shadcn's `Field`, `FieldLabel`,
   `FieldDescription` and `FieldError`, a group control's `FieldSet` and `FieldLegend`, with
@@ -57,7 +57,7 @@ import { Button, FieldGroup, asButton } from '@ember-joinery/ember'
 Its harnesses, at `@ember-joinery/formwright/test-support`, extend Formwright's
 `FieldHarness`: `SelectFieldHarness`, `CheckboxFieldHarness`, `CheckboxGroupFieldHarness`,
 `RadioGroupFieldHarness`, `SwitchFieldHarness`, `ToggleFieldHarness`,
-`ToggleGroupFieldHarness`, `SliderFieldHarness`, `InputOTPFieldHarness`,
+`ToggleGroupFieldHarness`, `SliderFieldHarness`, `RatingFieldHarness`, `InputOTPFieldHarness`,
 `ComboboxFieldHarness`, `DatePickerFieldHarness`, `InputFieldHarness`, `NumberFieldHarness` and
 `NativeSelectFieldHarness`. `@form` (and `findForm()`) declares a Formwright form inside a
 Joinery harness, a dialog's or a card's:

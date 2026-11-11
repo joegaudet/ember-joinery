@@ -13,6 +13,7 @@ import { InputControl } from './controls/input.gts'
 import { InputOTPControl } from './controls/input-otp.gts'
 import { NativeSelectControl } from './controls/native-select.gts'
 import { RadioGroupControl } from './controls/radio-group.gts'
+import { RatingControl } from './controls/rating.gts'
 import { SelectControl } from './controls/select.gts'
 import { SliderControl } from './controls/slider.gts'
 import { SwitchControl } from './controls/switch.gts'
@@ -22,8 +23,8 @@ import { ToggleGroupControl } from './controls/toggle-group.gts'
 import { JoineryFieldLayout } from './layout.gts'
 
 /**
- * Joinery's inputs (all but Rating and FileDrop, as yet), by the Formwright control name each
- * registers as. Formwright's own names
+ * Joinery's inputs, by the Formwright control name each registers as (all but FileDrop, which
+ * keeps no value: it hands each drop to a callback). Formwright's own names
  * (`input` and its types, `textarea`, `select`, `radio`, `checkbox`, `checkbox-group`,
  * `currency`, `range`) get Joinery's component; the rest are new.
  */
@@ -53,6 +54,7 @@ export const joineryControls: Readonly<Record<string, ControlComponent>> = Objec
   'toggle-group': ToggleGroupControl,
   slider: SliderControl,
   range: SliderControl,
+  rating: RatingControl,
   'input-otp': InputOTPControl,
   'date-picker': DatePickerControl,
 })

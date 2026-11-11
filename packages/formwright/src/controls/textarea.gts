@@ -1,7 +1,7 @@
 import Component from '@glimmer/component'
 import { on } from '@ember/modifier'
 import type { ControlSignature } from '@ember-formwright/ember'
-import { textareaClasses, type InputGroupParts } from '@ember-joinery/ember'
+import { InputGroup, textareaClasses, type InputGroupParts } from '@ember-joinery/ember'
 
 export interface TextareaControlSignature {
   Args: ControlSignature<string>['Args'] & {
@@ -31,38 +31,86 @@ export interface TextareaControlSignature {
  *       <g.Addon @align="block-end"><g.Text>{{field.value.length}}/100</g.Text></g.Addon>
  *     </InputGroup>
  *   </f.Field>
+ *
+ * The field's `@showCount` does the same for you, as Formwright's own textarea shows a count: the
+ * textarea goes in an Input Group with its length (and `@maxLength`) in an addon below it,
+ * announced politely as it changes (`data-test-fw-count`, as Formwright's). With `@group`, the
+ * group is yours, and so is any count.
  */
 export class TextareaControl extends Component<TextareaControlSignature> {
+  /** Whether it renders its own Input Group, for the field's `@showCount`. */
+  get counts(): boolean {
+    return Boolean(this.args.showCount) && !this.args.group
+  }
+
+  get inGroup(): boolean {
+    return Boolean(this.args.group) || this.counts
+  }
+
   get classes(): string {
-    return this.args.group ? `${textareaClasses()} jn-input-group-textarea` : textareaClasses()
+    return this.inGroup ? `${textareaClasses()} jn-input-group-textarea` : textareaClasses()
   }
 
   get slot(): string {
-    return this.args.group ? 'input-group-control' : 'textarea'
+    return this.inGroup ? 'input-group-control' : 'textarea'
+  }
+
+  get length(): number {
+    return (this.args.value ?? '').length
   }
 
   onInput = (event: Event): void => this.args.onChange((event.target as HTMLTextAreaElement).value)
 
   <template>
-    <textarea
-      id={{@id}}
-      name={{@name}}
-      class={{this.classes}}
-      value={{@value}}
-      placeholder={{@placeholder}}
-      disabled={{@disabled}}
-      readonly={{@readonly}}
-      required={{@required}}
-      aria-invalid={{if @invalid "true"}}
-      aria-describedby={{@describedBy}}
-      maxlength={{@maxLength}}
-      rows={{@rows}}
-      autocomplete={{@autocomplete}}
-      data-slot={{this.slot}}
-      data-test-jn="textarea"
-      data-test-fw-control={{@type}}
-      ...attributes
-      {{on "input" this.onInput}}
-    ></textarea>
+    {{#if this.counts}}
+      <InputGroup as |g|>
+        <textarea
+          id={{@id}}
+          name={{@name}}
+          class={{this.classes}}
+          value={{@value}}
+          placeholder={{@placeholder}}
+          disabled={{@disabled}}
+          readonly={{@readonly}}
+          required={{@required}}
+          aria-invalid={{if @invalid "true"}}
+          aria-describedby={{@describedBy}}
+          maxlength={{@maxLength}}
+          rows={{@rows}}
+          autocomplete={{@autocomplete}}
+          data-slot={{this.slot}}
+          data-test-jn="textarea"
+          data-test-fw-control={{@type}}
+          ...attributes
+          {{on "input" this.onInput}}
+        ></textarea>
+        <g.Addon @align="block-end">
+          <g.Text class="tabular-nums" aria-live="polite" data-test-fw-count>
+            {{this.length}}{{#if @maxLength}} / {{@maxLength}}{{/if}}
+          </g.Text>
+        </g.Addon>
+      </InputGroup>
+    {{else}}
+      <textarea
+        id={{@id}}
+        name={{@name}}
+        class={{this.classes}}
+        value={{@value}}
+        placeholder={{@placeholder}}
+        disabled={{@disabled}}
+        readonly={{@readonly}}
+        required={{@required}}
+        aria-invalid={{if @invalid "true"}}
+        aria-describedby={{@describedBy}}
+        maxlength={{@maxLength}}
+        rows={{@rows}}
+        autocomplete={{@autocomplete}}
+        data-slot={{this.slot}}
+        data-test-jn="textarea"
+        data-test-fw-control={{@type}}
+        ...attributes
+        {{on "input" this.onInput}}
+      ></textarea>
+    {{/if}}
   </template>
 }

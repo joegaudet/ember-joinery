@@ -6,8 +6,8 @@ import { array } from '@ember/helper'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { Form, type ErrorMap } from '@ember-formwright/ember'
 import { CurrencyHarness, FormHarness, field } from '@ember-formwright/test-support'
-import { FieldGroup, InputGroup, Slider } from '@ember-joinery/ember'
-import { SliderHarness } from '@ember-joinery/test-support'
+import { FieldGroup, InputGroup, Rating, Slider } from '@ember-joinery/ember'
+import { RatingHarness, SliderHarness } from '@ember-joinery/test-support'
 import { JoineryFieldLayout, setupJoineryForms } from '@ember-joinery/formwright'
 import {
   CheckboxFieldHarness,
@@ -19,6 +19,7 @@ import {
   NativeSelectFieldHarness,
   NumberFieldHarness,
   RadioGroupFieldHarness,
+  RatingFieldHarness,
   SelectFieldHarness,
   SliderFieldHarness,
   SwitchFieldHarness,
@@ -55,6 +56,7 @@ class Settings {
   @tracked bold = false
   @tracked volume = 50
   @tracked price: number[] = [20, 80]
+  @tracked stars: number | null = null
   @tracked code = ''
   @tracked framework: string | null = null
   @tracked dob: Date | null = null
@@ -71,6 +73,10 @@ class Mode {
   @tracked disabled = false
 }
 
+class Group {
+  @tracked wide = false
+}
+
 class SettingsForm extends FormHarness {
   static override formName = 'settings'
   @field(SelectFieldHarness) declare language: SelectFieldHarness
@@ -82,6 +88,7 @@ class SettingsForm extends FormHarness {
   @field(ToggleFieldHarness) declare bold: ToggleFieldHarness
   @field(SliderFieldHarness) declare volume: SliderFieldHarness
   @field(SliderFieldHarness) declare price: SliderFieldHarness
+  @field(RatingFieldHarness) declare stars: RatingFieldHarness
   @field(InputOTPFieldHarness) declare code: InputOTPFieldHarness
   @field(ComboboxFieldHarness) declare framework: ComboboxFieldHarness
   @field(DatePickerFieldHarness) declare dob: DatePickerFieldHarness
@@ -478,6 +485,211 @@ module('Integration | formwright | controls', function (hooks) {
     await a11yAudit()
   })
 
+  test('rating is a Rating, named by the label: a star picks it, and the same star clears it', async function (assert) {
+    const model = new Settings()
+    await render(
+      <template>
+        <Form @model={{model}} @name="settings" as |f|>
+          <f.Field @for="stars" @control="rating" @label="Stars" @hint="How was it?" />
+        </Form>
+      </template>,
+    )
+    const form = new SettingsForm()
+    const { rating } = form.stars
+    assert.strictEqual(form.stars.control, rating.element, "the field's id is on the Rating")
+    assert.dom(rating.element).hasAttribute('role', 'radiogroup')
+    assert.strictEqual(rating.label, 'Stars', "the field's label names its group")
+    assert
+      .dom('[data-slot="field-set"]', form.stars.element)
+      .doesNotExist('which is the only group: the field is a Field, not a FieldSet around it')
+    assert.deepEqual(form.stars.options, [1, 2, 3, 4, 5])
+    assert.strictEqual(form.stars.value, null, 'no rating to start with')
+    assert.strictEqual(rating.labelOf(3), '3 stars')
+
+    await form.stars.select(4)
+    assert.strictEqual(model.stars, 4, 'it stores the rating picked')
+    assert.strictEqual(form.stars.stars, '★ ★ ★ ★ ☆')
+    assert.dom(rating.input(4)).isChecked()
+
+    await form.stars.focus()
+    await form.stars.press('ArrowRight')
+    assert.strictEqual(model.stars, 5, 'the arrow keys move between the stars, and pick them')
+    assert.strictEqual(rating.focused, 5)
+
+    await form.stars.select(5)
+    assert.strictEqual(model.stars, null, 'picking the rating already picked clears it')
+    assert.strictEqual(form.stars.stars, '☆ ☆ ☆ ☆ ☆')
+    await a11yAudit()
+  })
+
+  test('a rating takes half stars with @step, and as many as @max', async function (assert) {
+    const model = new Settings()
+    model.stars = 2.5
+    await render(
+      <template>
+        <Form @model={{model}} @name="settings" as |f|>
+          <f.Field @for="stars" @control="rating" @label="Stars" @max={{3}} @step={{0.5}} />
+        </Form>
+      </template>,
+    )
+    const form = new SettingsForm()
+    assert.deepEqual(form.stars.options, [0.5, 1, 1.5, 2, 2.5, 3])
+    assert.strictEqual(form.stars.value, 2.5)
+    assert.dom(form.stars.rating.item(2.5)).hasAttribute('data-half', 'start')
+    assert.dom(form.stars.rating.item(3)).hasAttribute('data-half', 'end')
+    await form.stars.select(1.5)
+    assert.strictEqual(model.stars, 1.5)
+    await a11yAudit()
+  })
+
+  test("a rating's hint and errors describe each radio, aria-invalid while the field is", async function (assert) {
+    const model = new Settings()
+    const requireStars = (settings: Settings): ErrorMap =>
+      settings.stars ? {} : { stars: ['Rate it, please.'] }
+    await render(
+      <template>
+        <Form @model={{model}} @name="settings" @validator={{requireStars}} as |f|>
+          <FieldGroup>
+            <f.Field @for="bio" @label="Bio" />
+            <f.Field @for="stars" @control="rating" @label="Stars" @hint="How was it?" />
+          </FieldGroup>
+          <f.Submit>Save</f.Submit>
+        </Form>
+      </template>,
+    )
+    const form = new SettingsForm()
+    const hint = form.stars.element.querySelector('[data-test-fw-hint]')!.id
+    const errors = (): string => form.stars.element.querySelector('[data-test-fw-errors]')!.id
+    const radios = form.stars.rating.options.map(value => form.stars.rating.input(value))
+    for (const radio of radios) {
+      assert.dom(radio).hasAttribute('aria-describedby', hint, 'its hint describes each radio')
+      assert.dom(radio).doesNotHaveAttribute('aria-invalid')
+    }
+
+    await form.submit()
+    assert.true(form.stars.isInvalid)
+    assert.deepEqual(form.stars.errors, ['Rate it, please.'])
+    for (const radio of radios) {
+      assert
+        .dom(radio)
+        .hasAttribute('aria-describedby', `${hint} ${errors()}`)
+        .hasAttribute('aria-invalid', 'true')
+    }
+    assert.dom(radios[0]).isFocused('a failed submit focuses the first star')
+    await a11yAudit()
+
+    await form.stars.select(3)
+    assert.false(form.stars.isInvalid, 'its error clears as it is fixed')
+    for (const radio of radios) {
+      assert.dom(radio).hasAttribute('aria-describedby', hint).doesNotHaveAttribute('aria-invalid')
+    }
+    await a11yAudit()
+  })
+
+  test("a rating field renders Joinery's Rating markup", async function (assert) {
+    const model = new Settings()
+    model.stars = 2
+    await render(
+      <template>
+        <Rating @defaultValue={{2}} @name="plain" aria-label="Plain" />
+        <Form @model={{model}} @name="settings" as |f|>
+          <f.Field @for="stars" @control="rating" @label="Stars" />
+        </Form>
+      </template>,
+    )
+    const form = new SettingsForm()
+    const plain = new RatingHarness('plain')
+    const markup = (root: HTMLElement): string[] =>
+      [root, ...root.querySelectorAll<HTMLElement>('[data-slot]')].map(
+        element => `${element.dataset['slot']}: ${element.className}`,
+      )
+    assert.deepEqual(markup(form.stars.rating.element), markup(plain.element))
+    assert.deepEqual(markup(plain.element).slice(0, 3), [
+      'rating: jn-rating',
+      'rating-items: jn-rating-items',
+      'rating-item: jn-rating-item',
+    ])
+    // Each item's own attributes, and its radio's, but for what the field adds to the radio.
+    const FIELD_ONLY = new Set([
+      'id',
+      'name',
+      'aria-describedby',
+      'aria-invalid',
+      'data-test-fw-option',
+    ])
+    const attributesOf = (element: Element): string =>
+      [...element.attributes]
+        .filter(a => !FIELD_ONLY.has(a.name))
+        .map(a => `${a.name}=${a.value}`)
+        .sort()
+        .join(' ')
+    const shape = (harness: RatingHarness): string[] =>
+      harness.items.flatMap(item => [
+        attributesOf(item),
+        attributesOf(item.querySelector('input')!),
+        item
+          .querySelector('label')!
+          .innerHTML.replace(/<!---->/g, '')
+          .replace(/\s+/g, ' ')
+          .replace(/> | </g, m => m.trim()),
+      ])
+    assert.deepEqual(shape(form.stars.rating), shape(plain))
+    assert.dom(form.stars.rating.element).hasAttribute('data-size', 'default')
+    await a11yAudit()
+  })
+
+  test("in a vertical field each control is the field wide, through its own root's box", async function (assert) {
+    const model = new Settings()
+    const group = new Group()
+    await render(
+      <template>
+        <div style={{if group.wide "width: 40rem" "width: 20rem"}}>
+          <Form
+            @model={{model}}
+            @name="settings"
+            @layout={{if group.wide "joinery-responsive" "joinery-vertical"}}
+            as |f|
+          >
+            <FieldGroup>
+              <f.Field @for="bio" @label="Bio" />
+              <f.Field @for="language" @control="select" @label="Language" @options={{languages}} />
+              <f.Field
+                @for="framework"
+                @control="combobox"
+                @label="Framework"
+                @options={{languages}}
+                @storeKey={{true}}
+              />
+              <f.Field @for="dob" @control="date-picker" @label="Date of birth" />
+            </FieldGroup>
+          </Form>
+        </div>
+      </template>,
+    )
+    const form = new SettingsForm()
+    const width = (element: Element): number => element.getBoundingClientRect().width
+    const fieldWidth = (): number => width(form.bio.element.querySelector('[data-slot="field"]')!)
+    const controls = (): [string, Element][] => [
+      ['select', form.language.selectHarness.trigger],
+      ['combobox', form.framework.element.querySelector('.jn-combobox-input')!],
+      ['date picker', form.dob.control],
+    ]
+    assert.strictEqual(width(form.bio.control), fieldWidth(), 'an input is the field wide')
+    for (const [name, control] of controls()) {
+      assert.strictEqual(width(control), fieldWidth(), `and so is a ${name}`)
+    }
+
+    group.wide = true
+    await settled()
+    for (const [name, control] of controls()) {
+      assert.true(
+        width(control) < fieldWidth() / 2,
+        `responsive, in a group 28rem wide, a ${name} sizes to its content`,
+      )
+    }
+    await a11yAudit()
+  })
+
   test('input-otp is an Input OTP, in groups', async function (assert) {
     const model = new Settings()
     await render(
@@ -591,6 +803,89 @@ module('Integration | formwright | controls', function (hooks) {
     await a11yAudit()
   })
 
+  test("a textarea field's @showCount puts its count in an Input Group, as Formwright's shows one", async function (assert) {
+    const model = new Settings()
+    await render(
+      <template>
+        <Form @model={{model}} @name="settings" as |f|>
+          <f.Field
+            @for="bio"
+            @control="textarea"
+            @label="Bio"
+            @showCount={{true}}
+            @maxLength={{100}}
+          />
+          <f.Field @for="about" @control="textarea" @label="About" @showCount={{true}} />
+        </Form>
+      </template>,
+    )
+    const form = new SettingsForm()
+    const group = form.bio.element.querySelector('[data-slot="input-group"]')!
+    assert.dom(form.bio.control).hasClass('jn-input-group-textarea')
+    assert.dom(form.bio.control).hasAttribute('data-slot', 'input-group-control')
+    assert.true(group.contains(form.bio.control), 'the textarea is in the group')
+    const count = group.querySelector('[data-test-fw-count]')!
+    assert.dom(count).hasText('0 / 100').hasAttribute('aria-live', 'polite')
+    await form.bio.fillIn('Hello')
+    assert.strictEqual(model.bio, 'Hello')
+    assert.dom(count).hasText('5 / 100', 'it counts as you type')
+    await form.about.fillIn('Hi')
+    assert
+      .dom('[data-test-fw-count]', form.about.element)
+      .hasText('2', 'with no @maxLength, the length')
+    await a11yAudit()
+  })
+
+  test("in an inline form's callout, a select, a combobox and a date picker open and pick in it", async function (assert) {
+    const model = new Settings()
+    await render(
+      <template>
+        <Form @model={{model}} @name="settings" @inline={{true}} @callout={{true}} as |f|>
+          <f.Field
+            @for="language"
+            @control="select"
+            @label="Language"
+            @options={{languages}}
+            @storeKey={{true}}
+          />
+          <f.Field
+            @for="framework"
+            @control="combobox"
+            @label="Framework"
+            @options={{languages}}
+            @storeKey={{true}}
+          />
+          <f.Field @for="dob" @control="date-picker" @label="Date of birth" @locale="en-US" />
+        </Form>
+      </template>,
+    )
+    const form = new SettingsForm()
+    const calloutOf = (harness: { element: Element }): Element | null =>
+      harness.element.querySelector('.fw-callout')
+    const isOpen = (harness: { element: Element }): boolean =>
+      calloutOf(harness)?.matches(':popover-open') ?? false
+
+    await form.language.edit()
+    assert.true(isOpen(form.language), "the select's callout opens")
+    await form.language.select('fr')
+    assert.true(isOpen(form.language), 'and stays open while its list picks, over it')
+    await form.language.commit()
+    assert.strictEqual(model.language, 'fr')
+
+    await form.framework.edit()
+    await form.framework.select('German')
+    assert.true(isOpen(form.framework), "a combobox's list picks in its callout too")
+    await form.framework.commit()
+    assert.strictEqual(model.framework, 'de')
+
+    await form.dob.edit()
+    await form.dob.pick('2026-11-10')
+    assert.true(isOpen(form.dob), "and a date picker's calendar")
+    await form.dob.commit()
+    assert.strictEqual(model.dob?.toDateString(), new Date(2026, 10, 10).toDateString())
+    await a11yAudit()
+  })
+
   test('readonly and disabled reach every control, each as it can take them', async function (assert) {
     const model = new Settings()
     const mode = new Mode()
@@ -640,6 +935,7 @@ module('Integration | formwright | controls', function (hooks) {
             @storeKey={{true}}
           />
           <f.Field @for="volume" @control="slider" @label="Volume" />
+          <f.Field @for="stars" @control="rating" @label="Stars" />
           <f.Field @for="code" @control="input-otp" @label="Code" />
           <f.Field @for="dob" @control="date-picker" @label="Date of birth" />
         </Form>
@@ -681,6 +977,10 @@ module('Integration | formwright | controls', function (hooks) {
       assert.dom(option).isDisabled('so are a checkbox group and a toggle group')
     }
     assert.true(form.volume.slider.isDisabled, 'and a slider')
+    assert.true(form.stars.rating.isReadonly, 'a rating is read-only')
+    assert.false(form.stars.rating.isDisabled, 'and its stars still take focus')
+    await form.stars.select(2)
+    assert.strictEqual(model.stars, null, 'but picking one changes nothing')
     assert.dom('[data-slot="field"][data-disabled="true"]').doesNotExist('no field looks disabled')
     await a11yAudit()
 
@@ -695,8 +995,9 @@ module('Integration | formwright | controls', function (hooks) {
       assert.dom(option).isDisabled()
     }
     assert.true(form.volume.slider.isDisabled)
+    assert.true(form.stars.rating.isDisabled)
     assert.true(form.plan.isDisabled)
-    for (const harness of [...textual, form.framework, ...pressable, form.volume]) {
+    for (const harness of [...textual, form.framework, ...pressable, form.volume, form.stars]) {
       assert
         .dom(harness.element.querySelector('[data-slot="field"]'))
         .hasAttribute('data-disabled', 'true', `${harness.path}'s Field looks disabled`)
@@ -716,6 +1017,8 @@ module('Integration | formwright | controls', function (hooks) {
     for (const harness of pressable) assert.dom(harness.control).isNotDisabled()
     assert.false(form.plan.radioGroup.isDisabled)
     assert.false(form.volume.slider.isDisabled)
+    assert.false(form.stars.rating.isDisabled)
+    assert.false(form.stars.rating.isReadonly)
     await a11yAudit()
   })
 })

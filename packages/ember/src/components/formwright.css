@@ -57,6 +57,26 @@
 }
 
 /*
+ * And a Combobox's Input Group, in its root (also display: contents). combobox.css gives it
+ * upstream's `w-auto` at one class's weight (`.jn-combobox-input:where(.jn-input-group)`), which
+ * upstream's field's `*:w-full` beats by coming later in Tailwind's order. So the field's rule
+ * restated here weighs one class too, and comes later (formwright.css follows combobox.css).
+ */
+:where(.jn-field-orientation-vertical, .jn-field-orientation-responsive)
+  > :where(.fw-control-area)
+  > :where([data-test-jn='combobox'])
+  > .jn-combobox-input:where(.jn-input-group) {
+  @apply w-full;
+}
+
+:where(.jn-field-orientation-responsive)
+  > :where(.fw-control-area)
+  > :where([data-test-jn='combobox'])
+  > .jn-combobox-input:where(.jn-input-group) {
+  @apply @md/field-group:w-auto;
+}
+
+/*
  * A horizontal field with a FieldContent nudges a checkbox or radio beside it down a pixel
  * (field.css's `has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px`,
  * and a responsive field's, once its group is 28rem wide).

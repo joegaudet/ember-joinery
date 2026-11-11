@@ -70,6 +70,15 @@ module('Example | sidebar-13', function (hooks) {
     await a11yAudit()
   })
 
+  test('it opens with focus on its panel, the first thing in it that takes focus but a link', async function (assert) {
+    await render(<template><Sidebar13 /></template>)
+    const dialog = new SettingsDialog()
+    assert.true(dialog.hasFocus)
+    assert.dom(dialog.panel).isFocused('the panel, which scrolls, so the keyboard can scroll it')
+    assert.strictEqual(dialog.panel.getAttribute('tabindex'), '0')
+    await a11yAudit()
+  })
+
   test('closed, the dialog opens again from its button', async function (assert) {
     await render(<template><Sidebar13 /></template>)
     const dialog = new SettingsDialog()
@@ -80,9 +89,13 @@ module('Example | sidebar-13', function (hooks) {
 
     await dialog.open()
     assert.true(dialog.isOpen)
+    assert.dom(dialog.panel).isFocused('opened again, focus goes to the panel')
+    await a11yAudit()
+
     await dialog.close()
     assert.false(dialog.isOpen)
     assert.dom(dialog.trigger).isFocused('focus goes back to the button')
+    await a11yAudit()
   })
 
   test('at md and up, the dialog is 700px wide at most and the sidebar shows', async function (assert) {

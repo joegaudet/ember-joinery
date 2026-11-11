@@ -36,6 +36,11 @@ class SettingsDialog extends DialogHarness {
     return new BreadcrumbHarness({ within: this.content! })
   }
 
+  /** The panel beside the sections, which scrolls. */
+  get panel(): HTMLElement {
+    return this.content!.querySelector<HTMLElement>('.overflow-y-auto[tabindex="0"]')!
+  }
+
   /** The section the dialog shows: its active link, and the breadcrumb's page. */
   get section(): string | undefined {
     return this.sections.menuButtons.find(button => button.isActive)?.label
@@ -88,11 +93,13 @@ module('Application | the live demo', function (hooks) {
 
   test("the sidebar's Settings opens the settings dialog, a section at a time", async function (assert) {
     await visit('/')
-    await new SidebarHarness('demo').menuButton('Settings').click()
+    const settings = new SidebarHarness('demo').menuButton('Settings')
+    await settings.click()
     assert.strictEqual(currentURL(), '/settings')
     const dialog = new SettingsDialog()
     assert.true(dialog.isOpen)
     assert.strictEqual(dialog.label, 'Settings')
+    assert.dom(dialog.panel).isFocused('it opens with focus on its panel, as the block does')
     assert.strictEqual(dialog.section, 'Messages & media', "upstream's, until one is picked")
     assert.strictEqual(dialog.breadcrumb.current, 'Messages & media')
 
@@ -106,6 +113,9 @@ module('Application | the live demo', function (hooks) {
     await dialog.pressEscape()
     assert.strictEqual(currentURL(), '/', 'closing it goes back to the dashboard')
     assert.false(dialog.exists)
+    assert.true(settings.isFocused, 'and focus goes back to the link that opened it')
+    await a11yAudit(ALL_BUT_CONTRAST)
+    await a11yAudit(BUT_THE_INITIALS)
   })
 
   test('a section has a URL of its own', async function (assert) {

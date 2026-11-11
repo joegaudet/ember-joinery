@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'docs-app/tests/helpers'
-import { focus, render } from '@ember/test-helpers'
+import { click, find, focus, render, waitUntil } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { Toaster } from '@ember-joinery/ember'
 import {
@@ -20,6 +20,7 @@ import {
 import { ChartHarness } from '@ember-joinery/chart/test-support'
 import { DataTableHarness } from '@ember-joinery/data-table/test-support'
 import Dashboard01 from 'docs-app/examples/dashboard-01'
+import { Example } from 'docs-app/components/example'
 
 /**
  * Two of upstream's colours fall short of the 4.5:1 WCAG AA asks of small text: the avatar's
@@ -78,6 +79,11 @@ class Sections extends DataTableHarness {
 
   get views(): TabsHarness {
     return new TabsHarness({ within: this })
+  }
+
+  /** The View select, which stands in for the tabs below the `@4xl/main` breakpoint. */
+  get viewSelect(): SelectHarness {
+    return this.findAll(SelectHarness).find(select => select.trigger.id === 'view-selector')!
   }
 
   /** The drawer each row's header opens. */
@@ -164,6 +170,8 @@ module('Example | dashboard-01', function (hooks) {
     await sidebar.toggle()
     assert.strictEqual(sidebar.state, 'collapsed')
     assert.strictEqual(sidebar.collapsible, 'offcanvas', 'it slides off the page')
+    await a11yAudit(ALL_BUT_CONTRAST)
+    await a11yAudit(BUT_UPSTREAM_COLOURS)
   })
 
   test("the chart's range: the last 3 months, 30 days or 7 days", async function (assert) {
@@ -190,7 +198,12 @@ module('Example | dashboard-01', function (hooks) {
     assert.deepEqual(chart.tooltip?.names, ['Desktop', 'Mobile'], 'the top of the stack first')
     await a11yAudit(ALL_BUT_CONTRAST)
     await a11yAudit(BUT_UPSTREAM_COLOURS)
+
     await chart.unhover()
+    await range.toggle('90d')
+    assert.strictEqual(chart.series[0]!.points.length, 91, 'back to the last 3 months')
+    await a11yAudit(ALL_BUT_CONTRAST)
+    await a11yAudit(BUT_UPSTREAM_COLOURS)
   })
 
   test('rows are selected, paged, and their columns shown or hidden', async function (assert) {
@@ -256,6 +269,18 @@ module('Example | dashboard-01', function (hooks) {
     await pressKey('Escape')
     assert.strictEqual(table.announcement, 'Dragging was cancelled. Draggable item 1 was dropped.')
     assert.strictEqual(table.headers[2], 'Cover page', 'Escape puts it back')
+
+    // dnd-kit's sortable keyboard coordinates find no row beside one in a column.
+    await pressKey(' ')
+    const right = await pressKey('ArrowRight')
+    await pressKey('ArrowLeft')
+    assert.true(right, 'the page does not scroll')
+    assert.strictEqual(table.announcement, 'Picked up draggable item 1.', 'nor does the row move')
+    assert.strictEqual(table.row(2).style.transform, '')
+    await pressKey(' ')
+    assert.strictEqual(table.headers[2], 'Cover page', 'it drops where it was')
+    await a11yAudit(ALL_BUT_CONTRAST)
+    await a11yAudit(BUT_UPSTREAM_COLOURS)
   })
 
   test('a pointer drags a row by its handle', async function (assert) {
@@ -278,6 +303,122 @@ module('Example | dashboard-01', function (hooks) {
     ])
     await a11yAudit(ALL_BUT_CONTRAST)
     await a11yAudit(BUT_UPSTREAM_COLOURS)
+  })
+
+  test('a finger drags a row by its handle, as upstream’s touch sensor does', async function (assert) {
+    await render(<template><Dashboard01 /></template>)
+    const table = new Sections()
+    const handle = table.handle(1)
+    assert.strictEqual(
+      getComputedStyle(handle).touchAction,
+      'none',
+      'a touch on the handle drags the row; it doesn’t scroll the page, which would cancel it',
+    )
+    const row = table.row(1).getBoundingClientRect()
+    const x = handle.getBoundingClientRect().left + 2
+    const y = row.top + row.height / 2
+    const touch = { pointerType: 'touch', pointerId: 7 }
+
+    await sendPointer(handle, 'pointerdown', { ...touch, clientX: x, clientY: y })
+    assert.strictEqual(table.announcement, 'Picked up draggable item 2.')
+    await sendPointer(handle, 'pointermove', { ...touch, clientX: x, clientY: y - row.height })
+    assert.strictEqual(table.announcement, 'Draggable item 2 was moved over droppable area 1.')
+    await sendPointer(handle, 'pointerup', { ...touch, clientX: x, clientY: y - row.height })
+    assert.deepEqual(table.headers.slice(0, 2), ['Table of contents', 'Cover page'])
+
+    // A touch the browser takes back (a pan it began before the handle) ends in pointercancel,
+    // which puts the row back.
+    await sendPointer(table.handle(1), 'pointerdown', { ...touch, clientX: x, clientY: y })
+    await sendPointer(table.handle(1), 'pointercancel', { ...touch, clientX: x, clientY: y })
+    assert.strictEqual(table.announcement, 'Dragging was cancelled. Draggable item 1 was dropped.')
+    assert.deepEqual(table.headers.slice(0, 2), ['Table of contents', 'Cover page'])
+    await a11yAudit(ALL_BUT_CONTRAST)
+    await a11yAudit(BUT_UPSTREAM_COLOURS)
+  })
+
+  test('the views: the tabs switch what the table shows, and the View select lists them', async function (assert) {
+    await render(<template><Dashboard01 /></template>)
+    const table = new Sections()
+    const views = table.views
+    assert.deepEqual(
+      views.triggers.map(trigger => trigger.textContent?.replace(/\s+/g, ' ').trim()),
+      ['Outline', 'Past Performance 3', 'Key Personnel 2', 'Focus Documents'],
+    )
+    assert.true(views.isShown('outline'))
+
+    await views.select('past-performance')
+    assert.strictEqual(views.selected, 'past-performance')
+    assert.true(views.isShown('past-performance'), 'its placeholder')
+    assert.false(views.isShown('outline'), 'and not the table')
+    await views.press('ArrowRight')
+    assert.strictEqual(views.selected, 'key-personnel', 'the arrow keys move along the tabs')
+    await a11yAudit(ALL_BUT_CONTRAST)
+    await a11yAudit(BUT_UPSTREAM_COLOURS)
+
+    // Below @4xl/main (a narrow page) the select stands in for the tabs. As upstream's, it is a
+    // select of its own (`defaultValue="outline"`), not tied to them.
+    const select = table.viewSelect
+    assert.strictEqual(select.label, 'View')
+    assert.strictEqual(select.valueText, 'Outline')
+    await select.open()
+    assert.deepEqual(select.optionTexts, [
+      'Outline',
+      'Past Performance',
+      'Key Personnel',
+      'Focus Documents',
+    ])
+    await select.select('focus-documents')
+    assert.strictEqual(select.valueText, 'Focus Documents')
+    await views.select('outline')
+    assert.true(views.isShown('outline'))
+    await a11yAudit(ALL_BUT_CONTRAST)
+    await a11yAudit(BUT_UPSTREAM_COLOURS)
+  })
+
+  test('on a phone: the sidebar is a sheet, the chart shows 7 days, and a row opens from below', async function (assert) {
+    // The guide's frame at 375px, as its width switcher shows it: the sidebar's provider
+    // measures the window it renders in, the frame's.
+    await render(
+      <template>
+        <Example @name="dashboard-01" @title="dashboard-01" @block={{true}} @blockHeight={{1000}} />
+      </template>,
+    )
+    await click('[data-test-example-width="375"]')
+    const frame = () => find('iframe[width="375"]') as HTMLIFrameElement | null
+    await waitUntil(() => frame()?.contentDocument?.querySelector('[data-slot="chart"] svg'))
+    const page = frame()!.contentDocument!.body
+    const sidebar = new SidebarHarness({ within: page })
+    await waitUntil(() => sidebar.isMobile)
+    assert.false(sidebar.isOpen, 'a sheet, closed')
+    await sidebar.toggle()
+    assert.true(sidebar.sheet.isOpen)
+    assert.strictEqual(sidebar.side, 'left')
+    assert.true(sidebar.menuButtonLabels.includes('Settings'), 'the same sidebar, in the sheet')
+    await sidebar.sheet.close()
+    assert.false(sidebar.isOpen)
+
+    // Upstream's effect: on a phone, the chart's range becomes the last 7 days.
+    const range = new SelectHarness({ within: new CardHarness({ within: page, index: 4 }) })
+    const chart = new ChartHarness({ within: page })
+    await waitUntil(() => range.valueText === 'Last 7 days')
+    assert.strictEqual(chart.series[0]!.points.length, 8)
+    await range.open()
+    await range.select('30d')
+    assert.strictEqual(range.valueText, 'Last 30 days', 'a range picked after that stands')
+    assert.strictEqual(chart.series[0]!.points.length, 31)
+
+    const table = new Sections({ within: page })
+    assert.strictEqual(table.viewSelect.valueText, 'Outline', 'the View select, not the tabs')
+    const drawer = table.viewer(0)
+    await drawer.open()
+    await drawer.afterOpening()
+    assert.strictEqual(drawer.direction, 'bottom', 'from the bottom of the screen')
+    assert.strictEqual(drawer.title?.textContent?.trim(), 'Cover page')
+    assert.strictEqual(drawer.findAll(ChartHarness).length, 0, 'without its chart')
+    await drawer.close()
+    assert.false(drawer.isOpen)
+    // axe doesn't enter the frame; the frame around it is audited here, the block above.
+    await a11yAudit()
   })
 
   test("a row's header opens its drawer, and its target saves with a toast", async function (assert) {

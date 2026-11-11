@@ -8,6 +8,8 @@ import {
   startOfWeekArg,
   type CalendarOptions,
 } from './state.ts'
+import { translate, translator } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 /**
  * What the three calendars share: the month shown (controlled with `@center` or their own),
@@ -36,12 +38,17 @@ export abstract class CalendarBase<S extends { Args: CalendarOptions }> extends 
     return this.args.label ?? this.defaultLabel
   }
 
+  /** `@locale`, else the app's translator's. */
+  get locale(): string | undefined {
+    return this.args.locale ?? translator(this)?.locale
+  }
+
   get previousMonthLabel(): string {
-    return this.args.previousMonthLabel ?? 'Previous month'
+    return this.args.previousMonthLabel ?? translate(this, messages.previousMonth)
   }
 
   get nextMonthLabel(): string {
-    return this.args.nextMonthLabel ?? 'Next month'
+    return this.args.nextMonthLabel ?? translate(this, messages.nextMonth)
   }
 
   get minDate(): Date | undefined {

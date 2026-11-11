@@ -7,6 +7,13 @@ const ATTRIBUTES = [
   'alt',
 ]
 
+// Takes out each `⟦…⟧`, innermost first: a value may itself be a translated string.
+function unwrap(text: string): string {
+  let rest = text
+  for (let last = ''; last !== rest;) [last, rest] = [rest, rest.replace(/⟦[^⟦⟧]*⟧/g, '')]
+  return rest
+}
+
 /**
  * Every string under `root` a person sees or hears (its text, and the attributes a screen reader
  * reads) with words left over once the pseudo-locale's `⟦…⟧` are taken out: a built-in string
@@ -27,6 +34,6 @@ export function unlocalized(
   }
   return strings
     .map(text => text.trim())
-    .filter(text => /\p{L}/u.test(text.replace(/⟦[^⟧]*⟧/g, '')))
+    .filter(text => /\p{L}/u.test(unwrap(text)))
     .filter(text => !ignore.some(pattern => pattern.test(text)))
 }

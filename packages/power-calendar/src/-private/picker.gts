@@ -13,6 +13,7 @@ import {
 import { idFor } from '@ember-joinery/primitives/id'
 import { ensureDateLibrary } from '../date-library.ts'
 import type { CalendarOptions } from './state.ts'
+import { translator } from '@ember-joinery/primitives/i18n'
 
 type Align = 'start' | 'center' | 'end'
 type Side = 'top' | 'right' | 'bottom' | 'left'
@@ -108,6 +109,11 @@ export abstract class PickerBase<S extends { Args: PickerOptions }>
   abstract get component(): 'date-picker' | 'date-range-picker'
   abstract get text(): string
   abstract get isEmpty(): boolean
+  /** `@locale`, else the app's translator's. */
+  get locale(): string | undefined {
+    return this.args.locale ?? translator(this)?.locale
+  }
+
   abstract get defaultPlaceholder(): string
   abstract get defaultIcon(): IconNode
   abstract get defaultIconPosition(): 'inline-start' | 'inline-end'

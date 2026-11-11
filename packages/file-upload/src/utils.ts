@@ -1,3 +1,5 @@
+import { format } from '@ember-joinery/primitives/i18n'
+import { messages } from './messages.ts'
 /**
  * Whether `file` matches an `accept` list, as a file picker filters it: extensions (`.pdf`),
  * MIME types (`text/csv`) and wildcards (`image/*`), comma-separated. An empty list takes
@@ -25,7 +27,7 @@ export function acceptsFile(file: File, accept: string | undefined): boolean {
  *   fileKind('cv.pdf') // 'PDF'
  *   fileKind('README', 'ملف') // 'ملف'
  */
-export function fileKind(name: string, unknown = 'FILE'): string {
+export function fileKind(name: string, unknown = format(messages.unknownKind)): string {
   const dot = name.lastIndexOf('.')
   return dot > 0 && dot < name.length - 1 ? name.slice(dot + 1, dot + 5).toUpperCase() : unknown
 }

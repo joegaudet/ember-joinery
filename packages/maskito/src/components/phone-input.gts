@@ -29,6 +29,8 @@ import {
   type CountryCode,
   type MetadataJson,
 } from '../phone.ts'
+import { t, translate, translator } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 /** A country in the picker. */
 export interface PhoneCountry {
@@ -68,7 +70,7 @@ export interface PhoneInputSignature {
     national?: boolean
     /** libphonenumber-js metadata. Default its `min` metadata. */
     metadata?: MetadataJson
-    /** The language the countries are named in. Default the browser's. */
+    /** The language the countries are named in. Default the app's translator's, or the browser's. */
     locale?: string
     /**
      * The country picker's whole accessible name. By default it is named after the input: its
@@ -196,9 +198,13 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
     return idFor(this, 'country-word')
   }
 
+  get locale(): string | undefined {
+    return this.args.locale ?? translator(this)?.locale
+  }
+
   @cached
   get displayNames(): Intl.DisplayNames {
-    return new Intl.DisplayNames(this.args.locale ? [this.args.locale] : undefined, {
+    return new Intl.DisplayNames(this.locale ? [this.locale] : undefined, {
       type: 'region',
     })
   }
@@ -219,7 +225,7 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
       flag: countryFlag(code),
     }))
     if (given) return countries
-    const collator = new Intl.Collator(this.args.locale)
+    const collator = new Intl.Collator(this.locale)
     return countries.sort((a, b) => collator.compare(a.name, b.name))
   }
 
@@ -395,7 +401,10 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
       trigger.setAttribute('aria-labelledby', `${ids} ${this.countryWordId}`)
     } else {
       const name = input?.getAttribute('aria-label')?.trim()
-      trigger.setAttribute('aria-label', name ? `${name} country` : 'Country')
+      trigger.setAttribute(
+        'aria-label',
+        name ? translate(this, messages.namedCountry, { name }) : translate(this, messages.country),
+      )
     }
     return () => {
       trigger.removeAttribute('aria-labelledby')
@@ -510,7 +519,7 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
           {{/each}}
         </s.Content>
       </Select>
-      <span id={{this.countryWordId}} hidden>country</span>
+      <span id={{this.countryWordId}} hidden>{{t messages.countryWord}}</span>
       {{#if @formName}}
         <input type="hidden" name={{@formName}} value={{if this.value this.value ""}} />
       {{/if}}

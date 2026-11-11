@@ -66,7 +66,7 @@ export interface FileUploadStateOptions<T> {
   nameOf: () => ((value: T) => string) | undefined
   sizeOf: () => ((value: T) => number | undefined) | undefined
   previewOf: () => ((value: T) => string | undefined) | undefined
-  uploadFailedLabel: () => string | undefined
+  uploadFailedLabel: () => string
   unknownKindLabel: () => string | undefined
   locale: () => string | undefined
 }
@@ -334,7 +334,7 @@ export class FileUploadState<T> {
           ? error.message
           : typeof error === 'string' && error
             ? error
-            : (this.#options.uploadFailedLabel() ?? 'Upload failed')
+            : this.#options.uploadFailedLabel()
     }
   }
 

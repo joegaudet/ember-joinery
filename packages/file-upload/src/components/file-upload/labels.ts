@@ -31,14 +31,6 @@ export interface FileUploadLabels {
   progressLabel: (name: string) => string
 }
 
-export const defaultRejectedLabel = (names: string[]): string =>
-  `Not an accepted type: ${names.join(', ')}`
-export const defaultLeftOutLabel = (names: string[]): string =>
-  `One file at a time; left out: ${names.join(', ')}`
-export const defaultRemoveLabel = (name: string): string => `Remove ${name}`
-export const defaultRetryLabel = (name: string): string => `Retry ${name}`
-export const defaultProgressLabel = (name: string): string => `Uploading ${name}`
-
 const ARCHIVES = new Set(['zip', 'gz', 'tgz', 'tar', 'rar', '7z', 'bz2', 'xz'])
 const SHEETS = new Set(['csv', 'tsv', 'xls', 'xlsx', 'ods', 'numbers'])
 const TEXTS = new Set(['pdf', 'txt', 'md', 'doc', 'docx', 'odt', 'rtf', 'pages'])

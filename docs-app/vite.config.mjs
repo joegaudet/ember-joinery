@@ -4,6 +4,7 @@ import { babel } from '@rollup/plugin-babel'
 import { kolay } from 'kolay/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { joineryCss } from './joinery-css.mjs'
+import { apiDocs } from './api-docs.mjs'
 import { writeGuideMeta } from '../scripts/gen-guide-meta.mjs'
 
 // The A–Z sections' meta.json files come from the pages present, so they're written before
@@ -11,20 +12,35 @@ import { writeGuideMeta } from '../scripts/gen-guide-meta.mjs'
 // server runs shows up after a restart. See "Generated files" in CONTRIBUTING.md.
 writeGuideMeta()
 
+/**
+ * The packages the Reference section documents, one page each (app/templates/reference/), from
+ * their type declarations: TypeDoc reads each one's `exports` types, so build the packages first.
+ */
+const API_PACKAGES = [
+  '@ember-joinery/ember',
+  '@ember-joinery/primitives',
+  '@ember-joinery/test-support',
+  '@ember-joinery/chart',
+  '@ember-joinery/carousel',
+  '@ember-joinery/data-table',
+  '@ember-joinery/code-block',
+  '@ember-joinery/file-upload',
+  '@ember-joinery/tiptap',
+  '@ember-joinery/power-calendar',
+  '@ember-joinery/maskito',
+  '@ember-joinery/formwright',
+]
+
 export default defineConfig({
   // The guide is served from joegaudet.com/ember-joinery/guide/.
   base: process.env.JOINERY_GUIDE ? '/ember-joinery/guide/' : '/',
   plugins: [
     classicEmberSupport(),
     ember(),
-    kolay({
-      // TypeDoc renders <APIDocs> from these packages' type declarations.
-      packages: [
-        '@ember-joinery/ember',
-        '@ember-joinery/primitives',
-        '@ember-joinery/test-support',
-      ],
-    }),
+    // TypeDoc renders <APIDocs> from these packages' type declarations, and apiDocs() refines
+    // what it writes for the reference (see api-docs.mjs).
+    kolay({ packages: API_PACKAGES }),
+    apiDocs({ packages: API_PACKAGES }),
     // The examples' utility classes (app/styles/examples.css).
     tailwindcss(),
     // Every style, scoped to the previews that pick it, and the base colours' tokens.

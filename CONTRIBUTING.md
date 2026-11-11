@@ -635,6 +635,17 @@ load on GitHub Pages). Its tests run in the same Chrome as the test app's.
   joinery.css gives Joinery's parts the same (`src/css/base.css`, scoped to `[data-slot]`), so
   the parity comparison catches a part that misses it. Keep new guide rules inside the layer, and scope any that select bare elements or
   every element.
+- The Reference section is generated: `docs-app/app/templates/reference/<package>.md` for each
+  published package renders `<PackageReference @package="…">`, which lists the package's public
+  modules from its type declarations, each opening to Kolay's `<APIDocs>` (a component's
+  `<ComponentSignature>`: arguments, blocks, element) for everything it exports. Kolay's TypeDoc
+  run writes `docs/<package>.json` for each package in `API_PACKAGES` (`docs-app/vite.config.mjs`),
+  and `docs-app/api-docs.mjs` refines it for the renderer: module names made unique, a class's own
+  members, accessors as properties, a signature's `Args` intersection merged, and a comment's
+  indented examples fenced as code. `@ember-joinery/test-support` has one entry point, so
+  `packages/test-support/typedoc.json` gives TypeDoc each harness file instead, by a path
+  relative to `docs-app`, where Kolay runs. A new package needs its page and its line in
+  `API_PACKAGES`: `scripts/api-docs.test.mjs` fails until it has both.
 - `/parity/<name>` renders one example with no frame and no guide around it, centred as
   upstream's preview is, for the screenshot comparison. `?theme=dark` puts `.dark` on `<html>`
   and `?theme=light` (the default) puts `.light` there; either also pins `color-scheme`, so the

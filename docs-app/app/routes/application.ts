@@ -8,6 +8,7 @@ import { highlighter, THEMES } from '../highlight.ts'
 import { routeLinks } from '../links.ts'
 import { Example } from '../components/example.gts'
 import { SectionList } from '../components/section-list.gts'
+import { PackageReference } from '../components/package-reference.gts'
 
 export default class ApplicationRoute extends Route {
   @service declare router: RouterService
@@ -22,7 +23,7 @@ export default class ApplicationRoute extends Route {
 
     const manifest = await setupKolay(this, {
       // Usable in any page without an import.
-      topLevelScope: { Example, SectionList },
+      topLevelScope: { Example, SectionList, PackageReference },
       modules: {
         '@ember-joinery/ember': () => import('@ember-joinery/ember'),
         '@ember-joinery/primitives': () => import('@ember-joinery/primitives'),

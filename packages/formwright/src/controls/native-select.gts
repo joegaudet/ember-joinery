@@ -1,5 +1,5 @@
 import Component from '@glimmer/component'
-import type { ControlSignature } from '@ember-formwright/ember'
+import type { ControlSignature, OptionArgs } from '@ember-formwright/ember'
 import { NativeSelect, type NativeSelectSize } from '@ember-joinery/ember'
 import {
   isEmpty,
@@ -11,10 +11,11 @@ import {
 } from '../-private/options.ts'
 
 export interface NativeSelectControlSignature {
-  Args: ControlSignature['Args'] & {
-    /** NativeSelect's `@size`: `default` or `sm`. */
-    size?: NativeSelectSize
-  }
+  Args: ControlSignature['Args'] &
+    OptionArgs & {
+      /** NativeSelect's `@size`: `default` or `sm`. */
+      size?: NativeSelectSize
+    }
   Element: HTMLSelectElement
 }
 

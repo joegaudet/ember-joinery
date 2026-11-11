@@ -1,5 +1,5 @@
 import Component from '@glimmer/component'
-import type { ControlSignature } from '@ember-formwright/ember'
+import type { ControlSignature, OptionArgs } from '@ember-formwright/ember'
 import { ToggleGroup, type ToggleSize, type ToggleVariant } from '@ember-joinery/ember'
 import {
   isEmpty,
@@ -11,21 +11,22 @@ import {
 } from '../-private/options.ts'
 
 export interface ToggleGroupControlSignature {
-  Args: ControlSignature['Args'] & {
-    /**
-     * Whether several options can be pressed at once. Default: whether the field's value is a
-     * list. A single toggle group stores the option pressed, or `null`; a multiple one, a list.
-     */
-    multiple?: boolean
-    /** The items' `@variant`: `default` or `outline`. */
-    variant?: ToggleVariant
-    /** The items' `@size`: `default`, `sm` or `lg`. */
-    size?: ToggleSize
-    /** The gap between the items, as ToggleGroup's `@spacing`. */
-    spacing?: number
-    /** `horizontal` (the default) or `vertical`, for the arrow keys and the layout. */
-    orientation?: 'horizontal' | 'vertical'
-  }
+  Args: ControlSignature['Args'] &
+    OptionArgs & {
+      /**
+       * Whether several options can be pressed at once. Default: whether the field's value is a
+       * list. A single toggle group stores the option pressed, or `null`; a multiple one, a list.
+       */
+      multiple?: boolean
+      /** The items' `@variant`: `default` or `outline`. */
+      variant?: ToggleVariant
+      /** The items' `@size`: `default`, `sm` or `lg`. */
+      size?: ToggleSize
+      /** The gap between the items, as ToggleGroup's `@spacing`. */
+      spacing?: number
+      /** `horizontal` (the default) or `vertical`, for the arrow keys and the layout. */
+      orientation?: 'horizontal' | 'vertical'
+    }
   Blocks: {
     /**
      * What each item shows, an icon or text, given its option. Default: the option's label.

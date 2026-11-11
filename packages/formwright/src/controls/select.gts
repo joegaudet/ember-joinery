@@ -1,5 +1,5 @@
 import Component from '@glimmer/component'
-import type { ControlSignature } from '@ember-formwright/ember'
+import type { ControlSignature, OptionArgs } from '@ember-formwright/ember'
 import { Select, type SelectBlockParams, type SelectSize } from '@ember-joinery/ember'
 import type { SelectPosition } from '@ember-joinery/primitives/select'
 import {
@@ -12,12 +12,13 @@ import {
 } from '../-private/options.ts'
 
 export interface SelectControlSignature {
-  Args: ControlSignature['Args'] & {
-    /** Where the list opens: `item-aligned` (the default), over the trigger, or `popper`, below it. */
-    position?: SelectPosition
-    /** The trigger's `@size`: `default` or `sm`. */
-    size?: SelectSize
-  }
+  Args: ControlSignature['Args'] &
+    OptionArgs & {
+      /** Where the list opens: `item-aligned` (the default), over the trigger, or `popper`, below it. */
+      position?: SelectPosition
+      /** The trigger's `@size`: `default` or `sm`. */
+      size?: SelectSize
+    }
   Blocks: {
     /**
      * The list's items, instead of one per option: the Select's parts, to write them as a

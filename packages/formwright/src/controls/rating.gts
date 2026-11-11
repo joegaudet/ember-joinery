@@ -1,5 +1,5 @@
 import Component from '@glimmer/component'
-import type { ControlSignature } from '@ember-formwright/ember'
+import type { ControlSignature, RangeArgs } from '@ember-formwright/ember'
 import { Icon, type IconNode, type RatingSize } from '@ember-joinery/ember'
 import { Rating, defaultRatingItemLabel, ratingPercent } from '@ember-joinery/primitives/rating'
 import { VisuallyHidden } from '@ember-joinery/primitives/visually-hidden'
@@ -7,14 +7,15 @@ import { Star } from 'lucide'
 import { toNumber } from '../-private/options.ts'
 
 export interface RatingControlSignature {
-  Args: ControlSignature<number | null>['Args'] & {
-    /** Its stars' size, as Rating's `@size`: `sm` 16px, `default` 20px, `lg` 24px. */
-    size?: RatingSize
-    /** The star: a `lucide` icon. Default lucide's `Star`. */
-    icon?: IconNode
-    /** Each star's name for assistive technology. Default `1 star`, `2 stars`… */
-    itemLabel?: (value: number) => string
-  }
+  Args: ControlSignature<number | null>['Args'] &
+    Pick<RangeArgs, 'max' | 'step'> & {
+      /** Its stars' size, as Rating's `@size`: `sm` 16px, `default` 20px, `lg` 24px. */
+      size?: RatingSize
+      /** The star: a `lucide` icon. Default lucide's `Star`. */
+      icon?: IconNode
+      /** Each star's name for assistive technology. Default `1 star`, `2 stars`… */
+      itemLabel?: (value: number) => string
+    }
   /** The Rating's root, a `<fieldset>` of the stars' radios. */
   Element: HTMLFieldSetElement
 }

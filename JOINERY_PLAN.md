@@ -596,7 +596,10 @@ Joe asked for the whole plan to be built by subagents without feedback, as one b
     setting up trusted publishers, and pushing the tag;
   - required status checks on `main`;
   - setting the repository's Pages source to "GitHub Actions", so `pages.yml` can deploy;
-  - merging the sibling PRs on ember-formwright and real-enums.
+  - merging the sibling PRs on ember-formwright and real-enums;
+  - releasing Formwright 2.0 (joegaudet/ember-formwright#34, typed controls), then running
+    `pnpm install` here so the lockfile takes `@ember-formwright/*@^2.0.0`: the typed-controls
+    branch asks for 2.0, which CI can't install until it is published.
 
 ## The gate (CONTRIBUTING.md)
 

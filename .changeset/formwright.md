@@ -14,7 +14,9 @@ under a FieldLegend for a group control, in each control's orientation, or
 `@layout="joinery-vertical"`, `joinery-horizontal` or `joinery-responsive`.
 `registerJoineryControls({ only, except })` and `registerJoineryLayouts()` register them alone, each
 control is exported for `@control={{…}}`, and `asFieldErrors` makes a layout of your own's errors a
-FieldError. A textarea field's `@showCount` shows its count in an Input Group addon, as Formwright's
+FieldError. It needs Formwright 2, whose fields type their control against their path: the package declares
+each of its names to Formwright's types, so a field's path must hold what its control stores, and
+it takes only that control's args. A textarea field's `@showCount` shows its count in an Input Group addon, as Formwright's
 own textarea shows one. Its `/test-support` has a field harness for each control on Formwright's
 `FieldHarness` (`InputFieldHarness`, `SelectFieldHarness`, `RadioGroupFieldHarness`,
 `DatePickerFieldHarness`…), each reaching Joinery's own harness for its component, and `@form` and

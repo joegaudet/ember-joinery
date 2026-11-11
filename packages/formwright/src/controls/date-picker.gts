@@ -7,6 +7,8 @@ import type { CalendarValue, CaptionLayout, Matcher } from '@ember-joinery/primi
 
 export interface DatePickerControlSignature {
   Args: ControlSignature<Date | null>['Args'] & {
+    /** Writes the trigger's date. Default the browser's locale. */
+    locale?: string
     /** How the trigger writes the date. Default: Intl's long date in `@locale` (`November 10, 2026`). */
     formatDate?: (date: Date) => string
     /** The days that can't be picked, as Calendar's `@disabled`. */

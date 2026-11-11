@@ -17,7 +17,7 @@ const marks = [
 ]
 
 class Text {
-  @tracked size = 'md'
+  @tracked size: string | null = 'md'
   @tracked marks = ['bold']
   @tracked smallCaps = false
 }

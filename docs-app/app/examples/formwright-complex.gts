@@ -50,7 +50,12 @@ const formSchema = z.object({
  * form-next-complex is another form on the same fields: formwright-next-complex.
  */
 export default class FormwrightComplex extends Component {
-  model = { plan: 'basic', billingPeriod: '', addons: [] as string[], emailNotifications: false }
+  model = {
+    plan: 'basic',
+    billingPeriod: '' as string | null,
+    addons: [] as string[],
+    emailNotifications: false,
+  }
 
   <template>
     <Card class="w-full max-w-sm" as |c|>

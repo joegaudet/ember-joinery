@@ -123,8 +123,9 @@ module('Integration | formwright | harnesses', function (hooks) {
 
   test('registerJoineryControls() can leave out or pick controls', async function (assert) {
     try {
-      registerControl('input', Input)
-      registerControl('select', Select)
+      // Formwright's own controls, under the names Joinery's types declare as its own.
+      registerControl<string>('input', Input)
+      registerControl<string>('select', Select)
       registerJoineryControls({ except: ['select'] })
       assert.strictEqual(lookupControl('input'), InputControl)
       assert.strictEqual(lookupControl('select'), Select, "Formwright's own select stays")

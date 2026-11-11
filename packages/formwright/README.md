@@ -43,7 +43,9 @@ import { Button, FieldGroup, asButton } from '@ember-joinery/ember'
   `number`, `textarea`, `currency`, `select`, `checkbox`, `checkbox-group`, `radio`, `range`),
   and Joinery adds `native-select`, `combobox`, `switch`, `toggle`, `toggle-group`, `slider`,
   `rating`, `input-otp` and `date-picker`. Each is also exported (`SelectControl`…) and listed
-  in `joineryControls`. FileDrop isn't a control, since it keeps no value; the guide's Controls
+  in `joineryControls`. Their names are declared to Formwright's types, so Glint checks that a
+  field's path holds what its control stores and that it passes only the control's args.
+  FileDrop isn't a control, since it keeps no value; the guide's Controls
   page says more.
 - **The layout**, `JoineryFieldLayout` (`@layout="joinery"`, `"joinery-vertical"`,
   `"joinery-horizontal"`, `"joinery-responsive"`), renders shadcn's `Field`, `FieldLabel`,

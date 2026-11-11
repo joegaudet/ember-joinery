@@ -655,7 +655,13 @@ module('Integration | formwright | controls', function (hooks) {
           >
             <FieldGroup>
               <f.Field @for="bio" @label="Bio" />
-              <f.Field @for="language" @control="select" @label="Language" @options={{languages}} />
+              <f.Field
+                @for="language"
+                @control="select"
+                @label="Language"
+                @options={{languages}}
+                @storeKey={{true}}
+              />
               <f.Field
                 @for="framework"
                 @control="combobox"
@@ -905,7 +911,13 @@ module('Integration | formwright | controls', function (hooks) {
           <f.Field @for="about" @control="textarea" @label="About" />
           <f.Field @for="seats" @control="number" @label="Seats" />
           <f.Field @for="budget" @control="currency" @label="Budget" @locale="en-US" />
-          <f.Field @for="language" @control="select" @label="Language" @options={{languages}} />
+          <f.Field
+            @for="language"
+            @control="select"
+            @label="Language"
+            @options={{languages}}
+            @storeKey={{true}}
+          />
           <f.Field
             @for="nativeLanguage"
             @control="native-select"
@@ -922,7 +934,13 @@ module('Integration | formwright | controls', function (hooks) {
           <f.Field @for="agree" @control="checkbox" @label="Agree" />
           <f.Field @for="notify" @control="switch" @label="Notify" />
           <f.Field @for="bold" @control="toggle" @label="Bold" />
-          <f.Field @for="plan" @control="radio" @label="Plan" @options={{plans}} />
+          <f.Field
+            @for="plan"
+            @control="radio"
+            @label="Plan"
+            @options={{plans}}
+            @storeKey={{true}}
+          />
           <f.Field
             @for="tasks"
             @control="checkbox-group"

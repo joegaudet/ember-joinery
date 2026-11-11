@@ -4,25 +4,25 @@ Joinery's inputs as Formwright controls (all but FileDrop; see [Not here](#not-h
 `setupJoineryForms()` (or `registerJoineryControls()`) registers them, so a field names one
 with `@control`:
 
-| `@control`                                                                                                      | Joinery component                                 | Stores                                       |
-| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------- |
-| `input` (the default), `text`, `email`, `password`, `search`, `tel`, `url`, `color`, `date`, `datetime`, `time` | [Input](/components/input.md)                     | a string                                     |
-| `number`                                                                                                        | [Input](/components/input.md), `type="number"`    | a number, or `null` while empty              |
-| `currency`                                                                                                      | Formwright's currency control, as Joinery's Input | a number, shown in `@currency` and `@locale` |
-| `textarea`                                                                                                      | [Textarea](/components/textarea.md)               | a string                                     |
-| `select`                                                                                                        | [Select](/components/select.md)                   | the option (or its key, `@storeKey`)         |
-| `native-select`                                                                                                 | [Native Select](/components/native-select.md)     | the option, or `null`                        |
-| `combobox`                                                                                                      | [Combobox](/components/combobox.md)               | the option, or `null`                        |
-| `checkbox`                                                                                                      | [Checkbox](/components/checkbox.md)               | `true` or `false`                            |
-| `checkbox-group`                                                                                                | a [Checkbox](/components/checkbox.md) per option  | the options checked                          |
-| `radio`                                                                                                         | [Radio Group](/components/radio-group.md)         | the option chosen                            |
-| `switch`                                                                                                        | [Switch](/components/switch.md)                   | `true` or `false`                            |
-| `toggle`                                                                                                        | [Toggle](/components/toggle.md)                   | `true` (pressed) or `false`                  |
-| `toggle-group`                                                                                                  | [Toggle Group](/components/toggle-group.md)       | the option pressed, or a list of them        |
-| `slider`, `range`                                                                                               | [Slider](/components/slider.md)                   | a number, or a list for a range              |
-| `rating`                                                                                                        | [Rating](/components/rating.md)                   | the rating, a number, or `null` for none     |
-| `input-otp`                                                                                                     | [Input OTP](/components/input-otp.md)             | the code, a string                           |
-| `date-picker`                                                                                                   | [Date Picker](/components/date-picker.md)         | a `Date`, or `null`                          |
+| `@control`                                                                                                      | Joinery component                                 | Stores                                          |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------- |
+| `input` (the default), `text`, `email`, `password`, `search`, `tel`, `url`, `color`, `date`, `datetime`, `time` | [Input](/components/input.md)                     | a string                                        |
+| `number`                                                                                                        | [Input](/components/input.md), `type="number"`    | a number, or `null` while empty                 |
+| `currency`                                                                                                      | Formwright's currency control, as Joinery's Input | a number, shown in `@currency` and `@locale`    |
+| `textarea`                                                                                                      | [Textarea](/components/textarea.md)               | a string                                        |
+| `select`                                                                                                        | [Select](/components/select.md)                   | the option (or its key, `@storeKey`), or `null` |
+| `native-select`                                                                                                 | [Native Select](/components/native-select.md)     | the option, or `null`                           |
+| `combobox`                                                                                                      | [Combobox](/components/combobox.md)               | the option, or `null`                           |
+| `checkbox`                                                                                                      | [Checkbox](/components/checkbox.md)               | `true` or `false`                               |
+| `checkbox-group`                                                                                                | a [Checkbox](/components/checkbox.md) per option  | the options checked                             |
+| `radio`                                                                                                         | [Radio Group](/components/radio-group.md)         | the option chosen                               |
+| `switch`                                                                                                        | [Switch](/components/switch.md)                   | `true` or `false`                               |
+| `toggle`                                                                                                        | [Toggle](/components/toggle.md)                   | `true` (pressed) or `false`                     |
+| `toggle-group`                                                                                                  | [Toggle Group](/components/toggle-group.md)       | the option pressed, or a list of them           |
+| `slider`, `range`                                                                                               | [Slider](/components/slider.md)                   | a number, or a list for a range                 |
+| `rating`                                                                                                        | [Rating](/components/rating.md)                   | the rating, a number, or `null` for none        |
+| `input-otp`                                                                                                     | [Input OTP](/components/input-otp.md)             | the code, a string                              |
+| `date-picker`                                                                                                   | [Date Picker](/components/date-picker.md)         | a `Date`, or `null`                             |
 
 Formwright's own names (`input` and its types, `number`, `textarea`, `currency`, `select`,
 `checkbox`, `checkbox-group`, `radio` and `range`) render Joinery's component in place of
@@ -34,13 +34,26 @@ setupJoineryForms({ except: ['select'] }) // or registerJoineryControls({ only: 
 
 Each control is also exported (`SelectControl`, `SwitchControl`…), for `@control={{SelectControl}}`
 or `registerControl('language', SelectControl)`, and `joineryControls` lists them by name. A
-control takes the field's arguments (`@options`, `@optionKey`, `@optionLabel`, `@storeKey`,
-`@placeholder`, `@min`, `@max`, `@step`, `@maxLength`, `@disabled`, `@readonly`, `@required`),
-and its own through the field's block, `<field.Control @variant="card" />`. Attributes on
+control takes the field's arguments it declares (`@options`, `@optionKey`, `@optionLabel`,
+`@storeKey`, `@min`, `@max`, `@step`, `@maxLength`, as fits it, and every field's `@placeholder`,
+`@disabled`, `@readonly`, `@required`), and its own through the field's block,
+`<field.Control @variant="card" />`. Attributes on
 `field.Control` go on the control's focusable element (an input, a select's trigger, a
 combobox's input, a date picker's button), or, for a control made of several (a radio group,
 checkbox group, toggle group, slider or rating), on the element around them: the Radio Group's
 or Toggle Group's root, the checkboxes' `FieldGroup`, or the Slider's or Rating's root.
+
+## Typed controls
+
+Importing `@ember-joinery/formwright` declares these names to Formwright's types, so Glint checks
+each field against its control: the path must hold what the control stores (the Stores column),
+and the field and its `field.Control` take only that control's arguments. `@control="switch"` on a
+string path, `@control="rating"` on a `number` that can't be `null`, or `@rows` on a switch's
+control are type errors. The names are declared whichever `registerJoineryControls({ only, except })`
+registers; a name you leave out to keep Formwright's own control is still typed as Joinery's. Under
+a name of your own, declare it as Formwright's
+[Custom controls](https://joegaudet.com/ember-formwright/guide/controls/custom-controls.md) page
+shows.
 
 The [Forms](/formwright/forms.md) page shows the input, textarea, select, checkbox, checkbox
 group, radio group and switch, each in one of upstream's forms. Joinery's other inputs follow.

@@ -1,15 +1,16 @@
 import Component from '@glimmer/component'
-import type { ControlSignature } from '@ember-formwright/ember'
+import type { ControlSignature, RangeArgs } from '@ember-formwright/ember'
 import { Slider, defaultSliderThumbLabel } from '@ember-joinery/primitives/slider'
 import { toNumber } from '../-private/options.ts'
 
 export interface SliderControlSignature {
-  Args: ControlSignature<number | number[] | null>['Args'] & {
-    /** Called once a drag or a key press ends, with the value it ended on, as Slider's. */
-    onValueCommit?: (value: number[]) => void
-    /** The Slider's `@orientation`: `horizontal` (the default) or `vertical`. */
-    orientation?: 'horizontal' | 'vertical'
-  }
+  Args: ControlSignature<number | number[] | null>['Args'] &
+    RangeArgs & {
+      /** Called once a drag or a key press ends, with the value it ended on, as Slider's. */
+      onValueCommit?: (value: number[]) => void
+      /** The Slider's `@orientation`: `horizontal` (the default) or `vertical`. */
+      orientation?: 'horizontal' | 'vertical'
+    }
   /** The Slider's root (size it with a class); the field's id is on its first thumb. */
   Element: HTMLElement
 }

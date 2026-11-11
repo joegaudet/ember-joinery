@@ -51,7 +51,7 @@ const formSchema = z.object({
 
 class Subscription {
   @tracked plan = 'basic'
-  @tracked billingPeriod = 'monthly'
+  @tracked billingPeriod: string | null = 'monthly'
   @tracked addons: string[] = []
   @tracked emailNotifications = false
 }

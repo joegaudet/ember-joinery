@@ -3,9 +3,9 @@
 shadcn/ui for Ember: every component on [ui.shadcn.com](https://ui.shadcn.com/), in modern Ember,
 on a headless primitives layer, and each with a test harness.
 
-> **Status: pre-release.** Nothing is published yet. The plan, and every decision behind it, is in
-> [JOINERY_PLAN.md](JOINERY_PLAN.md). The work lands as one stacked PR, and nothing publishes until
-> it has been reviewed and merged. The first release is 1.0.0.
+> **Status: 1.0.0 in review.** Every component is built, and nothing is published yet. The plan,
+> and every decision behind it, is in [JOINERY_PLAN.md](JOINERY_PLAN.md). The work is one stacked
+> PR, and nothing publishes until it has been reviewed and merged. The first release is 1.0.0.
 
 ## What it is
 

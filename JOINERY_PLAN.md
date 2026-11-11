@@ -1,7 +1,10 @@
 # Joinery: shadcn/ui for Ember, as a Formwright sibling
 
-Status: building (2026-11-08). The plan was agreed through a 40-question intake. It is being built
-unattended by subagents onto one stacked PR; see "Autonomous execution".
+Status: built, in review (2026-11-11). The plan was agreed through a 40-question intake and built
+unattended by subagents onto one stacked PR, now ready for review; see "Autonomous execution".
+Every docs-page example and chart is mapped and compared (CI's parity runs with
+`--require-complete`), and upstream had nothing new since the pins. Nothing is published; what
+stays with Joe is listed under "Autonomous execution".
 
 Deviations from the intake, and why:
 
@@ -707,6 +710,6 @@ workspace.
 
 ## Next steps
 
-1. The workflow builds every unit onto `build/joinery-1.0`, ticking the PR's checklist as it goes.
-2. When the last unit lands, the PR is marked ready for review. Joe reviews it, merges it, and
-   releases 1.0.0.
+1. Done: every unit is on `build/joinery-1.0`, and the PR is ready for review.
+2. Joe reviews it, merges it, and releases 1.0.0 (see "What stays with Joe" and "Releasing" in
+   CONTRIBUTING.md), then merges the sibling PRs on ember-formwright and real-enums.

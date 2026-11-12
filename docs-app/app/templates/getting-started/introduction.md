@@ -16,7 +16,8 @@ written the modern Ember way, on a headless primitives layer, and each with a te
   offers. Use it on its own when you bring your own styles.
 - **A harness for every component.** `@ember-joinery/test-support` drives each component the
   way a user does, and reads its state through ARIA, so every test checks the ARIA contract too.
-- **Accessible.** WCAG 2.2 AA, the WAI-ARIA keyboard patterns, and right-to-left layouts.
+- **Accessible.** WCAG 2.2 AA, the WAI-ARIA keyboard patterns, and right-to-left layouts, with
+  an axe audit in every test. See [Accessibility](accessibility.md).
 
 <div class="callout">
 

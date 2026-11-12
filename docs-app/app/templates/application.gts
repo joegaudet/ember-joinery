@@ -142,6 +142,8 @@ export default class ApplicationTemplate extends Component {
         <p>
           More open source from
           <a href="https://joegaudet.com/">Joe Gaudet</a>:
+          <a href="https://joegaudet.com/harnessed/">harnessed</a>
+          ·
           <a href="https://joegaudet.com/ember-formwright/">Formwright</a>
           ·
           <a href="https://joegaudet.com/real-enums/">real-enums</a>

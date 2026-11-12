@@ -25,6 +25,10 @@ Deviations from the intake, and why:
   which isn't published: `@ember-joinery/test-support` has `setupTranslator()` and a
   pseudo-locale of its own, and every component passes the pseudo-locale test (item 8 of the
   definition of done).
+- **The site leads with accessibility** (2026-11-11, Joe's ask). `docs/site/` gains an
+  accessibility section after "why", its "Accessible" card moves first, and the guide gains
+  Getting started → Accessibility. The siblings section adds harnessed, and every sibling site
+  links back to Joinery.
 - **One stacked PR, built unattended** (replaces decisions 8 and 38). Joe asked for subagents to
   work through everything without feedback, as one big stacked PR. Each unit lands as its own
   commits on `build/joinery-1.0`. Nothing merges to `main` and nothing publishes until Joe has
@@ -416,12 +420,13 @@ current counts).
 
 `docs/site/index.html` is hand-written and styled with Joinery's own `tokens.css` and
 `joinery.css` (copied from the build by `site-css.mjs`), its components written out as
-Joinery's markup. Sections: a hero (with the dovetail logo), why Joinery, install, usage, theming
+Joinery's markup. Sections: a hero (with the dovetail logo), why Joinery, accessibility, install,
+usage, theming
 (a picker that restyles the whole page in any of the eight styles and seven base colours),
 a component grid (screenshots made by `site-screenshots.mjs`, which also renders the social
 card), testing with harnesses, Formwright, the live demo (`test-app` built into
 `docs/site/demo/`: the dashboard and settings blocks), the guide, and siblings (Formwright,
-real-enums). The footer credits shadcn/ui and ember-primitives. `scripts/site.test.mjs` holds
+real-enums, harnessed). The footer credits shadcn/ui and ember-primitives. `scripts/site.test.mjs` holds
 the page to the repository. `pages.yml` copies the CSS in, builds the demo and guide, then
 deploys `docs/site`.
 

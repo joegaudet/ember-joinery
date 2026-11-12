@@ -24,6 +24,8 @@ import {
   type StaticPartSignature,
 } from '../-private/static-part.gts'
 import { taggedPart, type TaggedPartSignature } from '../-private/tagged-part.gts'
+import { t, translate, type Message } from '@ember-joinery/primitives/i18n'
+import { messages as primitiveMessages } from '@ember-joinery/primitives/messages'
 
 export type {
   QuestionnaireChoiceDefinition,
@@ -70,7 +72,7 @@ class QuestionnaireProgress extends Component<QuestionnaireProgressSignature> {
       @tag="div"
       class="jn-questionnaire-progress"
       data-slot="questionnaire-progress"
-      aria-label={{if @label @label "Questionnaire progress"}}
+      aria-label={{if @label @label (t primitiveMessages.questionnaireProgressLabel)}}
       aria-valuetext={{this.text}}
       ...attributes
       {{@questionnaire.progress}}
@@ -475,11 +477,11 @@ export const QuestionnaireActions: TOC<StaticPartSignature> = staticPart(ACTIONS
 type NavigationKind = 'previous' | 'skip' | 'next' | 'submit'
 
 /** Each navigation button's default text and Button variant, as upstream's. */
-const NAVIGATION: Record<NavigationKind, { label: string; variant: ButtonVariant }> = {
-  previous: { label: 'Previous', variant: 'outline' },
-  skip: { label: 'Skip', variant: 'outline' },
-  next: { label: 'Next', variant: 'default' },
-  submit: { label: 'Submit', variant: 'default' },
+const NAVIGATION: Record<NavigationKind, { label: Message; variant: ButtonVariant }> = {
+  previous: { label: primitiveMessages.questionnairePrevious, variant: 'outline' },
+  skip: { label: primitiveMessages.questionnaireSkip, variant: 'outline' },
+  next: { label: primitiveMessages.questionnaireNext, variant: 'default' },
+  submit: { label: primitiveMessages.questionnaireSubmit, variant: 'default' },
 }
 
 /** What a navigation button takes, as arguments or as its modifier's named arguments. */
@@ -559,7 +561,7 @@ class QuestionnaireNavigation extends Component<QuestionnaireNavigationSignature
   }
 
   get defaultLabel(): string {
-    return NAVIGATION[this.args.kind].label
+    return translate(this, NAVIGATION[this.args.kind].label)
   }
 
   <template>

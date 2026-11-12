@@ -61,7 +61,7 @@ export default class Calendar extends Component<CalendarSignature> {
     }
   }
 
-  state = new CalendarState(() => this.options)
+  state = new CalendarState(() => this.options, undefined, this)
 
   get navButtonClass(): string {
     return buttonClasses({ variant: this.args.buttonVariant ?? 'ghost' })

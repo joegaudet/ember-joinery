@@ -71,7 +71,7 @@ module('Acceptance | API reference', function (hooks) {
     await waitFor('[data-test-api-module]', { timeout: 20000 })
     assert.deepEqual(
       findAll('[data-test-api-module]').map(module => module.getAttribute('data-test-api-module')),
-      ['components/carousel', 'embla', 'test-support'],
+      ['components/carousel', 'embla', 'messages', 'test-support'],
     )
     await open('test-support', `${exportOf('CarouselHarness')} .typedoc__declaration`)
     assert

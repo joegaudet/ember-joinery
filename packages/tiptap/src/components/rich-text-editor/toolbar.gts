@@ -29,6 +29,8 @@ import {
   type RichTextTool,
   type ToolSpec,
 } from './tools.ts'
+import { translate } from '@ember-joinery/primitives/i18n'
+import { messages } from '../../messages.ts'
 
 /** A control the toolbar shows, with what it needs to draw itself. */
 interface ShownTool {
@@ -101,7 +103,7 @@ export default class RichTextToolbar extends Component<RichTextToolbarSignature>
           return {
             spec,
             label: labels[spec.name],
-            keys: shortcutKeys(spec.shortcut),
+            keys: shortcutKeys(spec.shortcut, this),
             ariaKeys: ariaShortcut(spec.shortcut),
           }
         })
@@ -141,7 +143,7 @@ export default class RichTextToolbar extends Component<RichTextToolbarSignature>
     const option = (value: BlockType, label: string): BlockTypeOption => ({
       value,
       label,
-      keys: shortcutKeys(blockTypeShortcut(value)).join(''),
+      keys: shortcutKeys(blockTypeShortcut(value), this).join(''),
     })
     return [
       option('paragraph', labels.paragraph),
@@ -163,7 +165,7 @@ export default class RichTextToolbar extends Component<RichTextToolbarSignature>
   blockTypeName = (revision: number): string => {
     const text = this.blockTypeText(revision)
     const name = this.args.labels.blockType
-    return text === name ? name : `${name}: ${text}`
+    return text === name ? name : translate(this, messages.blockTypeName, { name, style: text })
   }
 
   headingLabel(type: BlockType): string {

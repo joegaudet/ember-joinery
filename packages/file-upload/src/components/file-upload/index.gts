@@ -7,14 +7,7 @@ import { modifier } from 'ember-modifier'
 import FileUploadDropzone from './dropzone.gts'
 import FileUploadList from './list.gts'
 import FileUploadQueue from './queue.gts'
-import {
-  defaultLeftOutLabel,
-  defaultProgressLabel,
-  defaultRejectedLabel,
-  defaultRemoveLabel,
-  defaultRetryLabel,
-  type FileUploadLabels,
-} from './labels.ts'
+import type { FileUploadLabels } from './labels.ts'
 import {
   FileUploadState,
   type FileEntry,
@@ -24,6 +17,8 @@ import {
   type UploadFn,
 } from './state.ts'
 import type { FileUploadContext } from './context.ts'
+import { translate, translator } from '@ember-joinery/primitives/i18n'
+import { messages } from '../../messages.ts'
 
 export type { FileEntry, FileState, FileUploadLabels, Upload, UploadFn }
 export type { FileUploadDropzoneSignature, FileUploadDropzoneState } from './dropzone.gts'
@@ -81,7 +76,7 @@ export interface FileUploadSignature<T = File> {
     sizeOf?: (value: T) => number | undefined
     /** A URL of an image of a value. Default: an image file's own contents. */
     previewOf?: (value: T) => string | undefined
-    /** The locale sizes are written in (`Intl`). Default: the browser's. */
+    /** The locale sizes are written in (`Intl`). Default: the app's translator's, or the browser's. */
     locale?: string
     /** The file input's `id`, so a `<label for>` (a FieldLabel) names it. */
     id?: string
@@ -195,24 +190,31 @@ export default class FileUpload<T = File> extends Component<FileUploadSignature<
       nameOf: () => this.args.nameOf,
       sizeOf: () => this.args.sizeOf,
       previewOf: () => this.args.previewOf,
-      uploadFailedLabel: () => this.args.uploadFailedLabel,
-      unknownKindLabel: () => this.args.unknownKindLabel,
-      locale: () => this.args.locale,
+      uploadFailedLabel: () =>
+        this.args.uploadFailedLabel ?? translate(this, messages.uploadFailed),
+      unknownKindLabel: () => this.args.unknownKindLabel ?? translate(this, messages.unknownKind),
+      locale: () => this.args.locale ?? translator(this)?.locale,
     })
   }
 
   get labels(): FileUploadLabels {
     const multiple = this.state.multiple
     return {
-      prompt: this.args.prompt ?? (multiple ? 'Choose files' : 'Choose a file'),
-      hint: this.args.hint ?? 'or drag and drop here',
-      dropLabel: this.args.dropLabel ?? 'Drop to add',
+      prompt:
+        this.args.prompt ?? translate(this, multiple ? messages.promptMultiple : messages.prompt),
+      hint: this.args.hint ?? translate(this, messages.hint),
+      dropLabel: this.args.dropLabel ?? translate(this, messages.dropLabel),
       description: this.args.description,
-      rejectedLabel: this.args.rejectedLabel ?? defaultRejectedLabel,
-      leftOutLabel: this.args.leftOutLabel ?? defaultLeftOutLabel,
-      removeLabel: this.args.removeLabel ?? defaultRemoveLabel,
-      retryLabel: this.args.retryLabel ?? defaultRetryLabel,
-      progressLabel: this.args.progressLabel ?? defaultProgressLabel,
+      rejectedLabel:
+        this.args.rejectedLabel ??
+        (names => translate(this, messages.rejected, { names: names.join(', ') })),
+      leftOutLabel:
+        this.args.leftOutLabel ??
+        (names => translate(this, messages.leftOut, { names: names.join(', ') })),
+      removeLabel: this.args.removeLabel ?? (name => translate(this, messages.remove, { name })),
+      retryLabel: this.args.retryLabel ?? (name => translate(this, messages.retry, { name })),
+      progressLabel:
+        this.args.progressLabel ?? (name => translate(this, messages.progress, { name })),
     }
   }
 

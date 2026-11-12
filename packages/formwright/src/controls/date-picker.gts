@@ -4,6 +4,8 @@ import { ChevronDown } from 'lucide'
 import type { ControlSignature } from '@ember-formwright/ember'
 import { Button, Calendar, Icon, Popover } from '@ember-joinery/ember'
 import type { CalendarValue, CaptionLayout, Matcher } from '@ember-joinery/primitives/calendar'
+import { translate, translator } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 export interface DatePickerControlSignature {
   Args: ControlSignature<Date | null>['Args'] & {
@@ -38,11 +40,16 @@ export class DatePickerControl extends Component<DatePickerControlSignature> {
     const date = this.date
     if (!date) return ''
     if (this.args.formatDate) return this.args.formatDate(date)
-    return new Intl.DateTimeFormat(this.args.locale, { dateStyle: 'long' }).format(date)
+    return new Intl.DateTimeFormat(this.locale, { dateStyle: 'long' }).format(date)
+  }
+
+  /** `@locale`, else the app's translator's. */
+  get locale(): string | undefined {
+    return this.args.locale ?? translator(this)?.locale
   }
 
   get placeholder(): string {
-    return this.args.placeholder ?? 'Pick a date'
+    return this.args.placeholder ?? translate(this, messages.datePickerPlaceholder)
   }
 
   get disabled(): boolean {
@@ -85,7 +92,7 @@ export class DatePickerControl extends Component<DatePickerControlSignature> {
           @captionLayout={{@captionLayout}}
           @startMonth={{@startMonth}}
           @endMonth={{@endMonth}}
-          @locale={{@locale}}
+          @locale={{this.locale}}
         />
       </p.Content>
     </Popover>

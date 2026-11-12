@@ -14,6 +14,8 @@ import type { PartModifier } from '@ember-joinery/primitives/part'
 import { VisuallyHidden } from '@ember-joinery/primitives/visually-hidden'
 import Button from './button.gts'
 import Icon, { type IconNode } from './icon.gts'
+import { t } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 /** Whether an optional flag that defaults to on is on. */
 const isOn = (flag: boolean | undefined): boolean => flag !== false
@@ -63,7 +65,7 @@ const DialogContent: TOC<DialogContentSignature> = <template>
         {{on "click" (fn @dialog.setOpen false)}}
       >
         <Icon @icon={{if @closeIcon @closeIcon X}} />
-        <VisuallyHidden>{{if @closeLabel @closeLabel "Close"}}</VisuallyHidden>
+        <VisuallyHidden>{{if @closeLabel @closeLabel (t messages.dialogClose)}}</VisuallyHidden>
       </Button>
     {{/if}}
   </@dialog.Content>
@@ -97,7 +99,11 @@ const DialogFooter: TOC<DialogFooterSignature> = <template>
   <div class="jn-dialog-footer" data-slot="dialog-footer" ...attributes>
     {{yield}}
     {{#if @showCloseButton}}
-      <Button @variant="outline" {{@close}}>{{if @closeLabel @closeLabel "Close"}}</Button>
+      <Button @variant="outline" {{@close}}>{{if
+          @closeLabel
+          @closeLabel
+          (t messages.dialogClose)
+        }}</Button>
     {{/if}}
   </div>
 </template>

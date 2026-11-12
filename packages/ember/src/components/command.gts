@@ -18,6 +18,8 @@ import type { PartModifier } from '@ember-joinery/primitives/part'
 import { visuallyHidden } from '@ember-joinery/primitives/visually-hidden'
 import Dialog from './dialog.gts'
 import Icon, { type IconNode } from './icon.gts'
+import { t } from '@ember-joinery/primitives/i18n'
+import { messages as primitiveMessages } from '@ember-joinery/primitives/messages'
 
 /** A press on the search icon's addon focuses the input, as upstream's InputGroupAddon does. */
 function focusInput(event: MouseEvent): void {
@@ -375,11 +377,11 @@ export class CommandDialog extends Component<CommandDialogSignature> {
         ...attributes
       >
         <d.Header {{visuallyHidden}}>
-          <d.Title>{{if @title @title "Command Palette"}}</d.Title>
+          <d.Title>{{if @title @title (t primitiveMessages.commandDialogTitle)}}</d.Title>
           <d.Description>{{if
               @description
               @description
-              "Search for a command to run..."
+              (t primitiveMessages.commandDialogDescription)
             }}</d.Description>
         </d.Header>
         {{yield (hash isOpen=d.isOpen open=d.open toggle=this.toggle setOpen=this.setOpen)}}

@@ -13,6 +13,8 @@ import {
   type TaggedPartSignature,
   type TaggedPartSpec,
 } from '../-private/tagged-part.gts'
+import { t, translate } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 const CONTENT = {
   tag: 'ul',
@@ -46,8 +48,8 @@ export interface PaginationStepOptions extends PaginationLinkOptions {
 }
 
 const STEPS = {
-  previous: { class: ' jn-pagination-previous', label: 'Go to previous page' },
-  next: { class: ' jn-pagination-next', label: 'Go to next page' },
+  previous: { class: ' jn-pagination-previous', label: messages.paginationPreviousLabel },
+  next: { class: ' jn-pagination-next', label: messages.paginationNextLabel },
 } as const
 
 function sizeOf(kind: PaginationLinkKind, size: ButtonSize | undefined): ButtonSize {
@@ -85,14 +87,18 @@ export interface PaginationLinkAttributes {
   [attribute: string]: string | undefined
 }
 
-/** The attributes a pagination link renders, as upstream's and for the pagination's harness. */
+/**
+ * The attributes a pagination link renders, as upstream's and for the pagination's harness. The
+ * previous and next links' default names are in `context`'s translator's words (English without).
+ */
 export function paginationLinkAttributes(
   kind: PaginationLinkKind = 'link',
   { isActive, size, label }: PaginationStepOptions = {},
+  context?: object,
 ): PaginationLinkAttributes {
   return {
     'aria-current': isActive ? 'page' : undefined,
-    'aria-label': kind === 'link' ? label : (label ?? STEPS[kind].label),
+    'aria-label': kind === 'link' ? label : (label ?? translate(context, STEPS[kind].label)),
     'data-slot': 'pagination-link',
     'data-active': isActive === undefined ? undefined : isActive ? 'true' : 'false',
     'data-variant': variantOf(isActive),
@@ -102,10 +108,12 @@ export function paginationLinkAttributes(
 }
 
 function linkModifier(kind: PaginationLinkKind): PartModifier<HTMLElement, PaginationStepOptions> {
-  return part<HTMLElement, PaginationStepOptions>(options => ({
-    class: paginationLinkClasses(kind, options),
-    attributes: paginationLinkAttributes(kind, options),
-  }))
+  return part<HTMLElement, PaginationStepOptions>(function (options) {
+    return {
+      class: paginationLinkClasses(kind, options),
+      attributes: paginationLinkAttributes(kind, options, this),
+    }
+  })
 }
 
 const attributesOf = (
@@ -114,6 +122,8 @@ const attributesOf = (
   size: ButtonSize | undefined,
   label?: string,
 ): PaginationLinkAttributes => paginationLinkAttributes(kind, { isActive, size, label })
+
+const labelOr = (label: string | undefined, fallback: string): string => label ?? fallback
 
 const classesOf = (
   kind: PaginationLinkKind,
@@ -165,7 +175,10 @@ export interface PaginationStepSignature {
 
 /** The previous page's link: an arrow, and `Previous` on wider screens. */
 const PaginationPrevious: TOC<PaginationStepSignature> = <template>
-  {{#let (attributesOf "previous" @isActive @size @label) as |a|}}
+  {{#let
+    (attributesOf "previous" @isActive @size (labelOr @label (t messages.paginationPreviousLabel)))
+    as |a|
+  }}
     <As
       @as={{@as}}
       @tag="a"
@@ -180,14 +193,21 @@ const PaginationPrevious: TOC<PaginationStepSignature> = <template>
       ...attributes
     >
       <Icon @icon={{if @icon @icon ChevronLeft}} data-icon="inline-start" class="jn-rtl-flip" />
-      <span class="jn-pagination-previous-text">{{if @text @text "Previous"}}</span>
+      <span class="jn-pagination-previous-text">{{if
+          @text
+          @text
+          (t messages.paginationPrevious)
+        }}</span>
     </As>
   {{/let}}
 </template>
 
 /** The next page's link: `Next` on wider screens, and an arrow. */
 const PaginationNext: TOC<PaginationStepSignature> = <template>
-  {{#let (attributesOf "next" @isActive @size @label) as |a|}}
+  {{#let
+    (attributesOf "next" @isActive @size (labelOr @label (t messages.paginationNextLabel)))
+    as |a|
+  }}
     <As
       @as={{@as}}
       @tag="a"
@@ -201,7 +221,7 @@ const PaginationNext: TOC<PaginationStepSignature> = <template>
       data-test-jn-part={{get a "data-test-jn-part"}}
       ...attributes
     >
-      <span class="jn-pagination-next-text">{{if @text @text "Next"}}</span>
+      <span class="jn-pagination-next-text">{{if @text @text (t messages.paginationNext)}}</span>
       <Icon @icon={{if @icon @icon ChevronRight}} data-icon="inline-end" class="jn-rtl-flip" />
     </As>
   {{/let}}
@@ -231,7 +251,7 @@ const PaginationEllipsis: TOC<PaginationEllipsisSignature> = <template>
     ...attributes
   >
     <Icon @icon={{if @icon @icon Ellipsis}} />
-    <VisuallyHidden>{{if @label @label "More pages"}}</VisuallyHidden>
+    <VisuallyHidden>{{if @label @label (t messages.paginationMore)}}</VisuallyHidden>
   </As>
 </template>
 
@@ -317,7 +337,7 @@ export interface PaginationSignature {
 const Pagination: TOC<PaginationSignature> = <template>
   <nav
     role="navigation"
-    aria-label={{if @label @label "pagination"}}
+    aria-label={{if @label @label (t messages.paginationLabel)}}
     data-slot="pagination"
     class="jn-pagination"
     data-test-jn="pagination"

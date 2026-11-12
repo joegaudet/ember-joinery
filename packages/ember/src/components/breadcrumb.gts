@@ -15,6 +15,8 @@ import {
   type TaggedPartSignature,
   type TaggedPartSpec,
 } from '../-private/tagged-part.gts'
+import { t } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 const LIST = {
   tag: 'ol',
@@ -116,7 +118,7 @@ const BreadcrumbEllipsis: TOC<BreadcrumbEllipsisSignature> = <template>
     ...attributes
   >
     <Icon @icon={{if @icon @icon Ellipsis}} />
-    <VisuallyHidden>{{if @label @label "More"}}</VisuallyHidden>
+    <VisuallyHidden>{{if @label @label (t messages.breadcrumbMore)}}</VisuallyHidden>
   </As>
 </template>
 
@@ -192,7 +194,7 @@ export interface BreadcrumbSignature {
  */
 const Breadcrumb: TOC<BreadcrumbSignature> = <template>
   <nav
-    aria-label={{if @label @label "breadcrumb"}}
+    aria-label={{if @label @label (t messages.breadcrumbLabel)}}
     data-slot="breadcrumb"
     class="jn-breadcrumb"
     data-test-jn="breadcrumb"

@@ -2,6 +2,8 @@ import Component from '@glimmer/component'
 import type { ControlSignature } from '@ember-formwright/ember'
 import { Slider, defaultSliderThumbLabel } from '@ember-joinery/primitives/slider'
 import { toNumber } from '../-private/options.ts'
+import { translate } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 export interface SliderControlSignature {
   Args: ControlSignature<number | number[] | null>['Args'] & {
@@ -47,8 +49,9 @@ export class SliderControl extends Component<SliderControlSignature> {
 
   thumbLabel = (index: number, count: number): string => {
     const label = this.args.label
-    if (!label) return defaultSliderThumbLabel(index, count)
-    return count === 1 ? label : `${label}, ${defaultSliderThumbLabel(index, count)}`
+    const thumb = defaultSliderThumbLabel(index, count, this)
+    if (!label) return thumb
+    return count === 1 ? label : translate(this, messages.sliderThumb, { label, thumb })
   }
 
   /** The field's id goes on the first thumb, the element its label and Formwright focus. */

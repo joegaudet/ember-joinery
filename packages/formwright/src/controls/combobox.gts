@@ -9,6 +9,8 @@ import {
   matches,
   toStored,
 } from '../-private/options.ts'
+import { translate } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 export interface ComboboxControlSignature {
   Args: ControlSignature['Args'] & {
@@ -39,7 +41,7 @@ export class ComboboxControl extends Component<ComboboxControlSignature> {
   }
 
   get emptyText(): string {
-    return this.args.emptyText ?? 'No items found.'
+    return this.args.emptyText ?? translate(this, messages.comboboxEmpty)
   }
 
   get disabled(): boolean {

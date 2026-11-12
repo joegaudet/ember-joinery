@@ -69,6 +69,7 @@ describe('docs/site sections', () => {
       sections.map(([, id]) => id),
       [
         'why',
+        'accessibility',
         'install',
         'usage',
         'theming',

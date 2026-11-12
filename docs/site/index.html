@@ -6,7 +6,7 @@
     <title>Joinery: shadcn/ui for Ember</title>
     <meta
       name="description"
-      content="Every shadcn/ui component and example for Ember: modern .gts components on a headless primitives layer, shadcn's own styles and theme tokens with Tailwind optional, and a test harness for every one."
+      content="Every shadcn/ui component and example for Ember: modern .gts components on a headless primitives layer, shadcn's own styles and theme tokens with Tailwind optional, and a test harness and an axe audit for every one, to WCAG 2.2 AA."
     />
     <link rel="canonical" href="https://joegaudet.com/ember-joinery/" />
     <!-- Link previews (Slack, X, LinkedIn, iMessage). The card's source is docs/social-card.html. -->
@@ -15,7 +15,7 @@
     <meta property="og:title" content="Joinery: shadcn/ui for Ember" />
     <meta
       property="og:description"
-      content="Every shadcn/ui component for Ember, on headless primitives, each with a test harness."
+      content="Every shadcn/ui component for Ember, accessible to WCAG 2.2 AA, each with a test harness."
     />
     <meta property="og:url" content="https://joegaudet.com/ember-joinery/" />
     <meta property="og:image" content="https://joegaudet.com/ember-joinery/social-card.png" />
@@ -71,6 +71,7 @@
         >
         <ul>
           <li class="wide-only roomy-only"><a href="#why">Why</a></li>
+          <li class="wide-only roomy-only"><a href="#accessibility">Accessibility</a></li>
           <li class="wide-only roomy-only"><a href="#install">Install</a></li>
           <li class="wide-only"><a href="#theming">Theming</a></li>
           <li class="wide-only"><a href="#components">Components</a></li>
@@ -145,8 +146,8 @@
           <p class="hero-sub">
             Every component and example on ui.shadcn.com, written as modern <code>.gts</code>
             components with yielded parts and Glint types, on a headless primitives layer. shadcn's
-            own styles and theme tokens, compiled so Tailwind is optional. And a test harness for
-            every one.
+            own styles and theme tokens, compiled so Tailwind is optional. Accessible to WCAG 2.2
+            AA, with a test harness and an axe audit for every one.
           </p>
           <div class="hero-actions">
             <a
@@ -378,6 +379,33 @@
                   stroke-linejoin="round"
                   aria-hidden="true"
                 >
+                  <circle cx="16" cy="4" r="1" />
+                  <path d="m18 19 1-7-6 1" />
+                  <path d="m5 8 3-3 5.5 3-2.36 3.5" />
+                  <path d="M4.24 14.5a5 5 0 0 0 6.88 6" />
+                  <path d="M13.76 17.5a5 5 0 0 0-6.88-6" />
+                </svg>
+                Accessible
+              </h3>
+              <p class="jn-card-description" data-slot="card-description">
+                WCAG 2.2 AA and the WAI-ARIA keyboard patterns, and every test ends in an axe audit.
+                Where shadcn's markup falls short, Joinery's is fixed and the pixels stay shadcn's.
+              </p>
+            </div>
+          </article>
+          <article class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">
+                <svg
+                  class="lucide icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
                   <path
                     d="M15.536 11.293a1 1 0 0 0 0 1.414l2.376 2.377a1 1 0 0 0 1.414 0l2.377-2.377a1 1 0 0 0 0-1.414l-2.377-2.377a1 1 0 0 0-1.414 0z"
                   />
@@ -470,33 +498,6 @@
                   stroke-linejoin="round"
                   aria-hidden="true"
                 >
-                  <circle cx="16" cy="4" r="1" />
-                  <path d="m18 19 1-7-6 1" />
-                  <path d="m5 8 3-3 5.5 3-2.36 3.5" />
-                  <path d="M4.24 14.5a5 5 0 0 0 6.88 6" />
-                  <path d="M13.76 17.5a5 5 0 0 0-6.88-6" />
-                </svg>
-                Accessible
-              </h3>
-              <p class="jn-card-description" data-slot="card-description">
-                WCAG 2.2 AA and the WAI-ARIA keyboard patterns, and every test ends in an axe audit.
-                Where shadcn's markup falls short, Joinery's is fixed and the pixels stay shadcn's.
-              </p>
-            </div>
-          </article>
-          <article class="jn-card group/card" data-slot="card" data-size="default">
-            <div class="jn-card-header group/card-header" data-slot="card-header">
-              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">
-                <svg
-                  class="lucide icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
                   <path d="m5 8 6 6" />
                   <path d="m4 14 6-6 2-3" />
                   <path d="M2 5h12" />
@@ -542,6 +543,73 @@
             </div>
           </article>
         </div>
+      </section>
+
+      <section id="accessibility">
+        <p class="eyebrow">Accessibility</p>
+        <h2>
+          Accessible, and tested to prove it<a
+            class="section-link"
+            href="#accessibility"
+            aria-label="Link to “Accessible, and tested to prove it”"
+            >#</a
+          >
+        </h2>
+        <p>
+          Joinery targets WCAG 2.2 AA. Every component has the roles, states, keyboard and focus
+          management of its WAI-ARIA pattern, and every test ends in an axe audit. The harnesses
+          read state through ARIA, as a screen reader does, so your own tests check the ARIA
+          contract too.
+        </p>
+        <div class="features two-up">
+          <article class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">Keyboard first</h3>
+              <p class="jn-card-description" data-slot="card-description">
+                Each component follows its WAI-ARIA Authoring Practices pattern: arrows, Home and
+                End, typeahead and Escape, each listed on its guide page and covered by its tests.
+              </p>
+            </div>
+          </article>
+          <article class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">
+                Focus that goes where it should
+              </h3>
+              <p class="jn-card-description" data-slot="card-description">
+                Dialogs, sheets, drawers and popovers move focus in, keep it there while modal, and
+                give it back to their trigger. A modal makes the rest of the page
+                <code>inert</code>.
+              </p>
+            </div>
+          </article>
+          <article class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">
+                An axe audit in every test
+              </h3>
+              <p class="jn-card-description" data-slot="card-description">
+                More than 1,600 axe audits run on every pull request: each component's tests, each
+                example in the guide, and the guide's own pages.
+              </p>
+            </div>
+          </article>
+          <article class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">
+                Fixed where upstream falls short
+              </h3>
+              <p class="jn-card-description" data-slot="card-description">
+                Progress announces its value, a wide Table scrolls from the keyboard, the menus make
+                the page inert rather than <code>aria-hidden</code>, and Data Table sorts with
+                <code>aria-sort</code>. The pixels stay shadcn's.
+              </p>
+            </div>
+          </article>
+        </div>
+        <p>
+          <a href="guide/getting-started/accessibility.md">Accessibility in the guide →</a>
+        </p>
       </section>
 
       <section id="install">
@@ -1932,6 +2000,17 @@ export class EditProfile extends DialogHarness {
               <p class="jn-card-description" data-slot="card-description">
                 Enums as classes for TypeScript, with members, labels and options, which a select or
                 radio group can take as its choices.
+              </p>
+            </div>
+          </article>
+          <article class="jn-card group/card" data-slot="card" data-size="default">
+            <div class="jn-card-header group/card-header" data-slot="card-header">
+              <h3 class="jn-card-title jn-font-heading" data-slot="card-title">
+                <a href="https://joegaudet.com/harnessed/">harnessed</a>
+              </h3>
+              <p class="jn-card-description" data-slot="card-description">
+                Test harnesses for components and pages: write one class and it drives them in
+                jsdom, Playwright, Cypress, Ember and more.
               </p>
             </div>
           </article>

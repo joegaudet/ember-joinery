@@ -262,3 +262,8 @@ import an add-on:
 | `@ember-joinery/power-calendar` | `PowerCalendarHarness`, `DatePickerHarness`                                                |
 | `@ember-joinery/maskito`        | `MaskedInputHarness`, `PhoneInputHarness`                                                  |
 | `@ember-joinery/formwright`     | A field harness for each control, on [Formwright's `FieldHarness`](/formwright/testing.md) |
+
+## Beyond Ember's test runner
+
+Joinery's harnesses run under `@ember/test-helpers`. To drive the same pages from Playwright,
+Cypress or jsdom with one harness class, see [harnessed](https://joegaudet.com/harnessed/).

@@ -3,16 +3,21 @@ import { get } from '@ember/helper'
 import { As, type TagName } from '@ember-joinery/primitives/as'
 import { part, type PartModifier } from '@ember-joinery/primitives/part'
 import type { CarouselOrientation, CarouselState } from './state.ts'
+import { translate } from '@ember-joinery/primitives/i18n'
+import { messages } from '../../messages.ts'
 
 /**
  * The attributes a slide renders: upstream's role, role description and `data-slot`, and the
  * orientation its rules key on. Its name (`2 of 5`) comes from the carousel once Embla has
  * counted the slides.
  */
-export function itemAttributes(orientation: CarouselOrientation): Record<string, string> {
+export function itemAttributes(
+  orientation: CarouselOrientation,
+  context: object,
+): Record<string, string> {
   return {
     role: 'group',
-    'aria-roledescription': 'slide',
+    'aria-roledescription': translate(context, messages.slide),
     'data-slot': 'carousel-item',
     'data-orientation': orientation,
     'data-test-jn-part': 'item',
@@ -23,7 +28,7 @@ export function itemAttributes(orientation: CarouselOrientation): Record<string,
 export function itemModifier(carousel: CarouselState): PartModifier<HTMLElement> {
   return part<HTMLElement>(() => ({
     class: 'jn-carousel-item',
-    attributes: itemAttributes(carousel.orientation),
+    attributes: itemAttributes(carousel.orientation, carousel),
   }))
 }
 
@@ -46,7 +51,7 @@ export interface CarouselItemSignature {
  * `basis-*` class to show several at once.
  */
 export const CarouselItem: TOC<CarouselItemSignature> = <template>
-  {{#let (itemAttributes @carousel.orientation) as |a|}}
+  {{#let (itemAttributes @carousel.orientation @carousel) as |a|}}
     <As
       @as={{@as}}
       @tag="div"

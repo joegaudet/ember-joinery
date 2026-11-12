@@ -6,6 +6,8 @@ import { CalendarBase } from '../-private/calendar.gts'
 import { MultipleDays } from '../-private/days.gts'
 import { CalendarCaption, CalendarNav } from '../-private/nav.gts'
 import { OwnedValue, type CalendarOptions } from '../-private/state.ts'
+import { translate } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 export interface PowerCalendarMultipleSignature {
   Args: CalendarOptions & {
@@ -46,7 +48,7 @@ export default class PowerCalendarMultiple extends CalendarBase<PowerCalendarMul
   }
 
   get defaultLabel(): string {
-    return 'Choose dates'
+    return translate(this, messages.chooseDates)
   }
 
   get selected(): Date[] {
@@ -61,7 +63,7 @@ export default class PowerCalendarMultiple extends CalendarBase<PowerCalendarMul
     <EmberPowerCalendarMultiple
       @selected={{this.selected}}
       @center={{this.center.value}}
-      @locale={{@locale}}
+      @locale={{this.locale}}
       @onSelect={{if this.interactive this.onSelect}}
       @onCenterChange={{this.onCenterChange}}
       @daysComponent={{MultipleDays}}

@@ -11,6 +11,9 @@ import { CarouselContent } from './content.gts'
 import { CarouselItem, itemModifier } from './item.gts'
 import { CarouselState, type CarouselOrientation, type CarouselSlideLabel } from './state.ts'
 import { CarouselNext, CarouselPrevious, stepModifier, type CarouselStepOptions } from './step.gts'
+import { t } from '@ember-joinery/primitives/i18n'
+import { setOwner } from '@ember/owner'
+import { messages } from '../../messages.ts'
 
 export type { CarouselOrientation, CarouselSlideLabel, CarouselStepOptions }
 
@@ -121,6 +124,8 @@ export default class Carousel extends Component<CarouselSignature> {
         slideLabel: () => this.args.slideLabel,
       }),
     )
+    // The state names the slides itself, in the words of the app's translator.
+    setOwner(this.state, owner)
     this.item = itemModifier(this.state)
     this.previous = stepModifier(this.state, 'previous')
     this.next = stepModifier(this.state, 'next')
@@ -131,7 +136,7 @@ export default class Carousel extends Component<CarouselSignature> {
       @as={{@as}}
       @tag="div"
       role="region"
-      aria-roledescription="carousel"
+      aria-roledescription={{t messages.carousel}}
       class="jn-carousel"
       data-slot="carousel"
       data-orientation={{this.state.orientation}}

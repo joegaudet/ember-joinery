@@ -16,7 +16,7 @@ import { idFor } from '@ember-joinery/primitives/id'
 import RichTextToolbar from './toolbar.gts'
 import {
   DEFAULT_HEADING_LEVELS,
-  DEFAULT_LABELS,
+  defaultLabels,
   DEFAULT_TOOLBAR,
   type BlockType,
   type HeadingLevel,
@@ -148,7 +148,7 @@ export default class RichTextEditor extends Component<RichTextEditorSignature> {
   }
 
   get labels(): RichTextLabels {
-    return { ...DEFAULT_LABELS, ...this.args.labels }
+    return { ...defaultLabels(this), ...this.args.labels }
   }
 
   get headingLevels(): readonly HeadingLevel[] {

@@ -12,6 +12,8 @@ import Button, {
 } from '@ember-joinery/ember/components/button'
 import Icon, { type IconNode } from '@ember-joinery/ember/components/icon'
 import type { CarouselOrientation, CarouselState } from './state.ts'
+import { t } from '@ember-joinery/primitives/i18n'
+import { messages } from '../../messages.ts'
 
 /** Which way a step button goes: to the previous slide, or the next. */
 export type CarouselStep = 'previous' | 'next'
@@ -121,7 +123,7 @@ export const CarouselPrevious: TOC<CarouselStepSignature> = <template>
       {{on "click" @carousel.scrollPrev}}
     >
       <Icon @icon={{if @icon @icon ChevronLeft}} class="jn-rtl-flip" />
-      <VisuallyHidden>{{if @label @label "Previous slide"}}</VisuallyHidden>
+      <VisuallyHidden>{{if @label @label (t messages.previous)}}</VisuallyHidden>
     </Button>
   {{/let}}
 </template>
@@ -147,7 +149,7 @@ export const CarouselNext: TOC<CarouselStepSignature> = <template>
       {{on "click" @carousel.scrollNext}}
     >
       <Icon @icon={{if @icon @icon ChevronRight}} class="jn-rtl-flip" />
-      <VisuallyHidden>{{if @label @label "Next slide"}}</VisuallyHidden>
+      <VisuallyHidden>{{if @label @label (t messages.next)}}</VisuallyHidden>
     </Button>
   {{/let}}
 </template>

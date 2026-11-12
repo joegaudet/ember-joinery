@@ -41,7 +41,7 @@ export class OwnedValue<T> {
 
 /** The arguments every calendar takes, besides its value. */
 export interface CalendarOptions {
-  /** A BCP 47 locale for the month's name, the weekdays and each day's name. Default: the browser's. */
+  /** A BCP 47 locale for the month's name, the weekdays and each day's name. Default: the app's translator's, or the browser's. */
   locale?: string
   /** The first day that can be chosen: a `Date` or `YYYY-MM-DD`. The months before it can't be shown. */
   minDate?: Date | string

@@ -204,7 +204,7 @@ tag, `@locale="ar-SA"`, and its names from `Intl`.
 | `@modifiers`             | `Record<string, Matcher \| Matcher[]>`                           |                   | Modifiers of your own                                                     |
 | `@modifiersClassNames`   | `Record<string, string>`                                         |                   | A class for each modifier, on the day's cell                              |
 | `@today`                 | `Date`                                                           | today             | The day counted as today                                                  |
-| `@locale`                | `string` (BCP 47)                                                | `"en-US"`         | The language of its names, and where its weeks start                      |
+| `@locale`                | `string` (BCP 47)                                                | the translator's  | The language of its names, and where its weeks start (else `"en-US"`)     |
 | `@calendar`              | `string` (Intl's calendar)                                       | `"gregory"`       | The calendar: `persian`, `islamic-umalqura`, `hebrew`…                    |
 | `@numerals`              | `string` (Intl's numbering system)                               | `"latn"`          | The digits: `arab`, `arabext`…                                            |
 | `@weekStartsOn`          | `0`–`6`                                                          | the locale's      | The first day of the week, 0 for Sunday                                   |

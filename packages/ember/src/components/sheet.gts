@@ -14,6 +14,8 @@ import type { PartModifier } from '@ember-joinery/primitives/part'
 import { VisuallyHidden } from '@ember-joinery/primitives/visually-hidden'
 import Button from './button.gts'
 import Icon, { type IconNode } from './icon.gts'
+import { t } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 /** The edge of the screen a sheet comes in from. */
 export type SheetSide = 'top' | 'right' | 'bottom' | 'left'
@@ -65,7 +67,7 @@ const SheetContent: TOC<SheetContentSignature> = <template>
         {{on "click" (fn @dialog.setOpen false)}}
       >
         <Icon @icon={{if @closeIcon @closeIcon X}} />
-        <VisuallyHidden>{{if @closeLabel @closeLabel "Close"}}</VisuallyHidden>
+        <VisuallyHidden>{{if @closeLabel @closeLabel (t messages.sheetClose)}}</VisuallyHidden>
       </Button>
     {{/if}}
   </@dialog.Content>

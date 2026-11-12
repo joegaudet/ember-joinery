@@ -5,6 +5,8 @@ import { formatDate, parseDate, toDate } from '../dates.ts'
 import { PickerBase, PickerFrame, type PickerOptions } from '../-private/picker.gts'
 import { OwnedValue } from '../-private/state.ts'
 import PowerCalendar from './power-calendar.gts'
+import { translate } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 export interface DatePickerSignature {
   Args: PickerOptions & {
@@ -54,7 +56,7 @@ export default class DatePicker extends PickerBase<DatePickerSignature> {
   }
 
   get text(): string {
-    return formatDate(this.value, { locale: this.args.locale, format: this.args.format })
+    return formatDate(this.value, { locale: this.locale, format: this.args.format })
   }
 
   get valueText(): string {
@@ -66,7 +68,7 @@ export default class DatePicker extends PickerBase<DatePickerSignature> {
   }
 
   get defaultPlaceholder(): string {
-    return 'Pick a date'
+    return translate(this, messages.placeholder)
   }
 
   get defaultIcon(): IconNode {
@@ -78,7 +80,7 @@ export default class DatePicker extends PickerBase<DatePickerSignature> {
   }
 
   get defaultTriggerLabel(): string {
-    return 'Select date'
+    return translate(this, messages.selectDate)
   }
 
   readTyped(text: string): boolean {
@@ -109,7 +111,7 @@ export default class DatePicker extends PickerBase<DatePickerSignature> {
         @required={{true}}
         @center={{this.center}}
         @onCenterChange={{this.setCenter}}
-        @locale={{@locale}}
+        @locale={{this.locale}}
         @minDate={{@minDate}}
         @maxDate={{@maxDate}}
         @disabledDates={{@disabledDates}}

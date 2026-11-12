@@ -15,6 +15,8 @@ import { isMac } from './keys.gts'
 import { part, type PartModifier } from './part.ts'
 import { VisuallyHidden, visuallyHidden } from './visually-hidden.gts'
 import { commandScore } from './-private/command-score.ts'
+import { t, translate } from './i18n.ts'
+import { messages } from './messages.ts'
 
 const waiter = buildWaiter('@ember-joinery/primitives:command')
 
@@ -36,11 +38,6 @@ export type CommandFilter = (value: string, search: string, keywords: readonly s
  */
 export const defaultFilter: CommandFilter = (value, search, keywords) =>
   commandScore(value, search, keywords)
-
-/** The words a screen reader hears when the number of results changes. */
-function defaultResultsText(count: number): string {
-  return count === 1 ? '1 result' : `${count} results`
-}
 
 /** Runs `callback` once the render that called it is over, holding the test waiter till then. */
 function afterRender(owner: object, callback: () => void): void {
@@ -390,7 +387,11 @@ export class CommandState {
 
   /** What `role="status"` says, for screen readers. */
   get resultsText(): string {
-    return (this.args.resultsText ?? defaultResultsText)(this.count)
+    const { resultsText } = this.args
+    const count = this.count
+    return resultsText
+      ? resultsText(count)
+      : translate(this.#owner, messages.commandResults, { count })
   }
 
   /** An item not rendered yet has no text to match: it shows, so it can render once. */
@@ -543,7 +544,9 @@ export class CommandState {
           role: listbox ? 'listbox' : undefined,
           tabindex: '-1',
           'aria-activedescendant': listbox ? this.selectedItemId : undefined,
-          'aria-label': listbox ? (label ?? 'Suggestions') : undefined,
+          'aria-label': listbox
+            ? (label ?? translate(this.#owner, messages.commandListLabel))
+            : undefined,
           id: this.listId,
           'data-test-jn-part': 'list',
         },
@@ -1094,7 +1097,7 @@ export const CommandLoading: TOC<CommandLoadingSignature> = <template>
     aria-valuenow={{@progress}}
     aria-valuemin="0"
     aria-valuemax="100"
-    aria-label={{if @label @label "Loading..."}}
+    aria-label={{if @label @label (t messages.commandLoading)}}
     data-test-jn-part="loading"
     ...attributes
     {{cmdk "loading"}}
@@ -1273,11 +1276,11 @@ export class CommandDialog extends Component<CommandDialogSignature> {
     >
       <d.Overlay class={{@overlayClass}} {{cmdk "overlay"}} />
       <d.Content ...attributes {{cmdk "dialog"}}>
-        <d.Title {{visuallyHidden}}>{{if @title @title "Command Palette"}}</d.Title>
+        <d.Title {{visuallyHidden}}>{{if @title @title (t messages.commandDialogTitle)}}</d.Title>
         <d.Description {{visuallyHidden}}>{{if
             @description
             @description
-            "Search for a command to run..."
+            (t messages.commandDialogDescription)
           }}</d.Description>
         {{yield (hash isOpen=d.isOpen open=d.open toggle=this.toggle setOpen=this.setOpen)}}
       </d.Content>

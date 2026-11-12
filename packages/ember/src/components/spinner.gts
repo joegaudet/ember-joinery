@@ -1,6 +1,8 @@
 import type { TOC } from '@ember/component/template-only'
 import { LoaderCircle } from 'lucide'
 import Icon, { type IconNode } from './icon.gts'
+import { t } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 export interface SpinnerSignature {
   Args: {
@@ -33,7 +35,7 @@ export interface SpinnerSignature {
 const Spinner: TOC<SpinnerSignature> = <template>
   <Icon
     @icon={{if @icon @icon LoaderCircle}}
-    @label={{if @label @label "Loading"}}
+    @label={{if @label @label (t messages.spinnerLabel)}}
     class="jn-spinner jn-size-4"
     data-slot="spinner"
     role="status"

@@ -6,6 +6,8 @@ import { CalendarBase } from '../-private/calendar.gts'
 import { RangeDays } from '../-private/days.gts'
 import { CalendarCaption, CalendarNav } from '../-private/nav.gts'
 import { OwnedValue, type CalendarOptions } from '../-private/state.ts'
+import { translate } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 export interface PowerCalendarRangeSignature {
   Args: CalendarOptions & {
@@ -54,7 +56,7 @@ export default class PowerCalendarRange extends CalendarBase<PowerCalendarRangeS
   }
 
   get defaultLabel(): string {
-    return 'Choose date range'
+    return translate(this, messages.chooseRange)
   }
 
   /** The range as ember-power-calendar holds it. */
@@ -75,7 +77,7 @@ export default class PowerCalendarRange extends CalendarBase<PowerCalendarRangeS
     <EmberPowerCalendarRange
       @selected={{this.selected}}
       @center={{this.center.value}}
-      @locale={{@locale}}
+      @locale={{this.locale}}
       @minRange={{this.minRange}}
       @maxRange={{@maxRange}}
       @proximitySelection={{@proximitySelection}}

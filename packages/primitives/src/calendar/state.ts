@@ -25,6 +25,8 @@ import {
   type DayOfWeekNumber,
   type Matcher,
 } from './dates.ts'
+import { translate, translator } from '../i18n.ts'
+import { messages } from '../messages.ts'
 
 /** How a calendar selects: one day, any number of days, or a range. */
 export type CalendarMode = 'single' | 'multiple' | 'range'
@@ -147,28 +149,36 @@ export const defaultCalendarFormatters: CalendarFormatters = {
   formatWeekNumberHeader: () => '',
 }
 
-/** react-day-picker's English labels, with Intl's full date for each day. */
-export const defaultCalendarLabels: CalendarLabels = {
-  labelDayButton(date, modifiers, locale) {
-    let label = locale.format(date, { dateStyle: 'full' })
-    if (modifiers.today) label = `Today, ${label}`
-    if (modifiers.selected) label = `${label}, selected`
-    return label
-  },
-  labelGridcell(date, modifiers, locale) {
-    const label = locale.format(date, { dateStyle: 'full' })
-    return modifiers.today ? `Today, ${label}` : label
-  },
-  labelGrid: (month, locale) => locale.format(month, { month: 'long', year: 'numeric' }),
-  labelMonthDropdown: () => 'Choose the Month',
-  labelYearDropdown: () => 'Choose the Year',
-  labelNav: () => '',
-  labelNext: () => 'Go to the Next Month',
-  labelPrevious: () => 'Go to the Previous Month',
-  labelWeekday: (weekday, locale) => locale.format(weekday, { weekday: 'long' }),
-  labelWeekNumber: weekNumber => `Week ${weekNumber}`,
-  labelWeekNumberHeader: () => 'Week Number',
+/** react-day-picker's labels, with Intl's full date for each day, in `context`'s translator's words. */
+function calendarLabels(context: unknown): CalendarLabels {
+  return {
+    labelDayButton(date, modifiers, locale) {
+      const values = { date: locale.format(date, { dateStyle: 'full' }) }
+      if (modifiers.today && modifiers.selected) {
+        return translate(context, messages.calendarTodaySelected, values)
+      }
+      if (modifiers.today) return translate(context, messages.calendarToday, values)
+      if (modifiers.selected) return translate(context, messages.calendarSelected, values)
+      return values.date
+    },
+    labelGridcell(date, modifiers, locale) {
+      const label = locale.format(date, { dateStyle: 'full' })
+      return modifiers.today ? translate(context, messages.calendarToday, { date: label }) : label
+    },
+    labelGrid: (month, locale) => locale.format(month, { month: 'long', year: 'numeric' }),
+    labelMonthDropdown: () => translate(context, messages.calendarMonthDropdown),
+    labelYearDropdown: () => translate(context, messages.calendarYearDropdown),
+    labelNav: () => '',
+    labelNext: () => translate(context, messages.calendarNextMonth),
+    labelPrevious: () => translate(context, messages.calendarPreviousMonth),
+    labelWeekday: (weekday, locale) => locale.format(weekday, { weekday: 'long' }),
+    labelWeekNumber: week => translate(context, messages.calendarWeekNumber, { week }),
+    labelWeekNumberHeader: () => translate(context, messages.calendarWeekNumberHeader),
+  }
 }
+
+/** react-day-picker's English labels, with Intl's full date for each day. */
+export const defaultCalendarLabels: CalendarLabels = calendarLabels(undefined)
 
 /** The parts and states react-day-picker gives a class each (`classNames`). */
 export interface CalendarClassNames {
@@ -306,7 +316,7 @@ export interface CalendarArgs {
   modifiersClassNames?: Record<string, string>
   /** The day counted as today. Default: today. */
   today?: Date
-  /** The locale for names and dates, a BCP 47 tag. Default `en-US`, as react-day-picker's. */
+  /** The locale for names and dates, a BCP 47 tag. Default: the app's translator's, or `en-US`, as react-day-picker's. */
   locale?: string
   /** The calendar, as Intl names it (`persian`, `islamic-umalqura`). Default Gregorian. */
   calendar?: string
@@ -448,6 +458,7 @@ const KEYS: Record<string, (shift: boolean, rtl: boolean) => [MoveBy, MoveDirect
 export class CalendarState {
   readonly #args: () => CalendarArgs
   readonly #classNames: () => Partial<CalendarClassNames> | undefined
+  readonly #context: object | undefined
   /** The first month shown: `@month`, `@defaultMonth` and `@onMonthChange`. */
   readonly month: ControllableState<Date>
   /** The selection the calendar holds itself, uncontrolled. */
@@ -461,13 +472,16 @@ export class CalendarState {
   /**
    * @param args the calendar's arguments, read live
    * @param classNames the headless component's `@classNames`; the styled one keeps the defaults
+   * @param context the component, whose app's translator words the labels and sets the locale
    */
   constructor(
     args: () => CalendarArgs,
     classNames: () => Partial<CalendarClassNames> | undefined = () => undefined,
+    context?: object,
   ) {
     this.#args = args
     this.#classNames = classNames
+    this.#context = context
     this.month = new ControllableState<Date>({
       name: 'month',
       value: () => args().month,
@@ -496,7 +510,7 @@ export class CalendarState {
   /** The locale, calendar and numbering system everything is formatted in. */
   get locale(): CalendarLocale {
     const { locale, calendar, numerals } = this.#args()
-    return calendarLocale(locale, calendar, numerals)
+    return calendarLocale(locale ?? translator(this.#context)?.locale, calendar, numerals)
   }
 
   /** The calendar's months and years. */
@@ -517,7 +531,7 @@ export class CalendarState {
   }
 
   get labels(): CalendarLabels {
-    return { ...defaultCalendarLabels, ...this.#args().labels }
+    return { ...calendarLabels(this.#context), ...this.#args().labels }
   }
 
   get today(): Date {

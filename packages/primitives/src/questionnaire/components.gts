@@ -16,6 +16,8 @@ import type {
   QuestionnaireItemStatus,
   QuestionnaireShortcutMode,
 } from './utils.ts'
+import { t } from '../i18n.ts'
+import { messages } from '../messages.ts'
 
 /** What a progress block gets: where the questionnaire is. */
 export interface QuestionnaireProgressState {
@@ -64,7 +66,7 @@ export class QuestionnaireProgress extends Component<QuestionnaireProgressSignat
     <As
       @as={{@as}}
       @tag="div"
-      aria-label={{if @label @label "Questionnaire progress"}}
+      aria-label={{if @label @label (t messages.questionnaireProgressLabel)}}
       aria-valuetext={{this.text}}
       ...attributes
       {{@questionnaire.progress}}
@@ -515,12 +517,24 @@ export class Questionnaire extends Component<QuestionnaireSignature> {
           Progress=(component QuestionnaireProgress questionnaire=this.questionnaire)
           Item=(component QuestionnaireItem questionnaire=this.questionnaire)
           Previous=(component
-            QuestionnaireNavigation part=this.questionnaire.previous defaultLabel="Previous"
+            QuestionnaireNavigation
+            part=this.questionnaire.previous
+            defaultLabel=(t messages.questionnairePrevious)
           )
-          Skip=(component QuestionnaireNavigation part=this.questionnaire.skip defaultLabel="Skip")
-          Next=(component QuestionnaireNavigation part=this.questionnaire.next defaultLabel="Next")
+          Skip=(component
+            QuestionnaireNavigation
+            part=this.questionnaire.skip
+            defaultLabel=(t messages.questionnaireSkip)
+          )
+          Next=(component
+            QuestionnaireNavigation
+            part=this.questionnaire.next
+            defaultLabel=(t messages.questionnaireNext)
+          )
           Submit=(component
-            QuestionnaireNavigation part=this.questionnaire.submit defaultLabel="Submit"
+            QuestionnaireNavigation
+            part=this.questionnaire.submit
+            defaultLabel=(t messages.questionnaireSubmit)
           )
           activeItem=this.questionnaire.activeName
           current=this.questionnaire.current

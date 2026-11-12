@@ -16,6 +16,8 @@ import { Presence } from './presence.gts'
 import { ignoreROError } from './resize-observer.ts'
 import { visuallyHidden } from './visually-hidden.gts'
 import { Delay, ElementRef, buttonType } from './-private/popper.gts'
+import { t } from './i18n.ts'
+import { messages } from './messages.ts'
 
 /**
  * What a styled layer adds to a modifier the menu yields (an item's `trigger`, the `link`), so it
@@ -393,7 +395,7 @@ export class NavigationMenu extends Component<NavigationMenuSignature> {
       @as={{@as}}
       @tag="nav"
       id={{this.id}}
-      aria-label="Main"
+      aria-label={{t messages.navigationMenuLabel}}
       data-test-jn="navigation-menu"
       data-test-jn-name={{@name}}
       ...attributes

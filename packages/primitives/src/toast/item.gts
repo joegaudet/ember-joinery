@@ -19,6 +19,8 @@ import type {
   ToastStyle,
   ToastT,
 } from './state.ts'
+import { t } from '../i18n.ts'
+import { messages } from '../messages.ts'
 
 // sonner 2.0.7's `Toast` (MIT, (c) 2023 Emil Kowalski; the notice is in state.ts): one toast in
 // a Toaster's list, with its timer, its place in the stack and its swipe to dismiss.
@@ -613,7 +615,7 @@ export class ToastItem extends Component<ToastItemSignature> {
       {{#if this.showCloseButton}}
         <button
           type="button"
-          aria-label={{if @closeButtonAriaLabel @closeButtonAriaLabel "Close toast"}}
+          aria-label={{if @closeButtonAriaLabel @closeButtonAriaLabel (t messages.toastClose)}}
           data-disabled={{bool this.disabled}}
           data-close-button="true"
           class={{this.part "closeButton"}}

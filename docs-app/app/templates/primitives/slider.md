@@ -45,7 +45,8 @@ import { Slider } from '@ember-joinery/primitives/slider'
 - **Forms.** With `@fieldName`, each thumb has a hidden input with its value (`name[]` for
   several), and an `input` event tells the form when it changes.
 
-`defaultSliderThumbLabel(index, count)` is the default name of a thumb, and
+`defaultSliderThumbLabel(index, count, context?)` is the default name of a thumb, in the words of
+the context's [translator](/getting-started/i18n.md) (English without one), and
 `sliderPercent(value, min, max)` where a value sits, for parts of your own.
 
 ## API

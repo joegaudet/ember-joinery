@@ -7,6 +7,8 @@ import { Check, Copy } from 'lucide'
 import { VisuallyHidden } from '@ember-joinery/primitives/visually-hidden'
 import Button, { type ButtonSize, type ButtonVariant } from '@ember-joinery/ember/components/button'
 import Icon, { type IconNode } from '@ember-joinery/ember/components/icon'
+import { translate } from '@ember-joinery/primitives/i18n'
+import { messages } from '../../messages.ts'
 
 /** How long the button shows that it copied, in milliseconds, as upstream's. */
 const COPIED_FOR = 2000
@@ -53,12 +55,16 @@ export default class CodeBlockCopyButton extends Component<CodeBlockCopyButtonSi
     registerDestructor(this, () => clearTimeout(this.#timer))
   }
 
+  get copiedLabel(): string {
+    return this.args.copiedLabel ?? translate(this, messages.copied)
+  }
+
   get label(): string {
-    return this.copied ? (this.args.copiedLabel ?? 'Copied') : (this.args.copyLabel ?? 'Copy')
+    return this.copied ? this.copiedLabel : (this.args.copyLabel ?? translate(this, messages.copy))
   }
 
   get status(): string {
-    return this.copied ? (this.args.copiedLabel ?? 'Copied') : ''
+    return this.copied ? this.copiedLabel : ''
   }
 
   get icon(): IconNode {

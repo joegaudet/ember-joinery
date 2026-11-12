@@ -13,6 +13,8 @@ import {
 import { PickerBase, PickerFrame, type PickerOptions } from '../-private/picker.gts'
 import { OwnedValue } from '../-private/state.ts'
 import PowerCalendarRange from './power-calendar-range.gts'
+import { translate } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 export interface DateRangePickerSignature {
   Args: PickerOptions & {
@@ -31,8 +33,6 @@ export interface DateRangePickerSignature {
   Element: HTMLElement
 }
 
-/** What sits between the two dates in the input: an en dash, spaced. */
-const SEPARATOR = ' – '
 /** What splits typed text into its two dates: a dash, a hyphen or "to", spaced. */
 const SPLIT = /\s+(?:–|—|-|to)\s+/i
 
@@ -76,7 +76,7 @@ export default class DateRangePicker extends PickerBase<DateRangePickerSignature
   }
 
   get formatOptions(): FormatOptions {
-    return { locale: this.args.locale, format: this.args.format ?? { dateStyle: 'medium' } }
+    return { locale: this.locale, format: this.args.format ?? { dateStyle: 'medium' } }
   }
 
   get text(): string {
@@ -90,7 +90,10 @@ export default class DateRangePicker extends PickerBase<DateRangePickerSignature
     if (!from) return ''
     const options = this.formatOptions
     return to
-      ? `${formatDate(from, options)}${SEPARATOR}${formatDate(to, options)}`
+      ? translate(this, messages.range, {
+          from: formatDate(from, options),
+          to: formatDate(to, options),
+        })
       : formatDate(from, options)
   }
 
@@ -99,7 +102,7 @@ export default class DateRangePicker extends PickerBase<DateRangePickerSignature
   }
 
   get defaultPlaceholder(): string {
-    return 'Pick a date'
+    return translate(this, messages.placeholder)
   }
 
   get defaultIcon(): IconNode {
@@ -111,7 +114,7 @@ export default class DateRangePicker extends PickerBase<DateRangePickerSignature
   }
 
   get defaultTriggerLabel(): string {
-    return 'Select dates'
+    return translate(this, messages.selectDates)
   }
 
   readTyped(text: string): boolean {
@@ -151,7 +154,7 @@ export default class DateRangePicker extends PickerBase<DateRangePickerSignature
         @onCenterChange={{this.setCenter}}
         @minRange={{@minRange}}
         @maxRange={{@maxRange}}
-        @locale={{@locale}}
+        @locale={{this.locale}}
         @minDate={{@minDate}}
         @maxDate={{@maxDate}}
         @disabledDates={{@disabledDates}}

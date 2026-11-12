@@ -14,6 +14,8 @@ import {
   Undo2,
 } from 'lucide'
 import type { IconNode } from '@ember-joinery/ember/components/icon'
+import { translate } from '@ember-joinery/primitives/i18n'
+import { messages } from '../../messages.ts'
 
 /**
  * A toolbar control, by name: the text style menu (`block-type`), a toggle for a mark or a
@@ -67,22 +69,26 @@ export interface RichTextLabels {
   redo: string
 }
 
-export const DEFAULT_LABELS: RichTextLabels = {
-  toolbar: 'Formatting',
-  blockType: 'Text style',
-  paragraph: 'Paragraph',
-  heading: level => `Heading ${level}`,
-  bold: 'Bold',
-  italic: 'Italic',
-  underline: 'Underline',
-  strike: 'Strikethrough',
-  code: 'Code',
-  'bullet-list': 'Bulleted list',
-  'ordered-list': 'Numbered list',
-  blockquote: 'Quote',
-  'code-block': 'Code block',
-  undo: 'Undo',
-  redo: 'Redo',
+/** The labels in the words of `context`'s translator (English without one). */
+export function defaultLabels(context: object): RichTextLabels {
+  const say = (message: (typeof messages)[keyof typeof messages]) => translate(context, message)
+  return {
+    toolbar: say(messages.toolbar),
+    blockType: say(messages.blockType),
+    paragraph: say(messages.paragraph),
+    heading: level => translate(context, messages.heading, { level }),
+    bold: say(messages.bold),
+    italic: say(messages.italic),
+    underline: say(messages.underline),
+    strike: say(messages.strike),
+    code: say(messages.code),
+    'bullet-list': say(messages.bulletList),
+    'ordered-list': say(messages.orderedList),
+    blockquote: say(messages.blockquote),
+    'code-block': say(messages.codeBlock),
+    undo: say(messages.undo),
+    redo: say(messages.redo),
+  }
 }
 
 /** A key of a shortcut, as ProseMirror's keymaps name it: `Mod` is ⌘ on Apple's systems, Ctrl elsewhere. */
@@ -93,12 +99,15 @@ export function isApple(): boolean {
   return typeof navigator !== 'undefined' && /Mac|iP(hone|[oa]d)/.test(navigator.platform)
 }
 
-/** How a shortcut's keys are shown, one `<Kbd>` each: `["Ctrl", "Shift", "S"]`, or `["⌘", "⇧", "S"]`. */
-export function shortcutKeys(keys: readonly Key[], apple = isApple()): string[] {
+/**
+ * How a shortcut's keys are shown, one `<Kbd>` each: `["Ctrl", "Shift", "S"]` in `context`'s
+ * translator's words, or `["⌘", "⇧", "S"]`.
+ */
+export function shortcutKeys(keys: readonly Key[], context: object, apple = isApple()): string[] {
   return keys.map(key => {
-    if (key === 'Mod') return apple ? '⌘' : 'Ctrl'
-    if (key === 'Shift') return apple ? '⇧' : 'Shift'
-    if (key === 'Alt') return apple ? '⌥' : 'Alt'
+    if (key === 'Mod') return apple ? '⌘' : translate(context, messages.keyCtrl)
+    if (key === 'Shift') return apple ? '⇧' : translate(context, messages.keyShift)
+    if (key === 'Alt') return apple ? '⌥' : translate(context, messages.keyAlt)
     return key.toUpperCase()
   })
 }

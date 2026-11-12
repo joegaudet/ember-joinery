@@ -81,6 +81,8 @@ How a part meets the element's own attributes:
   before it), and can stop the part's by calling `event.preventDefault()`, as in Radix.
 - A part can take arguments, such as an item's value: `part((named) => …)` for
   `<a {{m.item value="profile"}}>`.
+- The function's `this` is the modifier, which has the app's owner: a `function` (not an arrow)
+  can pass it to `translate(this, message)` for a built-in string in the app's language.
 - `element: (element) => cleanup` in the spec is called once with the element, to keep it for
   focus or positioning.
 

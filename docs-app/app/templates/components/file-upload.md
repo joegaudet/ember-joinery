@@ -150,7 +150,7 @@ an argument, and `@locale` writes the sizes in the language of the page.
 | `@nameOf`            | `(value: T) => string`              | a file's or record's `name` | A value's name in the list                                                   |
 | `@sizeOf`            | `(value: T) => number \| undefined` | its `size`                  | A value's size in bytes                                                      |
 | `@previewOf`         | `(value: T) => string \| undefined` | an image file's contents    | A URL of an image of a value                                                 |
-| `@locale`            | `string`                            | the browser's               | The locale sizes are written in                                              |
+| `@locale`            | `string`                            | the translator's            | The locale sizes are written in                                              |
 | `@id`                | `string`                            |                             | The file input's `id`, so a `<FieldLabel for>` names it                      |
 | `@label`             | `string`                            |                             | The file input's `aria-label`, in place of the zone's text                   |
 | `@required`          | `boolean`                           | `false`                     | Whether a file is required                                                   |

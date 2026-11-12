@@ -12,6 +12,19 @@ listed under "Autonomous execution".
 
 Deviations from the intake, and why:
 
+- **Built-in strings go through the app's translator** (changes decision 20; agreed with Joe on
+  2026-11-11, who authorized the change in that session). Every built-in string is still an
+  argument with an English default, and the argument still wins, but the default now comes
+  from the app's translator when it registers one, `translator:main`, as the msgid contract
+  (`joegaudet/msgid`) has it. Each package defines its strings once, as `Message` data in
+  `src/messages.ts`, exported at `<package>/messages` for a translation catalog, and shows
+  them through `translate()` from `@ember-joinery/primitives/i18n` (or its `t` helper in a
+  template), which formats English itself when there is no translator. A concatenation (`Value
+  2 of 3`, a selected day's name) is one message with placeholders, so a translation can order
+  the words. A `@locale` that isn't given is the translator's. No package depends on `msgid`,
+  which isn't published: `@ember-joinery/test-support` has `setupTranslator()` and a
+  pseudo-locale of its own, and every component passes the pseudo-locale test (item 8 of the
+  definition of done).
 - **One stacked PR, built unattended** (replaces decisions 8 and 38). Joe asked for subagents to
   work through everything without feedback, as one big stacked PR. Each unit lands as its own
   commits on `build/joinery-1.0`. Nothing merges to `main` and nothing publishes until Joe has
@@ -113,7 +126,7 @@ OIDC releases.
 | 17  | Floating parts  | The Popover API for layering. CSS anchor positioning where the browser has it, `@floating-ui/dom` otherwise. Supported: the last 2 versions of evergreen browsers                         |
 | 18  | `asChild`       | An `@as` tag, plus a yielded modifier for each part that needs one, e.g. `<LinkTo {{d.trigger}}>`                                                                                         |
 | 19  | Accessibility   | WCAG 2.2 AA: an axe audit in every test, plus APG keyboard and focus tests for each component                                                                                             |
-| 20  | i18n            | RTL: logical properties, a Direction provider, arrow keys flip. Every built-in string is an arg with an English default                                                                   |
+| 20  | i18n            | RTL: logical properties, a Direction provider, arrow keys flip. Every built-in string is an arg whose default is the app's translator's (`translator:main`), or English without one |
 | 21  | Scope           | All ~67 shadcn components, the chat set included, plus every ember-primitives component                                                                                                   |
 | 22  | Utilities       | ember-primitives' non-visual utilities go in `@ember-joinery/primitives`, one subpath export per feature                                                                                  |
 | 23  | Heavy deps      | We write Command, Drawer, Toast, Resizable, OTP and Calendar ourselves. Add-ons wrap embla-carousel, `@tanstack/table-core`, shiki and d3                                                 |
@@ -377,6 +390,8 @@ current counts).
 6. Each upstream example is mapped in `parity/map/<component>.json`, and the screenshot
    comparison passes in light and dark.
 7. A changeset, and `docs/site/` updated wherever the site shows the component.
+8. It passes the pseudo-locale test: rendered with `pseudoTranslator`, every built-in string it
+   shows (text, `aria-label`, `title`, `placeholder`) is wrapped, and an argument still beats it.
 
 ## Guide (`docs-app/`, Kolay)
 

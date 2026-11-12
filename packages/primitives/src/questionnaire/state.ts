@@ -30,6 +30,8 @@ import {
   type QuestionnaireItemStatus,
   type QuestionnaireShortcutMode,
 } from './utils.ts'
+import { translate } from '../i18n.ts'
+import { messages } from '../messages.ts'
 
 const waiter = buildWaiter('@ember-joinery/primitives:questionnaire')
 
@@ -595,10 +597,10 @@ export class QuestionnaireState {
   /** The words a screen reader hears for the progress: `Question 2 of 3`. */
   progressText(format?: (current: number, total: number) => string): string | undefined {
     if (!this.total) return undefined
-    return (format ?? ((current, total) => `Question ${current} of ${total}`))(
-      this.current,
-      this.total,
-    )
+    const { current, total } = this
+    return format
+      ? format(current, total)
+      : translate(this.#owner, messages.questionnaireProgress, { current, total })
   }
 
   /** What the progress element renders: a named, live progressbar. */
@@ -1085,9 +1087,10 @@ export class QuestionnaireItemState {
 
   /** The default error message: the required or the optional one. */
   get defaultError(): string {
-    return this.required
-      ? 'Choose an answer to continue.'
-      : 'Choose an answer or skip this question.'
+    return translate(
+      this.#owner,
+      this.required ? messages.questionnaireRequired : messages.questionnaireOptional,
+    )
   }
 
   /** What the error renders: shown, as an alert, only while the item is invalid. */

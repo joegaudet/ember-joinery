@@ -10,6 +10,8 @@ import Modifier from 'ember-modifier'
 import { As, type TagName } from './as.gts'
 import { controllable } from './controllable-state.ts'
 import { getDirection } from './direction.gts'
+import { format, translate } from './i18n.ts'
+import { messages } from './messages.ts'
 
 const waiter = buildWaiter('@ember-joinery/primitives:input-otp')
 
@@ -20,8 +22,8 @@ export const REGEXP_ONLY_CHARS = '^[a-zA-Z]+$'
 /** Digits and Latin letters. */
 export const REGEXP_ONLY_DIGITS_AND_CHARS = '^[a-zA-Z0-9]+$'
 
-/** The default `@label`, the input's name when nothing else names it. */
-export const INPUT_OTP_LABEL = 'One-time password'
+/** The input's name when nothing else names it, in English (the translator's, when there is one). */
+export const INPUT_OTP_LABEL = format(messages.inputOtpLabel)
 
 /** How far the input reaches past the slots for a password manager's badge, as input-otp's. */
 const PASSWORD_MANAGER_BADGE_SPACE = 40
@@ -662,7 +664,7 @@ function connect(input: HTMLInputElement, otp: InputOTP): () => void {
   const container = input.closest<HTMLElement>('[data-input-otp-container]')
   otp.started(otp.value)
   adoptRules(input)
-  if (!isNamed(input)) input.setAttribute('aria-label', INPUT_OTP_LABEL)
+  if (!isNamed(input)) input.setAttribute('aria-label', translate(otp, messages.inputOtpLabel))
 
   const onSelectionChange = (): void => otp.syncSelection(input)
   document.addEventListener('selectionchange', onSelectionChange, { capture: true })

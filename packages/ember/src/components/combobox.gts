@@ -20,6 +20,8 @@ import {
   inputGroupButtonClasses,
   type InputGroupAddonOptions,
 } from './input-group.gts'
+import { t } from '@ember-joinery/primitives/i18n'
+import { messages } from '../messages.ts'
 
 // The classes of the buttons upstream renders as an `InputGroupButton` (ghost, `icon-xs`), and
 // as a `Button` (a chip's remove button): Button's, then the group's own. ComboboxInput renders
@@ -131,7 +133,7 @@ const ComboboxClear: TOC<ComboboxClearSignature> = <template>
     data-slot="combobox-clear"
     data-variant="ghost"
     data-size="icon-xs"
-    aria-label={{if @label @label "Clear"}}
+    aria-label={{if @label @label (t messages.comboboxClear)}}
     ...attributes
   >
     <Icon @icon={{X}} class="jn-combobox-clear-icon" />
@@ -243,7 +245,7 @@ const ComboboxInput: TOC<ComboboxInputSignature> = <template>
           data-variant="ghost"
           data-size="icon-xs"
           disabled={{@disabled}}
-          aria-label={{if @triggerLabel @triggerLabel "Show options"}}
+          aria-label={{if @triggerLabel @triggerLabel (t messages.comboboxShowOptions)}}
         >
           <ComboboxTriggerIcon />
         </@Trigger>
@@ -255,7 +257,7 @@ const ComboboxInput: TOC<ComboboxInputSignature> = <template>
           data-variant="ghost"
           data-size="icon-xs"
           disabled={{@disabled}}
-          aria-label={{if @clearLabel @clearLabel "Clear"}}
+          aria-label={{if @clearLabel @clearLabel (t messages.comboboxClear)}}
         >
           <Icon @icon={{X}} class="jn-combobox-clear-icon" />
         </@Clear>
@@ -342,7 +344,7 @@ const ComboboxChip: TOC<ComboboxChipSignature> = <template>
         data-slot="combobox-chip-remove"
         data-variant="ghost"
         data-size="icon-xs"
-        aria-label={{if @removeLabel @removeLabel "Remove"}}
+        aria-label={{if @removeLabel @removeLabel (t messages.comboboxRemove)}}
       >
         <Icon @icon={{X}} class="jn-combobox-chip-indicator-icon" />
       </chip.Remove>

@@ -20,6 +20,8 @@ import {
   type ToastT,
   type Toasts,
 } from './state.ts'
+import { translate } from '../i18n.ts'
+import { messages } from '../messages.ts'
 
 // sonner 2.0.7's `Toaster` (MIT, (c) 2023 Emil Kowalski; the notice is in state.ts): the live
 // region, one list per position in use, and the stack's expanding on hover, its hotkey and its
@@ -245,7 +247,10 @@ export class Toaster extends Component<ToasterSignature> implements ToastHost {
 
   get label(): string {
     const hotkey = this.hotkey.join('+').replace(/Key/g, '').replace(/Digit/g, '')
-    return `${this.args.containerAriaLabel ?? 'Notifications'} ${hotkey}`
+    const label = this.args.containerAriaLabel
+    return label !== undefined
+      ? `${label} ${hotkey}`
+      : translate(this, messages.toasterLabel, { hotkey })
   }
 
   get dir(): Direction {

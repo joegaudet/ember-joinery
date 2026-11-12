@@ -16,6 +16,8 @@ import {
   type MessageScrollerOptions,
   type MessageScrollerScrollOptions,
 } from './state.ts'
+import { t, translate } from '../i18n.ts'
+import { messages } from '../messages.ts'
 
 const connectRoot = modifier<{
   Element: HTMLElement
@@ -99,7 +101,7 @@ export const MessageScrollerViewport: TOC<MessageScrollerViewportSignature> = <t
     <As
       @as={{@as}}
       role="region"
-      aria-label={{if @label @label "Messages"}}
+      aria-label={{if @label @label (t messages.messageScrollerLabel)}}
       tabindex="0"
       data-test-jn-part="viewport"
       ...attributes
@@ -259,7 +261,12 @@ class ButtonLabel extends Component<{
 }> {
   get text(): string {
     if (this.args.label) return this.args.label
-    return this.args.direction === 'start' ? 'Scroll to start' : 'Scroll to end'
+    return translate(
+      this,
+      this.args.direction === 'start'
+        ? messages.messageScrollerToStart
+        : messages.messageScrollerToEnd,
+    )
   }
 
   <template>{{this.text}}</template>

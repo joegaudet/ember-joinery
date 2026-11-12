@@ -24,6 +24,8 @@ import {
 import { VisuallyHidden } from '@ember-joinery/primitives/visually-hidden'
 import Button, { type ButtonSize, type ButtonVariant } from './button.gts'
 import Icon from './icon.gts'
+import { t, type Message } from '@ember-joinery/primitives/i18n'
+import { messages as primitiveMessages } from '@ember-joinery/primitives/messages'
 
 export { MessageScrollerConsumer, MessageScrollerVisibility }
 
@@ -111,9 +113,13 @@ export interface MessageScrollerButtonSignature {
   Element: HTMLButtonElement | HTMLAnchorElement
 }
 
-function defaultLabel(label: string | undefined, direction: MessageScrollerDirection | undefined) {
-  return label ?? (direction === 'start' ? 'Scroll to start' : 'Scroll to end')
+function labelMessage(direction: MessageScrollerDirection | undefined): Message {
+  return direction === 'start'
+    ? primitiveMessages.messageScrollerToStart
+    : primitiveMessages.messageScrollerToEnd
 }
+
+const labelOr = (label: string | undefined, fallback: string): string => label ?? fallback
 
 /**
  * "Jump to latest": a Button floating over the viewport's bottom edge (or its top, with
@@ -138,7 +144,7 @@ export const MessageScrollerButton: TOC<MessageScrollerButtonSignature> = <templ
         {{yield}}
       {{else}}
         <Icon @icon={{ArrowDown}} />
-        <VisuallyHidden>{{defaultLabel @label @direction}}</VisuallyHidden>
+        <VisuallyHidden>{{labelOr @label (t (labelMessage @direction))}}</VisuallyHidden>
       {{/if}}
     </Button>
   </MessageScrollerConsumer>

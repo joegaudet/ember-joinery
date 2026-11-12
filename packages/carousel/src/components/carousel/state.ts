@@ -4,6 +4,8 @@ import type { EmblaCarouselType, EmblaOptionsType, EmblaPluginType } from 'embla
 import { getDirection } from '@ember-joinery/primitives/direction'
 import { idFor } from '@ember-joinery/primitives/id'
 import { defer } from '../../-private/waiter.ts'
+import { translate } from '@ember-joinery/primitives/i18n'
+import { messages } from '../../messages.ts'
 
 /** Which way the slides run. */
 export type CarouselOrientation = 'horizontal' | 'vertical'
@@ -22,8 +24,6 @@ export interface CarouselStateArgs {
 
 /** The labels this carousel gave its slides, so a label of the caller's own is left alone. */
 const labels = new WeakMap<Element, string>()
-
-const defaultSlideLabel: CarouselSlideLabel = (index, count) => `${index} of ${count}`
 
 /** Keys that type into a field rather than move the carousel. */
 function isEditable(target: EventTarget | null): boolean {
@@ -149,7 +149,9 @@ export class CarouselState {
    * a name of the caller's own (`aria-label` or `aria-labelledby`).
    */
   #labelSlides(api: EmblaCarouselType): void {
-    const slideLabel = this.#args.slideLabel() ?? defaultSlideLabel
+    const slideLabel =
+      this.#args.slideLabel() ??
+      ((index: number, count: number) => translate(this, messages.slideLabel, { index, count }))
     const slides = api.slideNodes()
     slides.forEach((slide, index) => {
       if (slide.getAttribute('data-slot') !== 'carousel-item') return

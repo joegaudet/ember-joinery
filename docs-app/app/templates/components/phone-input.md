@@ -78,7 +78,7 @@ country shown in front, so choose the country first. Typing on the closed picker
 country whose name starts with what was typed, as any Select does.
 
 The country is controlled or not too (`@country`, `@defaultCountry` and `@onCountryChange`).
-Countries are named in `@locale`'s language (the browser's, by default), with
+Countries are named in `@locale`'s language (the app's translator's, else the browser's), with
 `Intl.DisplayNames`, and listed by name.
 
 ## National format
@@ -140,7 +140,7 @@ Phone Input adds.
 | `@onCountryChange` | `(country: CountryCode) => void`  |                    | Called with the new country whenever it changes                      |
 | `@countries`       | `CountryCode[]`                   | every country      | The countries the picker offers, in this order                       |
 | `@national`        | `boolean`                         | `false`            | Show the national format, with the calling code beside the flag      |
-| `@locale`          | `string`                          | the browser's      | The language the countries are named in                              |
+| `@locale`          | `string`                          | the translator's   | The language the countries are named in                              |
 | `@countryLabel`    | `string`                          | see below          | The picker's whole accessible name                                   |
 | `@icon`            | `IconNode`                        | `chevron-down`     | The picker's chevron                                                 |
 | `@metadata`        | `MetadataJson`                    | the `min` metadata | libphonenumber-js metadata (`max`, `mobile`, or your own)            |

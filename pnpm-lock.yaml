@@ -88,11 +88,11 @@ importers:
         specifier: ^7.29.7
         version: 7.29.13
       '@ember-formwright/ember':
-        specifier: ^1.3.0
-        version: 1.3.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))
+        specifier: ^2.0.0
+        version: 2.0.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))
       '@ember-formwright/test-support':
-        specifier: ^1.3.0
-        version: 1.3.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))
+        specifier: ^2.0.0
+        version: 2.0.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))
       '@ember-joinery/carousel':
         specifier: workspace:*
         version: link:../packages/carousel
@@ -419,8 +419,8 @@ importers:
   examples/ember-formwright:
     dependencies:
       '@ember-formwright/ember':
-        specifier: ^1.3.0
-        version: 1.3.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))
+        specifier: ^2.0.0
+        version: 2.0.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))
       '@ember-joinery/ember':
         specifier: workspace:*
         version: link:../../packages/ember
@@ -438,8 +438,8 @@ importers:
         specifier: ^7.29.7
         version: 7.29.13
       '@ember-formwright/test-support':
-        specifier: ^1.3.0
-        version: 1.3.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))
+        specifier: ^2.0.0
+        version: 2.0.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))
       '@ember-joinery/test-support':
         specifier: workspace:*
         version: link:../../packages/test-support
@@ -1242,11 +1242,11 @@ importers:
         specifier: ^7.29.7
         version: 7.29.13
       '@ember-formwright/ember':
-        specifier: ^1.3.0
-        version: 1.3.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))
+        specifier: ^2.0.0
+        version: 2.0.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))
       '@ember-formwright/test-support':
-        specifier: ^1.3.0
-        version: 1.3.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))
+        specifier: ^2.0.0
+        version: 2.0.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))
       '@ember-joinery/ember':
         specifier: workspace:*
         version: link:../ember
@@ -1634,11 +1634,11 @@ importers:
         specifier: ^7.29.7
         version: 7.29.13
       '@ember-formwright/ember':
-        specifier: ^1.3.0
-        version: 1.3.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))
+        specifier: ^2.0.0
+        version: 2.0.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))
       '@ember-formwright/test-support':
-        specifier: ^1.3.0
-        version: 1.3.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))
+        specifier: ^2.0.0
+        version: 2.0.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))
       '@ember-joinery/carousel':
         specifier: workspace:*
         version: link:../packages/carousel
@@ -2588,15 +2588,15 @@ packages:
   '@ember-data/rfc395-data@0.0.4':
     resolution: {integrity: sha512-tGRdvgC9/QMQSuSuJV45xoyhI0Pzjm7A9o/MVVA3HakXIImJbbzx/k/6dO9CUEQXIyS2y0fW6C1XaYOG7rY0FQ==}
 
-  '@ember-formwright/ember@1.3.0':
-    resolution: {integrity: sha512-eHMCRwwEXw8rE5jw/mvihY5GGt6ttZxyRfGzFCeh57jVGfVGDFrDfKH3SK8F8CLL8+SwbxhH9nng6hMkzsbWfw==}
+  '@ember-formwright/ember@2.0.0':
+    resolution: {integrity: sha512-EtD4h0tFT4GB4Io8tZ6slXk5mdVpLqMWKqRYJhaqvEGuO39TNguHvFj1t6B0zpPhV/DnK6FezJzYjcJYi81lOA==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
       '@glimmer/component': '>= 2.0.0'
       ember-source: '>= 6.12.0'
 
-  '@ember-formwright/test-support@1.3.0':
-    resolution: {integrity: sha512-FIbgjmubATJhKY+PhASUY6sutJ4Ly8qkDfWsLLOWg7e0CpjBOvC0iIOWRexqdHhzBCpljAxb+/mZ78zjow+Z6A==}
+  '@ember-formwright/test-support@2.0.0':
+    resolution: {integrity: sha512-ghdvVcXFe4Tf0mGSSxxM3E+n740QLBG1ySPhNwEGF79qDpcFqV2SM6Mb3Qjeubqr9q1s5RrVD73T9OxqYc8d/Q==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
       '@ember/test-helpers': '>= 5.0.0'
@@ -10182,7 +10182,7 @@ snapshots:
 
   '@ember-data/rfc395-data@0.0.4': {}
 
-  '@ember-formwright/ember@1.3.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))':
+  '@ember-formwright/ember@2.0.0(@babel/core@7.29.13)(@glimmer/component@2.2.1)(ember-source@7.3.1(@glimmer/component@2.2.1))':
     dependencies:
       '@ember/test-waiters': 4.1.2
       '@embroider/addon-shim': 1.11.0
@@ -10194,7 +10194,7 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
 
-  '@ember-formwright/test-support@1.3.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))':
+  '@ember-formwright/test-support@2.0.0(@ember/test-helpers@5.8.0(@babel/core@7.29.13))':
     dependencies:
       '@ember/test-helpers': 5.8.0(@babel/core@7.29.13)
       '@embroider/addon-shim': 1.11.0

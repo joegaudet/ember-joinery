@@ -1,7 +1,7 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { unlocalized } from 'test-app/tests/helpers/pseudo'
-import { render } from '@ember/test-helpers'
+import { LiveTranslator, unlocalized } from 'test-app/tests/helpers/pseudo'
+import { render, settled } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { pseudoTranslator, setupTranslator } from '@ember-joinery/test-support'
 import { Carousel } from '@ember-joinery/carousel'
@@ -20,6 +20,9 @@ import {
   PowerCalendarRange,
 } from '@ember-joinery/power-calendar'
 import { DatePickerHarness } from '@ember-joinery/power-calendar/test-support'
+import { messages as calendarMessages } from '@ember-joinery/power-calendar/messages'
+import { CarouselHarness } from '@ember-joinery/carousel/test-support'
+import { format } from '@ember-joinery/primitives/i18n'
 import { RichTextEditor } from '@ember-joinery/tiptap'
 import { RichTextEditorHarness } from '@ember-joinery/tiptap/test-support'
 
@@ -146,6 +149,65 @@ module('Integration | i18n | add-ons', function (hooks) {
       assert.dom('[data-slot="calendar"]').includesText('März 2026')
       await render(<template><PowerCalendar @defaultValue={{MARCH_4}} @locale="fr" /></template>)
       assert.dom('[data-slot="calendar"]').includesText('mars 2026')
+      await a11yAudit()
+    })
+  })
+
+  module('with a translator whose locale changes', function (hooks) {
+    const live = new LiveTranslator()
+    setupTranslator(hooks, live)
+    hooks.beforeEach(() => {
+      live.locale = 'en'
+    })
+
+    test("the carousel's slides are renamed in the new language", async function (assert) {
+      await render(
+        <template>
+          <Carousel style="width: 320px" as |c|>
+            <c.Content>
+              {{#each SLIDES as |n|}}<c.Item>{{n}}</c.Item>{{/each}}
+            </c.Content>
+          </Carousel>
+        </template>,
+      )
+      const carousel = new CarouselHarness()
+      assert.deepEqual(carousel.slideLabels, ['1 of 2', '2 of 2'])
+      live.locale = 'en-XA'
+      await settled()
+      assert.deepEqual(
+        carousel.slideLabels,
+        [1, 2].map(index => pseudoTranslator.t(carouselMessages.slideLabel, { index, count: 2 })),
+      )
+      await a11yAudit()
+    })
+  })
+
+  module('with a translated range separator', function (hooks) {
+    setupTranslator(hooks, {
+      locale: 'en-US',
+      t: (message, values) =>
+        message.id === calendarMessages.range.id
+          ? format({ ...message, message: 'from {from} until {to}' }, values)
+          : format(message, values),
+    })
+
+    test('the range picker reads back the range it wrote, and English', async function (assert) {
+      const state = { range: undefined as unknown }
+      const set = (range: unknown) => (state.range = range)
+      await render(
+        <template>
+          <DateRangePicker @name="stay" @trigger="input" @onValueChange={{set}} />
+        </template>,
+      )
+      const stay = new DatePickerHarness('stay')
+      await stay.typeDate('from Mar 4, 2026 until Mar 9, 2026')
+      assert.deepEqual(state.range, { from: new Date(2026, 2, 4), to: new Date(2026, 2, 9) })
+      assert.strictEqual(stay.text, 'from Mar 4, 2026 until Mar 9, 2026', 'written back')
+      await stay.typeDate(stay.text)
+      assert.deepEqual(state.range, { from: new Date(2026, 2, 4), to: new Date(2026, 2, 9) })
+      await stay.typeDate('Mar 1, 2026 - Mar 2, 2026')
+      assert.deepEqual(state.range, { from: new Date(2026, 2, 1), to: new Date(2026, 2, 2) })
+      assert.strictEqual(stay.text, 'from Mar 1, 2026 until Mar 2, 2026')
       await a11yAudit()
     })
   })

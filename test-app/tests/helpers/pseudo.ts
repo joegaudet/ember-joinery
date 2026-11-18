@@ -1,3 +1,18 @@
+import { tracked } from '@glimmer/tracking'
+import { format, type Message } from '@ember-joinery/primitives/i18n'
+import { pseudoTranslator } from '@ember-joinery/test-support'
+
+/**
+ * A translator whose `locale` is tracked, as an app's is: English (`en`) until a test sets it to
+ * the pseudo-locale (`en-XA`), to check that a live change of language reaches every string.
+ */
+export class LiveTranslator {
+  @tracked locale = 'en'
+
+  t = (message: Message, values?: Record<string, unknown>): string =>
+    this.locale === 'en' ? format(message, values) : pseudoTranslator.t(message, values)
+}
+
 const ATTRIBUTES = [
   'aria-label',
   'aria-roledescription',

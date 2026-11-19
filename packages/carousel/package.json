@@ -1,6 +1,6 @@
 {
   "name": "@ember-joinery/carousel",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "shadcn/ui's Carousel for Ember: slides with motion, swipe and keyboard control, on Embla Carousel.",
   "keywords": [
     "ember-addon",

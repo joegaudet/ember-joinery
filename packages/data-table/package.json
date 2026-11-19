@@ -1,6 +1,6 @@
 {
   "name": "@ember-joinery/data-table",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "shadcn/ui's Data Table for Ember: sorting, filtering, pagination, row selection and column visibility, on TanStack Table's framework-agnostic core.",
   "keywords": [
     "ember-addon",

@@ -1,6 +1,6 @@
 {
   "name": "@ember-joinery/power-calendar",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Calendars and date pickers in shadcn/ui's look for Ember, on ember-power-calendar: a day, a range or several days, inline or in a popover from a button or an input.",
   "keywords": [
     "ember-addon",

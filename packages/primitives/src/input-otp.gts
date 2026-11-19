@@ -10,7 +10,7 @@ import Modifier from 'ember-modifier'
 import { As, type TagName } from './as.gts'
 import { controllable } from './controllable-state.ts'
 import { getDirection } from './direction.gts'
-import { format, translate } from './i18n.ts'
+import { format, t } from './i18n.ts'
 import { messages } from './messages.ts'
 
 const waiter = buildWaiter('@ember-joinery/primitives:input-otp')
@@ -505,7 +505,13 @@ export class InputOTP extends Component<InputOTPSignature> {
           {{on "mouseover" this.handleMouseOver}}
           {{on "mouseleave" this.handleMouseLeave}}
           ...attributes
-          {{OTPInputModifier otp=this value=this.value textAlign=@textAlign reach=this.reach}}
+          {{OTPInputModifier
+            otp=this
+            value=this.value
+            textAlign=@textAlign
+            reach=this.reach
+            label=(t messages.inputOtpLabel)
+          }}
         />
       </div>
     </div>
@@ -520,6 +526,8 @@ interface OTPInputModifierSignature {
       value: string
       textAlign: 'left' | 'center' | 'right' | undefined
       reach: BadgeSide | null
+      /** The name the input gets when nothing else names it, in the translator's language. */
+      label: string
     }
   }
 }
@@ -532,12 +540,16 @@ interface OTPInputModifierSignature {
  */
 class OTPInputModifier extends Modifier<OTPInputModifierSignature> {
   #connected = false
+  /** The `aria-label` this gave the input, so a name of the caller's is left alone. */
+  #label: string | undefined
 
   override modify(
     input: HTMLInputElement,
     _: [],
-    { otp, textAlign = 'left', reach }: OTPInputModifierSignature['Args']['Named'],
+    { otp, textAlign = 'left', reach, label }: OTPInputModifierSignature['Args']['Named'],
   ): void {
+    const ours = this.#label !== undefined && input.getAttribute('aria-label') === this.#label
+    if (ours || !isNamed(input)) input.setAttribute('aria-label', (this.#label = label))
     otp.show(input)
     style(input, textAlign, reach)
     if (!this.#connected) {
@@ -664,7 +676,6 @@ function connect(input: HTMLInputElement, otp: InputOTP): () => void {
   const container = input.closest<HTMLElement>('[data-input-otp-container]')
   otp.started(otp.value)
   adoptRules(input)
-  if (!isNamed(input)) input.setAttribute('aria-label', translate(otp, messages.inputOtpLabel))
 
   const onSelectionChange = (): void => otp.syncSelection(input)
   document.addEventListener('selectionchange', onSelectionChange, { capture: true })

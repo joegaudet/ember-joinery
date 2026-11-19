@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { unlocalized } from 'test-app/tests/helpers/pseudo'
+import { LiveTranslator, unlocalized } from 'test-app/tests/helpers/pseudo'
 import { click, render, settled } from '@ember/test-helpers'
 import { array } from '@ember/helper'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
@@ -135,6 +135,35 @@ module('Integration | i18n | primitives', function (hooks) {
       await a11yAudit()
       await render(<template><Calendar @today={{today}} @locale="fr" /></template>)
       assert.dom('[role="grid"]').hasAttribute('aria-label', 'mars 2026')
+    })
+  })
+
+  module('with a translator whose locale changes', function (hooks) {
+    const live = new LiveTranslator()
+    setupTranslator(hooks, live)
+    hooks.beforeEach(() => {
+      live.locale = 'en'
+    })
+
+    test("the input OTP's fallback name follows it, and a name of the caller's stays", async function (assert) {
+      await render(
+        <template>
+          <InputOTP @maxLength={{2}} data-test-otp="fallback" as |otp|>
+            {{#each otp.slots as |slot|}}<otp.Slot @index={{slot.index}} />{{/each}}
+          </InputOTP>
+          <InputOTP @maxLength={{2}} aria-label="⟦code⟧" data-test-otp="own" as |otp|>
+            {{#each otp.slots as |slot|}}<otp.Slot @index={{slot.index}} />{{/each}}
+          </InputOTP>
+        </template>,
+      )
+      assert.dom('[data-test-otp="fallback"]').hasAttribute('aria-label', 'One-time password')
+      live.locale = 'en-XA'
+      await settled()
+      assert
+        .dom('[data-test-otp="fallback"]')
+        .hasAttribute('aria-label', pseudoTranslator.t(messages.inputOtpLabel))
+      assert.dom('[data-test-otp="own"]').hasAttribute('aria-label', '⟦code⟧')
+      await a11yAudit()
     })
   })
 

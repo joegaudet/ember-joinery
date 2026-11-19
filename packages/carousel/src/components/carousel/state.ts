@@ -141,14 +141,17 @@ export class CarouselState {
     if (!api || isDestroying(this)) return
     this.canScrollPrev = api.canScrollPrev()
     this.canScrollNext = api.canScrollNext()
-    this.#labelSlides(api)
+    this.labelSlides()
   }
 
   /**
    * Names each slide by its place (`2 of 5`), as the APG's carousel pattern asks, unless it has
-   * a name of the caller's own (`aria-label` or `aria-labelledby`).
+   * a name of the caller's own (`aria-label` or `aria-labelledby`). It reads the translator's
+   * tracked locale, so the carousel's modifier runs it again when the language changes.
    */
-  #labelSlides(api: EmblaCarouselType): void {
+  labelSlides(): void {
+    const api = this.api
+    if (!api) return
     const slideLabel =
       this.#args.slideLabel() ??
       ((index: number, count: number) => translate(this, messages.slideLabel, { index, count }))

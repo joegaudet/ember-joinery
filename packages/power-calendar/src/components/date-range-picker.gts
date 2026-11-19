@@ -36,6 +36,23 @@ export interface DateRangePickerSignature {
 /** What splits typed text into its two dates: a dash, a hyphen or "to", spaced. */
 const SPLIT = /\s+(?:–|—|-|to)\s+/i
 
+// Stand-ins for the two dates: private-use characters no translation or date contains.
+const FROM = '\uE000'
+const TO = '\uE001'
+
+/**
+ * A pattern for text the range message wrote (`{from} – {to}`, or its translation): its own
+ * words and spacing as written (a run of spaces as any), and each date captured, in either order.
+ */
+function rangePattern(written: string): RegExp | undefined {
+  const parts = written.split(/[\uE000\uE001]/)
+  if (parts.length !== 3) return undefined
+  const [before, between, after] = parts.map(part =>
+    part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+'),
+  )
+  return new RegExp(`^\\s*${before}(.+?)${between}(.+?)${after}\\s*$`, 'u')
+}
+
 /**
  * A date range picker: shadcn's Range Picker, a Popover holding a `PowerCalendarRange`, opened
  * from an outlined Button with a calendar icon (as upstream's date-picker-range), or from an
@@ -117,11 +134,20 @@ export default class DateRangePicker extends PickerBase<DateRangePickerSignature
     return translate(this, messages.selectDates)
   }
 
-  readTyped(text: string): boolean {
+  /** The two dates typed, as the range message writes them, or split by a dash or "to". */
+  #split(text: string): [string, string] | undefined {
+    const written = translate(this, messages.range, { from: FROM, to: TO })
+    const match = rangePattern(written)?.exec(text)
+    if (match) return [match[1] ?? '', match[2] ?? '']
     const [first = '', second, ...rest] = text.split(SPLIT)
-    if (rest.length || second === undefined) return false
-    const from = parseDate(first)
-    const to = parseDate(second)
+    return rest.length || second === undefined ? undefined : [first, second]
+  }
+
+  readTyped(text: string): boolean {
+    const split = this.#split(text)
+    if (!split) return false
+    const from = parseDate(split[0])
+    const to = parseDate(split[1])
     if (!from || !to) return false
     this.selection.set(+from <= +to ? { from, to } : { from: to, to: from })
     return true

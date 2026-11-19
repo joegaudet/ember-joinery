@@ -14,6 +14,10 @@ import { CarouselNext, CarouselPrevious, stepModifier, type CarouselStepOptions 
 import { t } from '@ember-joinery/primitives/i18n'
 import { setOwner } from '@ember/owner'
 import { messages } from '../../messages.ts'
+import { modifier } from 'ember-modifier'
+
+// Names the slides again whenever what names them changes: the translator's locale, `@slideLabel`.
+const labelSlides = modifier((_: Element, [state]: [CarouselState]) => state.labelSlides())
 
 export type { CarouselOrientation, CarouselSlideLabel, CarouselStepOptions }
 
@@ -144,6 +148,7 @@ export default class Carousel extends Component<CarouselSignature> {
       data-test-jn-name={{@name}}
       ...attributes
       {{on "keydown" this.state.onKeyDown capture=true}}
+      {{labelSlides this.state}}
     >
       {{yield
         (hash

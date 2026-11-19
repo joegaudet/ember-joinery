@@ -25,7 +25,7 @@ import { Calendar } from '@ember-joinery/primitives/calendar'
 
 - **No date library.** Days go in and out as `Date`s at local midnight, a range as
   `{ from, to }`, and day arithmetic is native. Names, numbers and week starts come from `Intl`
-  in `@locale` (the app's [translator](/getting-started/i18n.md)'s, else `en-US`, as
+  in `@locale` (the app's [translator](/internationalization/index.md)'s, else `en-US`, as
   DayPicker's), so `@locale="es"` starts the week on a Monday and names it `lunes`. `@calendar`
   takes any calendar `Intl` knows (`persian`, `islamic-umalqura`, `hebrew`…), whose months are
   worked out from `Intl`'s own reading of each day; `@numerals` the digits (`arabext`).

@@ -1,6 +1,8 @@
 {
   "order": [
     "getting-started",
+    "accessibility",
+    "internationalization",
     "components",
     "primitives",
     "charts",

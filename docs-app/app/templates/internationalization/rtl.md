@@ -4,7 +4,9 @@ Right-to-left support for Joinery's components.
 
 Joinery's components support right-to-left (RTL) layouts. Text alignment, positioning and
 directional styles adapt for languages like Arabic, Hebrew and Persian, and so do the keyboard
-and the pointer.
+and the pointer. The components' own strings, in the same languages, come from your app's
+translator: see [Internationalization](/internationalization/index.md), and
+[I18n](/primitives/i18n.md) for its API.
 
 <Example @name="card-rtl" @title="A card component in RTL mode." @dir="rtl" />
 

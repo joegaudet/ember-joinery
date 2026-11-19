@@ -67,9 +67,12 @@ collide. Don't edit them by hand.
   build if the list misses a page. The A–Z sections (Components, Primitives, Charts, Blocks,
   Formwright, Reference) get theirs from `scripts/gen-guide-meta.mjs`, which docs-app's Vite
   config runs on every build, test run and dev server start; those files are gitignored. A
-  section's `index.md` is its overview and always comes first. Getting started, and the order
-  of the sections themselves, are hand-written `meta.json` files: add a Getting started page to
-  `docs-app/app/templates/getting-started/meta.json` where it belongs in the reading order.
+  section's `index.md` is its overview and always comes first. Getting started, Accessibility
+  and Internationalization, and the order of the sections themselves, are hand-written
+  `meta.json` files: add a page to its section's `meta.json` where it belongs in the reading
+  order.
+- **Pages that moved.** A guide page keeps its old address: `MOVED` in
+  `docs-app/app/routes/page.ts` sends it to the new one, since READMEs on npm link to it.
 - **The guide's page list.** The pages acceptance test builds its `PAGES` from
   `docs-app/app/templates`, so a new page is tested as soon as it exists.
 

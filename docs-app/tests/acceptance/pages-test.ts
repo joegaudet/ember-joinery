@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupApplicationTest } from 'docs-app/tests/helpers'
-import { visit, waitFor, waitUntil, find } from '@ember/test-helpers'
+import { currentURL, visit, waitFor, waitUntil, find } from '@ember/test-helpers'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 
 /**
@@ -75,6 +75,8 @@ module('Acceptance | guide pages', function (hooks) {
     const sections = new Set(PAGES.map(page => page.split('/')[0]))
     for (const section of [
       'getting-started',
+      'accessibility',
+      'internationalization',
       'components',
       'primitives',
       'charts',
@@ -134,9 +136,11 @@ module('Acceptance | guide pages', function (hooks) {
         .trim(),
     )
     assert.deepEqual(
-      sections.slice(0, 7),
+      sections.slice(0, 9),
       [
         'Getting Started',
+        'Accessibility',
+        'Internationalization',
         'Components',
         'Primitives',
         'Charts',
@@ -148,6 +152,20 @@ module('Acceptance | guide pages', function (hooks) {
     )
     assert.dom('.guide-sidebar a.active').hasText('Introduction')
   })
+
+  // Pages that moved keep their old addresses: READMEs on npm and other guides link to them.
+  for (const [from, to, heading] of [
+    ['/getting-started/accessibility.md', '/accessibility/index.md', 'Accessibility'],
+    ['/getting-started/i18n.md', '/internationalization/index.md', 'Internationalization'],
+    ['/getting-started/rtl.md', '/internationalization/rtl.md', 'RTL'],
+  ] as const) {
+    test(`${from} goes to ${to}`, async function (assert) {
+      await visit(from)
+      await waitFor('.guide-prose h1', { timeout: 15000 })
+      assert.strictEqual(currentURL(), to)
+      assert.dom('.guide-prose h1').hasText(heading)
+    })
+  }
 
   test('the guide starts at the introduction', async function (assert) {
     await visit('/')

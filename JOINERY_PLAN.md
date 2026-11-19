@@ -25,6 +25,10 @@ Deviations from the intake, and why:
   which isn't published: `@ember-joinery/test-support` has `setupTranslator()` and a
   pseudo-locale of its own, and every component passes the pseudo-locale test (item 8 of the
   definition of done).
+- **Accessibility and Internationalization are guide sections** (2026-11-19, Joe's ask). They
+  move out of Getting started, after it in the sidebar: Accessibility's overview and a Testing
+  page, and Internationalization's overview and RTL. Primitives → I18n stays the API reference.
+  The old addresses go to the new pages.
 - **The site leads with accessibility** (2026-11-11, Joe's ask). `docs/site/` gains an
   accessibility section after "why", its "Accessible" card moves first, and the guide gains
   Getting started → Accessibility. The siblings section adds harnessed, and every sibling site
@@ -400,7 +404,8 @@ current counts).
 ## Guide (`docs-app/`, Kolay)
 
 - **Sections:** Getting started (Introduction, Installation for Vite, classic and Tailwind apps;
-  Theming; Styles; the theme builder; Dark mode; RTL; Testing) · Components (A–Z, like
+  Theming; Styles; the theme builder; Dark mode; Testing) · Accessibility (Overview; Testing) ·
+  Internationalization (Overview; RTL) · Components (A–Z, like
   ui.shadcn.com) · Primitives (headless use and the utilities) · Charts · Blocks · Formwright ·
   Reference (`<APIDocs>`, a page per package, generated from its types).
 - **A component page:** a preview, installation and import, usage, Examples (each upstream

@@ -1,6 +1,6 @@
 {
   "name": "@ember-joinery/primitives",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Headless, accessible behaviour and utilities for Ember: the unstyled layer under Joinery.",
   "keywords": [
     "ember-addon",

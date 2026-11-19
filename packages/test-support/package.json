@@ -1,6 +1,6 @@
 {
   "name": "@ember-joinery/test-support",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "A test harness for every Joinery primitive and component, driven through data-test-jn selectors and ARIA.",
   "keywords": [
     "ember-addon",

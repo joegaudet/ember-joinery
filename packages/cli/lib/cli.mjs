@@ -2,9 +2,10 @@
 // shadcn's `add` does, with its flags. Updating is `add` again: --dry-run, --diff and --view
 // look before anything is written, and --overwrite takes this version's files.
 import { spawnSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { createInterface } from 'node:readline/promises'
-import { basename, dirname, join, resolve } from 'node:path'
+import { basename, dirname, isAbsolute, join, posix, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const REGISTRY = join(dirname(fileURLToPath(import.meta.url)), '../registry')
@@ -14,6 +15,7 @@ const SHOWN = 5 // --diff and --view without a path show this many files, as sha
 
 const USAGE = `Usage: ember-joinery add [components...] [options]
        ember-joinery list
+       ember-joinery --version
 
 Options for add:
   -y, --yes            skip the confirmation prompt (changed files are kept)
@@ -99,12 +101,23 @@ function packageManager(cwd) {
   return 'npm'
 }
 
+/**
+ * How to run the install. Windows needs a shell to run `pnpm.cmd` and the like, and cmd.exe
+ * treats a bare `^` as an escape, so `lucide@^0.474.0` would install exactly 0.474.0: quoted,
+ * it stays a range.
+ */
+export function installCommand(pm, specs, platform = process.platform) {
+  const windows = platform === 'win32'
+  return {
+    command: pm,
+    args: [pm === 'npm' ? 'install' : 'add', ...(windows ? specs.map(spec => `"${spec}"`) : specs)],
+    shell: windows,
+  }
+}
+
 function defaultInstall(pm, specs, cwd) {
-  const result = spawnSync(pm, [pm === 'npm' ? 'install' : 'add', ...specs], {
-    cwd,
-    stdio: 'inherit',
-    shell: process.platform === 'win32',
-  })
+  const { command, args, shell } = installCommand(pm, specs)
+  const result = spawnSync(command, args, { cwd, stdio: 'inherit', shell })
   if (result.status !== 0) throw new Error(`${pm} could not install ${specs.join(' ')}`)
 }
 
@@ -117,16 +130,20 @@ async function defaultConfirm(question) {
   }
 }
 
+/** A file's text with LF endings and one final newline, so neither counts as a change. */
+const normalize = text => text.replace(/\r\n/g, '\n').replace(/\n*$/, '\n')
+
+/** What joinery.json records of a copy: the hash of the text the CLI wrote. */
+const hash = text => createHash('sha256').update(normalize(text)).digest('hex')
+
 /**
  * A unified diff of `yours` against `theirs`, with three lines of context, or '' when they are
  * the same. A plain LCS over lines: component files are a few hundred lines at most.
  */
 export function unifiedDiff(name, yours, theirs, label = 'new') {
-  if (yours === theirs) return ''
-  const a = yours.split('\n')
-  const b = theirs.split('\n')
-  if (a.at(-1) === '') a.pop()
-  if (b.at(-1) === '') b.pop()
+  if (normalize(yours) === normalize(theirs)) return ''
+  const a = yours === '' ? [] : normalize(yours).split('\n').slice(0, -1)
+  const b = normalize(theirs).split('\n').slice(0, -1)
   const lcs = Array.from({ length: a.length + 1 }, () => new Uint32Array(b.length + 1))
   for (let i = a.length - 1; i >= 0; i--)
     for (let j = b.length - 1; j >= 0; j--)
@@ -155,7 +172,10 @@ export function unifiedDiff(name, yours, theirs, label = 'new') {
     const hunk = lines.slice(start, end + 1)
     const aCount = hunk.filter(([op]) => op !== '+').length
     const bCount = hunk.filter(([op]) => op !== '-').length
-    out += `@@ -${hunk[0][2] + 1},${aCount} +${hunk[0][3] + 1},${bCount} @@\n`
+    // An empty side starts at the line before it (`-0,0` for a new file), as diff(1) writes it.
+    const aStart = hunk[0][2] + (aCount ? 1 : 0)
+    const bStart = hunk[0][3] + (bCount ? 1 : 0)
+    out += `@@ -${aStart},${aCount} +${bStart},${bCount} @@\n`
     out += hunk.map(([op, text]) => `${op}${text}\n`).join('')
   }
   return out
@@ -176,6 +196,15 @@ export async function run(argv, io = {}) {
     install = defaultInstall,
   } = io
   const [command, ...rest] = argv
+  const manifest = JSON.parse(readFileSync(join(registryDir, 'manifest.json'), 'utf8'))
+  if (['--help', '-h', 'help'].includes(command)) {
+    stdout(USAGE)
+    return 0
+  }
+  if (['--version', '-v'].includes(command)) {
+    stdout(`${manifest.version}\n`)
+    return 0
+  }
 
   let options
   try {
@@ -184,12 +213,11 @@ export async function run(argv, io = {}) {
     stderr(`${error.message}\n\n${USAGE}`)
     return 1
   }
-  if (!command || options.help || command === 'help') {
+  if (!command || options.help) {
     stdout(USAGE)
     return command ? 0 : 1
   }
 
-  const manifest = JSON.parse(readFileSync(join(registryDir, 'manifest.json'), 'utf8'))
   const names = Object.keys(manifest.items)
 
   if (command === 'list') {
@@ -231,14 +259,33 @@ export async function run(argv, io = {}) {
 
   const configFile = join(cwd, CONFIG)
   const config = existsSync(configFile) ? JSON.parse(readFileSync(configFile, 'utf8')) : null
+  if (config && options.path && posix.normalize(options.path) !== posix.normalize(config.path)) {
+    stderr(
+      `joinery.json keeps the copies in ${config.path}. To move them, move the files and edit its "path".\n`,
+    )
+    return 1
+  }
   const path = options.path ?? config?.path ?? DEFAULT_PATH
+  const recorded = config?.files ?? {}
+  if (isAbsolute(path) || relative(cwd, resolve(cwd, path)).startsWith('..')) {
+    stderr(`The copies' path must be inside the app, relative to it: "${path}" isn't.\n`)
+    return 1
+  }
 
   const files = [...new Set(items.flatMap(name => manifest.items[name].files))].map(file => {
     const target = join(cwd, path, file)
     const theirs = readFileSync(join(registryDir, 'files', file), 'utf8')
     const yours = existsSync(target) ? readFileSync(target, 'utf8') : null
-    const status = yours === null ? 'create' : yours === theirs ? 'unchanged' : 'overwrite'
-    return { file, shown: join(path, file), target, theirs, yours, status }
+    // `update`: the copy is what an earlier add wrote, untouched. `overwrite`: it was edited.
+    const status =
+      yours === null
+        ? 'create'
+        : normalize(yours) === normalize(theirs)
+          ? 'unchanged'
+          : recorded[file] === hash(yours)
+            ? 'update'
+            : 'overwrite'
+    return { file, shown: posix.join(path, file), target, theirs, yours, status }
   })
 
   // npm packages: the missing ones, and @ember-joinery/* when the app's range is older.
@@ -259,20 +306,29 @@ export async function run(argv, io = {}) {
   })
 
   // A path picks one file, by its path or its name, as shadcn's `--diff button.tsx` does.
-  const pick = arg =>
-    arg === true
-      ? null
-      : files.filter(f => f.file === arg || f.shown === arg || basename(f.file) === arg)
+  const picked = arg => {
+    if (arg === true) return files
+    const want = arg.replace(/\\/g, '/').replace(/^\.\//, '')
+    return files.filter(f => f.file === want || f.shown === want || basename(f.file) === want)
+  }
+  for (const arg of [options.diff, options.view]) {
+    if (arg && arg !== true && picked(arg).length === 0) {
+      stderr(
+        `${arg} isn't one of the files this adds:\n${files.map(f => `  ${f.shown}\n`).join('')}`,
+      )
+      return 1
+    }
+  }
 
   if (options.view) {
-    const chosen = pick(options.view) ?? files
+    const chosen = picked(options.view)
     for (const f of chosen.slice(0, SHOWN)) log(`// ${f.shown}\n${f.theirs}\n`)
     if (options.view === true && chosen.length > SHOWN)
       log(`… and ${chosen.length - SHOWN} more files.\n`)
     return 0
   }
   if (options.diff) {
-    const chosen = (pick(options.diff) ?? files).filter(f => f.status !== 'unchanged')
+    const chosen = picked(options.diff).filter(f => f.status !== 'unchanged')
     for (const f of chosen.slice(0, options.diff === true ? SHOWN : chosen.length)) {
       log(unifiedDiff(f.shown, f.yours ?? '', f.theirs, manifest.version))
     }
@@ -308,7 +364,12 @@ export async function run(argv, io = {}) {
     writeFileSync(f.target, f.theirs)
     written.push(f)
   }
-  if (!config) writeFileSync(configFile, `${JSON.stringify({ path }, null, 2)}\n`)
+  // A skipped file keeps its old record, so it still counts as edited next time.
+  const record = { ...recorded }
+  for (const f of files)
+    if (f.status === 'unchanged' || written.includes(f)) record[f.file] = hash(f.theirs)
+  const sorted = Object.fromEntries(Object.entries(record).sort(([a], [b]) => a.localeCompare(b)))
+  writeFileSync(configFile, `${JSON.stringify({ path, files: sorted }, null, 2)}\n`)
 
   for (const f of written) log(`${f.status === 'create' ? 'Created' : 'Updated'} ${f.shown}\n`)
   if (skipped.length) {
@@ -324,6 +385,12 @@ export async function run(argv, io = {}) {
     const pm = packageManager(cwd)
     log(`\nInstalling ${specs.join(' ')} with ${pm}…\n`)
     install(pm, specs, cwd)
+  }
+  if (!declared['@ember-joinery/ember']) {
+    log(
+      "\nJoinery's CSS styles the copies: install @ember-joinery/ember and import its CSS " +
+        '(https://joegaudet.com/ember-joinery/guide/getting-started/installation.md).\n',
+    )
   }
   if (!declared.typescript) {
     log(

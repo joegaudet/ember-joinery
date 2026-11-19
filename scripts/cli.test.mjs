@@ -1,11 +1,12 @@
 import { test } from 'node:test'
+import { createHash } from 'node:crypto'
 import assert from 'node:assert/strict'
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildRegistry } from '../packages/cli/lib/build-registry.mjs'
-import { run, unifiedDiff } from '../packages/cli/lib/cli.mjs'
+import { installCommand, run, unifiedDiff } from '../packages/cli/lib/cli.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const registryDir = mkdtempSync(join(tmpdir(), 'cli-registry-'))
@@ -246,4 +247,141 @@ test('unifiedDiff gives hunks with three lines of context', () => {
     '--- x (yours)\n+++ x (new)\n@@ -2,7 +2,7 @@\n b\n c\n d\n-e\n+E\n f\n g\n h\n',
   )
   assert.equal(unifiedDiff('x', before, before), '')
+})
+
+test('a path outside the app is an error, and nothing is written', async () => {
+  for (const args of [
+    ['add', 'badge', '--path', '../outside'],
+    ['add', 'badge', '-p', '/tmp/elsewhere/..'],
+  ]) {
+    const cwd = app()
+    const { code, output } = await cli(cwd, args)
+    assert.equal(code, 1, args.join(' '))
+    assert.match(output, /inside the app/)
+    assert.ok(!existsSync(join(cwd, 'joinery.json')))
+  }
+  const cwd = app()
+  writeFileSync(join(cwd, 'joinery.json'), JSON.stringify({ path: '../../..' }))
+  const { code } = await cli(cwd, ['add', 'badge'])
+  assert.equal(code, 1)
+})
+
+test('the install command quotes its specs for cmd.exe, which eats a bare ^', () => {
+  assert.deepEqual(installCommand('pnpm', ['lucide@^0.474.0'], 'darwin'), {
+    command: 'pnpm',
+    args: ['add', 'lucide@^0.474.0'],
+    shell: false,
+  })
+  assert.deepEqual(installCommand('npm', ['lucide@^0.474.0'], 'win32'), {
+    command: 'npm',
+    args: ['install', '"lucide@^0.474.0"'],
+    shell: true,
+  })
+})
+
+test('--help, -h and help print the usage; --version and -v print the version', async () => {
+  for (const flag of ['--help', '-h', 'help']) {
+    const { code, output } = await cli(app(), [flag])
+    assert.equal(code, 0, flag)
+    assert.match(output, /Usage: ember-joinery add/, flag)
+  }
+  for (const flag of ['--version', '-v']) {
+    const { code, output } = await cli(app(), [flag])
+    assert.equal(code, 0, flag)
+    assert.equal(output, '1.2.0\n', flag)
+  }
+})
+
+test('joinery.json records what each copy was, so an untouched old copy updates without asking', async () => {
+  const cwd = app()
+  await cli(cwd, ['add', 'button'])
+  const config = JSON.parse(readFileSync(join(cwd, 'joinery.json'), 'utf8'))
+  assert.match(config.files['components/button.gts'], /^[0-9a-f]{64}$/)
+  // An older version wrote it, and the user never touched it.
+  writeFileSync(target(cwd, 'components/button.gts'), 'old\n')
+  config.files['components/button.gts'] = createHash('sha256').update('old\n').digest('hex')
+  writeFileSync(join(cwd, 'joinery.json'), JSON.stringify(config))
+  const { questions, output } = await cli(cwd, ['add', 'button', '--yes'], { isTTY: true })
+  assert.deepEqual(questions, [])
+  assert.match(output, /Updated .*button\.gts/)
+  assert.equal(
+    readFileSync(target(cwd, 'components/button.gts'), 'utf8'),
+    source('components/button.gts'),
+  )
+  const dry = await cli(cwd, ['add', 'button', '--dry-run'])
+  assert.match(dry.output, /unchanged.*button\.gts/)
+})
+
+test('--dry-run tells an untouched old copy (update) from an edited one (overwrite)', async () => {
+  const cwd = app()
+  await cli(cwd, ['add', 'dialog'])
+  const config = JSON.parse(readFileSync(join(cwd, 'joinery.json'), 'utf8'))
+  writeFileSync(target(cwd, 'components/icon.gts'), 'old\n')
+  config.files['components/icon.gts'] = createHash('sha256').update('old\n').digest('hex')
+  writeFileSync(join(cwd, 'joinery.json'), JSON.stringify(config))
+  writeFileSync(target(cwd, 'components/button.gts'), 'mine\n')
+  const { output } = await cli(cwd, ['add', 'dialog', '--dry-run'])
+  assert.match(output, /update.*components\/icon\.gts/)
+  assert.match(output, /overwrite.*components\/button\.gts/)
+})
+
+test('a skipped file keeps its record, so it still counts as edited next time', async () => {
+  const cwd = app()
+  await cli(cwd, ['add', 'button'])
+  writeFileSync(target(cwd, 'components/button.gts'), 'mine\n')
+  await cli(cwd, ['add', 'button', '--yes'])
+  const { questions } = await cli(cwd, ['add', 'button'], { isTTY: true })
+  assert.equal(questions.length, 1)
+})
+
+test('--path that differs from joinery.json’s is an error', async () => {
+  const cwd = app()
+  await cli(cwd, ['add', 'badge'])
+  const { code, output } = await cli(cwd, ['add', 'badge', '--path', 'app/ui'])
+  assert.equal(code, 1)
+  assert.match(output, /joinery\.json/)
+  assert.ok(!existsSync(join(cwd, 'app/ui')))
+  assert.equal((await cli(cwd, ['add', 'badge', '--path', 'app/joinery'])).code, 0)
+})
+
+test('--diff and --view: a file the command doesn’t copy is an error; ./ and \\ are accepted', async () => {
+  const cwd = app()
+  for (const flag of ['--diff', '--view']) {
+    const { code, output } = await cli(cwd, ['add', 'dialog', flag, 'nosuch.gts'])
+    assert.equal(code, 1, flag)
+    assert.match(output, /nosuch\.gts isn't one of the files/, flag)
+  }
+  await cli(cwd, ['add', 'dialog'])
+  writeFileSync(target(cwd, 'components/button.gts'), 'mine\n')
+  for (const arg of [
+    './components/button.gts',
+    'components\\button.gts',
+    'app/joinery/components/button.gts',
+  ]) {
+    const { code, output } = await cli(cwd, ['add', 'dialog', '--diff', arg])
+    assert.equal(code, 0, arg)
+    assert.match(output, /--- app\/joinery\/components\/button\.gts/, arg)
+  }
+})
+
+test('line endings and a missing final newline aren’t changes', async () => {
+  const cwd = app()
+  await cli(cwd, ['add', 'button'])
+  const file = target(cwd, 'components/button.gts')
+  writeFileSync(file, source('components/button.gts').replace(/\n/g, '\r\n'))
+  assert.match((await cli(cwd, ['add', 'button', '--dry-run'])).output, /unchanged/)
+  writeFileSync(file, source('components/button.gts').replace(/\n$/, ''))
+  assert.match((await cli(cwd, ['add', 'button', '--dry-run'])).output, /unchanged/)
+  assert.equal(unifiedDiff('x', 'a\nb', 'a\nb\n'), '')
+  assert.equal(unifiedDiff('x', 'a\r\nb\r\n', 'a\nb\n'), '')
+})
+
+test('a new file’s diff starts its hunk at -0,0, as patch and git apply expect', () => {
+  assert.match(unifiedDiff('x', '', 'a\nb\n'), /^@@ -0,0 \+1,2 @@$/m)
+})
+
+test('an app without @ember-joinery/ember is told it needs it for the CSS', async () => {
+  assert.match((await cli(app(), ['add', 'badge'])).output, /@ember-joinery\/ember.*CSS/s)
+  const withEmber = app({ '@ember-joinery/ember': '^1.2.0', typescript: '^5.0.0' })
+  assert.doesNotMatch((await cli(withEmber, ['add', 'badge'])).output, /@ember-joinery\/ember/)
 })

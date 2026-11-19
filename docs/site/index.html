@@ -380,6 +380,7 @@
             <p class="label-above">Copy it in</p>
             <pre><code class="language-bash">$ npx ember-joinery add dialog
 Created app/joinery/components/dialog.gts
+Created app/joinery/messages.ts
 Created app/joinery/components/button.gts
 Created app/joinery/components/icon.gts</code></pre>
           </div>
@@ -668,16 +669,17 @@ import '@ember-joinery/ember/joinery.css'</code></pre>
           To change a component's markup or behaviour, copy it into your app with the
           <code>ember-joinery</code> CLI, shadcn's <code>add</code> for Ember, with its options. A
           copy keeps Joinery's CSS and its harness, and depends on the primitives and lucide, which
-          the CLI installs. Update one by running <code>add</code> again: it shows what changed and
-          never overwrites your edits without asking.
+          the CLI installs. Update one by running <code>add</code> again: it shows what changed,
+          updates the copies you haven't touched, and never overwrites your edits without asking.
         </p>
         <div class="pair">
           <pre><code class="language-bash">npx ember-joinery add dialog              # copy it in
 npx ember-joinery add dialog --diff       # later: what changed
 npx ember-joinery add dialog --overwrite  # take the new version</code></pre>
-          <pre><code class="language-json">// joinery.json, written by the first add
+          <pre><code class="language-json">// joinery.json: where the copies are, and what was written
 {
-  "path": "app/joinery"
+  "path": "app/joinery",
+  "files": { "components/dialog.gts": "9a0e…" }
 }</code></pre>
         </div>
         <p>

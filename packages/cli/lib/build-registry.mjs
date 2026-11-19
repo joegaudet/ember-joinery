@@ -32,11 +32,17 @@ const packageName = spec =>
     .slice(0, spec.startsWith('@') ? 2 : 1)
     .join('/')
 
-/** The specifiers of a module's static imports and re-exports. */
-const imports = source =>
+/** The specifiers of a module's static imports and re-exports, in either kind of quotes. */
+export const imports = source =>
   [
-    ...source.matchAll(/^\s*(?:import|export)\b[^'"]*?\bfrom\s+'([^']+)'|^\s*import\s+'([^']+)'/gm),
-  ].map(match => match[1] ?? match[2])
+    // Without comments, whose quotes (`it's`) would end a match early. No specifier holds `//`.
+    ...source
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/\/\/[^\n]*/g, '')
+      .matchAll(
+        /^\s*(?:import|export)\b[^'"]*?\bfrom\s+(['"])([^'"]+)\1|^\s*import\s+(['"])([^'"]+)\3/gm,
+      ),
+  ].map(match => match[2] ?? match[4])
 
 export function buildRegistry({ emberDir, outDir, version }) {
   const src = join(emberDir, 'src')

@@ -34,3 +34,4 @@ packages/*/NOTICE
 packages/cli/registry/
 # The components test-app copies in with the CLI, for the copied-components tests.
 test-app/app/joinery/
+test-app/joinery.json

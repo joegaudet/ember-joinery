@@ -1,7 +1,7 @@
 # Plan: copy components into your app (`npx ember-joinery add`)
 
-Status: built (2026-11-19) on `feature/joe/copy-cli`, branched from `build/joinery-1.0`, not
-committed. Decision 2 is recorded as changed in `JOINERY_PLAN.md`. Where the build differs from the
+Status: built (2026-11-19) on `feature/joe/copy-cli`, for 1.1, after 1.0 merged to `main`.
+Decision 2 is recorded as changed in `JOINERY_PLAN.md`. Where the build differs from the
 steps below:
 
 - **TypeScript only.** The copies are `.gts`, so an app needs TypeScript in its Babel config. The
@@ -16,6 +16,10 @@ steps below:
   `scripts/cli.test.mjs`, so the existing gate runs them.
 - **Reference test.** `scripts/api-docs.test.mjs` now asks a Reference page only of Ember
   add-ons, and checks that the CLI is documented on the Copy components page.
+- **Updates know what they wrote** (beyond shadcn). `joinery.json` also records a hash of each
+  file `add` wrote, so an untouched older copy is updated without asking (`update` in
+  `--dry-run`). Only a copy you've edited prompts, or is kept under `--yes`. Without this, `--yes`
+  and CI kept every old file, and a stale shared file (`messages.ts`) could break the build.
 - **No `--no-install`.** shadcn has no such flag. An `@ember-joinery/*` package is bumped only when
   the app's range is older, and a `workspace:` or `file:` spec is left alone.
 

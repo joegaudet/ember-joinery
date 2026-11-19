@@ -34,12 +34,15 @@ ember-joinery list
 | `--diff [path]` |       | Show diffs: the first five changed files, or the one named. Writes nothing  |
 | `--view [path]` |       | Show this version's files: the first five, or the one named. Writes nothing |
 
-The first `add` writes `joinery.json`, holding the copies' path, and later runs read it.
+The first `add` writes `joinery.json`: the copies' path, and a hash of each file it wrote.
+Later runs read it. Commit it with the copies.
+
+`ember-joinery --version` prints the version; `--help` prints the usage.
 
 ## Updating
 
-Run `add` again with the version you want. It never overwrites a file you've changed without
-asking:
+Run `add` again with the version you want. A copy you haven't touched is updated (`joinery.json`
+knows what was written); one you've edited is never overwritten without asking:
 
 ```bash
 npx ember-joinery@latest add dialog --dry-run           # which files would change

@@ -10,7 +10,7 @@ Joinery's CSS, and its harness still tests it.
 
 <div class="callout">
 
-**Not on npm yet.** The `ember-joinery` CLI publishes with Joinery's first release.
+**New in 1.1.** The `ember-joinery` CLI publishes with Joinery 1.1.
 
 </div>
 
@@ -22,14 +22,16 @@ npx ember-joinery add dialog
 
 ```text
 Created app/joinery/components/dialog.gts
+Created app/joinery/messages.ts
 Created app/joinery/components/button.gts
 Created app/joinery/components/icon.gts
 
-Installing @ember-joinery/primitives@^1.0.0 lucide@^0.474.0 with pnpm…
+Installing @ember-joinery/primitives@^1.1.0 lucide@^0.474.0 with pnpm…
 ```
 
 It copies the component and every component it uses (Dialog uses Button and Icon), with the
-folder layout the package has, so their imports of each other work unchanged.
+folder layout the package has (and `messages.ts`, their built-in strings, for
+[translation](/internationalization/index.md)), so their imports of each other work unchanged.
 Then it installs the npm packages the copies import that your app doesn't have yet, with the
 package manager your lockfile names. Name as many components as you like, or pass `--all`.
 `npx ember-joinery list` prints them all.
@@ -60,7 +62,8 @@ A copy is the component's own layer. What it's built on stays in packages:
 - **Behaviour**: `@ember-joinery/primitives`, the headless layer (focus, dismissing, the top
   layer, keyboard handling). shadcn's copies keep Radix as a dependency the same way.
 - **Icons**: `lucide`.
-- **Styles**: Joinery's CSS. A copy renders the same `jn-*` classes, so keep the
+- **Styles**: Joinery's CSS, from `@ember-joinery/ember` (the CLI says so when your app
+  doesn't have it). A copy renders the same `jn-*` classes, so keep the
   `tokens.css` and `joinery.css` imports from [Installation](/getting-started/installation.md);
   [Theming](/getting-started/theming.md) and [Styles](/getting-started/styles.md) apply to
   copies too. To restyle one component, add a class or edit its markup.
@@ -85,21 +88,29 @@ test('it opens', async function (assert) {
 
 ## joinery.json
 
-The first `add` writes `joinery.json` at your app's root, holding where the copies go:
+The first `add` writes `joinery.json` at your app's root: where the copies go, and a hash of
+each file it wrote, so a later `add` can tell a copy you've edited from one you haven't:
 
 ```json
 {
-  "path": "app/joinery"
+  "path": "app/joinery",
+  "files": {
+    "components/button.gts": "3f1c…",
+    "components/dialog.gts": "9a0e…"
+  }
 }
 ```
 
-Later runs read it, so an update lands where the first copy did. Put the copies somewhere else
-with `--path` on the first run (`npx ember-joinery add dialog --path app/ui`), or edit the file.
+Commit it with the copies. Later runs read it, so an update lands where the first copy did. Put
+the copies somewhere else with `--path` on the first run (`npx ember-joinery add dialog --path
+app/ui`); after that, `--path` must match the file's, so copies never end up in two places. To
+move them, move the files and edit `path`.
 
 ## Update a component
 
 Your copies don't change when Joinery does: you update one by running `add` again, as with
-shadcn. It never overwrites a file you've changed without asking, so look first:
+shadcn. A copy you haven't touched is updated, and one you've edited is never overwritten
+without asking, so look first:
 
 1. See which files would change:
 
@@ -107,8 +118,10 @@ shadcn. It never overwrites a file you've changed without asking, so look first:
    npx ember-joinery add dialog --dry-run
    ```
 
-   Each file is listed as `create`, `overwrite` (yours differs from this version's) or
-   `unchanged`, with the npm packages it would install. Run it with the version you want:
+   Each file is listed as `create`, `update` (an earlier version's, untouched since, so it is
+   replaced), `overwrite` (you've edited it, so `add` asks first) or `unchanged`, with the npm
+   packages it would install. Line endings and a missing final newline don't count as
+   changes. Run it with the version you want:
    `npx ember-joinery@latest add dialog --dry-run`. An update that needs newer primitives
    installs them.
 
@@ -126,8 +139,9 @@ shadcn. It never overwrites a file you've changed without asking, so look first:
    npx ember-joinery add dialog --overwrite
    ```
 
-   Without `--overwrite`, `add` asks before replacing each file you've changed. With `--yes`,
-   or in CI where there's no terminal to ask in, it keeps yours and lists them.
+   Without `--overwrite`, `add` asks before replacing each file you've edited. With `--yes`,
+   or in CI where there's no terminal to ask in, it keeps yours and lists them; a kept file
+   still counts as edited next time.
 
 ## Options
 

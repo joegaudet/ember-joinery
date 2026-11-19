@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, readdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { buildRegistry } from '../packages/cli/lib/build-registry.mjs'
+import { buildRegistry, imports } from '../packages/cli/lib/build-registry.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const src = join(root, 'packages/ember/src')
@@ -30,7 +30,9 @@ test('an item lists its file, the -private files it imports, and the components 
   assert.ok(dialog.registryDependencies.includes('button'))
   assert.ok(dialog.registryDependencies.includes('icon'))
   assert.ok(dialog.dependencies.includes('@ember-joinery/primitives'))
-  assert.deepEqual(manifest.items.icon.dependencies, ['lucide'])
+  assert.ok(dialog.dependencies.includes('lucide'), "dialog imports lucide's X")
+  // Icon takes its icon as an argument: it imports nothing from lucide, though its comments do.
+  assert.deepEqual(manifest.items.icon.dependencies, [])
 })
 
 test('every relative import is covered: by a file of the item or by one of its components', () => {
@@ -39,7 +41,7 @@ test('every relative import is covered: by a file of the item or by one of its c
     const own = new Set(item.files)
     for (const file of item.files) {
       const source = readFileSync(join(out, 'files', file), 'utf8')
-      for (const [, spec] of source.matchAll(/from '(\.[^']+)'/g)) {
+      for (const spec of imports(source).filter(spec => spec.startsWith('.'))) {
         const target = join(dirname(file), spec)
         const component = target.match(/^components\/(.+)\.gts$/)?.[1]
         assert.ok(
@@ -82,4 +84,13 @@ test('npm packages: primitives at this version, the rest at the ranges the packa
     '@ember-joinery/primitives': '^1.2.0',
     lucide: ember.dependencies.lucide,
   })
+})
+
+test('the import scanner reads single and double quotes, and multi-line imports', () => {
+  assert.deepEqual(
+    imports(
+      `import a from "./a.gts"\nimport {\n  b, // it's b\n} from '@x/y/z'\nexport * from './c.ts'\nimport './d.css'\n`,
+    ),
+    ['./a.gts', '@x/y/z', './c.ts', './d.css'],
+  )
 })

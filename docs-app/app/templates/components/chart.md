@@ -53,6 +53,9 @@ whatever order you write them in.
 pnpm add @ember-joinery/chart
 ```
 
+Copying the source in with `npx ember-joinery add` isn't available for add-on packages
+yet ([Copy components](/getting-started/copy.md)): install the package.
+
 The chart's styles are in Joinery's CSS (see [Installation](/getting-started/installation.md)),
 so there is nothing more to import. The colours are the theme's `--chart-1` to `--chart-5`:
 `tokens.css` and every base colour define them, light and dark, each its own (Neutral's, in

@@ -18,6 +18,15 @@ the same CSS, with shadcn's look on top. It is Joinery's only toast; the
 pnpm add @ember-joinery/ember lucide
 ```
 
+Or copy the source into your app, to change it as your own
+([Copy components](/getting-started/copy.md)):
+
+```bash
+npx ember-joinery add toaster
+```
+
+It copies the components it uses too: Icon.
+
 Import Joinery's CSS once (see [Installation](/getting-started/installation.md)); it includes
 sonner's. Then add the Toaster, once, to your application template:
 

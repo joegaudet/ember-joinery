@@ -1,0 +1,47 @@
+{
+  "name": "ember-joinery",
+  "version": "0.0.0",
+  "description": "Copy Joinery's components into your Ember app, and update them: shadcn's `add`, for Ember.",
+  "keywords": [
+    "ember",
+    "shadcn",
+    "cli",
+    "ui-components",
+    "design-system"
+  ],
+  "license": "MIT",
+  "author": "Joe Gaudet <joe@joegaudet.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joegaudet/ember-joinery.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://joegaudet.com/ember-joinery/guide/getting-started/copy.md",
+  "bugs": "https://github.com/joegaudet/ember-joinery/issues",
+  "type": "module",
+  "bin": {
+    "ember-joinery": "./bin/ember-joinery.mjs"
+  },
+  "exports": {
+    ".": "./lib/cli.mjs"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "registry",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE.md",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "node lib/build-registry.mjs",
+    "prepack": "node ../../scripts/legal-files.mjs . && node lib/build-registry.mjs"
+  },
+  "devDependencies": {
+    "@ember-joinery/ember": "workspace:*"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

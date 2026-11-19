@@ -919,6 +919,12 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
 
+  packages/cli:
+    devDependencies:
+      '@ember-joinery/ember':
+        specifier: workspace:*
+        version: link:../ember
+
   packages/code-block:
     dependencies:
       '@ember-joinery/primitives':
@@ -1759,6 +1765,9 @@ importers:
       ember-file-upload:
         specifier: ^10.1.0
         version: 10.1.0(@babel/core@7.29.13)(@ember/test-helpers@5.8.0(@babel/core@7.29.13))(@glimmer/component@2.2.1)(@glint/template@1.11.1)(ember-modifier@4.3.0(@babel/core@7.29.13))(tracked-built-ins@4.1.2(@babel/core@7.29.13))
+      ember-joinery:
+        specifier: workspace:*
+        version: link:../packages/cli
       ember-load-initializers:
         specifier: ^3.0.1
         version: 3.0.1(ember-source@7.3.1(@glimmer/component@2.2.1))

@@ -54,6 +54,9 @@ This guide will show you how to use [TanStack Table](https://tanstack.com/table)
    pnpm add @ember-joinery/data-table @ember-joinery/ember
    ```
 
+   Copying the source in with `npx ember-joinery add` isn't available for add-on packages
+   yet ([Copy components](/getting-started/copy.md)): install the package.
+
 It ships no CSS of its own: a data table is made of Joinery's Table, Input, Checkbox, Button and
 Dropdown Menu, which `joinery.css` styles. Everything `@tanstack/table-core` exports
 (`tableFeatures`, the features and row models, `createColumnHelper`, the filter and sort

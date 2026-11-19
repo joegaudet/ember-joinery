@@ -27,6 +27,9 @@ dependency and that library's peer, `tracked-built-ins`, beside it:
 pnpm add @ember-joinery/file-upload @ember-joinery/ember tracked-built-ins
 ```
 
+Copying the source in with `npx ember-joinery add` isn't available for add-on packages
+yet ([Copy components](/getting-started/copy.md)): install the package.
+
 It ships no CSS of its own: Joinery's `joinery.css` (or any of its styles) styles its parts, as
 it does every component. Import that once (see
 [Installation](/getting-started/installation.md)), then the component where you use it:

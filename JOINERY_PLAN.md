@@ -37,6 +37,12 @@ Deviations from the intake, and why:
   work through everything without feedback, as one big stacked PR. Each unit lands as its own
   commits on `build/joinery-1.0`. Nothing merges to `main` and nothing publishes until Joe has
   reviewed the whole PR.
+- **Copy-in CLI** (replaces decision 2, at Joe's request, 2026-11-19). Besides the npm
+  add-ons, `ember-joinery` (`packages/cli/`) copies a core component's source into an app, as
+  shadcn's `add` does, with its options; updating is `add` again (`--dry-run`, `--diff`,
+  `--overwrite`). It carries the source of its own version, built by
+  `packages/cli/lib/build-registry.mjs`. Copies keep Joinery's CSS and harnesses and depend on
+  the primitives. Add-ons, primitives and blocks aren't copyable yet. See `COPY_PLAN.md`.
 - **The upstream source, corrected.** ui.shadcn.com no longer renders the `new-york-v4` registry.
   Its component pages render `apps/v4/registry/bases/radix/ui`, styled by one of eight style
   sheets (`apps/v4/registry/styles/style-*.css`, Nova by default), with examples from
@@ -116,7 +122,7 @@ OIDC releases.
 | #   | Area            | Decision                                                                                                                                                                                  |
 | --- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | Name            | **Joinery**. Repo `joegaudet/ember-joinery`, npm `@ember-joinery/*`                                                                                                                       |
-| 2   | Distribution    | npm v2 addons only; no copy-in CLI                                                                                                                                                        |
+| 2   | Distribution    | npm v2 addons, plus `npx ember-joinery add` to copy a core component's source in (see the deviations)                                                                                     |
 | 3   | Packages        | Core plus opt-in add-ons, one add-on per heavy dependency                                                                                                                                 |
 | 4   | Positioning     | Its own brand. "Design and API ported from shadcn/ui (MIT)" in the README, the site footer and `NOTICE`                                                                                   |
 | 5   | Primitives      | Our own headless `@ember-joinery/primitives`, covering all of ember-primitives plus the Radix parts shadcn needs. No ember-primitives dependency                                          |
@@ -179,6 +185,7 @@ ember-joinery/
     power-calendar/ @ember-joinery/power-calendar ember-power-calendar: calendars, date pickers (+ /test-support)
     maskito/       @ember-joinery/maskito       Maskito: masked input, presets, phone input   (+ /test-support)
     formwright/    @ember-joinery/formwright    Formwright controls, Field layout, harnesses  (+ /test-support)
+    cli/           ember-joinery                the copy-in CLI: `npx ember-joinery add`, and its registry
   test-app/        Vite Ember app: integration tests for every package; built into docs/site/demo/
   docs-app/        the Kolay guide → docs/site/guide/
   parity/          private: React 19 + Tailwind 4 reference app that renders shadcn's own examples

@@ -192,8 +192,13 @@
             <span class="prompt" aria-hidden="true">$</span>
             <code>pnpm add @ember-joinery/ember</code>
           </div>
+          <div class="install">
+            <span class="prompt" aria-hidden="true">$</span>
+            <code>npx ember-joinery add button</code>
+          </div>
           <p class="install-note">
-            Add <code>@ember-joinery/test-support</code> for the harnesses. Joinery publishes to npm
+            Install the package, or copy a component's source in and own it. Add
+            <code>@ember-joinery/test-support</code> for the harnesses. Joinery publishes to npm
             with 1.0; until then, the <a href="guide/getting-started/installation.md">guide</a> has
             the steps.
           </p>
@@ -362,6 +367,30 @@
     &lt;/d.Footer&gt;
   &lt;/d.Content&gt;
 &lt;/Dialog&gt;</code></pre>
+          </div>
+        </div>
+
+        <p>
+          And as with shadcn, you can own the code. <code>npx ember-joinery add dialog</code> copies
+          the Dialog's source into your app, with the Button and Icon it uses, for you to change.
+          The copy still wears Joinery's CSS, and <code>DialogHarness</code> still tests it.
+        </p>
+        <div class="pair">
+          <div>
+            <p class="label-above">Copy it in</p>
+            <pre><code class="language-bash">$ npx ember-joinery add dialog
+Created app/joinery/components/dialog.gts
+Created app/joinery/components/button.gts
+Created app/joinery/components/icon.gts</code></pre>
+          </div>
+          <div>
+            <p class="label-above">Your copy, tested by the same harness</p>
+            <pre><code class="language-typescript">import Dialog from 'my-app/joinery/components/dialog.gts'
+import { DialogHarness } from '@ember-joinery/test-support'
+
+const dialog = new DialogHarness('edit-profile')
+await dialog.open()
+assert.true(dialog.isOpen)</code></pre>
           </div>
         </div>
 
@@ -634,6 +663,27 @@ pnpm add --save-dev @ember-joinery/test-support</code></pre>
 import '@ember-joinery/ember/tokens.css'
 import '@ember-joinery/ember/joinery.css'</code></pre>
         </div>
+        <h3>Or copy the source in</h3>
+        <p>
+          To change a component's markup or behaviour, copy it into your app with the
+          <code>ember-joinery</code> CLI, shadcn's <code>add</code> for Ember, with its options. A
+          copy keeps Joinery's CSS and its harness, and depends on the primitives and lucide, which
+          the CLI installs. Update one by running <code>add</code> again: it shows what changed and
+          never overwrites your edits without asking.
+        </p>
+        <div class="pair">
+          <pre><code class="language-bash">npx ember-joinery add dialog              # copy it in
+npx ember-joinery add dialog --diff       # later: what changed
+npx ember-joinery add dialog --overwrite  # take the new version</code></pre>
+          <pre><code class="language-json">// joinery.json, written by the first add
+{
+  "path": "app/joinery"
+}</code></pre>
+        </div>
+        <p>
+          The guide's <a href="guide/getting-started/copy.md">Copy components</a> page has the
+          options and the update steps, and each component's page has its command.
+        </p>
         <p>
           In a Tailwind app, put Joinery's layer between Tailwind's <code>base</code> and
           <code>components</code>, and add <code>tailwind.css</code>, which maps the tokens to
@@ -664,6 +714,15 @@ import '@ember-joinery/ember/joinery.css'</code></pre>
                   The components, styled: <code>joinery.css</code> (the Nova style) and shadcn's
                   seven other styles, <code>tokens.css</code> and the base colours,
                   <code>tailwind.css</code>, and <code>&lt;Icon&gt;</code> for lucide's icons.
+                </td>
+              </tr>
+              <tr class="jn-table-row" data-slot="table-row">
+                <th class="jn-table-cell" data-slot="table-cell" scope="row">
+                  <code>ember-joinery</code>
+                </th>
+                <td class="jn-table-cell" data-slot="table-cell">
+                  The CLI: <code>npx ember-joinery add</code> copies a component's source into your
+                  app, and updates it.
                 </td>
               </tr>
               <tr class="jn-table-row" data-slot="table-row">
@@ -1885,11 +1944,11 @@ export class EditProfile extends DialogHarness {
         </h2>
         <p>
           The guide has a page for each component, laid out like its ui.shadcn.com page, with every
-          upstream example ported, live, and tested with its harness. Each example switches style,
-          base colour, radius, light and dark, and right to left, shows itself at a phone's or a
-          tablet's width, and has Template and Test tabs to copy from. A theme builder shows every
-          component in the theme you make, and the API reference is generated from each package's
-          types.
+          upstream example ported, live, and tested with its harness, and its install and copy
+          commands. Each example switches style, base colour, radius, light and dark, and right to
+          left, shows itself at a phone's or a tablet's width, and has Template and Test tabs to
+          copy from. A theme builder shows every component in the theme you make, and the API
+          reference is generated from each package's types.
         </p>
         <figure class="guide-shot">
           <img

@@ -13,6 +13,15 @@ The Date Picker is built using a composition of the [Popover](/components/popove
 pnpm add @ember-joinery/ember
 ```
 
+Or copy the source into your app, to change it as your own
+([Copy components](/getting-started/copy.md)):
+
+```bash
+npx ember-joinery add calendar popover button
+```
+
+It copies the components they use too: Icon.
+
 Import Joinery's CSS once (see [Installation](/getting-started/installation.md)), then the
 components where you use them:
 

@@ -73,6 +73,13 @@ collide. Don't edit them by hand.
   order.
 - **Pages that moved.** A guide page keeps its old address: `MOVED` in
   `docs-app/app/routes/page.ts` sends it to the new one, since READMEs on npm link to it.
+- **The copy CLI's registry.** `packages/cli/registry/` (the components' source and
+  `manifest.json`, what each needs) is written from `packages/ember/src` by
+  `packages/cli/lib/build-registry.mjs` when the CLI builds or packs; it is gitignored. A new
+  component is copyable with `npx ember-joinery add` with nothing to edit, and its guide page
+  shows the command under Installation, as every core page does. `test-app`'s `pnpm copy` adds
+  every component to `test-app/app/joinery` (gitignored) before it typechecks and tests, so the
+  copies are checked as app code.
 - **The guide's page list.** The pages acceptance test builds its `PAGES` from
   `docs-app/app/templates`, so a new page is tested as soon as it exists.
 

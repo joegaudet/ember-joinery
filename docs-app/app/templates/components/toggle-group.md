@@ -10,6 +10,15 @@ A set of two-state buttons that can be toggled on or off.
 pnpm add @ember-joinery/ember
 ```
 
+Or copy the source into your app, to change it as your own
+([Copy components](/getting-started/copy.md)):
+
+```bash
+npx ember-joinery add toggle-group
+```
+
+It copies the components it uses too: Toggle.
+
 Import Joinery's CSS once (see [Installation](/getting-started/installation.md)), then the
 component where you use it:
 

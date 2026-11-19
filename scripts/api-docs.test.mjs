@@ -181,10 +181,15 @@ const publishedPackages = readdirSync(join(root, 'packages'))
   .map(dir => ({ dir, ...JSON.parse(readFileSync(join(root, 'packages', dir, 'package.json'))) }))
   .filter(pkg => !pkg.private)
 
-test('every published package has a Reference page, and the guide documents it', () => {
+// A Reference page is generated from a package's types, so it is for the Ember add-ons. The
+// CLI (`ember-joinery`) has commands, not an API to import: its guide page documents it.
+const addOns = publishedPackages.filter(pkg => pkg['ember-addon'])
+
+test('every published add-on has a Reference page, and the guide documents it', () => {
   const config = readFileSync(join(root, 'docs-app/vite.config.mjs'), 'utf8')
   const listed = config.match(/const API_PACKAGES = \[([^\]]*)\]/)[1]
-  for (const pkg of publishedPackages) {
+  assert.ok(addOns.length >= 12, `found ${addOns.length}`)
+  for (const pkg of addOns) {
     assert.ok(listed.includes(`'${pkg.name}'`), `${pkg.name} is in API_PACKAGES`)
     const page = join(root, 'docs-app/app/templates/reference', `${pkg.dir}.md`)
     assert.ok(existsSync(page), `reference/${pkg.dir}.md exists`)
@@ -198,5 +203,19 @@ test('every published package has a Reference page, and the guide documents it',
       new RegExp(`\\(/reference/${pkg.dir}\\.md\\)`),
       `the overview links ${pkg.dir}`,
     )
+  }
+})
+
+test('every published CLI is documented in the guide, by its command', () => {
+  const clis = publishedPackages.filter(pkg => !pkg['ember-addon'])
+  assert.deepEqual(
+    clis.map(pkg => pkg.name),
+    ['ember-joinery'],
+    'a published package is an Ember add-on or the CLI',
+  )
+  for (const pkg of clis) {
+    assert.ok(pkg.bin?.[pkg.name], `${pkg.name} has a bin of its name`)
+    const page = readFileSync(join(root, 'docs-app/app/templates/getting-started/copy.md'), 'utf8')
+    assert.match(page, new RegExp(`npx ${pkg.name} add`), `copy.md documents ${pkg.name}`)
   }
 })

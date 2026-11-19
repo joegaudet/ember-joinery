@@ -15,6 +15,10 @@ the steps the example apps follow inside the repository.
 
 </div>
 
+To change a component's source rather than install it, copy it into your app with
+`npx ember-joinery add`: see [Copy components](/getting-started/copy.md). The steps below
+still apply, since copies use Joinery's CSS and harnesses.
+
 ## Vite apps
 
 Add the packages:

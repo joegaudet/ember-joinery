@@ -29,6 +29,10 @@ A component is done only when it has all of these, in the same PR:
 - a parity mapping for each of those examples in `parity/map/<component>.json`;
 - a changeset.
 
+A core component is copyable with `npx ember-joinery add` with nothing to do: the CLI's
+registry is generated from `packages/ember/src`, and `scripts/cli-registry.test.mjs` checks it.
+Its guide page shows the copy command (`docs-app/tests/unit/copy-commands-test.ts`).
+
 The full checklist is "Definition of done for every component" in the plan.
 
 ## Keep upstream.json honest

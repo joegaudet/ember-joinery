@@ -10,6 +10,13 @@ Used to display textual user input from keyboard.
 pnpm add @ember-joinery/ember
 ```
 
+Or copy the source into your app, to change it as your own
+([Copy components](/getting-started/copy.md)):
+
+```bash
+npx ember-joinery add kbd
+```
+
 Import Joinery's CSS once (see [Installation](/getting-started/installation.md)), then the
 components where you use them:
 

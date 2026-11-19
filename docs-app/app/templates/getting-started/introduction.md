@@ -46,12 +46,15 @@ phone's width.
 | `@ember-joinery/ember`        | The styled components, their CSS and the theme tokens                                                                                                                    |
 | `@ember-joinery/primitives`   | The headless behaviour, and ember-primitives' utilities                                                                                                                  |
 | `@ember-joinery/test-support` | A harness for every component and primitive, and the testing helpers                                                                                                     |
+| `ember-joinery`               | The CLI: `npx ember-joinery add` copies a component's source into your app, and updates it                                                                               |
 | Opt-in add-ons                | Chart, Carousel, Data Table, Code Block, File Upload, Rich Text Editor, Power Calendar, Masked and Phone Input, and the Formwright bridge, each a package on its library |
 
 ## Where to next
 
 - [Installation](/getting-started/installation.md): add Joinery to a Vite, classic or Tailwind
   app.
+- [Copy components](/getting-started/copy.md): copy a component's source in, to change it as
+  your own, and update it later.
 - [Theming](/getting-started/theming.md), [Styles](/getting-started/styles.md) and the
   [Theme Builder](/getting-started/theme-builder.md): make it look like yours.
 - [Dark mode](/getting-started/dark-mode.md).

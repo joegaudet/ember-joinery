@@ -122,7 +122,7 @@ A `combobox` field filters its `@options` by label as you type, and stores the o
 A `date-picker` field is upstream's Date Picker, an outline Button that opens a Popover with a
 Calendar. It stores the day picked, a `Date` at local midnight, and closes. Its button writes
 the date as Intl's long date in the field's `@locale` (the app's
-[translator](/getting-started/i18n.md)'s, if not given), or `Pick a date` in its words.
+[translator](/internationalization/index.md)'s, if not given), or `Pick a date` in its words.
 
 <Example @name="formwright-date-picker" @title="Date Picker" />
 

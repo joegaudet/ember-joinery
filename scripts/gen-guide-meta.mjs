@@ -8,8 +8,8 @@
 //   node scripts/gen-guide-meta.mjs     regenerates them alone
 //
 // A section's index.md (its overview) needs no entry: Kolay always puts it first. The sections
-// read in a fixed order (Getting started, and the sections themselves in app/templates/meta.json)
-// keep hand-written meta.json files.
+// read in a fixed order (Getting started, Accessibility, Internationalization, and the sections
+// themselves in app/templates/meta.json) keep hand-written meta.json files.
 
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'

@@ -19,7 +19,13 @@ on a headless primitives layer, and each with a test harness.
   theme pastes in unchanged. The CSS ships compiled, so Tailwind is optional.
 - **A harness for every component** (`@ember-joinery/test-support`). Tests drive components the
   way users do, and check ARIA as they go.
-- **Accessible:** WCAG 2.2 AA, WAI-ARIA keyboard patterns, and right-to-left layouts.
+- **Accessible:** WCAG 2.2 AA, WAI-ARIA keyboard patterns, and an axe audit in every test; the
+  guide's [Accessibility](https://joegaudet.com/ember-joinery/guide/accessibility/index.md)
+  section has what each component does, and how to test it in your app.
+- **Internationalized:** every built-in string goes through your app's translator (ember-intl,
+  i18next, gettext, Lingui or your own), and every component works right to left; see the
+  guide's [Internationalization](https://joegaudet.com/ember-joinery/guide/internationalization/index.md)
+  section.
 - **Blocks:** shadcn's login, signup, dashboard and settings blocks, as tested guide pages to
   copy into your app, and a live demo built from them.
 - **Opt-in add-ons** for the heavy parts: charts, carousel, data table, code block, file uploads,
@@ -115,8 +121,9 @@ each, generated from its types.
 ## Links
 
 - Site and live demo: https://joegaudet.com/ember-joinery/ (not live yet)
-- Guide: https://joegaudet.com/ember-joinery/guide/ (not live yet): getting started, every
-  component with its examples, the theme builder and the API reference
+- Guide: https://joegaudet.com/ember-joinery/guide/ (not live yet): getting started,
+  accessibility, internationalization, every component with its examples, the theme builder
+  and the API reference
 - Sibling projects: [Formwright](https://joegaudet.com/ember-formwright/) (forms) and
   [real-enums](https://joegaudet.com/real-enums/).
 

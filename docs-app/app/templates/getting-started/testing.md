@@ -20,7 +20,7 @@ pnpm add --save-dev @ember-joinery/test-support
 It works with `@ember/test-helpers` 5 and later, under QUnit or Vitest. The guide's tests, and
 Joinery's own, end every test in an axe audit with
 [ember-a11y-testing](https://github.com/ember-a11y/ember-a11y-testing)'s `a11yAudit()`; do the
-same in yours.
+same in yours: [Accessibility → Testing](/accessibility/testing.md) shows how.
 
 ## Harnesses
 

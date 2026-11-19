@@ -17,7 +17,7 @@ written the modern Ember way, on a headless primitives layer, and each with a te
 - **A harness for every component.** `@ember-joinery/test-support` drives each component the
   way a user does, and reads its state through ARIA, so every test checks the ARIA contract too.
 - **Accessible.** WCAG 2.2 AA, the WAI-ARIA keyboard patterns, and right-to-left layouts, with
-  an axe audit in every test. See [Accessibility](accessibility.md).
+  an axe audit in every test. See [Accessibility](/accessibility/index.md).
 
 <div class="callout">
 
@@ -54,7 +54,10 @@ phone's width.
   app.
 - [Theming](/getting-started/theming.md), [Styles](/getting-started/styles.md) and the
   [Theme Builder](/getting-started/theme-builder.md): make it look like yours.
-- [Dark mode](/getting-started/dark-mode.md) and [RTL](/getting-started/rtl.md).
+- [Dark mode](/getting-started/dark-mode.md).
+- [Accessibility](/accessibility/index.md): what each component does for you, and how to test it.
+- [Internationalization](/internationalization/index.md): the components' strings in your
+  app's language, and [RTL](/internationalization/rtl.md).
 - [Testing](/getting-started/testing.md): harnesses, page objects and the selectors.
 - [Components](/components/index.md): every component, A to Z.
 - [Primitives](/primitives/index.md): the headless layer, and the utilities that come with it.

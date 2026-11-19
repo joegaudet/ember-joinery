@@ -13,7 +13,8 @@ or one of your own, through msgid's adapters.
 An argument still wins over the translator: `@closeLabel`, `@label`, `@labels`,
 `@getThumbLabel` and the like say exactly what they did before. With no translator and no
 argument, the strings are the English they always were, so an app that doesn't translate
-changes nothing.
+changes nothing. A language written right to left also needs its direction set:
+see [RTL](/internationalization/rtl.md).
 
 ## A translator
 
@@ -176,7 +177,8 @@ each `{name}`.
 ## In your own components
 
 `@ember-joinery/primitives/i18n` has what Joinery's own components use, for components of
-yours that want the same translator:
+yours that want the same translator (its [page under Primitives](/primitives/i18n.md) is the
+reference):
 
 ```gts
 import Component from '@glimmer/component'

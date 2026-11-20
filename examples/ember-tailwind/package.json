@@ -14,8 +14,8 @@
     "test": "vite build --mode development && testem ci --port 0"
   },
   "dependencies": {
-    "@ember-joinery/ember": "^1.0.0",
-    "@ember-joinery/test-support": "^1.0.0",
+    "@ember-joinery/ember": "^1.1.0",
+    "@ember-joinery/test-support": "^1.1.0",
     "lucide": "^0.474.0"
   },
   "devDependencies": {

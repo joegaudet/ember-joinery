@@ -10,6 +10,15 @@ Displays the path to the current resource using a hierarchy of links.
 pnpm add @ember-joinery/ember lucide
 ```
 
+Or copy the source into your app, to change it as your own
+([Copy components](/getting-started/copy.md)):
+
+```bash
+npx ember-joinery add breadcrumb
+```
+
+It copies the components it uses too: Icon.
+
 Import Joinery's CSS once (see [Installation](/getting-started/installation.md)), then the
 component where you use it:
 

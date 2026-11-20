@@ -30,3 +30,8 @@ docs-app/app/templates/*/meta.json
 # Each package's prepack copies the root's LICENSE.md and NOTICE in (scripts/legal-files.mjs).
 packages/*/LICENSE.md
 packages/*/NOTICE
+# The CLI's copy of the components it adds (packages/cli/lib/build-registry.mjs).
+packages/cli/registry/
+# The components test-app copies in with the CLI, for the copied-components tests.
+test-app/app/joinery/
+test-app/joinery.json

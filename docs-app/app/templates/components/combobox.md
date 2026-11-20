@@ -10,6 +10,15 @@ Autocomplete input with a list of suggestions.
 pnpm add @ember-joinery/ember
 ```
 
+Or copy the source into your app, to change it as your own
+([Copy components](/getting-started/copy.md)):
+
+```bash
+npx ember-joinery add combobox
+```
+
+It copies the components it uses too: Button, Icon, Input, Input Group and Textarea.
+
 Import Joinery's CSS once (see [Installation](/getting-started/installation.md)), then the
 component where you use it:
 

@@ -10,6 +10,13 @@ A set of layered sections of content—known as tab panels—that are displayed 
 pnpm add @ember-joinery/ember
 ```
 
+Or copy the source into your app, to change it as your own
+([Copy components](/getting-started/copy.md)):
+
+```bash
+npx ember-joinery add tabs
+```
+
 Import Joinery's CSS once (see [Installation](/getting-started/installation.md)), then the
 component where you use it:
 

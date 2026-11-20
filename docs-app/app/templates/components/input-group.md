@@ -10,6 +10,15 @@ Add addons, buttons, and helper content to inputs.
 pnpm add @ember-joinery/ember
 ```
 
+Or copy the source into your app, to change it as your own
+([Copy components](/getting-started/copy.md)):
+
+```bash
+npx ember-joinery add input-group
+```
+
+It copies the components it uses too: Button, Input and Textarea.
+
 Import Joinery's CSS once (see [Installation](/getting-started/installation.md)), then the
 component where you use it:
 

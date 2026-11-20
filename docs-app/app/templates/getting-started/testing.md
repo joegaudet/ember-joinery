@@ -6,6 +6,10 @@ its state through ARIA, as a screen reader does, and drives it the way a user do
 keys, typing and the pointer. So a test written with harnesses checks the ARIA contract as it
 goes, and keeps working when the markup inside a component changes.
 
+Harnesses work on [copied components](/getting-started/copy.md) too: a copy renders the same
+`data-test-jn-*` attributes, so `DialogHarness` drives your copy of the Dialog as it drives
+the package's.
+
 Every example in this guide has a **Test** tab with the test that covers it. The Dialog's is a
 page object, as below:
 

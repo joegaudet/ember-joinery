@@ -29,6 +29,9 @@ dependency and Tiptap's core and ProseMirror, its peers, beside it:
 pnpm add @ember-joinery/tiptap @ember-joinery/ember @tiptap/core @tiptap/pm
 ```
 
+Copying the source in with `npx ember-joinery add` isn't available for add-on packages
+yet ([Copy components](/getting-started/copy.md)): install the package.
+
 Keep `@tiptap/core`, `@tiptap/pm` and any Tiptap extensions you add on the version
 `@tiptap/starter-kit` has, so the app loads one copy of ProseMirror. The add-on ships no CSS of
 its own: Joinery's `joinery.css` (or any of its styles) styles its parts, as it does every

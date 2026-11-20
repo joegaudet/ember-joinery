@@ -18,6 +18,13 @@ more examples, look for the RTL section on components pages.
 pnpm add @ember-joinery/ember
 ```
 
+Or copy the source into your app, to change it as your own
+([Copy components](/getting-started/copy.md)):
+
+```bash
+npx ember-joinery add direction
+```
+
 ```gts
 import { DirectionProvider } from '@ember-joinery/ember'
 ```

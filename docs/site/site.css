@@ -324,6 +324,11 @@
   white-space: nowrap;
 }
 
+/* The hero's two ways in: install, or copy the source in. */
+.install + .install {
+  margin-top: 0.5rem;
+}
+
 .install .prompt {
   color: #8a8275;
   user-select: none;

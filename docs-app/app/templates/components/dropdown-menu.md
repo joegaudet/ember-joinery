@@ -10,6 +10,15 @@ Displays a menu to the user — such as a set of actions or functions — trigge
 pnpm add @ember-joinery/ember lucide
 ```
 
+Or copy the source into your app, to change it as your own
+([Copy components](/getting-started/copy.md)):
+
+```bash
+npx ember-joinery add dropdown-menu
+```
+
+It copies the components it uses too: Icon.
+
 Import Joinery's CSS once (see [Installation](/getting-started/installation.md)), then the
 component where you use it:
 

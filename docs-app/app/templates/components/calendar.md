@@ -10,6 +10,15 @@ A calendar component that allows users to select a date or a range of dates.
 pnpm add @ember-joinery/ember
 ```
 
+Or copy the source into your app, to change it as your own
+([Copy components](/getting-started/copy.md)):
+
+```bash
+npx ember-joinery add calendar
+```
+
+It copies the components it uses too: Button and Icon.
+
 Import Joinery's CSS once (see [Installation](/getting-started/installation.md)), then the
 component where you use it:
 

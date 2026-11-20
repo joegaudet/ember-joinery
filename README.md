@@ -28,6 +28,8 @@ on a headless primitives layer, and each with a test harness.
   section.
 - **Blocks:** shadcn's login, signup, dashboard and settings blocks, as tested guide pages to
   copy into your app, and a live demo built from them.
+- **Own the code, as with shadcn:** `npx ember-joinery add dialog` copies a component's source
+  into your app, and running it again updates the copy.
 - **Opt-in add-ons** for the heavy parts: charts, carousel, data table, code block, file uploads,
   a rich-text editor, calendars and date pickers on ember-power-calendar, masked and phone
   inputs, and a [Formwright](https://joegaudet.com/ember-formwright/) bridge.
@@ -50,6 +52,21 @@ Classic ember-cli apps also need `ember-auto-import` 2 and `ember-template-impor
 apps put Joinery's layer between Tailwind's `base` and `components` and add its
 `tailwind.css`; the guide's [Installation](https://joegaudet.com/ember-joinery/guide/getting-started/installation.md)
 page has the steps for each.
+
+### Or copy the source in
+
+To change a component's markup or behaviour, copy it into your app, as shadcn's `add` does:
+
+```bash
+npx ember-joinery add dialog              # copies Dialog, and the Button and Icon it uses
+npx ember-joinery add dialog --diff       # later: your copy against the new version
+npx ember-joinery add dialog --overwrite  # take the new version
+```
+
+A copy keeps Joinery's CSS and its harness, and depends on `@ember-joinery/primitives` and
+`lucide`, which the CLI installs. The guide's
+[Copy components](https://joegaudet.com/ember-joinery/guide/getting-started/copy.md) page has
+the options.
 
 ## Usage
 

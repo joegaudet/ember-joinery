@@ -278,6 +278,38 @@ describe('docs/site packages', () => {
   })
 })
 
+describe('docs/site copy-in', () => {
+  const hero = html.slice(0, html.indexOf('<section id="why">'))
+  const components = new Set(
+    readdirSync(join(root, 'packages', 'ember', 'src', 'components'))
+      .filter(file => file.endsWith('.gts'))
+      .map(file => file.replace(/\.gts$/, '')),
+  )
+
+  it('shows `npx ember-joinery add` in the hero, #why and #install', () => {
+    for (const [where, text] of [
+      ['the hero', hero],
+      ['#why', section('why')],
+      ['#install', section('install')],
+    ]) {
+      assert.match(text, /npx ember-joinery add /, where)
+    }
+  })
+
+  it("links #install to the guide's Copy components page, which exists", () => {
+    assert.ok(section('install').includes('href="guide/getting-started/copy.md"'))
+    assert.ok(guidePages.has('getting-started/copy.md'))
+  })
+
+  it('names only components the CLI can copy', () => {
+    const names = [...html.matchAll(/ember-joinery add ([a-z][a-z -]*)/g)].flatMap(([, args]) =>
+      args.split(' ').filter(arg => /^[a-z][a-z-]*$/.test(arg)),
+    )
+    assert.ok(names.length > 0)
+    for (const name of names) assert.ok(components.has(name), name)
+  })
+})
+
 describe('docs/social-card.html', () => {
   it("loads the site's logo and Joinery's CSS from docs/site", () => {
     for (const url of [...attributes(card, 'href'), ...attributes(card, 'src')].filter(

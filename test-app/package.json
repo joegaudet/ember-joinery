@@ -12,8 +12,9 @@
     "build": "vite build",
     "build:demo": "JOINERY_DEMO=1 vite build --outDir ../docs/site/demo --emptyOutDir",
     "start": "vite",
-    "typecheck": "ember-tsc --noEmit",
-    "test": "vite build --mode development && testem ci --port 0"
+    "typecheck": "pnpm copy && ember-tsc --noEmit",
+    "test": "pnpm copy && vite build --mode development && testem ci --port 0",
+    "copy": "ember-joinery add --all --overwrite --silent"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
@@ -63,6 +64,7 @@
     "ember-cli-babel": "^8.3.2",
     "ember-concurrency": "^5.3.0",
     "ember-file-upload": "^10.1.0",
+    "ember-joinery": "workspace:*",
     "ember-load-initializers": "^3.0.1",
     "ember-modifier": "^4.3.0",
     "ember-qunit": "^9.2.0",

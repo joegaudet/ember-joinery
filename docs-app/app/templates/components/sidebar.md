@@ -21,6 +21,15 @@ breakpoints. Pick 375 to see the mobile sheet.
 pnpm add @ember-joinery/ember lucide
 ```
 
+Or copy the source into your app, to change it as your own
+([Copy components](/getting-started/copy.md)):
+
+```bash
+npx ember-joinery add sidebar
+```
+
+It copies the components it uses too: Button, Icon, Input, Sheet, Skeleton and Tooltip.
+
 Import Joinery's CSS once (see [Installation](/getting-started/installation.md)), then the
 component where you use it:
 

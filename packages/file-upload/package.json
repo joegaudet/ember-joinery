@@ -1,6 +1,6 @@
 {
   "name": "@ember-joinery/file-upload",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "File uploads in shadcn/ui's look for Ember: a drop zone, a file list and an upload queue with progress, on ember-file-upload.",
   "keywords": [
     "ember-addon",

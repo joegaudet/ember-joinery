@@ -1,5 +1,13 @@
 # @ember-joinery/code-block
 
+## 1.1.0
+
+### Patch Changes
+
+- @ember-joinery/ember@1.1.0
+  - @ember-joinery/primitives@1.1.0
+  - @ember-joinery/test-support@1.1.0
+
 ## 1.0.0
 
 ### Major Changes

@@ -356,6 +356,7 @@ module('Integration | primitives | tooltip', function (hooks) {
     await next.hover()
     assert.strictEqual(next.state, 'delayed-open', 'nothing opened, so the delay still applies')
     await next.unhover()
+    await a11yAudit()
   })
 
   test('its state can be controlled', async function (assert) {

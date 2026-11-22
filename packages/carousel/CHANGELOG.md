@@ -28,6 +28,7 @@
 
 ### Patch Changes
 
+- a53c07b: Type checks in package source use `@sindresorhus/is` (`isString`, `isFunction`, …) instead of `typeof`, and a lint rule keeps it that way. `@sindresorhus/is` is a new runtime dependency, so `ember-joinery add` now installs it into the app for most components, `icon` included. `isNumber` rejects `NaN`, so a `NaN` reaching a numeric check now takes the non-number branch.
 - 99eab0c: Built-in strings follow a live change of the translator's `locale`: a carousel's slide names
   (`1 of 5`) and an input OTP's fallback name (`One-time password`) are set again in the new
   language, not only on the next render. A date range picker reads typed text with the range

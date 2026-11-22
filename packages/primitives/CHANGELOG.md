@@ -432,6 +432,7 @@
 
 ### Patch Changes
 
+- a53c07b: Type checks in package source use `@sindresorhus/is` (`isString`, `isFunction`, …) instead of `typeof`, and a lint rule keeps it that way. `@sindresorhus/is` is a new runtime dependency, so `ember-joinery add` now installs it into the app for most components, `icon` included. `isNumber` rejects `NaN`, so a `NaN` reaching a numeric check now takes the non-number branch.
 - a73065d: `anchor()` and `{{anchorTo}}` set the anchor's size (`--jn-anchor-width`, `--jn-anchor-height`)
   before they measure the floating element, and the Floating UI fallback places it again when
   those properties change its size, as Radix's Popper does. So an element as wide as its anchor (a

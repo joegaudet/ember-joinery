@@ -13,11 +13,13 @@ listed under "Autonomous execution".
 Deviations from the intake, and why:
 
 - **Stateful primitives run on Switchyard statecharts** (extends decisions 3 and 5; agreed with
-  Joe on 2026-11-22, who asked for it as one PR). `@ember-joinery/primitives` depends on
-  `@switchyard-ts/core`, `@switchyard-ts/ember` and `@real-enums/core`. Machines stay inside the
-  primitives (in `-private/`), so copied components and apps never import Switchyard. A machine
-  owns modes and timers only; an open or a value stays in `ControllableState`, and side effects
-  follow the value a controlled parent committed, not the one requested.
+  Joe on 2026-11-22, who asked for it as one PR). `@ember-joinery/primitives`, and the add-ons
+  whose components keep state of their own (file upload, power calendar, code block), depend on
+  `@switchyard-ts/core`, `@switchyard-ts/ember` and `@real-enums/core`. Machines stay in each
+  package's private code, so no public entry point exports one and copied components don't
+  import Switchyard themselves. A machine owns modes and timers only; an open or a value stays
+  in `ControllableState`, and side effects follow the value a controlled parent committed, not
+  the one requested.
 - **Built-in strings go through the app's translator** (changes decision 20; agreed with Joe on
   2026-11-11, who authorized the change in that session). Every built-in string is still an
   argument with an English default, and the argument still wins, but the default now comes

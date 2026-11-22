@@ -1,3 +1,4 @@
+import { isFunction } from '@sindresorhus/is'
 import { tracked } from '@glimmer/tracking'
 import { createCache, getValue } from '@glimmer/tracking/primitives/cache'
 import {
@@ -75,7 +76,7 @@ class Overrides {
 export function createTable<TFeatures extends TableFeatures, TData extends RowData>(
   options: EmberTableOptions<TFeatures, TData>,
 ): EmberTable<TFeatures, TData> {
-  const read = typeof options === 'function' ? options : () => options
+  const read = isFunction(options) ? options : () => options
   const initial = read()
   const features = {
     coreReactivityFeature: emberReactivity(),

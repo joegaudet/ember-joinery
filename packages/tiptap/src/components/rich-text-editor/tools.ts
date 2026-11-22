@@ -1,3 +1,4 @@
+import { isUndefined } from '@sindresorhus/is'
 import type { ChainedCommands, Editor } from '@tiptap/core'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import {
@@ -96,7 +97,7 @@ type Key = 'Mod' | 'Shift' | 'Alt' | string
 
 /** Whether `Mod` means ⌘ here, as ProseMirror's keymap decides it. */
 export function isApple(): boolean {
-  return typeof navigator !== 'undefined' && /Mac|iP(hone|[oa]d)/.test(navigator.platform)
+  return !isUndefined(globalThis.navigator) && /Mac|iP(hone|[oa]d)/.test(navigator.platform)
 }
 
 /**

@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is'
 import { find, settled } from '@ember/test-helpers'
 
 const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
@@ -28,7 +29,7 @@ export async function waitForObservers(): Promise<void> {
  *   assert.dom('[data-test-comment]').exists({ count: 3 })
  */
 export async function scrollIntoView(target: Element | string): Promise<void> {
-  const element = typeof target === 'string' ? find(target) : target
+  const element = isString(target) ? find(target) : target
   if (!element) throw new Error(`Joinery: scrollIntoView found nothing for ${String(target)}`)
   element.scrollIntoView({ block: 'center', inline: 'center' })
   await waitForObservers()

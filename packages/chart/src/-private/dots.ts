@@ -2,6 +2,7 @@
  * How a series' `dot`/`activeDot` option becomes what the chart draws: nothing, a circle with
  * attributes, or the caller's component.
  */
+import { isObject } from '@sindresorhus/is'
 import type { DotArgs, DotOption } from './parts.gts'
 
 export interface CircleDot {
@@ -21,7 +22,7 @@ export type DotRender = CircleDot | ComponentDot
 
 /** A plain object of attributes, as opposed to a component (a class, or a curried definition). */
 export function isPlainObject(value: unknown): value is Record<string, unknown> {
-  if (typeof value !== 'object' || value === null) return false
+  if (!isObject(value)) return false
   const proto = Object.getPrototypeOf(value) as unknown
   return proto === Object.prototype || proto === null
 }

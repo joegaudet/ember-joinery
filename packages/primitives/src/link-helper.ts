@@ -2,6 +2,7 @@ import Helper from '@ember/component/helper'
 import { service } from '@ember/service'
 import type RouterService from '@ember/routing/router-service'
 import { handleLink } from './proper-links.ts'
+import { isString } from '@sindresorhus/is'
 
 export interface LinkOptions {
   /**
@@ -149,7 +150,7 @@ class Link extends Helper<LinkSignature> {
     [href]: [string],
     { includeActiveQueryParams = false, activeOnSubPaths = false }: LinkOptions,
   ): LinkState {
-    if (typeof href !== 'string') throw new Error('Joinery: (link) needs the href')
+    if (!isString(href)) throw new Error('Joinery: (link) needs the href')
     const router = this.router
     return {
       isExternal: isExternalLink(href),

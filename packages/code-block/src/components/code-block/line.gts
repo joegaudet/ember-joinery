@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is'
 import type { TOC } from '@ember/component/template-only'
 import { htmlSafe, type SafeString } from '@ember/template'
 import type { CodeLine, CodeToken } from '../../highlighter.ts'
@@ -25,17 +26,17 @@ export interface CodeBlockLineSignature {
 /** What an empty line holds, so copying a selection keeps blank lines (as upstream's). */
 const NEWLINE = '\n'
 
-const isText = (code: string | CodeLine | undefined): code is string => typeof code === 'string'
+const isText = (code: string | CodeLine | undefined): code is string => isString(code)
 
 /** Whether the line has nothing to show: no code, an empty string, or no tokens with text. */
 const isEmpty = (code: string | CodeLine | undefined): boolean => {
   if (code === undefined) return false
-  if (typeof code === 'string') return code === ''
+  if (isString(code)) return code === ''
   return code.every(token => token.content === '')
 }
 
 const tokensOf = (code: string | CodeLine | undefined): CodeLine =>
-  code === undefined || typeof code === 'string' ? [] : code
+  code === undefined || isString(code) ? [] : code
 
 /** A token's colours, from Shiki's own output: trusted. */
 const styleOf = (token: CodeToken): SafeString | undefined =>

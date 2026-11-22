@@ -4,6 +4,7 @@ import { assert } from '@ember/debug'
 import { isDestroyed, isDestroying, registerDestructor } from '@ember/destroyable'
 import { buildWaiter } from '@ember/test-waiters'
 import type Owner from '@ember/owner'
+import { isFunction } from '@sindresorhus/is'
 
 const DEFAULT_BATCH_SIZE = 50
 
@@ -16,16 +17,15 @@ type Idle = (callback: () => void) => () => void
  * Safari has no `requestIdleCallback`, so there each batch waits for a task of its own: still
  * one batch at a time, without the idle hint.
  */
-const whenIdle: Idle =
-  typeof requestIdleCallback === 'function'
-    ? callback => {
-        const handle = requestIdleCallback(callback, { timeout: 10 })
-        return () => cancelIdleCallback(handle)
-      }
-    : callback => {
-        const handle = setTimeout(callback, 0)
-        return () => clearTimeout(handle)
-      }
+const whenIdle: Idle = isFunction(globalThis.requestIdleCallback)
+  ? callback => {
+      const handle = requestIdleCallback(callback, { timeout: 10 })
+      return () => cancelIdleCallback(handle)
+    }
+  : callback => {
+      const handle = setTimeout(callback, 0)
+      return () => clearTimeout(handle)
+    }
 
 /** How many batches have rendered, and of which collection. */
 interface Progress<T> {

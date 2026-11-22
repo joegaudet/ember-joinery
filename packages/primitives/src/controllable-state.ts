@@ -1,5 +1,6 @@
 import { tracked } from '@glimmer/tracking'
 import { warn } from '@ember/debug'
+import { isFunction } from '@sindresorhus/is'
 
 /** The next value, or a function from the current value to the next. */
 export type NextValue<T> = T | ((current: T) => T)
@@ -70,7 +71,7 @@ export class ControllableState<T> {
    */
   set(next: NextValue<T>): void {
     const current = this.value
-    const value = typeof next === 'function' ? (next as (current: T) => T)(current) : next
+    const value = isFunction(next) ? (next as (current: T) => T)(current) : next
     if (Object.is(value, current)) return
     if (!this.isControlled) this.changed = { value }
     this.#options.onChange?.()?.(value)

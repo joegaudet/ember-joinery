@@ -1,3 +1,4 @@
+import { isFunction } from '@sindresorhus/is'
 import { waitForPromise } from '@ember/test-waiters'
 import type {
   GrammarState,
@@ -103,7 +104,7 @@ let instance: Promise<Shiki> | undefined
 
 /** A theme (or a loader for one, or a module whose default export is one), resolved. */
 async function resolveTheme(input: ThemeInput): Promise<ThemeRegistrationAny> {
-  const value = (await (typeof input === 'function' ? input() : input)) as
+  const value = (await (isFunction(input) ? input() : input)) as
     ThemeRegistrationAny | { default: ThemeRegistrationAny }
   return 'default' in value ? value.default : value
 }
@@ -137,8 +138,7 @@ function getShiki(): Promise<Shiki> {
  */
 async function resolveLanguage(input: LanguageInput): Promise<LanguageRegistration[]> {
   type Grammars = LanguageRegistration | LanguageRegistration[]
-  const value = (await (typeof input === 'function' ? input() : input)) as
-    Grammars | { default: Grammars }
+  const value = (await (isFunction(input) ? input() : input)) as Grammars | { default: Grammars }
   const grammars = 'default' in value ? value.default : value
   return Array.isArray(grammars) ? grammars : [grammars]
 }

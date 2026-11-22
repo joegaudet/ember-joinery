@@ -1,10 +1,11 @@
+import { isFunction, isObject } from '@sindresorhus/is'
 import { get } from '@ember/object'
 import { keyOf, labelOf, matches, toStored, type OptionAccessor } from '@ember-formwright/ember'
 
 export { keyOf, labelOf, matches, toStored, type OptionAccessor }
 
-function isObject(value: unknown): value is object {
-  return typeof value === 'object' && value !== null
+function isRecord(value: unknown): value is object {
+  return isObject(value) && !isFunction(value)
 }
 
 /** An option's key as a string: `@optionKey`, else `id`, else `value`, else the option itself. */
@@ -18,8 +19,8 @@ export function keyString(option: unknown, accessor?: OptionAccessor): string {
  */
 export function descriptionOf(option: unknown, accessor?: OptionAccessor): string | undefined {
   let description: unknown
-  if (typeof accessor === 'function') description = accessor(option)
-  else if (!isObject(option)) return undefined
+  if (isFunction(accessor)) description = accessor(option)
+  else if (!isRecord(option)) return undefined
   else description = get(option, accessor ?? 'description')
   return description === null || description === undefined || description === ''
     ? undefined
@@ -28,7 +29,7 @@ export function descriptionOf(option: unknown, accessor?: OptionAccessor): strin
 
 /** Whether an option is marked `disabled: true`, as Formwright's controls read it. */
 export function isOptionDisabled(option: unknown): boolean {
-  return isObject(option) && (option as { disabled?: unknown }).disabled === true
+  return isRecord(option) && (option as { disabled?: unknown }).disabled === true
 }
 
 /** Whether a value counts as empty: nothing, an empty string or an empty list. */

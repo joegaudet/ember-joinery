@@ -38,6 +38,18 @@ export default tseslint.config(
     },
   },
   {
+    files: ['packages/*/src/**/*.{ts,gts}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "BinaryExpression > UnaryExpression[operator='typeof']",
+          message: 'Check types with @sindresorhus/is (isString, isFunction, …), not typeof.',
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.mjs', 'eslint.config.js', 'scripts/**'],
     languageOptions: { globals: globals.node },
   },

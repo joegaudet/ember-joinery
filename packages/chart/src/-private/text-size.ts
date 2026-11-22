@@ -8,6 +8,8 @@
  * ships this (see rollup.config.mjs).
  */
 
+import { isUndefined } from '@sindresorhus/is'
+
 export interface TextStyle {
   fontSize?: string
   letterSpacing?: string
@@ -32,7 +34,7 @@ const cache = new Map<string, TextSize>()
 const CACHE_SIZE = 2000
 
 function measure(text: string, style: TextStyle): TextSize {
-  if (typeof document === 'undefined') return { width: 0, height: 0 }
+  if (isUndefined(globalThis.document)) return { width: 0, height: 0 }
   let span = document.getElementById(SPAN_ID)
   if (!span) {
     span = document.createElement('span')

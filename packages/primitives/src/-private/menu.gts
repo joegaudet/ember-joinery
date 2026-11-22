@@ -46,6 +46,7 @@ import {
   type Point,
   type PopperContentArgs,
 } from './popper.gts'
+import { isUndefined } from '@sindresorhus/is'
 
 // ----- Keys ----------------------------------------------------------------------------------
 
@@ -117,7 +118,7 @@ export class KeyboardIntent {
   isUsingKeyboard = false
 
   constructor(owner: object) {
-    if (typeof document === 'undefined') return
+    if (isUndefined(globalThis.document)) return
     const onPointer = () => (this.isUsingKeyboard = false)
     const onKeyDown = () => {
       this.isUsingKeyboard = true

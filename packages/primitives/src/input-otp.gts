@@ -12,6 +12,7 @@ import { controllable } from './controllable-state.ts'
 import { getDirection } from './direction.gts'
 import { format, t } from './i18n.ts'
 import { messages } from './messages.ts'
+import { isString } from '@sindresorhus/is'
 
 const waiter = buildWaiter('@ember-joinery/primitives:input-otp')
 
@@ -222,7 +223,7 @@ export class InputOTP extends Component<InputOTPSignature> {
   get regexp(): RegExp | null {
     const { pattern } = this.args
     if (!pattern) return null
-    return typeof pattern === 'string' ? new RegExp(pattern) : pattern
+    return isString(pattern) ? new RegExp(pattern) : pattern
   }
 
   @cached

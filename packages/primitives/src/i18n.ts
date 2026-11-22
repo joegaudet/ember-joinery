@@ -1,6 +1,7 @@
 import { capabilities, setHelperManager } from '@ember/helper'
 import type Owner from '@ember/owner'
 import { findOwner } from './store.ts'
+import { isNumber } from '@sindresorhus/is'
 
 /**
  * A built-in string: a calendar's "Previous month", a dialog's "Close". Every package exports
@@ -41,7 +42,7 @@ export function format(message: Message, values?: Record<string, unknown>): stri
   const count = values?.['count']
   const text =
     message.plural !== undefined &&
-    typeof count === 'number' &&
+    isNumber(count) &&
     new Intl.PluralRules('en').select(count) !== 'one'
       ? message.plural
       : message.message

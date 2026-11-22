@@ -32,6 +32,7 @@ import {
   popperOptions,
   type PopperContentArgs,
 } from './-private/popper.gts'
+import { isUndefined } from '@sindresorhus/is'
 
 // Radix's Select (@radix-ui/react-select 2.2.6, the version radix-ui 1.4.3 pins), which
 // shadcn's Select is built on: a button that opens a listbox of options, with the selected
@@ -1125,8 +1126,9 @@ export class SelectContent extends Component<SelectContentSignature> {
    * (FastBoot) has no `document`, so there are none there; the value shows its placeholder until
    * the page is in a browser.
    */
-  readonly offPage: HTMLElement | undefined =
-    typeof document === 'undefined' ? undefined : document.createElement('div')
+  readonly offPage: HTMLElement | undefined = isUndefined(globalThis.document)
+    ? undefined
+    : globalThis.document.createElement('div')
 
   get select(): Select {
     return this.args.select

@@ -1,3 +1,4 @@
+import { isNumber } from '@sindresorhus/is'
 import { click, fillIn } from '@ember/test-helpers'
 import {
   CheckboxHarness,
@@ -85,7 +86,7 @@ export class DataTableHarness extends Harness {
   }
 
   #position(column: DataTableColumn): number {
-    if (typeof column === 'number') return column
+    if (isNumber(column)) return column
     const byId = this.columnIds.indexOf(column)
     if (byId !== -1) return byId
     const byText = this.columns.indexOf(column)

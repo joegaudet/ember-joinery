@@ -1,3 +1,4 @@
+import { isNumber } from '@sindresorhus/is'
 // The layout math of a resizable group, as react-resizable-panels (v4) does it: a layout is
 // one size per panel, in percent of the space the panels share, adding up to 100. Pure
 // functions, so they are easy to follow and to test.
@@ -55,7 +56,7 @@ export function sameLayout(a: readonly number[], b: readonly number[]): boolean 
  * ends in `%`, `px`, `rem`, `em`, `vh` or `vw`.
  */
 export function parseSize(size: PanelSize): [value: number, unit: SizeUnit] {
-  if (typeof size === 'number') return [size, 'px']
+  if (isNumber(size)) return [size, 'px']
   const value = parseFloat(size)
   const trimmed = size.trim()
   for (const unit of ['%', 'px', 'rem', 'vh', 'vw', 'em'] as const) {

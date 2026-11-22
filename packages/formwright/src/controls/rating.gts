@@ -1,3 +1,4 @@
+import { isNumber } from '@sindresorhus/is'
 import Component from '@glimmer/component'
 import type { ControlSignature } from '@ember-formwright/ember'
 import { Icon, type IconNode, type RatingSize } from '@ember-joinery/ember'
@@ -48,7 +49,7 @@ function halfOf(value: number, step: number): 'start' | 'end' | undefined {
 export class RatingControl extends Component<RatingControlSignature> {
   get value(): number {
     const value = this.args.value
-    return typeof value === 'number' && !Number.isNaN(value) ? value : 0
+    return isNumber(value) ? value : 0
   }
 
   get step(): number {

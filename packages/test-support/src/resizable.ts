@@ -1,3 +1,4 @@
+import { isNumber, isString } from '@sindresorhus/is'
 import { doubleClick, focus } from '@ember/test-helpers'
 import { Harness } from './harness.ts'
 import { pressKey, type KeyModifiers } from './focus.ts'
@@ -44,7 +45,7 @@ export class ResizableHarness extends Harness {
 
   /** A panel, by its index or its `@id`. Throws when there is none. */
   panel(key: PanelKey): HTMLElement {
-    if (typeof key === 'string') return this.part('panel', key)
+    if (isString(key)) return this.part('panel', key)
     const panel = this.panels[key]
     if (!panel) throw new Error(`no panel #${key} in ${this}`)
     return panel
@@ -73,7 +74,7 @@ export class ResizableHarness extends Harness {
 
   /** One panel's size, as `sizes` gives it. */
   size(key: PanelKey): number {
-    const index = typeof key === 'number' ? key : this.panels.indexOf(this.panel(key))
+    const index = isNumber(key) ? key : this.panels.indexOf(this.panel(key))
     return this.sizes[index]!
   }
 
@@ -143,12 +144,11 @@ export class ResizableHarness extends Harness {
     const box = handle.getBoundingClientRect()
     const x0 = box.left + box.width / 2
     const y0 = box.top + box.height / 2
-    const { x = 0, y = 0 } =
-      typeof distance === 'number'
-        ? this.orientation === 'horizontal'
-          ? { x: distance }
-          : { y: distance }
-        : distance
+    const { x = 0, y = 0 } = isNumber(distance)
+      ? this.orientation === 'horizontal'
+        ? { x: distance }
+        : { y: distance }
+      : distance
     // The distance is in the page's CSS pixels; the pointer's are the screen's, which a
     // transform (the test container's scale) makes differ.
     const group = this.element

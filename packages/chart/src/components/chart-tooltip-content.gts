@@ -1,3 +1,4 @@
+import { isFunction, isNumber, isString } from '@sindresorhus/is'
 import Component from '@glimmer/component'
 import { getComponentTemplate } from '@ember/component'
 import { htmlSafe, type SafeString } from '@ember/template'
@@ -75,7 +76,7 @@ interface Entry {
 }
 
 function text(value: unknown): string {
-  return typeof value === 'number' ? value.toLocaleString() : String(value)
+  return isNumber(value) ? value.toLocaleString() : String(value)
 }
 
 /**
@@ -86,7 +87,7 @@ function isFormatterComponent(
   formatter: TooltipFormatter,
 ): formatter is ComponentLike<TooltipFormatterSignature> {
   return (
-    typeof formatter !== 'function' ||
+    !isFunction(formatter) ||
     getComponentTemplate(formatter) !== undefined ||
     /^class[\s{]/.test(Function.prototype.toString.call(formatter))
   )
@@ -144,10 +145,9 @@ export default class ChartTooltipContent extends Component<ChartTooltipContentSi
     const config = this.args.config ?? {}
     if (hideLabel || !payload?.length) return null
     const [item] = payload
-    const key = `${labelKey ?? (typeof item?.dataKey === 'function' ? undefined : item?.dataKey) ?? item?.name ?? 'value'}`
+    const key = `${labelKey ?? (isFunction(item?.dataKey) ? undefined : item?.dataKey) ?? item?.name ?? 'value'}`
     const itemConfig = payloadConfig(config, item, key)
-    const value =
-      !labelKey && typeof label === 'string' ? (config[label]?.label ?? label) : itemConfig?.label
+    const value = !labelKey && isString(label) ? (config[label]?.label ?? label) : itemConfig?.label
     if (labelFormatter) return { text: String(labelFormatter(value, payload) ?? '') }
     if (!value) return null
     return { text: String(value) }
@@ -160,7 +160,7 @@ export default class ChartTooltipContent extends Component<ChartTooltipContentSi
     return (payload ?? [])
       .filter(item => item.type !== 'none')
       .map((item, index) => {
-        const key = `${nameKey ?? item.name ?? (typeof item.dataKey === 'function' ? undefined : item.dataKey) ?? 'value'}`
+        const key = `${nameKey ?? item.name ?? (isFunction(item.dataKey) ? undefined : item.dataKey) ?? 'value'}`
         const itemConfig = payloadConfig(config, item, key)
         const indicatorColor = cssValue(color ?? item.payload?.['fill'] ?? item.color)
         const icon = itemConfig?.icon

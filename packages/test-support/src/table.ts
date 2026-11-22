@@ -1,3 +1,4 @@
+import { isNumber } from '@sindresorhus/is'
 import { Harness } from './harness.ts'
 import { NotFoundError } from './-private/tree.ts'
 
@@ -98,7 +99,7 @@ export class TableHarness extends Harness {
   }
 
   #columnIndex(column: number | string): number {
-    if (typeof column === 'number') return column
+    if (isNumber(column)) return column
     const index = this.columns.indexOf(column)
     if (index === -1) throw new NotFoundError(`no column "${column}" in ${this}`)
     return index

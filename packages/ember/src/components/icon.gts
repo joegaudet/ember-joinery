@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is'
 import Component from '@glimmer/component'
 
 /**
@@ -47,8 +48,7 @@ export interface IconSignature {
 
 function elementsOf(icon: IconNode): readonly IconElement[] {
   // lucide 0.x: ['svg', defaultAttributes, elements]. Later: the elements alone.
-  if (typeof icon[0] === 'string')
-    return ((icon as readonly unknown[])[2] as readonly IconElement[]) ?? []
+  if (isString(icon[0])) return ((icon as readonly unknown[])[2] as readonly IconElement[]) ?? []
   return icon as readonly IconElement[]
 }
 

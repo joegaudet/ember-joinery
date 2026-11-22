@@ -22,6 +22,7 @@ import {
 } from './state.ts'
 import { translate } from '../i18n.ts'
 import { messages } from '../messages.ts'
+import { isFunction, isNumber, isObject, isString, isUndefined } from '@sindresorhus/is'
 
 // sonner 2.0.7's `Toaster` (MIT, (c) 2023 Emil Kowalski; the notice is in state.ts): the live
 // region, one list per position in use, and the stack's expanding on hover, its hotkey and its
@@ -115,15 +116,15 @@ export interface ToasterSignature {
 
 function offsetStyles(offset: ToastOffset | undefined, mobile: ToastOffset | undefined) {
   const result: Record<string, string> = {}
-  const px = (value: string | number) => (typeof value === 'number' ? `${value}px` : value)
+  const px = (value: string | number) => (isNumber(value) ? `${value}px` : value)
   for (const [value, prefix, fallback] of [
     [offset, '--offset', VIEWPORT_OFFSET],
     [mobile, '--mobile-offset', MOBILE_VIEWPORT_OFFSET],
   ] as const) {
     for (const side of ['top', 'right', 'bottom', 'left'] as const) {
-      if (typeof value === 'number' || typeof value === 'string') {
+      if (isNumber(value) || isString(value)) {
         result[`${prefix}-${side}`] = px(value)
-      } else if (typeof value === 'object' && value !== null) {
+      } else if (isObject(value) && !isFunction(value)) {
         const own = value[side]
         result[`${prefix}-${side}`] = own === undefined ? fallback : px(own)
       } else {
@@ -135,7 +136,7 @@ function offsetStyles(offset: ToastOffset | undefined, mobile: ToastOffset | und
 }
 
 const prefersDark = () =>
-  typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches
+  isFunction(globalThis.matchMedia) && globalThis.matchMedia('(prefers-color-scheme: dark)').matches
 
 /**
  * Whether focus on an element shows as the keyboard's (`:focus-visible`): tabbing or the hotkey,
@@ -176,7 +177,7 @@ export class Toaster extends Component<ToasterSignature> implements ToastHost {
   @tracked heights: readonly ToastHeight[] = []
   @tracked expanded = false
   @tracked interacting = false
-  @tracked documentHidden = typeof document !== 'undefined' && document.hidden
+  @tracked documentHidden = !isUndefined(globalThis.document) && globalThis.document.hidden
   @tracked systemDark = prefersDark()
 
   #section: HTMLElement | undefined
@@ -197,14 +198,15 @@ export class Toaster extends Component<ToasterSignature> implements ToastHost {
     super(owner, args)
     registerDestructor(this, bindToasts(owner))
     // Rendered on the server (FastBoot), there is no document to listen to.
-    if (typeof document === 'undefined') return
+    if (isUndefined(globalThis.document)) return
 
     const onKeyDown = (event: KeyboardEvent) => this.#onKeyDown(event)
     const onVisibility = () => (this.documentHidden = document.hidden)
     document.addEventListener('keydown', onKeyDown)
     document.addEventListener('visibilitychange', onVisibility)
-    const query =
-      typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : undefined
+    const query = isFunction(globalThis.matchMedia)
+      ? globalThis.matchMedia('(prefers-color-scheme: dark)')
+      : undefined
     const onScheme = (event: MediaQueryListEvent) => (this.systemDark = event.matches)
     query?.addEventListener('change', onScheme)
     registerDestructor(this, () => {

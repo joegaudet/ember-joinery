@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is'
 import { tracked } from '@glimmer/tracking'
 import { toDate } from '../dates.ts'
 
@@ -81,7 +82,7 @@ export function normalizeDisabledDates(
 ): Array<Date | string> | undefined {
   if (!dates) return undefined
   return dates.flatMap((date): Array<Date | string> => {
-    if (typeof date === 'string' && WEEKDAY_NAMES.has(date)) return [date]
+    if (isString(date) && WEEKDAY_NAMES.has(date)) return [date]
     const day = toDate(date)
     return day ? [day] : []
   })

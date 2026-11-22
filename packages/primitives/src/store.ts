@@ -1,6 +1,7 @@
 import { getOwner } from '@ember/owner'
 import type Owner from '@ember/owner'
 import { instanceFor, type InstanceDefinition } from './-private/instances.ts'
+import { isFunction, isObject } from '@sindresorhus/is'
 
 /**
  * What `createStore` makes one of per context: a class, constructed with the context's owner
@@ -14,12 +15,7 @@ export type StoreDefinition<T extends object> = InstanceDefinition<T>
  * Ember's business, and any object with `lookup` can stand in for one.
  */
 export function isOwner(value: unknown): value is Owner {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'lookup' in value &&
-    typeof value.lookup === 'function'
-  )
+  return isObject(value) && !isFunction(value) && 'lookup' in value && isFunction(value.lookup)
 }
 
 /**
@@ -28,7 +24,7 @@ export function isOwner(value: unknown): value is Owner {
  */
 export function findOwner(context: unknown): Owner | undefined {
   if (isOwner(context)) return context
-  if (typeof context !== 'object' || context === null) return undefined
+  if (!isObject(context) || isFunction(context)) return undefined
   const owner = getOwner(context)
   if (isOwner(owner)) return owner
   if ('owner' in context && isOwner(context.owner)) return context.owner
@@ -63,7 +59,7 @@ export function findOwner(context: unknown): Owner | undefined {
  * @param definition the class, or a function returning the instance
  */
 export function createStore<T extends object>(context: object, definition: StoreDefinition<T>): T {
-  if ((typeof context !== 'object' && typeof context !== 'function') || context === null) {
+  if (!isObject(context)) {
     throw new Error(
       `Joinery: createStore() needs an object to keep the instance on, not ${String(context)}`,
     )

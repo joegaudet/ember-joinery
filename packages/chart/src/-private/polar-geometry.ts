@@ -11,6 +11,7 @@
  * recharts is MIT licensed; its notice is in NOTICE, and the build keeps it in the module that
  * ships this (see rollup.config.mjs).
  */
+import { isFunction, isString } from '@sindresorhus/is'
 import { scaleBand, scaleLinear, scalePoint } from 'd3-scale'
 import {
   stack as d3Stack,
@@ -58,7 +59,7 @@ export function mathSign(value: number): number {
 }
 
 function isNumber(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value)
+  return Number.isFinite(value)
 }
 
 /**
@@ -72,9 +73,9 @@ export function percentValue(
   fallback = 0,
   validate = false,
 ): number {
-  if (typeof value !== 'string' && !isNumber(value)) return fallback
+  if (!isString(value) && !isNumber(value)) return fallback
   let result: number
-  if (typeof value === 'string' && value.includes('%')) {
+  if (isString(value) && value.includes('%')) {
     result = (total * parseFloat(value.slice(0, value.indexOf('%')))) / 100
   } else {
     result = +value
@@ -95,7 +96,7 @@ function path(strings: TemplateStringsArray, ...values: (number | string)[]): st
   return strings.reduce((out, string, i) => {
     if (i === 0) return string
     const value = values[i - 1]
-    return out + (typeof value === 'string' ? value : round4(value!)) + string
+    return out + (isString(value) ? value : round4(value!)) + string
   }, '')
 }
 
@@ -349,14 +350,14 @@ function parseNumericalDomain(
       return data ? (which === 0 ? Math.min(...data) : Math.max(...data)) : undefined
     }
     if (isNumber(value)) return value
-    if (typeof value === 'function') {
+    if (isFunction(value)) {
       try {
         return data ? value(data[which]) : undefined
       } catch {
         return undefined
       }
     }
-    if (typeof value === 'string' && regex.test(value)) {
+    if (isString(value) && regex.test(value)) {
       const match = regex.exec(value)
       if (!match?.[1] || !data) return undefined
       return which === 0 ? data[0] - Number(match[1]) : data[1] + Number(match[1])
@@ -417,7 +418,7 @@ function resolveAxis(
     domain = range(0, data.length)
   } else if (type === 'category') {
     const categories = applied.filter(
-      value => typeof value === 'string' || isNumber(value) || value instanceof Date,
+      value => isString(value) || isNumber(value) || value instanceof Date,
     )
     if (
       isCategorical &&

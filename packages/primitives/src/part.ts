@@ -1,5 +1,6 @@
 import Modifier from 'ember-modifier'
 import { registerDestructor } from '@ember/destroyable'
+import { isFunction } from '@sindresorhus/is'
 
 /** An attribute's value in a part: `true` sets it empty, and `false`, `null` or `undefined` leave it off. */
 export type AttributeValue = string | number | boolean | null | undefined
@@ -255,7 +256,7 @@ export function part<
       const merges = new Map<string, AttributeMerge>()
       for (const [name, value] of Object.entries(attributes)) {
         let resolved: AttributeValue
-        if (typeof value === 'function') {
+        if (isFunction(value)) {
           merges.set(name, value)
           const own = this.#originals.has(name)
             ? (this.#originals.get(name) ?? null)

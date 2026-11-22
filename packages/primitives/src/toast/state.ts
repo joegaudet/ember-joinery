@@ -27,6 +27,7 @@ import type Owner from '@ember/owner'
 import type { ComponentLike } from '@glint/template'
 import { service } from '../service.ts'
 import { isOwner } from '../store.ts'
+import { isBoolean, isFunction, isNumber, isObject, isString } from '@sindresorhus/is'
 
 // sonner 2.0.7's toast state (its `Observer` and `toast`), kept per owner instead of once per
 // page, so each app instance, and so each test, has its own toasts.
@@ -205,12 +206,7 @@ export interface PromiseToast<Data> {
 
 /** Whether a value is what `toast.promise()` returns. */
 function isPromiseToast(value: unknown): value is PromiseToast<unknown> {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'unwrap' in value &&
-    typeof value.unwrap === 'function'
-  )
+  return isObject(value) && !isFunction(value) && 'unwrap' in value && isFunction(value.unwrap)
 }
 
 /** What `create` takes: a toast's options plus its message (its title). */
@@ -221,25 +217,25 @@ interface CreateData extends Omit<ToastT, 'id' | 'title'> {
 
 function isHttpResponse(data: unknown): data is { ok: boolean; status: number } {
   return (
-    typeof data === 'object' &&
-    data !== null &&
+    isObject(data) &&
+    !isFunction(data) &&
     'ok' in data &&
-    typeof data.ok === 'boolean' &&
+    isBoolean(data.ok) &&
     'status' in data &&
-    typeof data.status === 'number'
+    isNumber(data.status)
   )
 }
 
 /** A promise result's options, when it is the extended form `{ message, … }`. */
 function isExtendedResult(value: unknown): value is PromiseExtendedResult {
-  return typeof value === 'object' && value !== null && 'message' in value
+  return isObject(value) && !isFunction(value) && 'message' in value
 }
 
 async function resolveResult<Data>(
   result: PromiseResult<Data> | undefined,
   data: Data,
 ): Promise<ToastContent | PromiseExtendedResult | undefined> {
-  return typeof result === 'function' && !isComponentClass(result)
+  return isFunction(result) && !isComponentClass(result)
     ? await (result as (data: Data) => ToastContent | PromiseExtendedResult)(data)
     : (result as ToastContent | PromiseExtendedResult | undefined)
 }
@@ -249,7 +245,7 @@ async function resolveResult<Data>(
  * is constructed, so it has a prototype other than a plain function's, with its own methods.
  */
 function isComponentClass(value: unknown): boolean {
-  return typeof value === 'function' && /^class[\s{]/.test(Function.prototype.toString.call(value))
+  return isFunction(value) && /^class[\s{]/.test(Function.prototype.toString.call(value))
 }
 
 /** Tests wait for a change to reach the Toasters (see `Toasts.toasts`). */
@@ -296,9 +292,7 @@ export class Toasts {
   create = (data: CreateData): ToastId => {
     const { message, ...rest } = data
     const id =
-      typeof data.id === 'number' || (typeof data.id === 'string' && data.id.length > 0)
-        ? data.id
-        : this.#counter++
+      isNumber(data.id) || (isString(data.id) && data.id.length > 0) ? data.id : this.#counter++
     if (this.#destroyed) return id
     const dismissible = data.dismissible === undefined ? true : data.dismissible
     this.#dismissed.delete(id)
@@ -375,10 +369,10 @@ export class Toasts {
         promise,
         type: 'loading',
         message: data.loading,
-        description: typeof data.description !== 'function' ? data.description : undefined,
+        description: !isFunction(data.description) ? data.description : undefined,
       } as CreateData)
     }
-    const started = Promise.resolve(typeof promise === 'function' ? promise() : promise)
+    const started = Promise.resolve(isFunction(promise) ? promise() : promise)
     let shouldDismiss = id !== undefined
     let result: ['resolve', Data] | ['reject', unknown] | undefined
 
@@ -442,11 +436,7 @@ export class Toasts {
       // A promise toast made without `loading` shows nothing until it settles, and has no id.
       if (toastOrId.id === undefined) return undefined
       id = toastOrId.id
-    } else if (
-      toastOrId === undefined ||
-      typeof toastOrId === 'number' ||
-      typeof toastOrId === 'string'
-    ) {
+    } else if (toastOrId === undefined || isNumber(toastOrId) || isString(toastOrId)) {
       id = toastOrId
     } else {
       warn(

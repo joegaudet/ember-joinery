@@ -1,4 +1,5 @@
 /* global HTMLElementTagNameMap -- a DOM type, which ESLint's browser globals don't list */
+import { isUndefined } from '@sindresorhus/is'
 import Component from '@glimmer/component'
 import { tracked } from '@glimmer/tracking'
 import { get, hash } from '@ember/helper'
@@ -66,7 +67,7 @@ export type SidebarMenuSubButtonSize = 'sm' | 'md'
  */
 export function sidebarStateFromCookie(
   cookieName: string = SIDEBAR_COOKIE_NAME,
-  doc: Document | undefined = typeof document === 'undefined' ? undefined : document,
+  doc: Document | undefined = isUndefined(globalThis.document) ? undefined : document,
 ): boolean | undefined {
   const prefix = `${cookieName}=`
   const entry = doc?.cookie
@@ -265,7 +266,7 @@ export class SidebarProvider extends Component<SidebarProviderSignature> {
     super(owner, args)
     // The page's own width, so a sidebar first renders as it should; `setup` measures again in
     // the window the provider is in, which differs only inside a frame.
-    this.viewportWidth = typeof window === 'undefined' ? Infinity : window.innerWidth
+    this.viewportWidth = isUndefined(globalThis.window) ? Infinity : window.innerWidth
   }
 
   /**
@@ -273,7 +274,7 @@ export class SidebarProvider extends Component<SidebarProviderSignature> {
    * with `document`, which a server-side render may not have.
    */
   get hasDocument(): boolean {
-    return typeof document !== 'undefined'
+    return !isUndefined(globalThis.document)
   }
 
   /** The root's `id`, which its parts name as their owner. */
@@ -303,7 +304,7 @@ export class SidebarProvider extends Component<SidebarProviderSignature> {
     if (!open) this.#keepFocus()
     this.openState.set(open)
     const name = this.args.cookieName ?? SIDEBAR_COOKIE_NAME
-    const doc = this.#document ?? (typeof document === 'undefined' ? undefined : document)
+    const doc = this.#document ?? (isUndefined(globalThis.document) ? undefined : document)
     if (name !== false && doc) {
       doc.cookie = `${name}=${open}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
     }

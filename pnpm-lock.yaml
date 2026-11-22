@@ -180,6 +180,9 @@ importers:
       '@shikijs/rehype':
         specifier: ^3.20.0
         version: 3.23.0
+      '@sindresorhus/is':
+        specifier: ^8.1.0
+        version: 8.1.0
       '@tailwindcss/vite':
         specifier: ^4.3.5
         version: 4.3.5(vite@8.3.6(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))
@@ -772,6 +775,9 @@ importers:
       '@embroider/addon-shim':
         specifier: ^1.10.3
         version: 1.11.0
+      '@sindresorhus/is':
+        specifier: ^8.1.0
+        version: 8.1.0
       decorator-transforms:
         specifier: ^2.4.0
         version: 2.4.0(@babel/core@7.29.13)
@@ -848,6 +854,9 @@ importers:
       '@embroider/addon-shim':
         specifier: ^1.10.3
         version: 1.11.0
+      '@sindresorhus/is':
+        specifier: ^8.1.0
+        version: 8.1.0
       d3-scale:
         specifier: ^4.0.2
         version: 4.0.3
@@ -936,6 +945,9 @@ importers:
       '@embroider/addon-shim':
         specifier: ^1.10.3
         version: 1.11.0
+      '@sindresorhus/is':
+        specifier: ^8.1.0
+        version: 8.1.0
       decorator-transforms:
         specifier: ^2.4.0
         version: 2.4.0(@babel/core@7.29.13)
@@ -1012,6 +1024,9 @@ importers:
       '@embroider/addon-shim':
         specifier: ^1.10.3
         version: 1.11.0
+      '@sindresorhus/is':
+        specifier: ^8.1.0
+        version: 8.1.0
       '@tanstack/table-core':
         specifier: 9.3.1
         version: 9.3.1
@@ -1085,6 +1100,9 @@ importers:
       '@embroider/addon-shim':
         specifier: ^1.10.3
         version: 1.11.0
+      '@sindresorhus/is':
+        specifier: ^8.1.0
+        version: 8.1.0
       decorator-transforms:
         specifier: ^2.4.0
         version: 2.4.0(@babel/core@7.29.13)
@@ -1152,6 +1170,9 @@ importers:
       '@embroider/addon-shim':
         specifier: ^1.10.3
         version: 1.11.0
+      '@sindresorhus/is':
+        specifier: ^8.1.0
+        version: 8.1.0
       decorator-transforms:
         specifier: ^2.4.0
         version: 2.4.0(@babel/core@7.29.13)
@@ -1228,6 +1249,9 @@ importers:
       '@embroider/addon-shim':
         specifier: ^1.10.3
         version: 1.11.0
+      '@sindresorhus/is':
+        specifier: ^8.1.0
+        version: 8.1.0
       decorator-transforms:
         specifier: ^2.4.0
         version: 2.4.0(@babel/core@7.29.13)
@@ -1392,6 +1416,9 @@ importers:
       '@embroider/addon-shim':
         specifier: ^1.10.3
         version: 1.11.0
+      '@sindresorhus/is':
+        specifier: ^8.1.0
+        version: 8.1.0
       decorator-transforms:
         specifier: ^2.4.0
         version: 2.4.0(@babel/core@7.29.13)
@@ -1474,6 +1501,9 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.8.0
         version: 1.8.0
+      '@sindresorhus/is':
+        specifier: ^8.1.0
+        version: 8.1.0
       decorator-transforms:
         specifier: ^2.4.0
         version: 2.4.0(@babel/core@7.29.13)
@@ -1529,6 +1559,9 @@ importers:
       '@embroider/addon-shim':
         specifier: ^1.10.3
         version: 1.11.0
+      '@sindresorhus/is':
+        specifier: ^8.1.0
+        version: 8.1.0
     devDependencies:
       '@ember/library-tsconfig':
         specifier: ^3.0.0
@@ -1551,6 +1584,9 @@ importers:
       '@embroider/addon-shim':
         specifier: ^1.10.3
         version: 1.11.0
+      '@sindresorhus/is':
+        specifier: ^8.1.0
+        version: 8.1.0
       '@tiptap/starter-kit':
         specifier: ^3.32.1
         version: 3.32.1
@@ -1729,6 +1765,9 @@ importers:
       '@rollup/plugin-babel':
         specifier: ^7.1.0
         version: 7.1.0(@babel/core@7.29.13)(rollup@4.68.0)
+      '@sindresorhus/is':
+        specifier: ^8.1.0
+        version: 8.1.0
       '@tailwindcss/vite':
         specifier: ^4.3.5
         version: 4.3.5(vite@8.3.6(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))
@@ -3660,6 +3699,10 @@ packages:
 
   '@simple-dom/interface@1.4.0':
     resolution: {integrity: sha512-l5qumKFWU0S+4ZzMaLXFU8tQZsicHEMEyAxI5kDFGhJsRqDwe0a7/iPA/GdxlGyDKseQQAgIz5kzU7eXTrlSpA==}
+
+  '@sindresorhus/is@8.1.0':
+    resolution: {integrity: sha512-2SX/1jW6CIMAiebvVv5ZInoCEuWQmMyBoJXXGC6Vjakjp/fpxP5eHs7/V6WKuPEIbuK06+VpjH+vjLQhr98rDQ==}
+    engines: {node: '>=22'}
 
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
@@ -11312,6 +11355,8 @@ snapshots:
       '@simple-dom/interface': 1.4.0
 
   '@simple-dom/interface@1.4.0': {}
+
+  '@sindresorhus/is@8.1.0': {}
 
   '@sindresorhus/merge-streams@4.0.0': {}
 

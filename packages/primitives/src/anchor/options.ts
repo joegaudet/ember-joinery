@@ -10,6 +10,7 @@ import type {
   VirtualElement,
 } from '@floating-ui/dom'
 import type { AnchorFlipOptions } from './middleware.ts'
+import { isFunction, isNumber, isObject, isUndefined } from '@sindresorhus/is'
 
 /** A side of the anchor, as Radix's `side`. */
 export type Side = 'top' | 'right' | 'bottom' | 'left'
@@ -129,9 +130,9 @@ export function resolve(options: AnchorOptions): ResolvedOptions {
   let rawCrossAxis = 0
   let alignmentAxis: number | null = options.alignOffset ?? null
   const given = options.offsetOptions
-  if (typeof given === 'number') {
+  if (isNumber(given)) {
     mainAxis = given
-  } else if (given && typeof given === 'object') {
+  } else if (given && isObject(given) && !isFunction(given)) {
     mainAxis = given.mainAxis ?? mainAxis
     rawCrossAxis = given.crossAxis ?? 0
     alignmentAxis = given.alignmentAxis ?? alignmentAxis
@@ -139,7 +140,7 @@ export function resolve(options: AnchorOptions): ResolvedOptions {
   // Floating UI's rule: for start and end, alignmentAxis replaces crossAxis, and counts from
   // the aligned edge, so it is negated for end.
   const crossAxis =
-    align !== 'center' && typeof alignmentAxis === 'number'
+    align !== 'center' && isNumber(alignmentAxis)
       ? align === 'end'
         ? -alignmentAxis
         : alignmentAxis
@@ -162,15 +163,15 @@ export function resolve(options: AnchorOptions): ResolvedOptions {
     arrow: options.arrow ?? null,
     arrowPadding: options.arrowPadding ?? 0,
     middleware: options.middleware ?? [],
-    offset: typeof given === 'function' ? given : undefined,
+    offset: isFunction(given) ? given : undefined,
     setData: options.setData,
   }
 }
 
 function hasPadding(padding: Padding | undefined): boolean {
   if (padding === undefined) return false
-  if (typeof padding === 'number') return padding !== 0
-  return Object.values(padding).some(value => typeof value === 'number' && value !== 0)
+  if (isNumber(padding)) return padding !== 0
+  return Object.values(padding).some(value => isNumber(value) && value !== 0)
 }
 
 /** The Floating UI settings CSS anchor positioning has no equivalent for. */
@@ -206,7 +207,7 @@ declare global {
 export function supportsAnchorPositioning(): boolean {
   try {
     return (
-      typeof CSS !== 'undefined' &&
+      !isUndefined(globalThis.CSS) &&
       CSS.supports('anchor-name: --jn-test') &&
       CSS.supports('position-area: bottom span-right') &&
       CSS.supports('position-try-fallbacks: flip-block, flip-inline')

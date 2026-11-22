@@ -1,6 +1,7 @@
 import { registerDestructor } from '@ember/destroyable'
 import { SharedObserver, type EntryCallback } from './-private/observers.ts'
 import { service } from './service.ts'
+import { isFunction, isString } from '@sindresorhus/is'
 
 const LOOP_MESSAGES = [
   'ResizeObserver loop limit exceeded',
@@ -10,7 +11,7 @@ const LOOP_MESSAGES = [
 const IGNORING = Symbol.for('@ember-joinery/primitives:ignores-resize-observer-loops')
 
 function isLoopMessage(message: unknown): boolean {
-  return typeof message === 'string' && LOOP_MESSAGES.includes(message)
+  return isString(message) && LOOP_MESSAGES.includes(message)
 }
 
 let listening = false
@@ -35,7 +36,7 @@ export function ignoreROError(): void {
     })
   }
   const previous = window.onerror as (OnErrorEventHandlerNonNull & { [IGNORING]?: true }) | null
-  if (typeof previous !== 'function' || previous[IGNORING]) return
+  if (!isFunction(previous) || previous[IGNORING]) return
   const wrapped = Object.assign(
     function (this: unknown, ...args: Parameters<OnErrorEventHandlerNonNull>) {
       if (isLoopMessage(args[0])) return true

@@ -8,6 +8,7 @@
  * recharts is MIT licensed; its notice is in NOTICE, and the build keeps it in the module that
  * ships this (see rollup.config.mjs).
  */
+import { isFunction, isNumber, isString } from '@sindresorhus/is'
 import { valueOf, type DataKey } from './cartesian.ts'
 
 export const RADIAN = Math.PI / 180
@@ -25,10 +26,6 @@ export function polarToCartesian(cx: number, cy: number, radius: number, angle: 
   }
 }
 
-function isNumber(value: unknown): value is number {
-  return typeof value === 'number' && !Number.isNaN(value)
-}
-
 export function mathSign(value: number): number {
   if (value === 0) return 0
   return value > 0 ? 1 : -1
@@ -44,9 +41,9 @@ export function percentOf(
   fallback = 0,
   validate = false,
 ): number {
-  if (!isNumber(value) && typeof value !== 'string') return fallback
+  if (!isNumber(value) && !isString(value)) return fallback
   let result: number
-  if (typeof value === 'string' && value.includes('%')) {
+  if (isString(value) && value.includes('%')) {
     result = (total * parseFloat(value.slice(0, value.indexOf('%')))) / 100
   } else {
     result = +value
@@ -67,7 +64,7 @@ export function round(value: number, precision = 4): number {
 function path(strings: TemplateStringsArray, ...values: (number | string)[]): string {
   return strings.reduce((result, string, i) => {
     const value = values[i - 1]
-    if (typeof value === 'string') return result + value + string
+    if (isString(value)) return result + value + string
     if (value !== undefined) return result + round(value) + string
     return result + string
   }, '')
@@ -350,8 +347,9 @@ function valueAt(datum: unknown, dataKey: DataKey, fallback: unknown): unknown {
 function pieCoordinate(settings: PieSettings, offset: Offset, datum: unknown) {
   const { top, left, width, height } = offset
   const maxPieRadius = Math.min(Math.abs(width), Math.abs(height)) / 2
-  const outer =
-    typeof settings.outerRadius === 'function' ? settings.outerRadius(datum) : settings.outerRadius
+  const outer = isFunction(settings.outerRadius)
+    ? settings.outerRadius(datum)
+    : settings.outerRadius
   return {
     cx: left + percentOf(settings.cx, width, width / 2),
     cy: top + percentOf(settings.cy, height, height / 2),
@@ -394,7 +392,7 @@ export function pieSectors(
     const coordinate = pieCoordinate(settings, offset, entry)
     const percent = value / sum
     const payload = { ...(entry as Record<string, unknown>), ...cells[i] }
-    const fill = typeof payload['fill'] === 'string' ? payload['fill'] : settings.fill
+    const fill = isString(payload['fill']) ? payload['fill'] : settings.fill
     const sectorStart = i
       ? previous!.endAngle + mathSign(delta) * paddingAngle * (raw !== 0 ? 1 : 0)
       : startAngle

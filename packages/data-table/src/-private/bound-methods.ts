@@ -1,3 +1,4 @@
+import { isFunction } from '@sindresorhus/is'
 /**
  * Makes each method on a table-core prototype (a row's, cell's, column's or header's) come back
  * bound to the instance it is read from, the first time it is read there.
@@ -12,7 +13,7 @@ function bindMethods(prototype: object): void {
   for (const key of Object.keys(prototype)) {
     const descriptor = Object.getOwnPropertyDescriptor(prototype, key)
     const method: unknown = descriptor?.value
-    if (typeof method !== 'function') continue
+    if (!isFunction(method)) continue
     Object.defineProperty(prototype, key, {
       configurable: true,
       enumerable: descriptor!.enumerable ?? true,

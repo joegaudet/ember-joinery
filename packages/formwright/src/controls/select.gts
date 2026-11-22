@@ -1,3 +1,4 @@
+import { isFunction, isObject } from '@sindresorhus/is'
 import Component from '@glimmer/component'
 import type { ControlSignature } from '@ember-formwright/ember'
 import { Select, type SelectBlockParams, type SelectSize } from '@ember-joinery/ember'
@@ -57,7 +58,7 @@ export class SelectControl extends Component<SelectControlSignature> {
     const selected = this.options.find(option => matches(value, option, this.args.optionKey))
     if (selected !== undefined) return this.keyFor(selected)
     // A stored key whose option isn't listed (items from the block): the key itself.
-    return typeof value === 'object' ? this.keyFor(value) : String(value)
+    return isObject(value) && !isFunction(value) ? this.keyFor(value) : String(value)
   }
 
   get disabled(): boolean {

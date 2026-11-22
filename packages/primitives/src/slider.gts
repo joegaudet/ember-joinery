@@ -11,6 +11,7 @@ import { getDirection, type Direction } from './direction.gts'
 import { ignoreROError } from './resize-observer.ts'
 import { translate } from './i18n.ts'
 import { messages } from './messages.ts'
+import { isNumber } from '@sindresorhus/is'
 
 /** Which way a slider runs: left to right (right to left in RTL text), or bottom to top. */
 export type SliderOrientation = 'horizontal' | 'vertical'
@@ -181,7 +182,7 @@ export class SliderStore {
   /** The step: `@step` (default 1); with ticks, 1 (from one tick to the next). */
   get step(): number {
     const step = this.#args().step
-    return typeof step === 'number' && step > 0 ? step : 1
+    return isNumber(step) && step > 0 ? step : 1
   }
 
   get orientation(): SliderOrientation {

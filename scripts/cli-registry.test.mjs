@@ -32,7 +32,7 @@ test('an item lists its file, the -private files it imports, and the components 
   assert.ok(dialog.dependencies.includes('@ember-joinery/primitives'))
   assert.ok(dialog.dependencies.includes('lucide'), "dialog imports lucide's X")
   // Icon takes its icon as an argument: it imports nothing from lucide, though its comments do.
-  assert.deepEqual(manifest.items.icon.dependencies, [])
+  assert.deepEqual(manifest.items.icon.dependencies, ['@sindresorhus/is'])
 })
 
 test('every relative import is covered: by a file of the item or by one of its components', () => {
@@ -82,6 +82,7 @@ test('npm packages: primitives at this version, the rest at the ranges the packa
   assert.equal(manifest.version, '1.2.0')
   assert.deepEqual(manifest.dependencies, {
     '@ember-joinery/primitives': '^1.2.0',
+    '@sindresorhus/is': ember.dependencies['@sindresorhus/is'],
     lucide: ember.dependencies.lucide,
   })
 })

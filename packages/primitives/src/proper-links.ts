@@ -1,6 +1,7 @@
 import { registerDestructor } from '@ember/destroyable'
 import type RouterService from '@ember/routing/router-service'
 import { findOwner } from './store.ts'
+import { isFunction } from '@sindresorhus/is'
 
 /** Paths a plain link leaves to the browser: a string or a RegExp, matched against the path. */
 export type IgnoredPath = string | RegExp
@@ -164,6 +165,6 @@ export function properLinks(
 export function properLinks<Router extends Constructor>(
   baseOrOptions: Router | ProperLinksOptions,
 ): Router | (<R extends Constructor>(Base: R) => R) {
-  if (typeof baseOrOptions === 'function') return withProperLinks(baseOrOptions, {})
+  if (isFunction(baseOrOptions)) return withProperLinks(baseOrOptions, {})
   return <R extends Constructor>(Base: R) => withProperLinks(Base, baseOrOptions)
 }

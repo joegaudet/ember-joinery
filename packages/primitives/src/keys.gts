@@ -1,4 +1,5 @@
 import type { TOC } from '@ember/component/template-only'
+import { isString } from '@sindresorhus/is'
 
 /**
  * Keys as a list, or as one string joined with `+`: `['ctrl', 'k']` or `'ctrl+k'`. In the
@@ -25,7 +26,7 @@ export function isMac(): boolean {
  * `"+"` alone is the plus key.
  */
 function split(keys: Keys): string[] {
-  if (typeof keys !== 'string') return [...keys]
+  if (!isString(keys)) return [...keys]
   const segments = keys.split('+').map(key => key.trim())
   const result: string[] = []
   for (let index = 0; index < segments.length; index++) {

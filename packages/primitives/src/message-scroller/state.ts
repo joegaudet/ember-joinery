@@ -32,6 +32,7 @@ import {
   type MessageScrollerScrollable,
   type MessageScrollerVisibilityState,
 } from './geometry.ts'
+import { isUndefined } from '@sindresorhus/is'
 
 const waiter = buildWaiter('@ember-joinery/primitives:message-scroller')
 
@@ -355,10 +356,9 @@ export class MessageScrollerState {
    */
   connectContent(element: HTMLElement): () => void {
     this.setContent(element)
-    const mutations =
-      typeof MutationObserver === 'undefined'
-        ? undefined
-        : new MutationObserver(() => this.handleContentChange())
+    const mutations = isUndefined(globalThis.MutationObserver)
+      ? undefined
+      : new MutationObserver(() => this.handleContentChange())
     mutations?.observe(element, { childList: true })
     const resizes = this.#observeResizes(element)
     return () => {
@@ -389,7 +389,7 @@ export class MessageScrollerState {
    * report a "ResizeObserver loop".
    */
   #observeResizes(element: HTMLElement): () => void {
-    if (typeof ResizeObserver === 'undefined') return () => {}
+    if (isUndefined(globalThis.ResizeObserver)) return () => {}
     const observer = new ResizeObserver(() => this.#resizeFrame.replace(this.handleResize))
     observer.observe(element)
     return () => observer.disconnect()
@@ -548,7 +548,7 @@ export class MessageScrollerState {
   #startVisibility(): void {
     const viewport = this.viewport
     if (!viewport || this.#visibilityWatchers === 0) return
-    if (typeof IntersectionObserver === 'undefined') {
+    if (isUndefined(globalThis.IntersectionObserver)) {
       this.#scheduleVisibilitySync()
       return
     }

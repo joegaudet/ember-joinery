@@ -27,6 +27,7 @@ import {
 } from './dates.ts'
 import { translate, translator } from '../i18n.ts'
 import { messages } from '../messages.ts'
+import { isFunction, isObject } from '@sindresorhus/is'
 
 /** How a calendar selects: one day, any number of days, or a range. */
 export type CalendarMode = 'single' | 'multiple' | 'range'
@@ -432,7 +433,7 @@ function sameRef(a: DayRef | undefined, b: DayRef): boolean {
 }
 
 function isRange(value: unknown): value is DateRange {
-  return typeof value === 'object' && value !== null && !Array.isArray(value) && 'from' in value
+  return isObject(value) && !isFunction(value) && !Array.isArray(value) && 'from' in value
 }
 
 const KEYS: Record<string, (shift: boolean, rtl: boolean) => [MoveBy, MoveDirection]> = {

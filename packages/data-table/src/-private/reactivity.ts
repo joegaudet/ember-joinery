@@ -1,3 +1,4 @@
+import { isFunction } from '@sindresorhus/is'
 import { tracked } from '@glimmer/tracking'
 import { buildWaiter } from '@ember/test-waiters'
 import type { TableReactivityBindings } from '@tanstack/table-core/reactivity'
@@ -13,7 +14,7 @@ type Listener<T> = Observer<T> | ((value: T) => void)
 type Subscription = { unsubscribe: () => void }
 
 const notify = <T>(listener: Listener<T>, value: T): void =>
-  typeof listener === 'function' ? listener(value) : listener.next?.(value)
+  isFunction(listener) ? listener(value) : listener.next?.(value)
 
 /**
  * A writable atom on Ember's autotracking: reading `get()` in a template or getter tracks it,
@@ -35,8 +36,7 @@ class TrackedAtom<T> {
   get = (): T => (untracking > 0 ? this.#raw : this.current)
 
   set = (updater: T | ((previous: T) => T)): void => {
-    const next =
-      typeof updater === 'function' ? (updater as (previous: T) => T)(this.#raw) : updater
+    const next = isFunction(updater) ? (updater as (previous: T) => T)(this.#raw) : updater
     if (this.#compare(this.#raw, next)) return
     this.#raw = next
     this.current = next

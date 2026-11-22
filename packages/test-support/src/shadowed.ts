@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is'
 import { find, getRootElement } from '@ember/test-helpers'
 import { Harness } from './harness.ts'
 
@@ -5,7 +6,7 @@ import { Harness } from './harness.ts'
 type Findable = Element | string
 
 function resolve(target: Findable): Element | null {
-  return typeof target === 'string' ? find(target) : target
+  return isString(target) ? find(target) : target
 }
 
 /**

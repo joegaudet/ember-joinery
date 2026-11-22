@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is'
 /**
  * A range of days, as Joinery's dates are: `from` and `to` are `Date`s (at local midnight), and
  * either may be missing while the range is being chosen. The same shape as shadcn's Calendar
@@ -21,7 +22,7 @@ export function toDate(value: unknown): Date | undefined {
       ? undefined
       : new Date(value.getFullYear(), value.getMonth(), value.getDate())
   }
-  if (typeof value === 'string') {
+  if (isString(value)) {
     const match = ISO_DATE.exec(value)
     if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
   }

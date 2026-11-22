@@ -4,6 +4,7 @@ import { buildWaiter } from '@ember/test-waiters'
 import Modifier from 'ember-modifier'
 import { getDirection, type Direction } from '../direction.gts'
 import { resizeObserver, type ResizeObservers } from '../resize-observer.ts'
+import { areaHover, ScrollbarMachine, type AreaHover } from '../-private/scroll-visibility.ts'
 
 const waiter = buildWaiter('@ember-joinery/primitives:scroll-area')
 
@@ -103,19 +104,6 @@ function style(element: HTMLElement, property: string, value: string | null): vo
     element.style.setProperty(property, value)
 }
 
-/** A timer the tests wait for. */
-function later(callback: () => void, delay: number): () => void {
-  const token = waiter.beginAsync()
-  const timer = setTimeout(() => {
-    waiter.endAsync(token)
-    callback()
-  }, delay)
-  return () => {
-    clearTimeout(timer)
-    waiter.endAsync(token)
-  }
-}
-
 /** One orientation's scrollbar: how many are mounted, its elements and its state. */
 export class ScrollbarState {
   readonly orientation: ScrollAreaOrientation
@@ -132,14 +120,18 @@ export class ScrollbarState {
   @tracked sizes: ScrollbarSizes = EMPTY
   /** Whether the content overflows this way. */
   @tracked overflowing = false
-  @tracked scrollState: ScrollState = 'hidden'
-
-  #cancelHide: (() => void) | undefined
-  #cancelScrollEnd: (() => void) | undefined
+  /** The `scroll` type's machine, Radix's: stopped by `teardown`. */
+  readonly #machine: ScrollbarMachine
 
   constructor(area: ScrollAreaState, orientation: ScrollAreaOrientation) {
     this.#area = area
     this.orientation = orientation
+    this.#machine = new ScrollbarMachine(area).start()
+  }
+
+  get scrollState(): ScrollState {
+    // The machine's states are named as these.
+    return this.#machine.state.value as ScrollState
   }
 
   get horizontal(): boolean {
@@ -168,36 +160,25 @@ export class ScrollbarState {
 
   /** The `scroll` type's machine: Radix's, event by event. */
   send(event: 'SCROLL' | 'SCROLL_END' | 'POINTER_ENTER' | 'POINTER_LEAVE' | 'HIDE'): void {
-    const machine: Record<ScrollState, Partial<Record<typeof event, ScrollState>>> = {
-      hidden: { SCROLL: 'scrolling' },
-      scrolling: { SCROLL_END: 'idle', POINTER_ENTER: 'interacting' },
-      interacting: { SCROLL: 'interacting', POINTER_LEAVE: 'idle' },
-      idle: { HIDE: 'hidden', SCROLL: 'scrolling', POINTER_ENTER: 'interacting' },
+    const m = this.#machine
+    const events = {
+      SCROLL: m.scroll,
+      SCROLL_END: m.scrollEnd,
+      POINTER_ENTER: m.pointerEnter,
+      POINTER_LEAVE: m.pointerLeave,
+      HIDE: m.hide,
     }
-    const next = machine[this.scrollState][event]
-    if (!next || next === this.scrollState) return
-    this.scrollState = next
-    this.#cancelHide?.()
-    this.#cancelHide = undefined
-    if (next === 'idle') {
-      this.#cancelHide = later(() => this.send('HIDE'), this.#area.scrollHideDelay)
-    }
+    events[event].call(m)
   }
 
   /** The viewport scrolled this way: the machine hears it, and the end of it 100ms later. */
   scrolled(): void {
-    this.send('SCROLL')
-    this.#cancelScrollEnd?.()
-    this.#cancelScrollEnd = later(() => {
-      this.#cancelScrollEnd = undefined
-      this.send('SCROLL_END')
-    }, 100)
+    this.#machine.scroll()
   }
 
   /** @internal */
   teardown(): void {
-    this.#cancelHide?.()
-    this.#cancelScrollEnd?.()
+    this.#machine.stop()
   }
 }
 
@@ -221,12 +202,10 @@ export class ScrollAreaState {
   readonly vertical: ScrollbarState
   readonly horizontal: ScrollbarState
 
-  /** Whether the pointer is over the area (for the `hover` type, until the hide delay is up). */
-  @tracked hovered = false
+  readonly #hover: AreaHover
   @tracked private cornerSize = { width: 0, height: 0 }
   @tracked private bothMounted = false
 
-  #cancelHoverHide: (() => void) | undefined
   #scheduled = false
   #destroyed = false
 
@@ -235,12 +214,17 @@ export class ScrollAreaState {
     this.#observers = resizeObserver(context)
     this.vertical = new ScrollbarState(this, 'vertical')
     this.horizontal = new ScrollbarState(this, 'horizontal')
+    this.#hover = areaHover(context, this)
     registerDestructor(context, () => {
       this.#destroyed = true
-      this.#cancelHoverHide?.()
       this.vertical.teardown()
       this.horizontal.teardown()
     })
+  }
+
+  /** Whether the pointer is over the area (for the `hover` type, until the hide delay is up). */
+  get hovered(): boolean {
+    return this.#hover.isHovered
   }
 
   get type(): ScrollAreaType {
@@ -404,19 +388,9 @@ export class ScrollAreaState {
     this.#placeThumb(this.horizontal)
   }
 
-  #onPointerEnter = (): void => {
-    this.#cancelHoverHide?.()
-    this.#cancelHoverHide = undefined
-    if (!this.hovered) this.hovered = true
-  }
+  #onPointerEnter = (): void => this.#hover.enter()
 
-  #onPointerLeave = (): void => {
-    this.#cancelHoverHide?.()
-    this.#cancelHoverHide = later(() => {
-      this.#cancelHoverHide = undefined
-      this.hovered = false
-    }, this.scrollHideDelay)
-  }
+  #onPointerLeave = (): void => this.#hover.leave()
 
   /** A drag in the track (or of the thumb): scroll to where the pointer is. */
   #dragScroll(bar: ScrollbarState, event: PointerEvent): void {

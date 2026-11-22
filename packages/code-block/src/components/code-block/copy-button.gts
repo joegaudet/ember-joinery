@@ -1,17 +1,12 @@
 import Component from '@glimmer/component'
-import { tracked } from '@glimmer/tracking'
 import { on } from '@ember/modifier'
-import { registerDestructor } from '@ember/destroyable'
-import { waitForPromise } from '@ember/test-waiters'
 import { Check, Copy } from 'lucide'
 import { VisuallyHidden } from '@ember-joinery/primitives/visually-hidden'
 import Button, { type ButtonSize, type ButtonVariant } from '@ember-joinery/ember/components/button'
 import Icon, { type IconNode } from '@ember-joinery/ember/components/icon'
 import { translate } from '@ember-joinery/primitives/i18n'
 import { messages } from '../../messages.ts'
-
-/** How long the button shows that it copied, in milliseconds, as upstream's. */
-const COPIED_FOR = 2000
+import { copyMachine } from '../../-private/copy-machine.ts'
 
 export interface CodeBlockCopyButtonSignature {
   Args: {
@@ -46,13 +41,10 @@ export interface CodeBlockCopyButtonSignature {
  *   <b.CopyButton @value={{this.code}} disabled={{this.streaming}} />
  */
 export default class CodeBlockCopyButton extends Component<CodeBlockCopyButtonSignature> {
-  @tracked copied = false
+  machine = copyMachine(this)
 
-  #timer: ReturnType<typeof setTimeout> | undefined
-
-  constructor(owner: unknown, args: CodeBlockCopyButtonSignature['Args']) {
-    super(owner as never, args)
-    registerDestructor(this, () => clearTimeout(this.#timer))
+  get copied(): boolean {
+    return this.machine.isCopied
   }
 
   get copiedLabel(): string {
@@ -71,24 +63,7 @@ export default class CodeBlockCopyButton extends Component<CodeBlockCopyButtonSi
     return this.copied ? (this.args.copiedIcon ?? Check) : (this.args.copyIcon ?? Copy)
   }
 
-  copy = (): void => {
-    const value = this.args.value
-    // As upstream's: a clipboard that refuses (or a page without one) leaves the button as it
-    // was. Tests wait for the write.
-    void waitForPromise(
-      Promise.resolve()
-        .then(() => navigator.clipboard.writeText(value))
-        .then(() => {
-          if (this.isDestroying) return
-          this.copied = true
-          clearTimeout(this.#timer)
-          this.#timer = setTimeout(() => {
-            if (!this.isDestroying) this.copied = false
-          }, COPIED_FOR)
-        })
-        .catch(() => undefined),
-    )
-  }
+  copy = (): void => this.machine.copy(this.args.value)
 
   <template>
     <Button

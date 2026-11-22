@@ -3,11 +3,12 @@ import Component from '@glimmer/component'
 import { cached, tracked } from '@glimmer/tracking'
 import { hash } from '@ember/helper'
 import { isDestroyed, isDestroying, registerDestructor } from '@ember/destroyable'
-import { buildWaiter, waitForPromise } from '@ember/test-waiters'
+import { waitForPromise } from '@ember/test-waiters'
 import type Owner from '@ember/owner'
 import type { WithBoundArgs } from '@glint/template'
 import { As, type TagName } from './as.gts'
 import { isString, isUndefined } from '@sindresorhus/is'
+import { fallbackDelay, ImageMachine, type FallbackDelay } from './-private/image-loading.ts'
 
 /**
  * Where an avatar's image is: Radix's `ImageLoadingStatus`. `idle` until there is an image to
@@ -23,8 +24,6 @@ export interface ImageLoaderOptions {
   referrerPolicy?: ReferrerPolicy
 }
 
-const waiter = buildWaiter('@ember-joinery/primitives:avatar')
-
 /**
  * Loads one image off the page, as Radix's `useImageLoadingStatus` does: an `Image` the page
  * never shows, whose `load` and `error` events set `status`. A cached image is `loaded` at
@@ -37,34 +36,31 @@ const waiter = buildWaiter('@ember-joinery/primitives:avatar')
  * Tests wait for it: `settled()` resolves once the image has loaded or failed.
  */
 export class ImageLoader {
-  /** Where the image is. Tracked: a template that reads it updates when the image settles. */
-  @tracked status: ImageLoadingStatus
   readonly src: string | undefined
-  #image: HTMLImageElement | undefined
-  #token: unknown
+  readonly #machine: ImageMachine
+  /** The status it had when destroyed: a stopped machine has none. */
+  #final: ImageLoadingStatus | undefined
   #listeners = new Set<(status: ImageLoadingStatus) => void>()
 
   constructor(src: string | undefined | null, options: ImageLoaderOptions = {}) {
     this.src = src ?? undefined
-    if (isUndefined(globalThis.window) || isUndefined(globalThis.window.Image)) {
-      this.status = 'idle'
-      return
+    const client = !isUndefined(globalThis.window) && !isUndefined(globalThis.window.Image)
+    let image: HTMLImageElement | undefined
+    if (client && src) {
+      image = new window.Image()
+      if (options.referrerPolicy) image.referrerPolicy = options.referrerPolicy
+      if (isString(options.crossOrigin)) image.crossOrigin = options.crossOrigin
+      image.src = src
     }
-    if (!src) {
-      this.status = 'error'
-      return
-    }
-    const image = new window.Image()
-    if (options.referrerPolicy) image.referrerPolicy = options.referrerPolicy
-    if (isString(options.crossOrigin)) image.crossOrigin = options.crossOrigin
-    image.addEventListener('load', this.#onLoad)
-    image.addEventListener('error', this.#onError)
-    image.src = src
-    this.#image = image
-    // The browser fires `load` or `error` even for an image it has already, so the waiter
-    // always ends.
-    this.#token = waiter.beginAsync()
-    this.status = image.complete && image.naturalWidth > 0 ? 'loaded' : 'loading'
+    this.#machine = new ImageMachine(image, client && !src, status => {
+      for (const listener of this.#listeners) listener(status)
+    }).start()
+  }
+
+  /** Where the image is. Tracked: a template that reads it updates when the image settles. */
+  get status(): ImageLoadingStatus {
+    // The machine's states are named as the statuses.
+    return this.#final ?? (this.#machine.state.value as ImageLoadingStatus)
   }
 
   /** Calls `listener` with each new status, until the returned function is called. */
@@ -75,27 +71,10 @@ export class ImageLoader {
 
   /** Stops listening to the image, and lets tests stop waiting for it. */
   destroy(): void {
-    this.#image?.removeEventListener('load', this.#onLoad)
-    this.#image?.removeEventListener('error', this.#onError)
-    this.#image = undefined
+    if (this.#final !== undefined) return
+    this.#final = this.status
     this.#listeners.clear()
-    this.#end()
-  }
-
-  #onLoad = (): void => this.#settle('loaded')
-  #onError = (): void => this.#settle('error')
-
-  #settle(status: ImageLoadingStatus): void {
-    this.#end()
-    if (this.status === status) return
-    this.status = status
-    for (const listener of this.#listeners) listener(status)
-  }
-
-  #end(): void {
-    if (this.#token === undefined) return
-    waiter.endAsync(this.#token)
-    this.#token = undefined
+    this.#machine.stop()
   }
 }
 
@@ -227,48 +206,34 @@ export interface AvatarFallbackSignature {
 
 /** What the avatar shows while its image loads, when it fails, and when it has none. */
 class AvatarFallback extends Component<AvatarFallbackSignature> {
-  /** Whether a `@delayMs` wait has run out: once it has, the fallback may show for good. */
-  @tracked private waited = false
-  #timer: ReturnType<typeof setTimeout> | undefined
-  #token: unknown
+  /** Whether it still waits out `@delayMs`: see `FallbackDelay`. */
+  readonly delay: FallbackDelay
+  /** The `@delayMs` the delay last heard of. */
+  #delayMs: number | undefined
 
   constructor(owner: Owner, args: AvatarFallbackSignature['Args']) {
     super(owner, args)
-    registerDestructor(this, () => this.#stop())
+    this.#delayMs = args.delayMs
+    this.delay = fallbackDelay(this, this)
   }
 
-  /**
-   * Whether it still waits out `@delayMs`. A new `@delayMs` while it waits starts the wait over,
-   * as Radix's effect does, and taking it away ends the wait; once it has run out, a new one
-   * changes nothing. Cached on `@delayMs`, as a resource.
-   */
-  @cached
-  get isWaiting(): boolean {
-    return this.#wait(this.args.delayMs, this.waited)
-  }
-
-  /** Stops the last wait, and starts one of `delay` unless there is none or it has run out. */
-  #wait(delay: number | undefined, waited: boolean): boolean {
-    this.#stop()
-    if (delay === undefined || waited) return false
-    this.#token = waiter.beginAsync()
-    this.#timer = setTimeout(() => {
-      this.#stop()
-      if (!isDestroying(this) && !isDestroyed(this)) this.waited = true
-    }, delay)
-    return true
+  get delayMs(): number | undefined {
+    return this.#delayMs
   }
 
   get isShown(): boolean {
-    return !this.isWaiting && this.args.avatar.status !== 'loaded'
+    this.#heed(this.args.delayMs)
+    return !this.delay.isWaiting && this.args.avatar.status !== 'loaded'
   }
 
-  #stop(): void {
-    clearTimeout(this.#timer)
-    this.#timer = undefined
-    if (this.#token === undefined) return
-    waiter.endAsync(this.#token)
-    this.#token = undefined
+  /** Tells the delay of a new `@delayMs`, after the render that brought it. */
+  #heed(delayMs: number | undefined): void {
+    if (delayMs === this.#delayMs) return
+    afterRender(() => {
+      if (isDestroying(this)) return
+      this.#delayMs = delayMs
+      this.delay.delayChanged()
+    })
   }
 
   <template>

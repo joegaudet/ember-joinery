@@ -530,6 +530,11 @@ neither OIDC nor provenance; its header explains. `node scripts/publish.mjs --dr
 checks every package without publishing anything (it asks the registry what is already there, so
 it needs the network).
 
+`pnpm release:npm`, run in a terminal on your machine, does all of the above in one go and
+publishes locally whatever CI can't (a package with no trusted publisher yet). It wraps the
+oss-release skill's `release.sh` and opens each npm login and 2FA link in a Chrome window it
+drives; its header explains.
+
 Every tarball carries the root's `LICENSE.md` and `NOTICE` (the notices of shadcn/ui,
 ember-primitives, sonner, recharts and the rest of what Joinery ports): each package lists both in
 its `files`, and its `prepack` copies them in from the root (`scripts/legal-files.mjs`), so the

@@ -33,6 +33,7 @@
 
 ### Patch Changes
 
+- a53c07b: Type checks in package source use `@sindresorhus/is` (`isString`, `isFunction`, …) instead of `typeof`, and a lint rule keeps it that way. `@sindresorhus/is` is a new runtime dependency, so `ember-joinery add` now installs it into the app for most components, `icon` included. `isNumber` rejects `NaN`, so a `NaN` reaching a numeric check now takes the non-number branch.
 - a73065d: Every package's tarball carries Joinery's `LICENSE.md` and `NOTICE`, with the licences and
   notices of what it ports (shadcn/ui, ember-primitives, sonner, recharts and the rest), copied in
   from the repository's root by the package's `prepack`.

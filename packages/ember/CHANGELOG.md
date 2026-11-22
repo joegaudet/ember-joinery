@@ -575,6 +575,7 @@
 
 ### Patch Changes
 
+- a53c07b: Type checks in package source use `@sindresorhus/is` (`isString`, `isFunction`, …) instead of `typeof`, and a lint rule keeps it that way. `@sindresorhus/is` is a new runtime dependency, so `ember-joinery add` now installs it into the app for most components, `icon` included. `isNumber` rejects `NaN`, so a `NaN` reaching a numeric check now takes the non-number branch.
 - a73065d: The share of Tailwind's preflight that joinery.css gives Joinery's parts now takes the markers
   off lists and collapses tables' borders, as upstream's parts expect, and `jn-rtl-flip` mirrors
   an icon right to left, as upstream's right-to-left build does with `cn-rtl-flip`.

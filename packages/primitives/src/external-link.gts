@@ -22,7 +22,7 @@ export interface ExternalLinkSignature {
  *   <ExternalLink href="https://developer.mozilla.org">MDN</ExternalLink>
  *
  * A new tab surprises some users: say so in the link's text or with an icon that has a label.
- * [`Link`](./link.gts) renders one for an `@href` on another origin.
+ * {@link Link | `Link`} renders one for an `@href` on another origin.
  */
 export const ExternalLink: TOC<ExternalLinkSignature> = <template>
   <a

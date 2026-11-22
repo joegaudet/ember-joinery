@@ -1,0 +1,50 @@
+# Joinery
+
+> shadcn/ui for Ember: every component on ui.shadcn.com as a modern `.gts` component with Glint
+> types, on a headless primitives layer, with shadcn's styles and theme tokens (Tailwind
+> optional), and a test harness for every component. WCAG 2.2 AA, with an axe audit in every test.
+
+Install the components and their harnesses:
+
+```bash
+pnpm add @ember-joinery/ember lucide
+pnpm add --save-dev @ember-joinery/test-support
+```
+
+Import the theme's tokens and the components' CSS once, in `app/app.ts`:
+
+```ts
+import '@ember-joinery/ember/tokens.css'
+import '@ember-joinery/ember/joinery.css'
+```
+
+Or copy a component's source into the app, as shadcn's `add` does: `npx ember-joinery add dialog`.
+
+## Packages
+
+- `@ember-joinery/ember`: the styled components, their CSS and the theme tokens
+- `@ember-joinery/primitives`: headless behaviour and utilities
+- `@ember-joinery/test-support`: a harness for every component
+- `@ember-joinery/chart`: charts, Glimmer SVG on d3
+- `@ember-joinery/carousel`: carousel, on embla-carousel
+- `@ember-joinery/data-table`: data table, on @tanstack/table-core
+- `@ember-joinery/code-block`: code block, on shiki
+- `@ember-joinery/file-upload`: file uploads, on ember-file-upload
+- `@ember-joinery/tiptap`: rich-text editor with a formatting toolbar, on Tiptap
+- `@ember-joinery/power-calendar`: calendars and date pickers, on ember-power-calendar
+- `@ember-joinery/maskito`: masked and phone inputs, on Maskito
+- `@ember-joinery/formwright`: Joinery's inputs as Formwright controls
+
+## Docs
+
+- [Guide](https://joegaudet.com/ember-joinery/guide/): every component, argument, primitive and
+  harness, each with a live, tested example
+- [Installation](https://joegaudet.com/ember-joinery/guide/getting-started/installation.md)
+- [Copy components](https://joegaudet.com/ember-joinery/guide/getting-started/copy.md)
+- [API reference](https://joegaudet.com/ember-joinery/api/): every export of every package, from
+  the latest release
+- [llms-full.txt](https://joegaudet.com/ember-joinery/api/llms-full.txt): this file followed by
+  the whole API reference as Markdown
+- [api.json](https://joegaudet.com/ember-joinery/api/api.json): the API reference as TypeDoc's
+  JSON model, for tools
+- [Source](https://github.com/joegaudet/ember-joinery)

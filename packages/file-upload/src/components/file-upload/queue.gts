@@ -9,6 +9,7 @@ import Progress from '@ember-joinery/ember/components/progress'
 import { fileIcon } from './labels.ts'
 import type { FileUploadContext } from './context.ts'
 
+/** What a file upload's queue of uploads (`<u.Queue>`) takes. */
 export interface FileUploadQueueSignature {
   Args: {
     /** The `<FileUpload>` it belongs to; `u.Queue` comes with it. */

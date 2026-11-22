@@ -26,7 +26,8 @@
     "site:css": "node scripts/site-css.mjs",
     "site:screenshots": "node scripts/site-screenshots.mjs",
     "start": "pnpm --filter test-app start",
-    "release": "pnpm build && node scripts/publish.mjs"
+    "release": "pnpm build && node scripts/publish.mjs",
+    "docs:api": "typedoc && node scripts/llms-full.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",
@@ -41,6 +42,8 @@
     "pngjs": "^7.0.0",
     "prettier": "^3.9.10",
     "prettier-plugin-ember-template-tag": "^2.1.8",
+    "typedoc": "^0.28.20",
+    "typedoc-plugin-markdown": "^4.14.1",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.2"
   }

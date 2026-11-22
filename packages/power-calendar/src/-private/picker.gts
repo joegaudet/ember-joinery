@@ -5,11 +5,7 @@ import type { TOC } from '@ember/component/template-only'
 import { on } from '@ember/modifier'
 import { modifier } from 'ember-modifier'
 import { buttonClasses, Icon, InputGroup, Popover, type IconNode } from '@ember-joinery/ember'
-import {
-  controllable,
-  type ControllableArgs,
-  type ControllableState,
-} from '@ember-joinery/primitives/controllable-state'
+import { controllable, type ControllableState } from '@ember-joinery/primitives/controllable-state'
 import { idFor } from '@ember-joinery/primitives/id'
 import { ensureDateLibrary } from '../date-library.ts'
 import type { CalendarOptions } from './state.ts'
@@ -19,8 +15,14 @@ type Align = 'start' | 'center' | 'end'
 type Side = 'top' | 'right' | 'bottom' | 'left'
 
 /** What both pickers take, besides their value and the calendar's options. */
-export type PickerOptions = ControllableArgs<'open', boolean> &
-  Omit<CalendarOptions, 'name' | 'disabled'> & {
+export type PickerOptions = {
+  /** Whether the calendar is open; pass it to control it. */
+  readonly open?: boolean
+  /** Whether the calendar starts open, while you don't control it. */
+  readonly defaultOpen?: boolean
+  /** Called with `true` as the calendar opens and `false` as it closes, controlled or not. */
+  readonly onOpenChange?: (open: boolean) => void
+} & Omit<CalendarOptions, 'name' | 'disabled'> & {
     /**
      * What opens the calendar: an outlined `button` showing the value (the default), or an
      * `input` the date can be typed into, with a calendar button at its end (an Input Group).

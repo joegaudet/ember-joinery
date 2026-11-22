@@ -13,6 +13,7 @@ import { messages } from '../../messages.ts'
 /** How long the button shows that it copied, in milliseconds, as upstream's. */
 const COPIED_FOR = 2000
 
+/** What a code block's copy button (`<b.CopyButton>`) takes, and the Button `...attributes` goes on. */
 export interface CodeBlockCopyButtonSignature {
   Args: {
     /** The text it copies. Required. */

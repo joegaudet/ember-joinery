@@ -28,6 +28,7 @@ export interface EmblaOptions {
   onInit?: (api: EmblaCarouselType) => void
 }
 
+/** What `{{embla}}` takes, and the viewport element it goes on. */
 export interface EmblaSignature {
   Element: HTMLElement
   Args: { Named: EmblaOptions }

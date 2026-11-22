@@ -1,0 +1,86 @@
+/* The API reference (TypeDoc's default theme) in the marketing site's look (docs/site/site.css):
+   Joinery's neutral theme tokens, the walnut-amber accent, Inter, and the sticky blurred nav
+   with the logo. TypeDoc copies this to api/assets/custom.css. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* site.css's accent, light and dark. */
+  --site-accent: #b45309;
+  --site-accent-dark: #f5b04c;
+
+  /* Joinery's neutral tokens (tokens.css), light. */
+  --light-color-background: oklch(1 0 0);
+  --light-color-background-secondary: oklch(0.985 0 0);
+  --light-color-background-navbar: color-mix(in oklab, oklch(1 0 0) 82%, transparent);
+  --light-color-accent: oklch(0.922 0 0);
+  --light-color-text: oklch(0.145 0 0);
+  --light-color-text-aside: oklch(0.556 0 0);
+  --light-color-link: var(--site-accent);
+  --light-color-focus-outline: rgb(217 119 6 / 0.4);
+
+  /* And dark. */
+  --dark-color-background: oklch(0.145 0 0);
+  --dark-color-background-secondary: oklch(0.205 0 0);
+  --dark-color-background-navbar: color-mix(in oklab, oklch(0.145 0 0) 82%, transparent);
+  --dark-color-accent: oklch(0.269 0 0);
+  --dark-color-text: oklch(0.985 0 0);
+  --dark-color-text-aside: oklch(0.708 0 0);
+  --dark-color-link: var(--site-accent-dark);
+  --dark-color-focus-outline: rgb(245 158 11 / 0.4);
+}
+
+body {
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+code,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+.tsd-page-toolbar {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.tsd-toolbar-contents .title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+
+.tsd-toolbar-contents .title::before {
+  content: '';
+  width: 28px;
+  height: 28px;
+  background: url('../../logo.svg') center / contain no-repeat;
+}
+
+#tsd-toolbar-links a {
+  color: var(--color-text-aside);
+  font-weight: 500;
+}
+
+#tsd-toolbar-links a:hover {
+  color: var(--color-text);
+}
+
+a.tsd-anchor-link,
+.tsd-signature-type {
+  color: var(--color-link);
+}
+
+/* A {@link} in prose is a link like any other, not coloured by what it links to. */
+.tsd-comment a[class^='tsd-kind-'] {
+  color: var(--color-link);
+}

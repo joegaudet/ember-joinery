@@ -98,6 +98,7 @@ export default class ApplicationTemplate extends Component {
         <nav aria-label="Site">
           <a href={{SITE}}>Home</a>
           <a href="{{SITE}}demo/">Demo</a>
+          <a href="{{SITE}}api/">API</a>
           <a href="https://github.com/joegaudet/ember-joinery">GitHub</a>
         </nav>
       </header>

@@ -9,7 +9,7 @@ import { accessibleName, text } from './-private/overlay.ts'
 
 /**
  * One menu of a menubar: its trigger, in the bar, and its content and items, with a
- * [Dropdown Menu harness's](./dropdown-menu.ts) members for those (`items`, `select()`,
+ * {@link DropdownMenuHarness | Dropdown Menu harness's} members for those (`items`, `select()`,
  * `sub()`…). Its content is found through the trigger's `aria-controls`, so it is `null` while
  * the menu is closed.
  */

@@ -91,7 +91,7 @@ const DrawerTrigger = DialogTrigger
 /**
  * A panel that slides in from an edge of the screen and follows a drag, as vaul's Drawer (which
  * shadcn's Drawer is built on), covering ember-primitives' Drawer too. It is a
- * [Dialog](./dialog) underneath, so it renders no box of its own, and yields its parts:
+ * {@link Dialog} underneath, so it renders no box of its own, and yields its parts:
  *
  *   <Drawer as |d|>
  *     <d.Trigger>Open</d.Trigger>

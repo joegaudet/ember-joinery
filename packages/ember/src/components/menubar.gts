@@ -155,7 +155,7 @@ export interface MenubarSignature {
 /**
  * A visually persistent menu common in desktop applications that provides quick access to a
  * consistent set of commands: shadcn's Menubar, on the primitives' headless one. It yields its
- * menus, and each menu yields the parts of a [Dropdown Menu](./dropdown-menu.gts):
+ * menus, and each menu yields the parts of a {@link DropdownMenu | Dropdown Menu}:
  *
  *   <Menubar as |bar|>
  *     <bar.Menu as |m|>

@@ -93,7 +93,7 @@ function isSubTrigger(element: Element): boolean {
  * ArrowDown open a menu, its first item focused. While one is open, ArrowLeft and ArrowRight
  * open the menu beside it, the pointer opens whichever trigger it rests on, and Escape or a
  * press outside closes it, focus going back to its trigger. Each menu's content is a
- * [Dropdown Menu's](dropdown-menu.gts), not modal. Which menu is open is `@value` (the menu's
+ * {@link DropdownMenu | Dropdown Menu's}, not modal. Which menu is open is `@value` (the menu's
  * own `@value`, or `''` for none), its own or yours with `@onValueChange`.
  */
 export class Menubar extends Component<MenubarSignature> {

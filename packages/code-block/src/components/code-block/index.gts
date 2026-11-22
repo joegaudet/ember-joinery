@@ -74,6 +74,7 @@ const PARTS: CodeBlockParts = {
   footer: staticPartModifier(FOOTER),
 }
 
+/** What `<CodeBlock>` takes and yields: its arguments, its parts, and the element `...attributes` goes on. */
 export interface CodeBlockSignature {
   Args: {
     /** Default `default`. `destructive` for errors and failed output. */

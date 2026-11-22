@@ -4,6 +4,7 @@ import { htmlSafe, type SafeString } from '@ember/template'
 import { modifier } from 'ember-modifier'
 import CodeBlockLine from './line.gts'
 
+/** What a code block's content (`<b.Content>`) takes, and the `<pre>` `...attributes` goes on. */
 export interface CodeBlockContentSignature {
   Args: {
     /**

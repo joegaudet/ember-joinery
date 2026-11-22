@@ -33,6 +33,7 @@ export type RichTextValue = string | JSONContent | null
 /** What the document is stored as: an HTML string, or Tiptap's JSON. */
 export type RichTextOutput = 'html' | 'json'
 
+/** What `<RichTextEditor>` takes, and the `<div>` around its toolbar and document that `...attributes` goes on. */
 export interface RichTextEditorSignature {
   Args: {
     /** The document, when the caller controls it: a new value replaces what is in the editor. */
@@ -135,22 +136,27 @@ export default class RichTextEditor extends Component<RichTextEditorSignature> {
     args.onCreate?.(this.editor)
   }
 
+  /** The document's id: `@id`, for a `<label for>`, else one of its own. */
   get contentId(): string {
     return this.args.id ?? idFor(this, 'content')
   }
 
+  /** Whether it stores Tiptap's JSON (`@output="json"`) rather than HTML. */
   get isJson(): boolean {
     return this.args.output === 'json'
   }
 
+  /** Whether the document can be changed: neither `@disabled` nor `@readonly`. */
   get editable(): boolean {
     return !(this.args.disabled || this.args.readonly)
   }
 
+  /** The toolbar's and text styles' names: `@labels` over the translated defaults. */
   get labels(): RichTextLabels {
     return { ...defaultLabels(this), ...this.args.labels }
   }
 
+  /** The heading levels the text style menu offers: `@headingLevels`, else 1 to 3. */
   get headingLevels(): readonly HeadingLevel[] {
     return this.args.headingLevels ?? DEFAULT_HEADING_LEVELS
   }
@@ -162,6 +168,7 @@ export default class RichTextEditor extends Component<RichTextEditorSignature> {
     return new Set(wanted ?? DEFAULT_TOOLBAR)
   }
 
+  /** Whether it shows a toolbar: it has at least one control. */
   get hasToolbar(): boolean {
     return this.tools.size > 0
   }

@@ -173,11 +173,12 @@ export class SelectHarness extends Harness {
     )
   }
 
-  /** Whether the "scroll up" and "scroll down" buttons are showing. */
+  /** Whether the "scroll up" button is showing. */
   get canScrollUp(): boolean {
     return this.queryPart('scroll-up-button') !== null
   }
 
+  /** Whether the "scroll down" button is showing. */
   get canScrollDown(): boolean {
     return this.queryPart('scroll-down-button') !== null
   }

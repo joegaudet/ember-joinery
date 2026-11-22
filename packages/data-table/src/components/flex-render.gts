@@ -17,14 +17,18 @@ import type {
  */
 export interface FlexCell {
   column: { columnDef: object }
+  /** The context the column's `cell` renders with. */
   getContext(): object
+  /** From column grouping: whether the cell aggregates its group's rows. */
   getIsAggregated?: () => boolean
+  /** From column grouping: whether the cell only holds a grouped column's place. */
   getIsPlaceholder?: () => boolean
 }
 
 /** What a FlexRender reads of a header or footer: its column's definition and its context. */
 export interface FlexHeader {
   column: { columnDef: object }
+  /** The context the column's `header` or `footer` renders with. */
   getContext(): object
 }
 
@@ -132,6 +136,7 @@ function resolve(template: unknown, given: object): Resolved {
   return { text: drawable(template) }
 }
 
+/** What `<FlexRender>` takes: one cell, header or footer to render. */
 export interface FlexRenderSignature {
   Args: {
     /** A body cell: renders its column's `cell` (or `aggregatedCell`) with the cell's context. */
@@ -156,6 +161,7 @@ export interface FlexRenderSignature {
  * A placeholder cell (from column grouping) renders nothing.
  */
 export default class FlexRender extends Component<FlexRenderSignature> {
+  /** What to draw for the cell, header or footer: a component with its arguments, or text. */
   get resolved(): Resolved {
     const { cell, header, footer } = this.args
     if (cell) {

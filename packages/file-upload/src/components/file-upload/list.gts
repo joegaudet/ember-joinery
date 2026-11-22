@@ -8,6 +8,7 @@ import Item, { ItemGroup } from '@ember-joinery/ember/components/item'
 import { fileIcon } from './labels.ts'
 import type { FileUploadContext } from './context.ts'
 
+/** What a file upload's list of files (`<u.List>`) takes. */
 export interface FileUploadListSignature {
   Args: {
     /** The `<FileUpload>` it belongs to; `u.List` comes with it. */

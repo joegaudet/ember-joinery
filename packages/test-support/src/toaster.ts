@@ -9,6 +9,7 @@ function text(element: Element | null | undefined): string {
 /** A direction a toast can be swiped off in. */
 export type ToastSwipe = 'left' | 'right' | 'up' | 'down'
 
+/** How a toast is swiped. */
 export interface ToastSwipeOptions {
   /** How far the pointer moves, in pixels. Default 100 (sonner dismisses from 45). */
   distance?: number

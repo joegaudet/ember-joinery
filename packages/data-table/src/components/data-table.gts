@@ -111,6 +111,7 @@ export interface DataTableParts<TFeatures extends TableFeatures, TData extends R
   viewOptions: PartModifier<HTMLElement>
 }
 
+/** What `<DataTable>` takes and yields: the table, its parts, and the element `...attributes` goes on. */
 export interface DataTableSignature<TFeatures extends TableFeatures, TData extends RowData> {
   Args: {
     /** The table, from `createTable()`. */
@@ -147,6 +148,7 @@ export default class DataTable<
   TFeatures extends TableFeatures,
   TData extends RowData,
 > extends Component<DataTableSignature<TFeatures, TData>> {
+  /** The element's id, one of its own. */
   get id(): string {
     return idFor(this)
   }

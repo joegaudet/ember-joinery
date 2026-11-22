@@ -65,6 +65,7 @@ export interface CarouselYield {
   scrollTo: (index: number) => void
 }
 
+/** What `<Carousel>` takes and yields: its arguments, its parts, and the region `...attributes` goes on. */
 export interface CarouselSignature {
   Args: {
     /** Which way the slides run, and so Embla's axis. Default `horizontal`. */

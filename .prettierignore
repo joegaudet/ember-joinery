@@ -26,3 +26,7 @@ packages/ember/src/css/shadcn.css
 packages/ember/src/components/sonner.css
 # Copied from vaul (see its header).
 packages/ember/src/components/vaul.css
+# The API reference, built by `pnpm docs:api`.
+docs/api/
+docs/api-md/
+docs/site/api/

@@ -6,6 +6,7 @@ import type { CodeLine, CodeToken } from '../../highlighter.ts'
 /** A line's state: `added` and `removed` mark a diff, `highlighted` calls a line out. */
 export type CodeBlockLineVariant = 'default' | 'added' | 'removed' | 'highlighted'
 
+/** What a code block's line (`<b.Line>`) takes, and the `<span>` `...attributes` goes on. */
 export interface CodeBlockLineSignature {
   Args: {
     /**

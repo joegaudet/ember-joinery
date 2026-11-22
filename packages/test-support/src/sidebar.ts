@@ -91,14 +91,17 @@ export class SidebarMenuButtonHarness extends Harness {
     return this.element.ownerDocument.activeElement === this.element
   }
 
+  /** Clicks it. */
   async click(): Promise<void> {
     await click(this.element)
   }
 
+  /** Focuses it. */
   async focus(): Promise<void> {
     await focus(this.element)
   }
 
+  /** Moves focus off it. */
   async blur(): Promise<void> {
     await blur(this.element)
   }

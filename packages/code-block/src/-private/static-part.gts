@@ -13,6 +13,7 @@ export interface StaticPartSpec {
   readonly part: string
 }
 
+/** What one of a code block's plain parts (`<b.Header>`, `<b.Title>`…) takes: a tag, its block, and `...attributes`. */
 export interface StaticPartSignature {
   Args: {
     /**

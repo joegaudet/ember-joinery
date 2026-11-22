@@ -15,6 +15,7 @@ export interface FileUploadDropzoneState {
   isSupported: boolean
 }
 
+/** What a file upload's drop zone (`<u.Dropzone>`) takes and shows. */
 export interface FileUploadDropzoneSignature {
   Args: {
     /** The `<FileUpload>` it belongs to; `u.Dropzone` comes with it. */

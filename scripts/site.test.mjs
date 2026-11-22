@@ -114,10 +114,14 @@ describe('docs/site links and files', () => {
   })
 
   it('loads files that are in docs/site, or that the Pages build puts there', () => {
-    // The demo and the guide are built into docs/site by pages.yml; Joinery's CSS is copied in
-    // by `pnpm site:css`.
+    // The demo, the guide and the API reference are built into docs/site by pages.yml;
+    // Joinery's CSS is copied in by `pnpm site:css`.
     const built = url =>
-      url === 'guide/' || url.startsWith('guide/') || url === 'demo/' || url.startsWith(`joinery/`)
+      url === 'guide/' ||
+      url.startsWith('guide/') ||
+      url === 'demo/' ||
+      url === 'api/' ||
+      url.startsWith(`joinery/`)
     for (const url of local.filter(url => !built(url))) {
       assert.ok(existsSync(join(site, url)), `docs/site/${url} is missing`)
     }

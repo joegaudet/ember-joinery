@@ -16,10 +16,12 @@ const tick = () => new Promise(resolve => setTimeout(resolve, 60))
 /**
  * Uploads a file and resolves with what to keep. A real one would be
  * `const response = await file.upload('/api/uploads'); return response.json()`, and
- * ember-file-upload keeps `file.progress` up to date. This one pretends.
+ * ember-file-upload keeps `file.progress` up to date. This one pretends, and stops when `signal`
+ * aborts: the file was replaced, or the component went.
  */
-const upload: UploadFn<Attachment> = async file => {
+const upload: UploadFn<Attachment> = async (file, options) => {
   for (let progress = 0; progress <= 100; progress += 20) {
+    options?.signal.throwIfAborted()
     file.progress = progress
     await tick()
   }

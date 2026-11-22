@@ -1,6 +1,14 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { click, focus, render, rerender, settled, triggerEvent } from '@ember/test-helpers'
+import {
+  clearRender,
+  click,
+  focus,
+  render,
+  rerender,
+  settled,
+  triggerEvent,
+} from '@ember/test-helpers'
 import { fn } from '@ember/helper'
 import { on } from '@ember/modifier'
 import { tracked } from '@glimmer/tracking'
@@ -55,10 +63,13 @@ class Uploads {
     string,
     { file: UploadFile; resolve: (v: unknown) => void; reject: (e: unknown) => void }
   >()
+  /** The signal each file's latest upload was given. */
+  signals = new Map<string, AbortSignal | undefined>()
 
-  upload = (upload: UploadFile): Promise<unknown> =>
+  upload = (upload: UploadFile, options?: { signal: AbortSignal }): Promise<unknown> =>
     new Promise((resolve, reject) => {
       this.pending.set(upload.name, { file: upload, resolve, reject })
+      this.signals.set(upload.name, options?.signal)
     })
 
   async progress(name: string, progress: number): Promise<void> {
@@ -675,6 +686,26 @@ module('Integration | components | file-upload', function (hooks) {
     assert.deepEqual(values, [['cv.pdf']])
     assert.deepEqual(queue.files, [])
     await a11yAudit()
+  })
+
+  test('@upload gets a signal, aborted when its file is replaced or the component goes', async function (assert) {
+    const uploads = new Uploads()
+    await render(<template><FileUpload @upload={{uploads.upload}} /></template>)
+    const upload = new FileUploadHarness()
+    await upload.select(file('a.txt', 1, 'text/plain'))
+    const first = uploads.signals.get('a.txt')!
+    assert.false(first.aborted, 'a running upload’s signal is live')
+
+    await upload.select(file('b.txt', 1, 'text/plain'))
+    assert.true(first.aborted, 'replacing its file aborts it')
+
+    await uploads.reject('b.txt', 'Offline')
+    await upload.retry('b.txt')
+    const retried = uploads.signals.get('b.txt')!
+    assert.false(retried.aborted, 'a retry gets a live signal of its own')
+
+    await clearRender()
+    assert.true(retried.aborted, 'the component going aborts what is still uploading')
   })
 
   test('controlled: a removal the caller refuses keeps the row’s preview', async function (assert) {

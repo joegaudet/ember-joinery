@@ -1179,9 +1179,18 @@ importers:
       '@embroider/addon-shim':
         specifier: ^1.10.3
         version: 1.11.0
+      '@real-enums/core':
+        specifier: ^2.3.0
+        version: 2.3.0
       '@sindresorhus/is':
         specifier: ^8.1.0
         version: 8.1.0
+      '@switchyard-ts/core':
+        specifier: ^0.3.0
+        version: 0.3.0(@real-enums/core@2.3.0)
+      '@switchyard-ts/ember':
+        specifier: ^0.3.0
+        version: 0.3.0(@babel/core@7.29.13)(@switchyard-ts/core@0.3.0(@real-enums/core@2.3.0))(ember-resources@7.1.0(@glimmer/component@2.2.1)(@glint/template@1.11.1))(ember-source@7.3.1(@glimmer/component@2.2.1))
       decorator-transforms:
         specifier: ^2.4.0
         version: 2.4.0(@babel/core@7.29.13)

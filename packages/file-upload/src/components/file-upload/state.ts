@@ -5,13 +5,19 @@ import { Queue, type UploadFile } from 'ember-file-upload'
 import type FileQueueService from 'ember-file-upload/services/file-queue'
 import { ControllableState } from '@ember-joinery/primitives/controllable-state'
 import { acceptsFile, fileKind, formatFileSize } from '../../utils.ts'
+import { UploadActor, UploadState, type UploadHost } from '../../-private/upload-actor.ts'
 
 /**
  * Uploads a file the user chose, and resolves with what the value keeps for it: an id, a URL,
  * a record. `file` is ember-file-upload's `UploadFile`: `file.upload(url)` sends it and keeps
- * `file.progress` up to date, which the upload queue shows.
+ * `file.progress` up to date, which the upload queue shows. `signal` aborts when the file leaves
+ * the queue before its upload settles (it is replaced, or the component goes): pass it to
+ * `fetch` to cancel the request.
  */
-export type UploadFn<T = unknown> = (file: UploadFile) => Promise<T>
+export type UploadFn<T = unknown> = (
+  file: UploadFile,
+  options?: { signal: AbortSignal },
+) => Promise<T>
 
 /** Where a file is: kept in the value, uploading, or failed to upload. As upstream's Attachment. */
 export type FileState = 'done' | 'uploading' | 'error'
@@ -32,15 +38,42 @@ export interface FileEntry<T> {
 
 /** A chosen file that is uploading, or whose upload failed: an entry in the upload queue. */
 export class Upload {
-  /** `uploading`, or `error` once its upload has failed. */
-  @tracked state: 'uploading' | 'error' = 'uploading'
-  /** Why its upload failed. */
-  @tracked error: string | undefined
   /** ember-file-upload's file. */
   readonly file: UploadFile
+  readonly #actor: UploadActor<unknown>
+  readonly #failedLabel: () => string
 
-  constructor(file: UploadFile) {
+  constructor(file: UploadFile, host: UploadHost<unknown>, failedLabel: () => string) {
     this.file = file
+    this.#failedLabel = failedLabel
+    this.#actor = new UploadActor(file, host).start()
+  }
+
+  /** `uploading`, or `error` once its upload has failed. */
+  get state(): 'uploading' | 'error' {
+    return this.#actor.matches(UploadState.Failed) ? 'error' : 'uploading'
+  }
+
+  /** Why its upload failed. */
+  get error(): string | undefined {
+    if (this.state !== 'error') return undefined
+    const error = this.#actor.failure
+    if (error instanceof Error && error.message) return error.message
+    return isString(error) && error ? error : this.#failedLabel()
+  }
+
+  /** Whether `retry()` would send it again: it failed, and the component isn't disabled. */
+  get canRetry(): boolean {
+    return Boolean(this.#actor.can.retry)
+  }
+
+  retry(): void {
+    this.#actor.retry()
+  }
+
+  /** Stops it: a running upload's signal aborts, and what it settles with is dropped. */
+  stop(): void {
+    this.#actor.stop()
   }
 
   /** Its name. */
@@ -153,8 +186,11 @@ export class FileUploadState<T> {
       this.#destroyed = true
       for (const url of this.#previews.values()) URL.revokeObjectURL(url)
       this.#previews.clear()
-      // Its uploads leave whichever queue they are in, `@queue` included: nothing will settle them.
-      for (const entry of this.uploads) entry.file.queue?.remove(entry.file)
+      // Its uploads stop and leave whichever queue they are in, `@queue` included.
+      for (const entry of this.uploads) {
+        entry.stop()
+        entry.file.queue?.remove(entry.file)
+      }
       for (const file of this.#ownQueue.files) this.#ownQueue.remove(file)
     })
   }
@@ -308,35 +344,32 @@ export class FileUploadState<T> {
       this.#store(files.map(file => file.file as T))
       return
     }
-    const fresh = files.map(file => new Upload(file))
+    const fresh = files.map(file => this.#upload(file, upload))
     if (this.multiple) this.uploads = [...this.uploads, ...fresh]
     else {
-      for (const old of this.uploads) old.file.queue?.remove(old.file)
+      for (const old of this.uploads) {
+        old.stop()
+        old.file.queue?.remove(old.file)
+      }
       this.uploads = fresh
       this.#sweep()
     }
-    for (const entry of fresh) void this.#send(entry, upload)
   }
 
-  async #send(entry: Upload, upload: UploadFn<T>): Promise<void> {
-    entry.state = 'uploading'
-    entry.error = undefined
-    try {
-      const result = await upload(entry.file)
-      if (this.#destroyed || !this.uploads.includes(entry)) return
-      this.uploads = this.uploads.filter(other => other !== entry)
-      entry.file.queue?.remove(entry.file)
-      this.#store([result])
-    } catch (error) {
-      if (this.#destroyed || !this.uploads.includes(entry)) return
-      entry.state = 'error'
-      entry.error =
-        error instanceof Error && error.message
-          ? error.message
-          : isString(error) && error
-            ? error
-            : this.#options.uploadFailedLabel()
+  /** An upload of `file`, which `upload` sends (a retry sends it with the current `@upload`). */
+  #upload(file: UploadFile, upload: UploadFn<T>): Upload {
+    const host: UploadHost<unknown> = {
+      isDisabled: () => this.disabled,
+      upload: (file, options) => (this.#options.upload() ?? upload)(file, options),
+      // An upload settles a microtask after it starts at the soonest, so `entry` is set by then.
+      uploaded: value => {
+        this.uploads = this.uploads.filter(other => other !== entry)
+        file.queue?.remove(file)
+        this.#store([value as T])
+      },
     }
+    const entry = new Upload(file, host, this.#options.uploadFailedLabel)
+    return entry
   }
 
   #store(values: T[]): void {
@@ -367,10 +400,9 @@ export class FileUploadState<T> {
    * the nearest row's Retry (or remove) button, else to the file input.
    */
   retry = (entry: Upload): void => {
-    const upload = this.#options.upload()
     const index = this.uploads.indexOf(entry)
-    if (!upload || this.disabled || index === -1 || entry.state !== 'error') return
-    void this.#send(entry, upload)
+    if (!this.#options.upload() || index === -1 || !entry.canRetry) return
+    entry.retry()
     this.focusRequest = { list: 'queue', index, button: 'retry' }
   }
 
@@ -380,6 +412,7 @@ export class FileUploadState<T> {
     const index = this.uploads.indexOf(entry)
     if (index === -1) return
     this.uploads = this.uploads.filter(other => other !== entry)
+    entry.stop()
     entry.file.queue?.remove(entry.file)
     this.#sweep()
     this.focusRequest = { list: 'queue', index, button: 'remove' }

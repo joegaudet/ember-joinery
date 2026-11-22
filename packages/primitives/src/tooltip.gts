@@ -21,8 +21,9 @@ import { topLayer } from './layer.ts'
 import { part, type PartModifier } from './part.ts'
 import { Presence } from './presence.gts'
 import { service } from './service.ts'
+import { delayGroup, type DelayGroup } from './-private/delay-group.ts'
+import { hoverIntent, type HoverIntent } from './-private/hover-intent.ts'
 import {
-  Delay,
   ElementRef,
   PlacedData,
   PopperArrow,
@@ -66,14 +67,18 @@ export interface TooltipProviderArgs {
  */
 export class TooltipGroup {
   readonly #settings: () => TooltipProviderArgs
-  /** Whether the next tooltip to open waits for its delay; not just after one closed. */
-  isOpenDelayed = true
+  readonly #delay: DelayGroup
   /** Whether the pointer is crossing from a trigger to its tooltip, or back. */
   isPointerInTransit = false
-  #skipTimer: ReturnType<typeof setTimeout> | undefined
 
   constructor(settings: () => TooltipProviderArgs = () => ({})) {
     this.#settings = settings
+    this.#delay = delayGroup(this, this)
+  }
+
+  /** Whether the next tooltip to open waits for its delay; not while one is open or just after. */
+  get isOpenDelayed(): boolean {
+    return this.#delay.isOpenDelayed
   }
 
   /** The provider's delay, if it sets one. */
@@ -91,18 +96,16 @@ export class TooltipGroup {
 
   /** A tooltip in the group opened: the next opens at once. */
   opened(): void {
-    clearTimeout(this.#skipTimer)
-    this.isOpenDelayed = false
+    this.#delay.opened()
   }
 
   /** A tooltip in the group closed: the next opens at once, for a moment. */
   closed(): void {
-    clearTimeout(this.#skipTimer)
-    this.#skipTimer = setTimeout(() => (this.isOpenDelayed = true), this.skipDelayDuration)
+    this.#delay.closed()
   }
 
   destroy(): void {
-    clearTimeout(this.#skipTimer)
+    this.#delay.stop()
   }
 }
 
@@ -410,18 +413,32 @@ export class Tooltip extends Component<TooltipSignature> {
     name: 'open',
     value: () => this.args.open,
     defaultValue: () => this.args.defaultOpen,
-    onChange: () => this.onChange,
+    onChange: () => this.args.onOpenChange,
     fallback: false,
   })
   triggerRef = new ElementRef()
   arrowRef = new ElementRef()
   placed = new PlacedData()
-  openDelay = new Delay(this)
+  /** Times the open delay; `enter()` opens it after `delayDuration`. */
+  intent: HoverIntent
   /** Whether it opened after its delay (`delayed-open`) rather than at once. */
   @tracked wasOpenDelayed = false
 
   #isPointerDown = false
   #hasPointerMoveOpened = false
+
+  constructor(owner: Owner, args: TooltipArgs) {
+    super(owner, args)
+    // Read live: the delay can come from a provider found once the trigger renders.
+    const delay = (): number => this.delayDuration
+    this.intent = hoverIntent(this, {
+      get openDelay() {
+        return delay()
+      },
+      closeDelay: 0,
+      setOpen: () => this.#set(true, true),
+    })
+  }
 
   get id(): string {
     return idFor(this)
@@ -463,14 +480,21 @@ export class Tooltip extends Component<TooltipSignature> {
     return this.args.disableHoverableContent ?? this.group.disableHoverableContent ?? false
   }
 
-  onChange = (open: boolean): void => {
+  /**
+   * Asks for `open`; when it changed (a controlled `@open` may refuse), tells the group, and on
+   * opening, every other tooltip.
+   */
+  #set(open: boolean, delayed: boolean): void {
+    const was = this.isOpen
+    if (open) this.wasOpenDelayed = delayed
+    this.openState.set(open)
+    if (this.isOpen === was) return
     if (open) {
       this.group.opened()
       document.dispatchEvent(new CustomEvent(TOOLTIP_OPEN))
     } else {
       this.group.closed()
     }
-    this.args.onOpenChange?.(open)
   }
 
   setOpen = (open: boolean): void => {
@@ -478,21 +502,15 @@ export class Tooltip extends Component<TooltipSignature> {
     // after its provider has gone and while the owner the app's group comes from is going too:
     // a tooltip that is going, or whose app is, changes nothing.
     if (isGoing(this) || isGoing(getOwner(this))) return
-    this.openDelay.cancel()
-    if (open) this.wasOpenDelayed = false
-    this.openState.set(open)
+    this.intent.cancel()
+    this.#set(open, false)
   }
 
   handleOpen = (): void => this.setOpen(true)
   handleClose = (): void => this.setOpen(false)
   dismiss = (_reason: DismissReason): void => this.handleClose()
 
-  handleDelayedOpen = (): void => {
-    this.openDelay.start(this.delayDuration, () => {
-      this.wasOpenDelayed = true
-      this.openState.set(true)
-    })
-  }
+  handleDelayedOpen = (): void => this.intent.enter()
 
   onTriggerEnter = (): void => {
     if (this.group.isOpenDelayed) this.handleDelayedOpen()
@@ -501,7 +519,7 @@ export class Tooltip extends Component<TooltipSignature> {
 
   onTriggerLeave = (): void => {
     if (this.disableHoverableContent) this.handleClose()
-    else this.openDelay.cancel()
+    else this.intent.cancel()
   }
 
   #onPointerUp = (): void => {

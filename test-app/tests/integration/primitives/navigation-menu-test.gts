@@ -198,6 +198,27 @@ module('Integration | primitives | navigation-menu', function (hooks) {
     await a11yAudit()
   })
 
+  test('a value its parent refuses doesn’t skip the next open’s delay', async function (assert) {
+    const state = new State()
+    // A parent that never lets "components" open.
+    state.setValue = (value: string) => {
+      state.changes.push(value)
+      if (value !== 'components') state.value = value
+    }
+    await render(<template><Menu @state={{state}} /></template>)
+    const nav = new NavigationMenuHarness()
+    const start = nav.item('Getting started')
+    const components = nav.item('Components')
+    await press(components.trigger)
+    assert.deepEqual(state.changes, ['components'])
+    assert.false(nav.isOpen, 'its parent kept it closed')
+    const begun = performance.now()
+    await start.hover()
+    assert.true(start.isOpen)
+    assert.true(performance.now() - begun >= 190, 'nothing opened, so it waits for the delay')
+    await a11yAudit()
+  })
+
   test('the pointer on the viewport keeps the content open', async function (assert) {
     const state = new State()
     await render(<template><Menu @state={{state}} /></template>)

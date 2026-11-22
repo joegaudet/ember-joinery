@@ -29,7 +29,7 @@ export function moduleSpecifier(name) {
 
 /**
  * Fences the indented examples in one comment's parts, in place. An inline tag (`{@link}`) is
- * kept as it is, through a placeholder; a relative link becomes text. Records the media ids of
+ * kept as it is, through a placeholder (a private-use character); a relative link becomes text. Records the media ids of
  * relative links that became text (`dropped`) and of those left as links (`kept`).
  */
 export function fence(parts, dropped = new Set(), kept = new Set()) {
@@ -39,7 +39,7 @@ export function fence(parts, dropped = new Set(), kept = new Set()) {
     .map(part => {
       if (part.kind !== 'inline-tag') return part.text
       tags.push(part)
-      return `\u0000${tags.length - 1}\u0000`
+      return `\uE000${tags.length - 1}\uE000`
     })
     .join('')
   const links = parts.filter(part => part.kind === 'relative-link' && part.target)
@@ -50,7 +50,7 @@ export function fence(parts, dropped = new Set(), kept = new Set()) {
   }
   for (const link of links) dropped.add(link.target)
   const out = fenced
-    .split(/\u0000(\d+)\u0000/)
+    .split(/\uE000(\d+)\uE000/)
     .map((piece, i) => (i % 2 ? tags[Number(piece)] : { kind: 'text', text: piece }))
     .filter(part => part.kind !== 'text' || part.text)
   parts.splice(0, parts.length, ...out)

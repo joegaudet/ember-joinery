@@ -79,3 +79,8 @@ a.tsd-anchor-link,
 .tsd-signature-type {
   color: var(--color-link);
 }
+
+/* A {@link} in prose is a link like any other, not coloured by what it links to. */
+.tsd-comment a[class^='tsd-kind-'] {
+  color: var(--color-link);
+}

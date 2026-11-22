@@ -56,7 +56,10 @@
     "@embroider/addon-shim": "^1.10.3",
     "@embroider/macros": "^1.21.4",
     "@floating-ui/dom": "^1.8.0",
+    "@real-enums/core": "^2.3.0",
     "@sindresorhus/is": "^8.1.0",
+    "@switchyard-ts/core": "^0.3.0",
+    "@switchyard-ts/ember": "^0.3.0",
     "decorator-transforms": "^2.4.0",
     "ember-modifier": "^4.3.0"
   },

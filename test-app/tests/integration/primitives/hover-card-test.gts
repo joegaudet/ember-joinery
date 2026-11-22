@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { render, settled } from '@ember/test-helpers'
+import { render, settled, triggerEvent } from '@ember/test-helpers'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
 import { HoverCard } from '@ember-joinery/primitives/hover-card'
@@ -150,6 +150,27 @@ module('Integration | primitives | hover-card', function (hooks) {
     await card.unhoverContent()
     assert.false(card.isOpen, 'off it, it closes')
     await a11yAudit()
+  })
+
+  test('a press held inside the card keeps it open when the pointer leaves', async function (assert) {
+    await render(
+      <template>
+        <HoverCard @openDelay={{0}} @closeDelay={{0}} as |h|>
+          <h.Trigger href="#nextjs">@nextjs</h.Trigger>
+          <h.Content>The React Framework</h.Content>
+        </HoverCard>
+      </template>,
+    )
+    const card = new HoverCardHarness()
+    await card.hover()
+    await card.hoverContent()
+    await triggerEvent(card.content!, 'pointerdown')
+    await card.unhoverContent()
+    assert.true(card.isOpen, 'held, it stays open')
+    await triggerEvent(document, 'pointerup')
+    await card.hoverContent()
+    await card.unhoverContent()
+    assert.false(card.isOpen, 'released, leaving closes it')
   })
 
   test('focus opens it and blur closes it; Escape and a press outside close it at once', async function (assert) {

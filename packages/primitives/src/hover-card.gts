@@ -17,8 +17,8 @@ import { idFor } from './id.ts'
 import { topLayer } from './layer.ts'
 import { part, type PartModifier } from './part.ts'
 import { Presence } from './presence.gts'
+import { hoverIntent } from './-private/hover-intent.ts'
 import {
-  Delay,
   ElementRef,
   PlacedData,
   PopperArrow,
@@ -272,8 +272,7 @@ export class HoverCard extends Component<HoverCardSignature> {
   triggerRef = new ElementRef()
   arrowRef = new ElementRef()
   placed = new PlacedData()
-  openTimer = new Delay(this)
-  closeTimer = new Delay(this)
+  intent = hoverIntent(this, this)
   /** Whether the user selected text in the card, which keeps it open. */
   hasSelection = false
   /** Whether a press inside the card is still down, which keeps it open. */
@@ -303,20 +302,16 @@ export class HoverCard extends Component<HoverCardSignature> {
     return this.args.closeDelay ?? 300
   }
 
-  handleOpen = (): void => {
-    this.closeTimer.cancel()
-    this.openTimer.start(this.openDelay, () => this.openState.set(true))
+  get isHeld(): boolean {
+    return this.hasSelection || this.isPointerDownOnContent
   }
 
-  handleClose = (): void => {
-    this.openTimer.cancel()
-    if (this.hasSelection || this.isPointerDownOnContent) return
-    this.closeTimer.start(this.closeDelay, () => this.openState.set(false))
-  }
+  handleOpen = (): void => this.intent.enter()
+
+  handleClose = (): void => this.intent.leave()
 
   setOpen = (open: boolean): void => {
-    this.openTimer.cancel()
-    this.closeTimer.cancel()
+    this.intent.cancel()
     this.openState.set(open)
   }
 

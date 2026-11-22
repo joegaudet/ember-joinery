@@ -614,6 +614,49 @@ module('Integration | primitives | dialog', function (hooks) {
     await a11yAudit()
   })
 
+  test('controlled, @onClose and the returnValue follow @open, not what it asks for', async function (assert) {
+    class State {
+      @tracked open = true
+      /** Whether the caller lets it close, or open. */
+      @tracked allow = false
+      set = (open: boolean) => {
+        if (this.allow) this.open = open
+      }
+    }
+    const state = new State()
+    const closes: string[] = []
+    const onClose = (value: string) => closes.push(value)
+    await render(
+      <template>
+        <Dialog @open={{state.open}} @onOpenChange={{state.set}} @onClose={{onClose}} as |d|>
+          <d.Trigger>Choose</d.Trigger>
+          <d.Content>
+            <d.Title>Pick a plan</d.Title>
+            <form method="dialog">
+              <button type="submit" value="pro">Pro</button>
+            </form>
+          </d.Content>
+          <output data-test-value>{{d.returnValue}}</output>
+        </Dialog>
+      </template>,
+    )
+    const dialog = new DialogHarness()
+    await dialog.pressEscape()
+    assert.true(dialog.isOpen, 'the caller kept it open')
+    assert.deepEqual(closes, [], 'so it did not close')
+
+    state.allow = true
+    await click(dialog.content!.querySelector('[value="pro"]')!)
+    assert.false(dialog.isOpen)
+    assert.deepEqual(closes, ['pro'])
+
+    state.allow = false
+    await click(dialog.trigger)
+    assert.false(dialog.isOpen, 'the caller kept it closed')
+    assert.dom('[data-test-value]').hasText('pro', 'so the returnValue stays')
+    await a11yAudit()
+  })
+
   test('the harness: one pointed at another component says so', async function (assert) {
     await render(
       <template>

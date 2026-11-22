@@ -1,5 +1,4 @@
 import Component from '@glimmer/component'
-import { tracked } from '@glimmer/tracking'
 import type Owner from '@ember/owner'
 import type { TOC } from '@ember/component/template-only'
 import { on } from '@ember/modifier'
@@ -13,6 +12,7 @@ import {
 import { idFor } from '@ember-joinery/primitives/id'
 import { ensureDateLibrary } from '../date-library.ts'
 import type { CalendarOptions } from './state.ts'
+import { Popup, pickerChart, type ChartHost } from './picker-chart.ts'
 import { translator } from '@ember-joinery/primitives/i18n'
 
 type Align = 'start' | 'center' | 'end'
@@ -83,6 +83,8 @@ export interface PickerHost {
   onOpenAutoFocus: (event: Event) => void
   onCloseAutoFocus: (event: Event) => void
   onEscapeKeyDown: (event: KeyboardEvent) => void
+  /** Brings the chart to whether the popover is open, once that has changed. */
+  followOpen: (open: boolean) => void
 }
 
 /**
@@ -92,14 +94,11 @@ export interface PickerHost {
  */
 export abstract class PickerBase<S extends { Args: PickerOptions }>
   extends Component<S>
-  implements PickerHost
+  implements PickerHost, ChartHost
 {
   openState: ControllableState<boolean> = controllable(this, 'open', false)
-  /** What was typed into the input since the value was last written there. */
-  @tracked typed: string | null = null
-  /** The month shown, while the user pages away from the value's. */
-  @tracked center: Date | undefined
-  #focusInput = false
+  /** The modes: open (on which month, halfway through a range), and the input's typing. */
+  chart = pickerChart(this, this)
 
   constructor(owner: Owner, args: S['Args']) {
     super(owner, args)
@@ -120,12 +119,12 @@ export abstract class PickerBase<S extends { Args: PickerOptions }>
   abstract get defaultTriggerLabel(): string
   /** The input's text for the value. */
   abstract get valueText(): string
+  /** Whether typed text names a value. */
+  abstract parses(text: string): boolean
   /** Reads typed text: whether it named a value, which the picker then takes. */
   abstract readTyped(text: string): boolean
   /** Clears the value, as emptying the input does. */
   abstract clear(): void
-  /** Forgets what the calendar held while it was open. */
-  abstract reset(): void
 
   get name(): string | undefined {
     return this.args.name
@@ -144,7 +143,7 @@ export abstract class PickerBase<S extends { Args: PickerOptions }>
   }
 
   get inputText(): string {
-    return this.typed ?? this.valueText
+    return this.chart.typed ?? this.valueText
   }
 
   get triggerId(): string | undefined {
@@ -204,29 +203,38 @@ export abstract class PickerBase<S extends { Args: PickerOptions }>
     return this.inputMode ? -8 : undefined
   }
 
+  /** The month shown, while the user pages away from the value's. */
+  get center(): Date | undefined {
+    return this.chart.center
+  }
+
   setOpen = (open: boolean): void => {
     if (open && this.disabled) return
-    if (!open) {
-      this.center = undefined
-      this.reset()
-    }
     this.openState.set(open)
+    this.followOpen(this.openState.value)
+    // A close the caller refused must not leave its reason to a later one.
+    this.chart.closeReason = 'outside'
+  }
+
+  followOpen = (open: boolean): void => {
+    if (open === this.chart.matches(Popup.Open)) return
+    if (open) this.chart.opened()
+    else this.chart.closed()
   }
 
   /** Closes the calendar once a value is chosen, focus going back to the trigger or input. */
   close(): void {
-    this.typed = null
-    this.#focusInput = this.inputMode
+    this.chart.written()
+    this.chart.closeReason = 'choice'
     this.setOpen(false)
   }
 
   setCenter = (center: Date): void => {
-    this.center = center
+    this.chart.page(center)
   }
 
   onInput = (text: string): void => {
-    this.typed = text
-    if (this.readTyped(text)) this.center = undefined
+    this.chart.type(text)
   }
 
   onInputKeydown = (event: KeyboardEvent): void => {
@@ -237,14 +245,7 @@ export abstract class PickerBase<S extends { Args: PickerOptions }>
   }
 
   onInputBlur = (): void => {
-    const typed = this.typed
-    if (typed === null) return
-    if (!typed.trim()) {
-      this.clear()
-      this.typed = null
-    } else if (this.readTyped(typed)) {
-      this.typed = null
-    }
+    this.chart.blur()
   }
 
   /** Focus goes to the calendar's tab stop (the chosen day, else today), not its first button. */
@@ -258,18 +259,23 @@ export abstract class PickerBase<S extends { Args: PickerOptions }>
 
   /** Escape, as a choice does, sends focus back to the input it was typed into. */
   onEscapeKeyDown = (): void => {
-    this.#focusInput = this.inputMode
+    this.chart.closeReason = 'escape'
   }
 
   onCloseAutoFocus = (event: Event): void => {
-    if (!this.#focusInput) return
-    this.#focusInput = false
+    if (!this.chart.focusInput) return
+    this.chart.focusInput = false
     const input = document.getElementById(this.inputId)
     if (!input) return
     event.preventDefault()
     input.focus()
   }
 }
+
+/** Brings the picker's chart to the popover's committed open, also when `@open` changes it. */
+const followOpen = modifier((_: Element, [follow, open]: [(open: boolean) => void, boolean]) =>
+  follow(open),
+)
 
 /** Elements this modifier named, so it leaves a caller's own `aria-labelledby` alone. */
 const named = new WeakSet<Element>()
@@ -335,6 +341,7 @@ export const PickerFrame: TOC<PickerFrameSignature> = <template>
             aria-label={{@picker.triggerLabel}}
             disabled={{@picker.disabled}}
             {{p.trigger}}
+            {{followOpen @picker.followOpen @picker.isOpen}}
           ><Icon @icon={{@picker.inputIcon}} /></g.Button>
         </g.Addon>
       </InputGroup>
@@ -353,6 +360,7 @@ export const PickerFrame: TOC<PickerFrameSignature> = <template>
         aria-describedby={{@picker.describedBy}}
         disabled={{@picker.disabled}}
         {{p.trigger}}
+        {{followOpen @picker.followOpen @picker.isOpen}}
         {{nameWithValue @picker.valueId}}
         ...attributes
       >

@@ -1,4 +1,3 @@
-import { tracked } from '@glimmer/tracking'
 import type Owner from '@ember/owner'
 import { Calendar } from 'lucide'
 import type { IconNode } from '@ember-joinery/ember'
@@ -66,8 +65,6 @@ function rangePattern(written: string): RegExp | undefined {
  */
 export default class DateRangePicker extends PickerBase<DateRangePickerSignature> {
   selection: OwnedValue<DateRange | undefined>
-  /** The start chosen before the end, held until the range is whole. */
-  @tracked pending: DateRange | undefined
 
   constructor(owner: Owner, args: DateRangePickerSignature['Args']) {
     super(owner, args)
@@ -89,7 +86,7 @@ export default class DateRangePicker extends PickerBase<DateRangePickerSignature
 
   /** What the calendar shows: the range being chosen, else the value. */
   get shown(): DateRange | undefined {
-    return this.pending ?? this.value
+    return this.chart.pending ?? this.value
   }
 
   get formatOptions(): FormatOptions {
@@ -143,31 +140,36 @@ export default class DateRangePicker extends PickerBase<DateRangePickerSignature
     return rest.length || second === undefined ? undefined : [first, second]
   }
 
-  readTyped(text: string): boolean {
+  #parse(text: string): DateRange | undefined {
     const split = this.#split(text)
-    if (!split) return false
+    if (!split) return undefined
     const from = parseDate(split[0])
     const to = parseDate(split[1])
-    if (!from || !to) return false
-    this.selection.set(+from <= +to ? { from, to } : { from: to, to: from })
-    return true
+    if (!from || !to) return undefined
+    return +from <= +to ? { from, to } : { from: to, to: from }
+  }
+
+  parses(text: string): boolean {
+    return Boolean(this.#parse(text))
+  }
+
+  readTyped(text: string): boolean {
+    const range = this.#parse(text)
+    if (range) this.selection.set(range)
+    return Boolean(range)
   }
 
   clear(): void {
     if (this.value) this.selection.set(undefined)
   }
 
-  reset(): void {
-    this.pending = undefined
-  }
-
   choose = (range: DateRange): void => {
     if (range.from && range.to) {
-      this.pending = undefined
+      this.chart.endRange()
       this.selection.set({ from: range.from, to: range.to })
       this.close()
     } else {
-      this.pending = range
+      this.chart.startRange(range)
     }
   }
 

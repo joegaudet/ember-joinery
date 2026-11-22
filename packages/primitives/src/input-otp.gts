@@ -541,6 +541,8 @@ interface OTPInputModifierSignature {
  */
 class OTPInputModifier extends Modifier<OTPInputModifierSignature> {
   #connected = false
+  /** The selection sync a render scheduled, cleared when the modifier goes. */
+  #sync: { timer: ReturnType<typeof setTimeout>; token: unknown } | undefined
   /** The `aria-label` this gave the input, so a name of the caller's is left alone. */
   #label: string | undefined
 
@@ -557,18 +559,29 @@ class OTPInputModifier extends Modifier<OTPInputModifierSignature> {
       this.#connected = true
       styleContainer(input)
       registerDestructor(this, connect(input, otp))
+      registerDestructor(this, () => this.#cancelSync())
       return
     }
     otp.settle(input, { later: true })
     // A render can't change what it has read, so the slots follow the selection after it.
+    this.#cancelSync()
     const token = waiter.beginAsync()
-    setTimeout(() => {
+    const timer = setTimeout(() => {
+      this.#sync = undefined
       try {
         if (input.isConnected) otp.syncSelection(input)
       } finally {
         waiter.endAsync(token)
       }
     }, 0)
+    this.#sync = { timer, token }
+  }
+
+  #cancelSync(): void {
+    if (!this.#sync) return
+    clearTimeout(this.#sync.timer)
+    waiter.endAsync(this.#sync.token)
+    this.#sync = undefined
   }
 }
 

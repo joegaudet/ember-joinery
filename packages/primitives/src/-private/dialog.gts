@@ -165,9 +165,10 @@ export class DialogController {
 
   setOpen = (open: boolean): void => {
     const was = this.isOpen
-    if (open && !was) this.returnValue = ''
     this.openState.set(open)
-    if (was && !open) this.args.onClose?.(this.returnValue)
+    // What the state became, not what was asked: a controlled `@open` may refuse it.
+    if (!was && this.isOpen) this.returnValue = ''
+    if (was && !this.isOpen) this.args.onClose?.(this.returnValue)
   }
 
   show = (): void => this.setOpen(true)

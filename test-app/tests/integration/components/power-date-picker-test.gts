@@ -436,6 +436,41 @@ module('Integration | components | power-date-picker', function (hooks) {
       await a11yAudit()
     })
 
+    test('controlled: a close @open refuses keeps the start chosen and the month paged to', async function (assert) {
+      const state = new State()
+      state.open = true
+      const range = { from: new Date(2026, 2, 4), to: new Date(2026, 2, 9) }
+      const refuse = (open: boolean) => state.sent.push(open)
+      await render(
+        <template>
+          <DateRangePicker
+            @name="stay"
+            @defaultValue={{range}}
+            @open={{state.open}}
+            @onOpenChange={{refuse}}
+            @locale="en-US"
+          />
+        </template>,
+      )
+      const stay = new DatePickerHarness('stay')
+      await stay.calendar.select('2026-03-20')
+      await stay.calendar.nextMonth()
+      await pressEscape()
+      assert.deepEqual(state.sent, [false], 'it asked to close')
+      assert.true(stay.isOpen, 'but @open kept it open')
+      assert.strictEqual(stay.calendar.shownMonth, '2026-04', 'on the month paged to')
+      await stay.calendar.previousMonth()
+      assert.deepEqual(stay.calendar.selected, ['2026-03-20'], 'with the start chosen')
+
+      state.open = false
+      await settled()
+      state.open = true
+      await settled()
+      assert.strictEqual(stay.calendar.shownMonth, '2026-03', 'closed by @open, it forgets both')
+      assert.strictEqual(stay.calendar.selected.length, 6)
+      await a11yAudit()
+    })
+
     test('with an input, both dates can be typed', async function (assert) {
       const state = new State()
       await render(

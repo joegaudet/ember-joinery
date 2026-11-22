@@ -83,6 +83,10 @@ export default class DatePicker extends PickerBase<DatePickerSignature> {
     return translate(this, messages.selectDate)
   }
 
+  parses(text: string): boolean {
+    return Boolean(parseDate(text))
+  }
+
   readTyped(text: string): boolean {
     const date = parseDate(text)
     if (!date) return false
@@ -92,10 +96,6 @@ export default class DatePicker extends PickerBase<DatePickerSignature> {
 
   clear(): void {
     if (this.value) this.selection.set(undefined)
-  }
-
-  reset(): void {
-    // A single day has nothing held while the calendar is open.
   }
 
   choose = (date: Date | undefined): void => {

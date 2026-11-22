@@ -15,6 +15,7 @@ import { idFor } from './id.ts'
 import { topLayer } from './layer.ts'
 import { part, type PartModifier } from './part.ts'
 import { Presence } from './presence.gts'
+import { comboboxList } from './-private/combobox-list.ts'
 import { ignoreROError } from './resize-observer.ts'
 import { Typeahead, getNextMatch } from './typeahead.ts'
 import {
@@ -379,7 +380,6 @@ export class ComboboxItem extends Component<ComboboxItemSignature> {
         this.choose(event)
       },
       pointermove: () => {
-        this.combobox.keyboardActive = false
         if (this.combobox.highlightOnHover && !this.isHighlighted) {
           this.combobox.highlight(this.index)
         }
@@ -964,16 +964,12 @@ export class Combobox extends Component<ComboboxSignature> {
 
   /** The highlighted item's index among the rendered items, or `null`. */
   @tracked activeIndex: number | null = null
-  /** Whether the user has typed a query since the list opened. */
-  @tracked queryChangedAfterOpen = false
-  /** The query frozen while the list animates out, so it doesn't refilter as it goes. */
-  @tracked closeQuery: string | null = null
+  /** Where the list is in its life, whether a query was typed, and the query frozen as it goes. */
+  listMode = comboboxList(this)
   /** Whether an input outside the popup has registered (so the input isn't inside it). */
   @tracked hasOutsideInput = false
   /** The chip that has focus, for the arrow keys. */
   highlightedChip: number | undefined
-  /** Whether the last interaction was the keyboard, for how a highlight is reported. */
-  keyboardActive = true
   /** The key that opened the list, which decides the first highlight. */
   #openKey: string | null = null
   #hadInputClear = false
@@ -1116,7 +1112,8 @@ export class Combobox extends Component<ComboboxSignature> {
   }
 
   get query(): string {
-    if (this.closeQuery !== null) return this.closeQuery
+    const frozen = this.listMode.frozenQuery
+    if (frozen !== null) return frozen
     const value = this.inputValue
     return value === '' ? '' : value.trim()
   }
@@ -1138,7 +1135,7 @@ export class Combobox extends Component<ComboboxSignature> {
     const selected = this.selectedLabel
     return (
       this.isSingle &&
-      !this.queryChangedAfterOpen &&
+      !this.listMode.isQuerying &&
       query !== '' &&
       selected !== '' &&
       selected.length === query.length &&
@@ -1152,7 +1149,7 @@ export class Combobox extends Component<ComboboxSignature> {
     if (own !== undefined) return own
     const collator = this.collator
     const toLabel = this.args.itemToStringLabel
-    if (this.isSingle && !this.queryChangedAfterOpen) {
+    if (this.isSingle && !this.listMode.isQuerying) {
       const selected = this.value
       return (item, query) => {
         if (item == null) return false
@@ -1285,7 +1282,7 @@ export class Combobox extends Component<ComboboxSignature> {
       else if (this.#openKey !== null) {
         // Opened from the keyboard: the chosen item, or the first (the last for ArrowUp).
         this.activeIndex = this.selectedIndex ?? (this.#openKey === 'ArrowUp' ? count - 1 : 0)
-      } else if (!this.queryChangedAfterOpen && this.selectedIndex !== null) {
+      } else if (!this.listMode.isQuerying && this.selectedIndex !== null) {
         this.activeIndex = this.selectedIndex
       }
       this.#openKey = null
@@ -1299,7 +1296,7 @@ export class Combobox extends Component<ComboboxSignature> {
     this.#hadInputClear = reason === 'input-clear'
     if (reason === 'input-change' && isTyped(event)) {
       const hasQuery = next.trim() !== ''
-      if (hasQuery) this.queryChangedAfterOpen = true
+      if (hasQuery) this.listMode.typed()
       if (hasQuery && this.autoHighlight) this.activeIndex = 0
     }
     this.inputState.set(next)
@@ -1307,24 +1304,30 @@ export class Combobox extends Component<ComboboxSignature> {
 
   setOpen = (next: boolean, reason: Reason = 'none'): void => {
     if (this.isOpen === next) return
-    if (next && this.isMultiple && this.inputInsidePopup && this.closeQuery !== null) {
-      this.queryChangedAfterOpen = false
-      this.closeQuery = null
-      if (this.inputValue !== '') this.setInputValue('', 'input-clear')
-    }
-    if (!next && this.queryChangedAfterOpen) {
-      if (this.isSingle) {
-        this.closeQuery = this.query
-        if (this.query === '') this.queryChangedAfterOpen = false
-      } else {
-        this.closeQuery = this.query
-        if (this.inputInsidePopup) this.activeIndex = null
-        else this.setInputValue('', 'input-clear')
-      }
-    }
     if (next && reason !== 'list-navigation') this.#openKey = null
     this.openState.set(next)
-    if (next) queueMicrotask(() => this.#settleHighlight())
+    // A controlled `@open` may refuse: what follows goes with the committed value only.
+    if (this.isOpen !== next) return
+    if (next) {
+      const reopened = this.listMode.frozenQuery !== null
+      this.listMode.opened()
+      if (reopened && this.isMultiple && this.inputInsidePopup) {
+        this.listMode.browse()
+        if (this.inputValue !== '') this.setInputValue('', 'input-clear')
+      }
+      queueMicrotask(() => this.#settleHighlight())
+      return
+    }
+    const wasQuerying = this.listMode.isQuerying
+    this.listMode.closed(this.query)
+    if (!wasQuerying) return
+    if (this.isSingle) {
+      if (this.query === '') this.listMode.browse()
+    } else if (this.inputInsidePopup) {
+      this.activeIndex = null
+    } else {
+      this.setInputValue('', 'input-clear')
+    }
   }
 
   setSelectedValue(next: unknown, reason: Reason): void {
@@ -1332,8 +1335,8 @@ export class Combobox extends Component<ComboboxSignature> {
     if (this.isSingle && !this.inputInsidePopup) {
       this.setInputValue(labelOf(next, this.args.itemToStringLabel), reason)
     }
-    if (this.isSingle && next != null && reason !== 'input-change' && this.queryChangedAfterOpen) {
-      this.closeQuery = this.query
+    if (this.isSingle && next != null && reason !== 'input-change' && this.listMode.isQuerying) {
+      this.listMode.freeze(this.query)
     }
   }
 
@@ -1375,8 +1378,7 @@ export class Combobox extends Component<ComboboxSignature> {
   /** The popup has gone (after any exit animation): Base UI's `handleUnmount`. */
   unmounted(): void {
     if (this.isDestroying || this.isDestroyed) return
-    this.queryChangedAfterOpen = false
-    this.closeQuery = null
+    this.listMode.unmounted()
     this.activeIndex = null
     const input = this.inputRef.current
     if (this.isMultiple && input && input.value !== '' && !this.#hadInputClear) {
@@ -1422,7 +1424,6 @@ export class Combobox extends Component<ComboboxSignature> {
   inputKeyDown = (event: KeyboardEvent): void => {
     if (this.isDisabled || this.isReadOnly) return
     if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) return
-    this.keyboardActive = true
     const input = event.currentTarget as HTMLInputElement
     if (event.key === 'Home' || event.key === 'End') {
       // They move the caret, not the highlight.
@@ -1505,7 +1506,6 @@ export class Combobox extends Component<ComboboxSignature> {
   /** A press on the input (or the chips) opens the list, as Base UI's `useClick` on mousedown. */
   inputPress = (event: MouseEvent): void => {
     if (this.isReadOnly || this.isDisabled || event.button !== 0) return
-    this.keyboardActive = false
     if (this.args.openOnInputClick ?? true) this.setOpen(true, 'input-press')
   }
 
@@ -1542,8 +1542,6 @@ export class Combobox extends Component<ComboboxSignature> {
         input: this.onInput,
         keydown: this.inputKeyDown,
         mousedown: this.inputPress,
-        pointerdown: () => (this.keyboardActive = false),
-        pointermove: () => (this.keyboardActive = false),
       },
       element: element => {
         this.inputRef.set(element)

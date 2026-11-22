@@ -1,6 +1,7 @@
 import Modifier from 'ember-modifier'
 import { registerDestructor } from '@ember/destroyable'
 import { focusElement, focusable } from './focus.ts'
+import { SearchState, TypeaheadSearch } from './-private/typeahead-search.ts'
 
 /** How long a search lasts after its last key, in milliseconds, as in Radix: one second. */
 export const TYPEAHEAD_TIMEOUT = 1000
@@ -64,17 +65,15 @@ export function getNextMatch<T>(
  * Call `dispose()` when its owner goes, to stop the timer.
  */
 export class Typeahead {
-  readonly #timeout: number
-  #search = ''
-  #timer: ReturnType<typeof setTimeout> | undefined
+  readonly #search: TypeaheadSearch
 
   constructor(options: { timeout?: number } = {}) {
-    this.#timeout = options.timeout ?? TYPEAHEAD_TIMEOUT
+    this.#search = new TypeaheadSearch(options.timeout ?? TYPEAHEAD_TIMEOUT).start()
   }
 
   /** What has been typed so far, or `''`. */
   get search(): string {
-    return this.#search
+    return this.#search.search
   }
 
   /**
@@ -82,22 +81,18 @@ export class Typeahead {
    * the focused item: a menu item or option shouldn't activate on it.
    */
   get isTyping(): boolean {
-    return this.#search !== ''
+    return this.#search.matches(SearchState.Typing)
   }
 
   /** Adds a key to the search, restarts the timer, and returns the search. */
   type(key: string): string {
-    this.#search += key
-    clearTimeout(this.#timer)
-    this.#timer = setTimeout(() => this.reset(), this.#timeout)
-    return this.#search
+    this.#search.type(key)
+    return this.#search.search
   }
 
   /** Clears the search now. */
   reset(): void {
-    this.#search = ''
-    clearTimeout(this.#timer)
-    this.#timer = undefined
+    this.#search.reset()
   }
 
   /** Stops the timer. */

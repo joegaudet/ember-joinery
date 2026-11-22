@@ -904,6 +904,55 @@ module('Integration | primitives | drawer', function (hooks) {
     assert.strictEqual(drawer.activeSnapPoint, '1', 'and still at its last snap point')
   })
 
+  test('closed by @open, as vaul keeps it, its snap point stays', async function (assert) {
+    const state = new State()
+    state.open = true
+    const SNAP_POINTS = [0.25, 1]
+    await render(
+      <template>
+        <PanelStyles />
+        <Drawer
+          @open={{state.open}}
+          @snapPoints={{SNAP_POINTS}}
+          @defaultActiveSnapPoint={{1}}
+          @onActiveSnapPointChange={{state.setSnapPoint}}
+          as |d|
+        >
+          <d.Content class="panel tall"><d.Title>Parent</d.Title></d.Content>
+        </Drawer>
+      </template>,
+    )
+    state.open = false
+    await settled()
+    await wait(600)
+    assert.deepEqual(state.changes, [], 'no snap point change')
+  })
+
+  test('destroyed while open, a scaled background puts the body back', async function (assert) {
+    const show = new (class {
+      @tracked value = true
+    })()
+    const body = document.body.style.background
+    await render(
+      <template>
+        <PanelStyles />
+        <div data-vaul-drawer-wrapper>
+          {{#if show.value}}
+            <Drawer @defaultOpen={{true}} @shouldScaleBackground={{true}} as |d|>
+              <d.Content class="panel"><d.Title>Gone</d.Title></d.Content>
+            </Drawer>
+          {{/if}}
+        </div>
+      </template>,
+    )
+    assert.strictEqual(document.body.style.backgroundColor, 'black', 'on black')
+    show.value = false
+    await settled()
+    await wait(600)
+    assert.notStrictEqual(document.body.style.backgroundColor, 'black', 'not black')
+    assert.strictEqual(document.body.style.background, body)
+  })
+
   test('closed before it has finished opening, onAnimationEnd hears only the close', async function (assert) {
     const state = new State()
     const ended: boolean[] = []

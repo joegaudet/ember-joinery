@@ -192,6 +192,8 @@ export class DrawerController extends DialogController {
   #wasBeyondThePoint = false
   /** Whether the pending tap on the handle came from one with `preventCycle`. */
   #preventCycle = false
+  /** Whether it closed itself (vaul's closeDrawer), so it goes back to its first snap point. */
+  #resetOnClose = false
   /** The body whose background a scaled background put back, and the colour to restore. */
   #body: { element: HTMLElement; background: string } | null = null
   #previousScrollBehavior: string | null = null
@@ -467,8 +469,11 @@ export class DrawerController extends DialogController {
 
   /** Opens or closes it, whatever `@dismissible` says (your own code calling it decides). */
   override setOpen = (open: boolean): void => {
-    if (this.isOpen && !open) this.cancelDrag()
+    const was = this.isOpen
+    if (was && !open) this.cancelDrag()
     this.#setDialogOpen(open)
+    // Only once the close is committed: a controlled `@open` may refuse it.
+    if (was && !this.isOpen) this.#resetOnClose = true
   }
 
   /** A close part, a `<form method="dialog">`: closes it, if it is dismissible. */
@@ -498,6 +503,7 @@ export class DrawerController extends DialogController {
     const root = (this.contentElement ?? this.triggerElement)?.ownerDocument.documentElement
     if (open) {
       this.#openTime = Date.now()
+      this.#resetOnClose = false
       if (root) {
         this.#previousScrollBehavior = root.style.scrollBehavior
         root.style.scrollBehavior = 'auto'
@@ -512,10 +518,11 @@ export class DrawerController extends DialogController {
     else this.#machine.opened()
   }
 
-  /** It finished opening or closing; closed, it goes back to its first snap point (vaul's). */
+  /** It finished opening or closing; if it closed itself, it goes back to its first snap point. */
   #animationEnded(open: boolean): void {
     const snapPoints = this.snapPoints
-    if (!open && snapPoints) this.setActiveSnapPoint(snapPoints[0] ?? null)
+    if (!open && this.#resetOnClose && snapPoints) this.setActiveSnapPoint(snapPoints[0] ?? null)
+    this.#resetOnClose = false
     this.args.onAnimationEnd?.(open)
   }
 
@@ -526,6 +533,8 @@ export class DrawerController extends DialogController {
 
   teardown(): void {
     this.#machine.stop()
+    // The wait for the body's background died with the machine.
+    this.#restoreBackground()
   }
 
   // ----- Focus and presses outside, as vaul's Content passes them to Radix's ------------------

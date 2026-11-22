@@ -316,6 +316,32 @@ module('Integration | primitives | toast', function (hooks) {
     await a11yAudit()
   })
 
+  test('a promise toast dismissed while it waits stays dismissed when the promise settles', async function (assert) {
+    let resolve!: (value: string) => void
+    await render(<template><Toaster /></template>)
+    const result = toast.promise(new Promise<string>(r => (resolve = r)), {
+      loading: 'Saving',
+      success: 'Saved',
+    })
+    await settled()
+    const toaster = new ToasterHarness()
+    assert.strictEqual(toaster.count, 1)
+
+    toast.dismiss(result)
+    await settled()
+    assert.strictEqual(toaster.count, 0)
+
+    resolve('done')
+    await result.unwrap()
+    await settled()
+    assert.strictEqual(toaster.count, 0, 'the outcome does not bring it back')
+    assert.false(
+      toast.getToasts().some(each => each.id === result.id),
+      'nor lists it as shown',
+    )
+    await a11yAudit()
+  })
+
   test('a promise with nothing to show for its outcome takes the loading toast away', async function (assert) {
     await render(<template><Toaster /></template>)
     toast.promise(Promise.resolve('done'), { loading: 'Working' })
@@ -397,6 +423,20 @@ module('Integration | primitives | toast', function (hooks) {
     assert.deepEqual(closed, ['Short'])
     assert.deepEqual(toaster.titles, ['Forever'], 'duration: Infinity stays')
     await a11yAudit()
+  })
+
+  test('a paused toast keeps only the time it had left', async function (assert) {
+    await render(<template><Toaster @duration={{400}} /></template>)
+    toast('Half gone')
+    await settled()
+    const toaster = new ToasterHarness()
+    await sleep(300)
+    await toaster.hover()
+    await toaster.unhover()
+    assert.strictEqual(toaster.count, 1)
+    // About 100ms were left; a fresh 400ms would outlast the wait.
+    await waitUntil(() => toaster.count === 0, { timeout: 300 })
+    assert.strictEqual(toaster.count, 0)
   })
 
   test('a loading toast has no timer', async function (assert) {

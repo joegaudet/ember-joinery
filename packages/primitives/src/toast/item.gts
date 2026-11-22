@@ -22,6 +22,13 @@ import type {
 import { t } from '../i18n.ts'
 import { messages } from '../messages.ts'
 import { isFunction, isObject, isString } from '@sindresorhus/is'
+import {
+  GestureState,
+  LifeState,
+  TIME_BEFORE_UNMOUNT,
+  toastLife,
+  toastTimer,
+} from '../-private/toast.ts'
 
 // sonner 2.0.7's `Toast` (MIT, (c) 2023 Emil Kowalski; the notice is in state.ts): one toast in
 // a Toaster's list, with its timer, its place in the stack and its swipe to dismiss.
@@ -32,8 +39,7 @@ const waiter = buildWaiter('@ember-joinery/primitives:toast')
 export const TOAST_LIFETIME = 4000
 /** How far, in pixels, a swipe must go to dismiss a toast (sonner's `SWIPE_THRESHOLD`). */
 export const SWIPE_THRESHOLD = 45
-/** How long a toast takes to animate out before it is removed (sonner's `TIME_BEFORE_UNMOUNT`). */
-export const TIME_BEFORE_UNMOUNT = 200
+export { TIME_BEFORE_UNMOUNT }
 
 /** A toast's measured height, which the toasts below it in the stack are placed by. */
 export interface ToastHeight {
@@ -140,28 +146,21 @@ const component = (content: ToastContent | undefined): ComponentLike | undefined
   content === undefined || isString(content) ? undefined : content
 
 export class ToastItem extends Component<ToastItemSignature> {
-  @tracked mounted = false
-  @tracked removed = false
-  @tracked swiping = false
-  @tracked swipeOut = false
-  @tracked isSwiped = false
   @tracked swipeOutDirection: SwipeOut | null = null
   @tracked offsetBeforeRemove = 0
   @tracked initialHeight = 0
 
   #element: HTMLLIElement | undefined
   #swipeDirection: 'x' | 'y' | null = null
-  #remainingTime: number
-  #duration: number
-  #closeTimerStart = 0
-  #lastCloseTimerStart = 0
   #dragStart: number | null = null
   #pointerStart: { x: number; y: number } | null = null
   #deleted = false
 
+  chart = toastLife(this, this)
+  timer = toastTimer(this, this)
+
   constructor(owner: Owner, args: ToastItemSignature['Args']) {
     super(owner, args)
-    this.#remainingTime = this.#duration = this.duration
     registerDestructor(this, () => {
       const id = this.args.toast.id
       const host = this.args.host
@@ -171,6 +170,26 @@ export class ToastItem extends Component<ToastItemSignature> {
 
   get toast(): ToastT {
     return this.args.toast
+  }
+
+  get mounted(): boolean {
+    return !this.chart.matches(LifeState.Measuring)
+  }
+
+  get removed(): boolean {
+    return this.chart.matches(LifeState.Removing) || this.chart.matches(LifeState.Removed)
+  }
+
+  get swiping(): boolean {
+    return !this.chart.matches(GestureState.Idle)
+  }
+
+  get isSwiped(): boolean {
+    return this.chart.matches(GestureState.Swiping) || this.chart.matches(GestureState.SwipedOut)
+  }
+
+  get swipeOut(): boolean {
+    return this.chart.matches(GestureState.SwipedOut)
   }
 
   get type() {
@@ -366,22 +385,17 @@ export class ToastItem extends Component<ToastItemSignature> {
     cn(this.args.classNames?.[name], this.toast.classNames?.[name], extra)
 
   /** Closes it: it animates out, and its Toaster removes it. */
-  deleteToast = (): void => {
-    if (this.removed) return
-    this.removed = true
+  deleteToast = (): void => this.chart.remove()
+
+  removing(): void {
     this.offsetBeforeRemove = this.offset
     const id = this.toast.id
     this.args.host.setHeights(heights => heights.filter(height => height.toastId !== id))
-    const toast = this.toast
-    const host = this.args.host
-    const token = waiter.beginAsync()
-    setTimeout(() => {
-      try {
-        host.removeToast(toast)
-      } finally {
-        waiter.endAsync(token)
-      }
-    }, TIME_BEFORE_UNMOUNT)
+    this.timer.sync()
+  }
+
+  unmount(): void {
+    this.args.host.removeToast(this.toast)
   }
 
   #dismiss(): void {
@@ -400,7 +414,7 @@ export class ToastItem extends Component<ToastItemSignature> {
       this.args.host.setHeights(heights => [{ toastId: id, height, position }, ...heights])
       // Measuring it laid it out unmounted (below and transparent), so turning `data-mounted`
       // on now is a transition, as sonner's effect after the first paint is.
-      this.mounted = true
+      this.chart.measured()
     })
   })
 
@@ -431,35 +445,20 @@ export class ToastItem extends Component<ToastItemSignature> {
    * showing, and pauses it otherwise (sonner's timer effect). A loading toast, a promise that
    * hasn't settled and `duration: Infinity` have none.
    */
-  timer = modifier(
-    (
-      _element: HTMLLIElement,
-      [paused, toast, duration]: [boolean, ToastT, number],
-    ): (() => void) | undefined => {
-      if (duration !== this.#duration) this.#remainingTime = this.#duration = duration
-      if (
-        (toast.promise && toast.type === 'loading') ||
-        toast.duration === Infinity ||
-        toast.type === 'loading'
-      ) {
-        return
-      }
-      if (paused) {
-        if (this.#lastCloseTimerStart < this.#closeTimerStart) {
-          this.#remainingTime -= Date.now() - this.#closeTimerStart
-        }
-        this.#lastCloseTimerStart = Date.now()
-        return
-      }
-      if (this.#remainingTime === Infinity) return
-      this.#closeTimerStart = Date.now()
-      const timeout = setTimeout(() => {
-        toast.onAutoClose?.(toast)
-        this.deleteToast()
-      }, this.#remainingTime)
-      return () => clearTimeout(timeout)
-    },
-  )
+  timerSync = modifier((_element: HTMLLIElement, _: [boolean, ToastT, number]) => this.timer.sync())
+
+  get isUntimed(): boolean {
+    return this.type === 'loading' || this.removed
+  }
+
+  get isPaused(): boolean {
+    return this.paused
+  }
+
+  timedOut(): void {
+    this.toast.onAutoClose?.(this.toast)
+    this.deleteToast()
+  }
 
   get paused(): boolean {
     return this.args.expanded || this.args.interacting || this.args.documentHidden
@@ -478,7 +477,7 @@ export class ToastItem extends Component<ToastItemSignature> {
       // not an active pointer (a synthetic event)
     }
     if (target.tagName === 'BUTTON') return
-    this.swiping = true
+    this.chart.press()
     this.#pointerStart = { x: event.clientX, y: event.clientY }
   }
 
@@ -497,14 +496,12 @@ export class ToastItem extends Component<ToastItemSignature> {
       this.toast.onDismiss?.(this.toast)
       if (this.#swipeDirection === 'x') this.swipeOutDirection = amountX > 0 ? 'right' : 'left'
       else this.swipeOutDirection = amountY > 0 ? 'down' : 'up'
-      this.deleteToast()
-      this.swipeOut = true
+      this.chart.swipeOut()
       return
     }
     style?.setProperty('--swipe-amount-x', '0px')
     style?.setProperty('--swipe-amount-y', '0px')
-    this.isSwiped = false
-    this.swiping = false
+    this.chart.release()
     this.#swipeDirection = null
   }
 
@@ -542,13 +539,13 @@ export class ToastItem extends Component<ToastItemSignature> {
             : dampened(xDelta)
       }
     }
-    if (Math.abs(amount.x) > 0 || Math.abs(amount.y) > 0) this.isSwiped = true
+    if (Math.abs(amount.x) > 0 || Math.abs(amount.y) > 0) this.chart.drag()
     this.#element?.style.setProperty('--swipe-amount-x', `${amount.x}px`)
     this.#element?.style.setProperty('--swipe-amount-y', `${amount.y}px`)
   }
 
   onDragEnd = (): void => {
-    this.swiping = false
+    this.chart.dragEnd()
     this.#swipeDirection = null
     this.#pointerStart = null
   }
@@ -607,7 +604,7 @@ export class ToastItem extends Component<ToastItemSignature> {
         this.toast.cancel
       }}
       {{this.watchDelete this.toast.delete}}
-      {{this.timer this.paused this.toast this.duration}}
+      {{this.timerSync this.paused this.toast this.duration}}
       {{on "pointerdown" this.onPointerDown}}
       {{on "pointerup" this.onPointerUp}}
       {{on "pointermove" this.onPointerMove}}

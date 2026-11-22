@@ -55,8 +55,8 @@ export class Settle extends State {
 export interface DrawerHost {
   /** It has finished opening or closing. */
   animationEnded(open: boolean): void
-  /** A tap on the handle has outlasted the double-tap wait. */
-  cycleSnapPoints(): void
+  /** A tap on the handle has outlasted the double-tap wait; `isLongPress`, it isn't a tap. */
+  cycleSnapPoints(isLongPress: boolean): void
   /** A drawer nested in it has finished closing. */
   pinNested(): void
   /** The background has finished scaling back up. */
@@ -158,14 +158,26 @@ export class DrawerMachine extends Machine<{
   @after(LONG_HANDLE_PRESS_TIMEOUT, { from: HandlePress.Down, to: HandlePress.LongPress })
   heldLong() {}
 
-  /** A click on the handle: it cycles after the double-tap wait (a second click adds nothing). */
+  /** Clicks on the handle waiting out the double-tap wait. */
+  taps = 0
+
+  /**
+   * A click on the handle: it cycles after the double-tap wait. A second click within the wait
+   * cycles once more, as vaul's (whose timers each cycle), rather than cancelling the first.
+   */
   @transition({ from: HandleTap.Idle, to: HandleTap.Pending })
   @transition({ from: HandleTap.Pending })
-  tap() {}
+  tap() {
+    this.taps++
+  }
 
   @after(DOUBLE_TAP_TIMEOUT, { from: HandleTap.Pending, to: HandleTap.Idle })
   tapped() {
-    this.host.cycleSnapPoints()
+    const taps = this.taps
+    this.taps = 0
+    // The first tap's cycle forgets the long press (vaul's handleCancelInteraction); the
+    // cancel it sends is queued, so the later taps are told so.
+    for (let tap = 0; tap < taps; tap++) this.host.cycleSnapPoints(tap === 0 && this.isLongPress)
   }
 
   // ----- Waits for the animation ----------------------------------------------------------

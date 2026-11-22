@@ -215,7 +215,7 @@ export class DrawerController extends DialogController {
     })
     this.#machine = drawerMachine(owner, {
       animationEnded: open => this.#animationEnded(open),
-      cycleSnapPoints: () => this.#cycleSnapPoints(),
+      cycleSnapPoints: isLongPress => this.#cycleSnapPoints(isLongPress),
       pinNested: () => this.#pinNested(),
       restoreBackground: () => this.#restoreBackground(),
     })
@@ -1059,9 +1059,9 @@ export class DrawerController extends DialogController {
   #cancelHandleInteraction = (): void => this.#machine.handleCancel()
 
   /** A tap on the handle: the next snap point, or closed after the last. */
-  #cycleSnapPoints(): void {
+  #cycleSnapPoints(isLongPress: boolean): void {
     // A tap while dragging, or a long press, isn't a tap.
-    if (this.isDragging || this.#preventCycle || this.#machine.isLongPress) {
+    if (this.isDragging || this.#preventCycle || isLongPress) {
       this.#cancelHandleInteraction()
       return
     }

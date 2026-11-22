@@ -974,6 +974,24 @@ module('Integration | primitives | drawer', function (hooks) {
     assert.deepEqual(ended, [false])
   })
 
+  test('two quick taps on the handle move it two snap points, as vaul does', async function (assert) {
+    const SNAP_POINTS = [0.25, 0.5, 1]
+    await render(
+      <template>
+        <PanelStyles />
+        <Drawer @defaultOpen={{true}} @snapPoints={{SNAP_POINTS}} as |d|>
+          <d.Content class="panel tall"><d.Handle /><d.Title>Twice</d.Title></d.Content>
+        </Drawer>
+      </template>,
+    )
+    const drawer = new DrawerHarness()
+    // Native clicks, both inside the 120ms wait: the helper's would wait out the first.
+    drawer.handle!.click()
+    drawer.handle!.click()
+    await settled()
+    assert.strictEqual(drawer.activeSnapPoint, '1', 'each tap moves it one')
+  })
+
   test('a tap on the handle does nothing once the drawer is gone', async function (assert) {
     const state = new State()
     state.open = true

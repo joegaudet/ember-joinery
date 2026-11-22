@@ -121,31 +121,43 @@ export class hotkey extends Modifier<HotkeySignature> {
 // ----- The state -----------------------------------------------------------------------------
 
 /** What a `<Command>` takes. */
-export type CommandArgs = ControllableArgs<'value', string> &
-  ControllableArgs<'search', string> & {
-    /** The input's name for screen readers, in a visually hidden `<label>`. */
-    label?: string
-    /** Ranks each item against the search; 0 hides it. Default `defaultFilter`, cmdk's. */
-    filter?: CommandFilter
-    /** `false` turns filtering and ranking off, for items you filter yourself. Default `true`. */
-    shouldFilter?: boolean
-    /** Whether the arrow keys wrap round from the last item to the first. Default `false`. */
-    loop?: boolean
-    /** Whether a pointer moving over an item leaves the selection alone. Default `false`. */
-    disablePointerSelection?: boolean
-    /** Whether Ctrl+N and Ctrl+J move down, and Ctrl+P and Ctrl+K up, as in Vim. Default `true`. */
-    vimBindings?: boolean
-    /** Called whenever an item is chosen (a click, or Enter), with its value and the event. */
-    onSelect?: (value: string, event: Event) => void
-    /** What a screen reader hears as the results change. Default `1 result`, `3 results`. */
-    resultsText?: (count: number) => string
-    /** A key combination that calls `@onOpen` from anywhere on the page: `"mod+k"`. */
-    hotkey?: string
-    /** Called when `@hotkey` is pressed. */
-    onOpen?: () => void
-    /** Its name, for `CommandHarness` (`data-test-jn-name`). */
-    name?: string
-  }
+export type CommandArgs = {
+  /** The selected item's value; pass it to control the selection. */
+  readonly value?: string
+  /** The item selected first, while you don't control the selection. */
+  readonly defaultValue?: string
+  /** Called with the selected item's value whenever the selection moves, controlled or not. */
+  readonly onValueChange?: (value: string) => void
+  /** The input's text; pass it to control the search. */
+  readonly search?: string
+  /** The input's text to start with, while you don't control the search. */
+  readonly defaultSearch?: string
+  /** Called with the input's text whenever it changes, controlled or not. */
+  readonly onSearchChange?: (search: string) => void
+} & {
+  /** The input's name for screen readers, in a visually hidden `<label>`. */
+  label?: string
+  /** Ranks each item against the search; 0 hides it. Default `defaultFilter`, cmdk's. */
+  filter?: CommandFilter
+  /** `false` turns filtering and ranking off, for items you filter yourself. Default `true`. */
+  shouldFilter?: boolean
+  /** Whether the arrow keys wrap round from the last item to the first. Default `false`. */
+  loop?: boolean
+  /** Whether a pointer moving over an item leaves the selection alone. Default `false`. */
+  disablePointerSelection?: boolean
+  /** Whether Ctrl+N and Ctrl+J move down, and Ctrl+P and Ctrl+K up, as in Vim. Default `true`. */
+  vimBindings?: boolean
+  /** Called whenever an item is chosen (a click, or Enter), with its value and the event. */
+  onSelect?: (value: string, event: Event) => void
+  /** What a screen reader hears as the results change. Default `1 result`, `3 results`. */
+  resultsText?: (count: number) => string
+  /** A key combination that calls `@onOpen` from anywhere on the page: `"mod+k"`. */
+  hotkey?: string
+  /** Called when `@hotkey` is pressed. */
+  onOpen?: () => void
+  /** Its name, for `CommandHarness` (`data-test-jn-name`). */
+  name?: string
+}
 
 /** What an item takes. */
 export interface CommandItemArgs {

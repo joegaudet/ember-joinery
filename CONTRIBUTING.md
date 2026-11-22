@@ -723,6 +723,23 @@ Pages), a repository setting only the maintainer can change. When a change touch
 site shows (packages, components, arguments, an API used in a snippet), update `docs/site/` in
 the same PR.
 
+The **API reference** at `/ember-joinery/api/` is generated: TypeDoc reads the packages' built
+declarations (`pnpm docs:api`, after `pnpm build`; `typedoc.json` and `tsconfig.api.json`) into
+`docs/api/`, with `docs/api/llms-full.txt` (`docs/site/llms.txt`, then the reference as
+Markdown) and `docs/api/api.json` beside it. `scripts/typedoc-site.mjs` names each module as it
+is imported, drops inherited members and fences indented examples as code, as the guide's
+`docs-app/api-docs.mjs` does, and adds the site's link-preview meta; `docs/api.css` gives it the
+site's look. Pages builds it from the latest release tag's sources and deploys it in `api/`,
+after each release. `scripts/api-reference.test.mjs`, in the gate, builds it, and any TypeDoc
+warning fails it: a broken link, or an export a package in `typedoc.json`'s
+`packagesRequiringDocumentation` leaves without a doc comment. The other packages join that list
+once their exports are all documented. To preview it as Pages deploys it:
+
+```bash
+pnpm build && pnpm docs:api && rm -rf docs/site/api && cp -R docs/api docs/site/api
+python3 -m http.server 8766 --directory docs/site   # http://localhost:8766/api/
+```
+
 The demo is the guide's dashboard block (`docs-app/app/examples/dashboard-01`), with its
 settings block (`sidebar-13`) over it at `/settings`, copied into `test-app/app/components/demo`
 as an app copies a block in. `scripts/demo-blocks.test.mjs` fails when a copy differs from the

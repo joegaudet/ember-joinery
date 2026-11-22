@@ -71,7 +71,7 @@ test('release.yml runs on pushes to main and v* tags, nothing else', () => {
 
 test('release.yml publishes only from a v* tag', () => {
   const source = read('release.yml')
-  assert.deepEqual(childKeys(block(source, 'jobs'), '  '), ['version', 'publish'])
+  assert.deepEqual(childKeys(block(source, 'jobs'), '  '), ['version', 'publish', 'pages'])
 
   const publish = job(source, 'publish')
   assert.match(publish, /^ {4}if: startsWith\(github\.ref, 'refs\/tags\/v'\)$/m)
@@ -95,6 +95,16 @@ test("release.yml's version job only opens the version PR, and needs the release
   assert.doesNotMatch(version, PUBLISHES)
   // changesets/action publishes only when given a publish script.
   assert.doesNotMatch(version, /publish/)
+})
+
+test("release.yml's pages job only redeploys the site, after a publish, from main", () => {
+  const pages = job(read('release.yml'), 'pages')
+  assert.match(pages, /^ {4}needs: publish$/m)
+  assert.match(pages, /actions: write/)
+  // The github-pages environment deploys only from main, so it dispatches rather than runs.
+  assert.match(pages, /gh workflow run pages\.yml --repo "\$GITHUB_REPOSITORY" --ref main/)
+  assert.doesNotMatch(pages, PUBLISHES)
+  assert.doesNotMatch(pages, /contents: write|id-token/)
 })
 
 test(

@@ -11,6 +11,7 @@ export async function pressEscape(target?: Element): Promise<void> {
   await triggerKeyEvent(where, 'keyup', 'Escape')
 }
 
+/** How a pointer press is made. */
 export interface PointerOptions {
   /** `mouse` (the default), `pen` or `touch`. A touch dismisses on the click that follows. */
   pointerType?: 'mouse' | 'pen' | 'touch'

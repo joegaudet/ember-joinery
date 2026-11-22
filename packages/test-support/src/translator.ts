@@ -13,7 +13,9 @@ export interface TranslatorMessage {
 
 /** What translates Joinery's built-in strings, as `@ember-joinery/primitives/i18n` declares it. */
 export interface TestTranslator {
+  /** BCP 47 locale. */
   readonly locale: string
+  /** The translated, interpolated string. */
   t(message: TranslatorMessage, values?: Record<string, unknown>): string
 }
 

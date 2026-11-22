@@ -4,6 +4,7 @@ import { nativeValue, type NativeValueArgs } from '@ember-joinery/primitives/nat
 import { inputClasses } from '@ember-joinery/ember/components/input'
 import { maskito, maskText } from '../maskito.ts'
 
+/** What `<MaskedInput>` takes, and the `<input>` `...attributes` goes on. */
 export interface MaskedInputSignature {
   Args: NativeValueArgs & {
     /**

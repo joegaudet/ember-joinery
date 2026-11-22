@@ -1,0 +1,75 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "Joinery",
+  "entryPoints": [
+    "packages/*/declarations/index.d.ts",
+    "packages/*/declarations/test-support/index.d.ts",
+    "packages/test-support/dist/index.d.ts"
+  ],
+  "tsconfig": "tsconfig.api.json",
+  "skipErrorChecking": true,
+  "disableSources": true,
+  "validation": {
+    "notExported": true,
+    "invalidLink": true,
+    "notDocumented": true
+  },
+  "requiredToBeDocumented": [
+    "Enum",
+    "Variable",
+    "Function",
+    "Class",
+    "Interface",
+    "TypeAlias",
+    "Method",
+    "Accessor"
+  ],
+  "packagesRequiringDocumentation": [
+    "@ember-joinery/carousel",
+    "@ember-joinery/code-block",
+    "@ember-joinery/data-table",
+    "@ember-joinery/file-upload",
+    "@ember-joinery/maskito",
+    "@ember-joinery/test-support",
+    "@ember-joinery/tiptap"
+  ],
+  "outputs": [
+    {
+      "name": "html",
+      "path": "docs/api"
+    },
+    {
+      "name": "markdown",
+      "path": "docs/api-md"
+    },
+    {
+      "name": "json",
+      "path": "docs/api/api.json"
+    }
+  ],
+  "plugin": ["typedoc-plugin-markdown", "./scripts/typedoc-site.mjs"],
+  "readme": "none",
+  "hostedBaseUrl": "https://joegaudet.com/ember-joinery/api/",
+  "customCss": "docs/api.css",
+  "favicon": "docs/site/favicon.svg",
+  "navigationLinks": {
+    "Home": "https://joegaudet.com/ember-joinery/",
+    "Guide": "https://joegaudet.com/ember-joinery/guide/",
+    "GitHub": "https://github.com/joegaudet/ember-joinery"
+  },
+  "excludeInternal": true,
+  "excludePrivate": true,
+  "treatWarningsAsErrors": true,
+  "highlightLanguages": [
+    "bash",
+    "css",
+    "html",
+    "javascript",
+    "json",
+    "typescript",
+    "tsx",
+    "handlebars",
+    "glimmer-ts",
+    "hbs"
+  ]
+}

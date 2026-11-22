@@ -3,6 +3,7 @@ import type { TestHooks } from './test-hooks.ts'
 /** A color scheme the system can prefer. */
 export type SystemColorScheme = 'light' | 'dark'
 
+/** The emulated system preference and storage that `setupColorScheme` gives a test. */
 export interface ColorSchemeEmulation {
   /** What the emulated system prefers now. */
   readonly system: SystemColorScheme
@@ -17,6 +18,7 @@ export interface ColorSchemeEmulation {
   readonly stored: string | null
 }
 
+/** What `setupColorScheme` takes. */
 export interface SetupColorSchemeOptions {
   /** What the system prefers at the start of each test. Default `light`. */
   system?: SystemColorScheme

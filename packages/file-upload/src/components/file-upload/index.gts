@@ -49,6 +49,7 @@ export interface FileUploadYield<T> {
   queue: Queue
 }
 
+/** What `<FileUpload>` takes and yields: its arguments, its parts, and the `<div>` `...attributes` goes on. */
 export interface FileUploadSignature<T = File> {
   Args: {
     /** Whether it takes more than one file. Without it, a new choice replaces the file. */
@@ -197,6 +198,7 @@ export default class FileUpload<T = File> extends Component<FileUploadSignature<
     })
   }
 
+  /** The strings it shows: each argument given, else its translated default. */
   get labels(): FileUploadLabels {
     const multiple = this.state.multiple
     return {

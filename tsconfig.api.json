@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "es2024",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["./packages/ember/node_modules/ember-source/types/stable"]
+  },
+  "include": ["packages/*/declarations/**/*.d.ts", "packages/test-support/dist/**/*.d.ts"]
+}

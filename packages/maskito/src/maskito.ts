@@ -7,6 +7,7 @@ export type { MaskitoOptions }
 /** The input or textarea a mask goes on. */
 export type MaskedElement = HTMLInputElement | HTMLTextAreaElement
 
+/** What `{{maskito}}` takes, and the input or textarea it goes on. */
 export interface MaskitoSignature {
   Element: MaskedElement
   Args: {

@@ -48,7 +48,7 @@ export interface LinkComponentSignature {
  * An `<a>` that knows where the user is, as ember-primitives' `Link`: on the current route it
  * has `aria-current` and `data-active="true"`, a click on it is a transition (so it works in an
  * app without `properLinks`), and an `@href` on another origin makes it an
- * [`ExternalLink`](./external-link.gts), which opens in a new tab.
+ * {@link ExternalLink | `ExternalLink`}, which opens in a new tab.
  *
  *   <nav aria-label="Main">
  *     <Link @href="/">Home</Link>

@@ -6,6 +6,7 @@ import type { DSLCallback } from '@ember/routing/lib/dsl'
 /** The routes a test needs: the same callback `Router.map` takes. */
 export type RouteMap = DSLCallback
 
+/** What `setupRouting` takes, besides the routes. */
 export interface SetupRoutingOptions {
   /** The rootURL the app is served under, as the router's own. Default `/`. */
   rootURL?: string

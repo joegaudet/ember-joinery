@@ -44,6 +44,7 @@ export interface PhoneCountry {
   flag: string
 }
 
+/** What `<PhoneInput>` takes, and the `<input>` `...attributes` goes on. */
 export interface PhoneInputSignature {
   Args: {
     /**
@@ -162,10 +163,12 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
     fallback: 'US',
   })
 
+  /** The libphonenumber-js metadata it formats with: `@metadata`, else the `min` set. */
   get metadata(): MetadataJson {
     return this.args.metadata ?? phoneMetadata
   }
 
+  /** Whether it shows numbers in the national format (`@national`). */
   get national(): boolean {
     return this.args.national ?? false
   }
@@ -181,14 +184,17 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
     return countryOfPhone(this.value, chosen, this.metadata) ?? chosen
   }
 
+  /** The shown country's calling code, without the `+`. */
   get callingCode(): string {
     return callingCode(this.country, this.metadata)
   }
 
+  /** The shown country's flag, as an emoji. */
   get flag(): string {
     return countryFlag(this.country)
   }
 
+  /** The shown country's name, in `locale`'s language. */
   get countryName(): string {
     return this.nameOf(this.country)
   }
@@ -198,10 +204,12 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
     return idFor(this, 'country-word')
   }
 
+  /** The language countries are named in: `@locale`, else the translator's; none means the browser's. */
   get locale(): string | undefined {
     return this.args.locale ?? translator(this)?.locale
   }
 
+  /** Names regions in `locale`'s language. */
   @cached
   get displayNames(): Intl.DisplayNames {
     return new Intl.DisplayNames(this.locale ? [this.locale] : undefined, {
@@ -209,6 +217,7 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
     })
   }
 
+  /** A country's name in `locale`'s language, or its code where the browser has none. */
   nameOf(code: CountryCode): string {
     return this.displayNames.of(code) ?? code
   }
@@ -424,6 +433,7 @@ export default class PhoneInput extends Component<PhoneInputSignature> {
     void waitForPromise(renderSettled().then(() => this.#input?.focus()))
   }
 
+  /** As the country picker opens, forgets that a country was chosen the last time it closed. */
   onOpenChange = (open: boolean): void => {
     if (open) this.#chose = false
   }

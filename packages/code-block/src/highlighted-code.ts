@@ -3,6 +3,7 @@ import { tracked } from '@glimmer/tracking'
 import type { GrammarState } from 'shiki/core'
 import { loadHighlighter, plainLines, type CodeHighlighter, type CodeLine } from './highlighter.ts'
 
+/** What the `highlightedCode` helper takes (the code and its language) and returns (its lines). */
 export interface HighlightedCodeSignature {
   Args: {
     /** The code, and its language: a name or alias from the list, or `ansi`. */

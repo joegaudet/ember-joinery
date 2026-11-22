@@ -2,13 +2,13 @@
 // shadcn/ui's Drawer is built on), as a DialogController with gestures. This file is bundled
 // into @ember-joinery/primitives/drawer; it isn't a subpath of its own.
 import { tracked } from '@glimmer/tracking'
-import { buildWaiter } from '@ember/test-waiters'
 import { ControllableState, type ControllableArgs } from '../controllable-state.ts'
 import { isRTL } from '../direction.gts'
 import type { FocusOutsideEvent, PointerDownOutsideEvent } from '../dismiss.ts'
 import { part, type PartModifier } from '../part.ts'
 import { DialogController, type DialogArgs } from '../-private/dialog.gts'
 import { isNumber, isString } from '@sindresorhus/is'
+import { drawerMachine, type DrawerMachine } from './machine.ts'
 
 /** The edge of the screen a drawer comes in from. */
 export type DrawerDirection = 'top' | 'bottom' | 'left' | 'right'
@@ -85,16 +85,12 @@ const SCROLL_LOCK_TIMEOUT = 100
 const BORDER_RADIUS = 8
 const NESTED_DISPLACEMENT = 16
 const WINDOW_TOP_OFFSET = 26
-const LONG_HANDLE_PRESS_TIMEOUT = 250
-const DOUBLE_TAP_TIMEOUT = 120
 
 /** The class a drawer has while it is dragged. */
 export const DRAG_CLASS = 'vaul-dragging'
 
 /** The selectors vaul finds the background to scale by. */
 const WRAPPER = '[data-vaul-drawer-wrapper], [vaul-drawer-wrapper]'
-
-const waiter = buildWaiter('@ember-joinery/primitives:drawer')
 
 const transformTransition = `transform ${DURATION}s ${EASE}`
 const opacityTransition = `opacity ${DURATION}s ${EASE}`
@@ -176,8 +172,6 @@ function translate(direction: DrawerDirection, value: number | string): string {
 export class DrawerController extends DialogController {
   readonly activeSnapPointState: ControllableState<SnapPoint | null>
 
-  /** Whether it is being dragged now. */
-  @tracked isDragging = false
   /** The window's size, kept as it resizes (snap points are measured against it). */
   @tracked private viewportSize: { width: number; height: number } | null = null
 
@@ -186,26 +180,26 @@ export class DrawerController extends DialogController {
   #openTime: number | null = null
   #dragStartTime: number | null = null
   #lastTimeDragPrevented: number | null = null
-  #isAllowedToDrag = false
   #pointerStart = 0
   #keyboardIsOpen = false
   #previousDiffFromInitial = 0
   #drawerHeight = 0
   #drawerWidth = 0
   #initialDrawerHeight = 0
-  #nestedOpenChangeTimer: ReturnType<typeof setTimeout> | undefined
-  #timers = new Set<ReturnType<typeof setTimeout>>()
   // The content's own pointer tracking (vaul's Content).
   #contentPointerStart: { x: number; y: number } | null = null
   #lastKnownPointerEvent: PointerEvent | null = null
   #wasBeyondThePoint = false
-  // The handle's taps (vaul's Handle).
-  #handleCloseTimeout: ReturnType<typeof setTimeout> | undefined
-  #shouldCancelInteraction = false
+  /** Whether the pending tap on the handle came from one with `preventCycle`. */
+  #preventCycle = false
+  /** The body whose background a scaled background put back, and the colour to restore. */
+  #body: { element: HTMLElement; background: string } | null = null
   #previousScrollBehavior: string | null = null
 
   /** The Dialog's own `setOpen`, which this one wraps. */
   readonly #setDialogOpen = (this as DialogController).setOpen
+  /** Its modes and timers: the open lifecycle, the drag, the handle's taps. */
+  readonly #machine: DrawerMachine
 
   constructor(owner: { readonly args: DrawerArgs }) {
     super(owner)
@@ -217,6 +211,17 @@ export class DrawerController extends DialogController {
       fallback: null,
       name: 'activeSnapPoint',
     })
+    this.#machine = drawerMachine(owner, {
+      animationEnded: open => this.#animationEnded(open),
+      cycleSnapPoints: () => this.#cycleSnapPoints(),
+      pinNested: () => this.#pinNested(),
+      restoreBackground: () => this.#restoreBackground(),
+    })
+  }
+
+  /** Whether it is being dragged now (or pressed, about to be). */
+  get isDragging(): boolean {
+    return this.#machine.isDragging
   }
 
   // ----- Arguments, with vaul's defaults ----------------------------------------------------
@@ -462,11 +467,7 @@ export class DrawerController extends DialogController {
 
   /** Opens or closes it, whatever `@dismissible` says (your own code calling it decides). */
   override setOpen = (open: boolean): void => {
-    if (this.isOpen && !open) {
-      this.cancelDrag()
-      const snapPoints = this.snapPoints
-      if (snapPoints) this.#later(() => this.setActiveSnapPoint(snapPoints[0] ?? null), DURATION)
-    }
+    if (this.isOpen && !open) this.cancelDrag()
     this.#setDialogOpen(open)
   }
 
@@ -489,16 +490,11 @@ export class DrawerController extends DialogController {
     this.setOpen(false)
   }
 
-  #later(callback: () => void, seconds: number): void {
-    const timer = setTimeout(() => {
-      this.#timers.delete(timer)
-      callback()
-    }, seconds * 1000)
-    this.#timers.add(timer)
-  }
-
-  /** Called by the root when it has opened or closed, however that came about. */
-  openChanged(open: boolean): void {
+  /**
+   * Called by the root when it has opened or closed, however that came about: `initial` when it
+   * renders open, where nothing slides in (and, as vaul's, `onAnimationEnd` isn't called).
+   */
+  openChanged(open: boolean, initial = false): void {
     const root = (this.contentElement ?? this.triggerElement)?.ownerDocument.documentElement
     if (open) {
       this.#openTime = Date.now()
@@ -511,7 +507,16 @@ export class DrawerController extends DialogController {
       this.#previousScrollBehavior = null
     }
     this.args.parent?.onNestedOpenChange(open)
-    this.#later(() => this.args.onAnimationEnd?.(open), DURATION)
+    if (!open) this.#machine.closed()
+    else if (initial) this.#machine.startedOpen()
+    else this.#machine.opened()
+  }
+
+  /** It finished opening or closing; closed, it goes back to its first snap point (vaul's). */
+  #animationEnded(open: boolean): void {
+    const snapPoints = this.snapPoints
+    if (!open && snapPoints) this.setActiveSnapPoint(snapPoints[0] ?? null)
+    this.args.onAnimationEnd?.(open)
   }
 
   /** Called by the root once it has rendered, a frame after which opening animates. */
@@ -520,10 +525,7 @@ export class DrawerController extends DialogController {
   }
 
   teardown(): void {
-    for (const timer of this.#timers) clearTimeout(timer)
-    this.#timers.clear()
-    clearTimeout(this.#nestedOpenChangeTimer)
-    clearTimeout(this.#handleCloseTimeout)
+    this.#machine.stop()
   }
 
   // ----- Focus and presses outside, as vaul's Content passes them to Radix's ------------------
@@ -569,7 +571,7 @@ export class DrawerController extends DialogController {
     const rect = drawer?.getBoundingClientRect()
     this.#drawerHeight = rect?.height ?? 0
     this.#drawerWidth = rect?.width ?? 0
-    this.isDragging = true
+    this.#machine.press()
     this.#dragStartTime = Date.now()
     // Keep the pointer while it leaves the drawer. A pointer that isn't active (an event a test
     // dispatches) can't be captured.
@@ -661,12 +663,15 @@ export class DrawerController extends DialogController {
     )
     if (snapPercentage !== null) percentageDragged = snapPercentage
     if (noCloseSnapPoints && percentageDragged >= 1) return
-    if (!this.#isAllowedToDrag && !this.#shouldDrag(event.target as Element, isDraggingInDirection))
+    if (
+      !this.#machine.isMoving &&
+      !this.#shouldDrag(event.target as Element, isDraggingInDirection)
+    )
       return
 
     drawer.classList.add(DRAG_CLASS)
     // Once it drags, it keeps dragging until let go.
-    this.#isAllowedToDrag = true
+    this.#machine.move()
     setStyles(drawer, { transition: 'none' })
     setStyles(this.overlayElement, { transition: 'none' })
 
@@ -715,8 +720,7 @@ export class DrawerController extends DialogController {
     const drawer = this.contentElement
     if (!this.isDragging || !drawer) return
     drawer.classList.remove(DRAG_CLASS)
-    this.#isAllowedToDrag = false
-    this.isDragging = false
+    this.#machine.release()
   }
 
   /** Puts it back where it rests, after a drag that didn't close it. */
@@ -754,8 +758,7 @@ export class DrawerController extends DialogController {
     const drawer = this.contentElement
     if (!this.isDragging || !drawer) return
     drawer.classList.remove(DRAG_CLASS)
-    this.#isAllowedToDrag = false
-    this.isDragging = false
+    this.#machine.release()
     const dragEndTime = Date.now()
     const side = this.side
     const swipeAmount = getTranslate(drawer, side)
@@ -819,18 +822,21 @@ export class DrawerController extends DialogController {
     const width = this.#viewport.width
     const scale = open ? (width - NESTED_DISPLACEMENT) / width : 1
     const initialTranslate = open ? -NESTED_DISPLACEMENT : 0
-    clearTimeout(this.#nestedOpenChangeTimer)
-    const side = this.side
     setStyles(drawer, {
       transition: transformTransition,
-      transform: `scale(${scale}) ${translate(side, initialTranslate)}`,
+      transform: `scale(${scale}) ${translate(this.side, initialTranslate)}`,
     })
-    if (!open && drawer) {
-      this.#nestedOpenChangeTimer = setTimeout(() => {
-        const value = getTranslate(drawer, side) ?? 0
-        setStyles(drawer, { transition: 'none', transform: translate(side, value) })
-      }, DURATION * 1000)
-    }
+    if (!open && drawer) this.#machine.nestedClosed()
+    else this.#machine.nestedOpened()
+  }
+
+  /** Half a second after a nested drawer closed: pin this one where it came forward to. */
+  #pinNested(): void {
+    const drawer = this.contentElement
+    if (!drawer) return
+    const side = this.side
+    const value = getTranslate(drawer, side) ?? 0
+    setStyles(drawer, { transition: 'none', transform: translate(side, value) })
   }
 
   /** A drawer nested in this one is dragged: this one comes forward as it goes. */
@@ -861,14 +867,12 @@ export class DrawerController extends DialogController {
 
   // ----- The scaled background (vaul's useScaleBackground) ----------------------------------
 
-  #backgroundTimer: ReturnType<typeof setTimeout> | undefined
-
   /** Scales the background back, while it is open; returns the function that undoes it. */
   scaleBackground(element: HTMLElement): (() => void) | undefined {
     const document = element.ownerDocument
     const wrapper = document.querySelector(WRAPPER)
     if (!(wrapper instanceof HTMLElement)) return undefined
-    clearTimeout(this.#backgroundTimer)
+    this.#machine.backgroundScaled()
     const body = document.body
     const initialBackground = body.style.backgroundColor
     const vertical = isVertical(this.side)
@@ -890,11 +894,19 @@ export class DrawerController extends DialogController {
     })
     return () => {
       restoreWrapper()
-      this.#backgroundTimer = setTimeout(() => {
-        if (initialBackground) body.style.background = initialBackground
-        else body.style.removeProperty('background')
-      }, DURATION * 1000)
+      this.#body = { element: body, background: initialBackground }
+      // Torn down with the drawer, there is no machine left to wait: restore it now.
+      if (this.#machine.status === 'active') this.#machine.backgroundReleased()
+      else this.#restoreBackground()
     }
+  }
+
+  #restoreBackground(): void {
+    const body = this.#body
+    this.#body = null
+    if (!body) return
+    if (body.background) body.element.style.background = body.background
+    else body.element.style.removeProperty('background')
   }
 
   // ----- A phone's keyboard (vaul's repositionInputs) ----------------------------------------
@@ -1035,15 +1047,12 @@ export class DrawerController extends DialogController {
 
   // ----- The handle (vaul's Handle) ----------------------------------------------------------
 
-  #cancelHandleInteraction = (): void => {
-    clearTimeout(this.#handleCloseTimeout)
-    this.#shouldCancelInteraction = false
-  }
+  #cancelHandleInteraction = (): void => this.#machine.handleCancel()
 
   /** A tap on the handle: the next snap point, or closed after the last. */
-  #cycleSnapPoints(preventCycle: boolean): void {
+  #cycleSnapPoints(): void {
     // A tap while dragging, or a long press, isn't a tap.
-    if (this.isDragging || preventCycle || this.#shouldCancelInteraction) {
+    if (this.isDragging || this.#preventCycle || this.#machine.isLongPress) {
       this.#cancelHandleInteraction()
       return
     }
@@ -1075,24 +1084,19 @@ export class DrawerController extends DialogController {
     },
     on: {
       click: () => {
-        // The second tap of a double tap cancels the first.
-        if (this.#shouldCancelInteraction) {
+        // A click that ends a long press isn't a tap (vaul's shouldCancelInteraction).
+        if (this.#machine.isLongPress) {
           this.#cancelHandleInteraction()
           return
         }
-        const token = waiter.beginAsync()
-        setTimeout(() => {
-          waiter.endAsync(token)
-          this.#cycleSnapPoints(Boolean(named.preventCycle))
-        }, DOUBLE_TAP_TIMEOUT)
+        this.#preventCycle = Boolean(named.preventCycle)
+        this.#machine.tap()
       },
       pointercancel: this.#cancelHandleInteraction,
       pointerdown: (event: PointerEvent) => {
         if (this.args.handleOnly) this.onPress(event)
-        this.#handleCloseTimeout = setTimeout(() => {
-          // A long press isn't a tap.
-          this.#shouldCancelInteraction = true
-        }, LONG_HANDLE_PRESS_TIMEOUT)
+        // Held long, it isn't a tap.
+        this.#machine.handleDown()
       },
       pointermove: (event: PointerEvent) => {
         if (this.args.handleOnly) this.onDrag(event)

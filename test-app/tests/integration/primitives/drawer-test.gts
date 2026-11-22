@@ -878,4 +878,118 @@ module('Integration | primitives | drawer', function (hooks) {
     assert.strictEqual(drawer.content!.style.bottom, '')
     await a11yAudit()
   })
+
+  test('a close that @open refuses leaves its snap point where it is', async function (assert) {
+    const SNAP_POINTS = [0.5, 1]
+    const refuse = () => {}
+    await render(
+      <template>
+        <PanelStyles />
+        <Drawer
+          @open={{true}}
+          @onOpenChange={{refuse}}
+          @snapPoints={{SNAP_POINTS}}
+          @defaultActiveSnapPoint={{1}}
+          as |d|
+        >
+          <d.Content class="panel tall"><d.Title>Refused</d.Title></d.Content>
+        </Drawer>
+      </template>,
+    )
+    const drawer = new DrawerHarness()
+    await drawer.pressEscape()
+    await wait(600)
+    await settled()
+    assert.true(drawer.isOpen, 'still open')
+    assert.strictEqual(drawer.activeSnapPoint, '1', 'and still at its last snap point')
+  })
+
+  test('closed before it has finished opening, onAnimationEnd hears only the close', async function (assert) {
+    const state = new State()
+    const ended: boolean[] = []
+    const onAnimationEnd = (open: boolean) => ended.push(open)
+    await render(
+      <template>
+        <PanelStyles />
+        <Drawer @open={{state.open}} @onAnimationEnd={{onAnimationEnd}} as |d|>
+          <d.Content class="panel"><d.Title>Quick</d.Title></d.Content>
+        </Drawer>
+      </template>,
+    )
+    // Not through helpers that wait for settled(), which waits for the opening too.
+    state.open = true
+    await wait(100)
+    state.open = false
+    await wait(600)
+    await settled()
+    assert.deepEqual(ended, [false])
+  })
+
+  test('a tap on the handle does nothing once the drawer is gone', async function (assert) {
+    const state = new State()
+    state.open = true
+    const show = new (class {
+      @tracked value = true
+    })()
+    const SNAP_POINTS = [0.5, 1]
+    await render(
+      <template>
+        <PanelStyles />
+        {{#if show.value}}
+          <Drawer
+            @open={{state.open}}
+            @snapPoints={{SNAP_POINTS}}
+            @onActiveSnapPointChange={{state.setSnapPoint}}
+            as |d|
+          >
+            <d.Content class="panel tall"><d.Handle /><d.Title>Gone</d.Title></d.Content>
+          </Drawer>
+        {{/if}}
+      </template>,
+    )
+    // A native click: the helper's would wait out the tap.
+    new DrawerHarness().handle!.click()
+    show.value = false
+    await wait(300)
+    await settled()
+    assert.deepEqual(state.changes, [], 'no snap point change after it was destroyed')
+  })
+
+  test('settled() waits for its timers: the animation end, the body and a nested parent', async function (assert) {
+    const ended: boolean[] = []
+    const onAnimationEnd = (open: boolean) => ended.push(open)
+    await render(
+      <template>
+        <PanelStyles />
+        <div data-vaul-drawer-wrapper>
+          <Drawer
+            @name="outer"
+            @shouldScaleBackground={{true}}
+            @onAnimationEnd={{onAnimationEnd}}
+            as |d|
+          >
+            <d.Trigger>Open</d.Trigger>
+            <d.Content class="panel">
+              <d.Title>Outer</d.Title>
+              <d.Nested @name="inner" as |n|>
+                <n.Trigger>More</n.Trigger>
+                <n.Content class="panel"><n.Title>Inner</n.Title></n.Content>
+              </d.Nested>
+            </d.Content>
+          </Drawer>
+        </div>
+      </template>,
+    )
+    const outer = new DrawerHarness('outer')
+    const inner = new DrawerHarness('inner')
+    const body = document.body.style.background
+    await outer.open()
+    assert.deepEqual(ended, [true], 'opened')
+    await inner.open()
+    await inner.pressEscape()
+    assert.strictEqual(outer.content!.style.transition, 'none', 'the parent is pinned in place')
+    await outer.pressEscape()
+    assert.deepEqual(ended, [true, false], 'closed')
+    assert.strictEqual(document.body.style.background, body, "the body's background is back")
+  })
 })

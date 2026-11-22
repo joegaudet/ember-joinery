@@ -91,7 +91,7 @@ export class DrawerRoot extends Modifier<DrawerRootSignature> {
     const open = drawer.isOpen
     if (this.#open === undefined) {
       this.#open = open
-      if (open) drawer.openChanged(true)
+      if (open) drawer.openChanged(true, true)
       drawer.rendered()
       registerDestructor(this, () => drawer.teardown())
       return

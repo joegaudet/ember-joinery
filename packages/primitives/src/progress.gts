@@ -2,6 +2,7 @@ import Component from '@glimmer/component'
 import { hash } from '@ember/helper'
 import type { TOC } from '@ember/component/template-only'
 import type { WithBoundArgs } from '@glint/template'
+import { isNumber } from '@sindresorhus/is'
 
 /**
  * Where a progress bar is, as Radix's `data-state`: `indeterminate` without a value, `complete`
@@ -29,7 +30,7 @@ const DEFAULT_MAX = 100
 
 /** `@max`, when it is a finite number above 0 (Radix's rule), else 100. */
 function maxOf(max: number | null | undefined): number {
-  return typeof max === 'number' && Number.isFinite(max) && max > 0 ? max : DEFAULT_MAX
+  return isNumber(max) && Number.isFinite(max) && max > 0 ? max : DEFAULT_MAX
 }
 
 /**
@@ -38,7 +39,7 @@ function maxOf(max: number | null | undefined): number {
  */
 function valueOf(value: number | null | undefined, max: number): number | null {
   if (value === null || value === undefined) return null
-  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) return 0
+  if (!isNumber(value) || !Number.isFinite(value) || value < 0) return 0
   return Math.min(value, max)
 }
 

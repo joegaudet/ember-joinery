@@ -7,6 +7,7 @@ import { buildWaiter, waitForPromise } from '@ember/test-waiters'
 import type Owner from '@ember/owner'
 import type { WithBoundArgs } from '@glint/template'
 import { As, type TagName } from './as.gts'
+import { isString, isUndefined } from '@sindresorhus/is'
 
 /**
  * Where an avatar's image is: Radix's `ImageLoadingStatus`. `idle` until there is an image to
@@ -45,7 +46,7 @@ export class ImageLoader {
 
   constructor(src: string | undefined | null, options: ImageLoaderOptions = {}) {
     this.src = src ?? undefined
-    if (typeof window === 'undefined' || typeof window.Image === 'undefined') {
+    if (isUndefined(globalThis.window) || isUndefined(globalThis.window.Image)) {
       this.status = 'idle'
       return
     }
@@ -55,7 +56,7 @@ export class ImageLoader {
     }
     const image = new window.Image()
     if (options.referrerPolicy) image.referrerPolicy = options.referrerPolicy
-    if (typeof options.crossOrigin === 'string') image.crossOrigin = options.crossOrigin
+    if (isString(options.crossOrigin)) image.crossOrigin = options.crossOrigin
     image.addEventListener('load', this.#onLoad)
     image.addEventListener('error', this.#onError)
     image.src = src

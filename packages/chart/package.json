@@ -56,6 +56,7 @@
   "dependencies": {
     "@ember-joinery/primitives": "workspace:*",
     "@embroider/addon-shim": "^1.10.3",
+    "@sindresorhus/is": "^8.1.0",
     "d3-scale": "^4.0.2",
     "d3-shape": "^3.2.0",
     "decorator-transforms": "^2.4.0",

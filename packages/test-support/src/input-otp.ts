@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is'
 import { blur, click, fillIn, find, focus, getRootElement, settled } from '@ember/test-helpers'
 import { Harness } from './harness.ts'
 import { controlDescription, controlLabel, isMarkedInvalid, textOf } from './-private/control.ts'
@@ -299,7 +300,7 @@ export class InputOTPHarness extends Harness {
  *   await fillOTP('123456', '[data-test-login]')
  */
 export async function fillOTP(code: string, within?: string | Element): Promise<void> {
-  const scope = typeof within === 'string' ? find(within) : (within ?? getRootElement())
+  const scope = isString(within) ? find(within) : (within ?? getRootElement())
   if (!scope) throw new Error(`fillOTP: nothing matches ${String(within)}`)
   const component = selectors.component('input-otp')
   const root =

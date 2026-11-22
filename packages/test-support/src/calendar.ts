@@ -1,3 +1,4 @@
+import { isNumber, isString } from '@sindresorhus/is'
 import { click, focus, select as selectOption, settled } from '@ember/test-helpers'
 import { Harness } from './harness.ts'
 import { pressKey, type KeyModifiers } from './focus.ts'
@@ -11,7 +12,7 @@ function pad(value: number, length = 2): string {
 
 /** The day as `yyyy-MM-dd`, the key a calendar's days carry in `data-test-jn-value`. */
 function iso(day: CalendarDayInput): string {
-  if (typeof day === 'string') return day
+  if (isString(day)) return day
   return `${pad(day.getFullYear(), 4)}-${pad(day.getMonth() + 1)}-${pad(day.getDate())}`
 }
 
@@ -262,10 +263,9 @@ export class CalendarHarness extends Harness {
   async chooseMonth(month: number | string, index = 0): Promise<void> {
     const select = this.monthDropdown(index)
     if (!select) throw new Error(`${this}: month ${index + 1} has no month dropdown`)
-    const option =
-      typeof month === 'number'
-        ? select.options[month]
-        : [...select.options].find(found => text(found) === month)
+    const option = isNumber(month)
+      ? select.options[month]
+      : [...select.options].find(found => text(found) === month)
     if (!option) throw new Error(`${this}: the month dropdown has no option ${month}`)
     await selectOption(select, option.value)
   }

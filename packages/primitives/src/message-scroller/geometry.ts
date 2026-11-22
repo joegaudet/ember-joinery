@@ -1,3 +1,4 @@
+import { isUndefined } from '@sindresorhus/is'
 // The message scroller's measurements, ported from @shadcn/react's message-scroller/geometry.ts
 // (shadcn-ui/ui@8ab2771). One change: every distance read off the screen
 // (`getBoundingClientRect()`) is turned back into CSS pixels, the unit of `scrollTop`, by the
@@ -94,7 +95,7 @@ export function getMessageScrollerVisibilityState({
   // with the previous turn peeking above. A row only peeking in that band has not been read
   // down to yet, so it counts as neither visible nor current.
   const lineTop = viewportRect.top + (scrollMargin + scrollPreviousItemPeek) * scale
-  const trackByLayout = typeof IntersectionObserver === 'undefined'
+  const trackByLayout = isUndefined(globalThis.IntersectionObserver)
   const visible: string[] = []
   let currentAnchorId: string | null = null
 

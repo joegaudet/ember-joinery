@@ -2,6 +2,7 @@ import Modifier from 'ember-modifier'
 import { registerDestructor } from '@ember/destroyable'
 import { buildWaiter } from '@ember/test-waiters'
 import { registerDismissable, type DismissableLayer } from './dismiss.ts'
+import { isUndefined } from '@sindresorhus/is'
 
 /**
  * How a layer behaves in the top layer, as the Popover API's `popover` attribute:
@@ -37,7 +38,7 @@ const waiter = buildWaiter('@ember-joinery/primitives:layer')
 
 /** Whether the browser has the Popover API. Every supported browser does. */
 export function supportsPopover(): boolean {
-  return typeof HTMLElement !== 'undefined' && 'showPopover' in HTMLElement.prototype
+  return !isUndefined(globalThis.HTMLElement) && 'showPopover' in globalThis.HTMLElement.prototype
 }
 
 /** Whether an element is in the top layer now: an open popover or a modal `<dialog>`. */

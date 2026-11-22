@@ -30,6 +30,7 @@ import {
   type ResolvedOptions,
   type Side,
 } from './options.ts'
+import { isFunction, isNumber, isString, isUndefined } from '@sindresorhus/is'
 
 const waiter = buildWaiter('@ember-joinery/primitives:anchor')
 
@@ -118,7 +119,7 @@ const PLACING = /^(?:left|top|right|bottom|inset|margin|visibility)/
  * `transition-property` left at its initial `all`. Its other transitions carry on.
  */
 function arrive(element: HTMLElement): void {
-  if (typeof element.getAnimations !== 'function' || typeof CSSTransition === 'undefined') return
+  if (!isFunction(element.getAnimations) || isUndefined(globalThis.CSSTransition)) return
   // getAnimations() brings the style up to date first, so it sees the transitions just started.
   for (const animation of element.getAnimations()) {
     if (animation instanceof CSSTransition && PLACING.test(animation.transitionProperty)) {
@@ -142,7 +143,7 @@ function arrowSizeOf(arrow: HTMLElement | null): ArrowSize {
 }
 
 function lookUp(reference: AnchorReference): Element | VirtualElement {
-  if (typeof reference !== 'string') return reference
+  if (!isString(reference)) return reference
   const found = document.querySelector(reference)
   assert(`Joinery: anchorTo found no element for the selector \`${reference}\``, found)
   return found
@@ -283,7 +284,7 @@ function viewport(): { width: number; height: number } {
 }
 
 function paddingOf(padding: ResolvedOptions['padding']) {
-  if (typeof padding === 'number') {
+  if (isNumber(padding)) {
     return { top: padding, right: padding, bottom: padding, left: padding }
   }
   return { top: 0, right: 0, bottom: 0, left: 0, ...padding }

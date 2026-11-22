@@ -5,6 +5,7 @@
  * recharts is MIT licensed; its notice is in NOTICE, and the build keeps it in the module that
  * ships this (see rollup.config.mjs).
  */
+import { isString } from '@sindresorhus/is'
 import { getStringSize, type TextStyle } from './text-size.ts'
 
 /** One tick: its value, where it sits along the axis, and its index among the axis's ticks. */
@@ -221,7 +222,7 @@ function angledWidth(size: { width: number; height: number }, angle = 0): number
 export function visibleTicks(options: TickIntervalOptions): Tick[] {
   const { ticks, viewBox, orientation, interval, minTickGap, tickFormatter, unit, style } = options
   if (!ticks.length || !options.tick) return []
-  if (typeof interval === 'number') return everyNth(ticks, interval + 1)
+  if (!isString(interval)) return everyNth(ticks, interval + 1)
 
   const sizeKey = orientation === 'top' || orientation === 'bottom' ? 'width' : 'height'
   const unitSize =

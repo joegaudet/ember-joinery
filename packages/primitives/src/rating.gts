@@ -9,6 +9,7 @@ import { idFor } from './id.ts'
 import { VisuallyHidden } from './visually-hidden.gts'
 import { format, translate } from './i18n.ts'
 import { messages } from './messages.ts'
+import { isString } from '@sindresorhus/is'
 
 /** What a component given as a rating's `@icon` receives, for each item. */
 export interface RatingIconSignature {
@@ -53,10 +54,6 @@ export function ratingValues(max: number, step: number): number[] {
 export function ratingPercent(item: number, value: number, step: number): number {
   const filled = (value - (item - step)) / step
   return Math.round(Math.min(1, Math.max(0, filled)) * 100)
-}
-
-function isString(value: unknown): value is string {
-  return typeof value === 'string'
 }
 
 function lte(a: number, b: number): boolean {

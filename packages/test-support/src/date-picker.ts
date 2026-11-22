@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is'
 import { CalendarHarness, type CalendarDayInput } from './calendar.ts'
 import { PopoverHarness } from './popover.ts'
 import { text } from './-private/overlay.ts'
@@ -8,7 +9,7 @@ function pad(value: number, length = 2): string {
 
 /** The day as `yyyy-MM-dd`, the key a calendar's days carry in `data-test-jn-value`. */
 function iso(day: CalendarDayInput): string {
-  if (typeof day === 'string') return day
+  if (isString(day)) return day
   return `${pad(day.getFullYear(), 4)}-${pad(day.getMonth() + 1)}-${pad(day.getDate())}`
 }
 

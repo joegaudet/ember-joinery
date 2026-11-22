@@ -26,6 +26,7 @@ import {
   popperOptions,
 } from './-private/popper.gts'
 import { translator } from './i18n.ts'
+import { isFunction, isObject, isString } from '@sindresorhus/is'
 
 // Base UI's Combobox (@base-ui/react 1.6.0, the version shadcn-ui/ui@8ab2771 pins), which
 // shadcn's Combobox is built on: an input that filters a list of items, with the list's
@@ -43,12 +44,12 @@ export interface ComboboxItemGroup<T = unknown> {
 /** Whether `items` is a list of groups (each has `items`), as Base UI decides it. */
 export function isGroupedItems(items: readonly unknown[] | undefined): boolean {
   const first = items?.[0]
-  return first != null && typeof first === 'object' && 'items' in first
+  return first != null && isObject(first) && !isFunction(first) && 'items' in first
 }
 
 function serialize(value: unknown): string {
   if (value == null) return ''
-  if (typeof value === 'string') return value
+  if (isString(value)) return value
   try {
     return JSON.stringify(value)
   } catch {
@@ -62,7 +63,7 @@ function serialize(value: unknown): string {
  */
 export function labelOf(item: unknown, itemToStringLabel?: (item: unknown) => string): string {
   if (itemToStringLabel && item != null) return itemToStringLabel(item) ?? ''
-  if (item && typeof item === 'object') {
+  if (item && isObject(item) && !isFunction(item)) {
     const record = item as Record<string, unknown>
     if ('label' in record && record['label'] != null) return String(record['label'])
     if ('value' in record) return String(record['value'])
@@ -76,7 +77,7 @@ export function labelOf(item: unknown, itemToStringLabel?: (item: unknown) => st
  */
 export function formValueOf(item: unknown, itemToStringValue?: (item: unknown) => string): string {
   if (itemToStringValue && item != null) return itemToStringValue(item) ?? ''
-  if (item && typeof item === 'object' && 'value' in item && 'label' in item) {
+  if (item && isObject(item) && !isFunction(item) && 'value' in item && 'label' in item) {
     return serialize((item as Record<string, unknown>)['value'])
   }
   return serialize(item)

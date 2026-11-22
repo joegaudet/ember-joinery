@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is'
 import type { JSONContent } from '@tiptap/core'
 import type { RichTextValue } from './components/rich-text-editor/index.gts'
 
@@ -11,7 +12,7 @@ const isBlank = (value: unknown) => value === null || value === undefined || val
  */
 export function toPlainText(value: RichTextValue | undefined): string {
   if (isBlank(value)) return ''
-  if (typeof value === 'string') {
+  if (isString(value)) {
     // Blocks end in a space, so "<p>a</p><p>b</p>" reads "a b", not "ab".
     const spaced = value.replace(/<\/(p|h[1-6]|li|blockquote|pre)>|<br\s*\/?>/gi, '$& ')
     const text = new DOMParser().parseFromString(spaced, 'text/html').body.textContent ?? ''

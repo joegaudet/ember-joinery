@@ -1,3 +1,4 @@
+import { isBoolean, isFunction, isNumber, isObject, isString } from '@sindresorhus/is'
 import Component from '@glimmer/component'
 import { getComponentTemplate } from '@ember/component'
 import { isHTMLSafe, type SafeString } from '@ember/template'
@@ -84,10 +85,10 @@ type Rendered = ComponentLike<{ Args: Record<string, unknown> }>
 
 /** Whether a value is a component: one with a template, or a class (whose template it inherits). */
 export function isComponent(value: unknown): value is Rendered {
-  if (value === null || (typeof value !== 'object' && typeof value !== 'function')) return false
+  if (!isObject(value)) return false
   return (
     getComponentTemplate(value as object) !== undefined ||
-    (typeof value === 'function' && /^class[\s{]/.test(Function.prototype.toString.call(value)))
+    (isFunction(value) && /^class[\s{]/.test(Function.prototype.toString.call(value)))
   )
 }
 
@@ -112,8 +113,8 @@ interface Resolved {
 
 /** `null`, `undefined` and booleans draw nothing, as in React; anything else draws as text. */
 function drawable(value: unknown): string | number | SafeString | undefined {
-  if (value === null || value === undefined || typeof value === 'boolean') return undefined
-  if (typeof value === 'string' || typeof value === 'number' || isHTMLSafe(value)) {
+  if (value === null || value === undefined || isBoolean(value)) return undefined
+  if (isString(value) || isNumber(value) || isHTMLSafe(value)) {
     return value as string | number | SafeString
   }
   return String(value)
@@ -123,7 +124,7 @@ function resolve(template: unknown, given: object): Resolved {
   const context = given as AnyContext
   if (template === null || template === undefined) return {}
   if (isComponent(template)) return { component: template, args: context }
-  if (typeof template === 'function') {
+  if (isFunction(template)) {
     const result: unknown = (template as (context: AnyContext) => unknown)(context)
     if (isComponent(result)) return { component: result, args: context }
     return { text: drawable(result) }

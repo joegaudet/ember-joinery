@@ -4,6 +4,7 @@ import { cached } from '@glimmer/tracking'
 import type Owner from '@ember/owner'
 import { isElement, type Newable } from './narrowing.ts'
 import { createStore } from './store.ts'
+import { isFunction, isString } from '@sindresorhus/is'
 
 /**
  * Each provider's node (its element, or its marker text node) → the key consumers ask for, and
@@ -63,7 +64,7 @@ export class Provide<Data extends object> extends Component<ProvideSignature<Dat
   constructor(owner: Owner, args: ProvideSignature<Data>['Args']) {
     super(owner, args)
     const element = args.element
-    if (element !== undefined && element !== false && typeof element !== 'string') {
+    if (element !== undefined && element !== false && !isString(element)) {
       throw new Error("Joinery: <Provide>'s @element is a tag name or false")
     }
     if (element === false) {
@@ -79,7 +80,7 @@ export class Provide<Data extends object> extends Component<ProvideSignature<Dat
     if (!('data' in this.args)) throw new Error('Joinery: <Provide> needs @data')
     const data = this.args.data
     // A class or a function: one instance per provider.
-    if (typeof data === 'function') return createStore<Data>(this, data as () => Data)
+    if (isFunction(data)) return createStore<Data>(this, data as () => Data)
     return data
   }
 

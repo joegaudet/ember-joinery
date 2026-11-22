@@ -7,6 +7,7 @@
  * recharts is MIT licensed; its notice is in NOTICE, and the build keeps it in the module that
  * ships this (see rollup.config.mjs).
  */
+import { isFunction, isNumber, isString } from '@sindresorhus/is'
 import Component from '@glimmer/component'
 import type { TOC } from '@ember/component/template-only'
 import { cached, tracked } from '@glimmer/tracking'
@@ -178,11 +179,11 @@ const INITIAL_DIMENSION = { width: -1, height: -1 }
 const DEFAULT_MARGIN = { top: 5, right: 5, bottom: 5, left: 5 }
 
 function num(value: number | undefined, fallback: number): number {
-  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+  return isNumber(value) && Number.isFinite(value) ? value : fallback
 }
 
 function keyOf(dataKey: unknown): string {
-  return typeof dataKey === 'function' ? '' : String(dataKey ?? '')
+  return isFunction(dataKey) ? '' : String(dataKey ?? '')
 }
 
 function round(value: number): number {
@@ -429,7 +430,7 @@ export default class PieChart extends Component<PieChartSignature> implements Ch
   // Size
 
   get fixedSize(): boolean {
-    return typeof this.args.width === 'number' && typeof this.args.height === 'number'
+    return isNumber(this.args.width) && isNumber(this.args.height)
   }
 
   get size(): { width: number; height: number } | null {
@@ -749,7 +750,7 @@ export default class PieChart extends Component<PieChartSignature> implements Ch
     if (this.pointerItem) return this.pointerItem
     const items = this.items
     if (this.keyboardActive && this.keyboardIndex !== null) return items[this.keyboardIndex] ?? null
-    if (typeof tooltip.args.defaultIndex === 'number' && this.keyboardIndex === null) {
+    if (isNumber(tooltip.args.defaultIndex) && this.keyboardIndex === null) {
       return items.find(item => item.pie === 0 && item.index === tooltip.args.defaultIndex) ?? null
     }
     if (tooltip.args.active === true) return items[this.keyboardIndex ?? 0] ?? null
@@ -861,10 +862,9 @@ export default class PieChart extends Component<PieChartSignature> implements Ch
         const name = valueOf(row, args.nameKey ?? PIE_DEFAULTS.nameKey) ?? args.name
         const cellFill = cells[i]?.args.fill
         const color =
-          cellFill ??
-          (typeof row['fill'] === 'string' ? row['fill'] : (args.fill ?? PIE_DEFAULTS.fill))
+          cellFill ?? (isString(row['fill']) ? row['fill'] : (args.fill ?? PIE_DEFAULTS.fill))
         items.push({
-          value: name ? String(name) : typeof dataKey === 'string' ? dataKey : '',
+          value: name ? String(name) : isString(dataKey) ? dataKey : '',
           color,
           payload: row,
           type: legendType,

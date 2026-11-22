@@ -8,6 +8,7 @@ import { isRTL } from '../direction.gts'
 import type { FocusOutsideEvent, PointerDownOutsideEvent } from '../dismiss.ts'
 import { part, type PartModifier } from '../part.ts'
 import { DialogController, type DialogArgs } from '../-private/dialog.gts'
+import { isNumber, isString } from '@sindresorhus/is'
 
 /** The edge of the screen a drawer comes in from. */
 export type DrawerDirection = 'top' | 'bottom' | 'left' | 'right'
@@ -162,7 +163,7 @@ function dampen(value: number): number {
 }
 
 function translate(direction: DrawerDirection, value: number | string): string {
-  const amount = typeof value === 'number' ? `${value}px` : value
+  const amount = isNumber(value) ? `${value}px` : value
   return isVertical(direction) ? `translate3d(0, ${amount}, 0)` : `translate3d(${amount}, 0, 0)`
 }
 
@@ -321,7 +322,7 @@ export class DrawerController extends DialogController {
     const side = this.side
     const { width, height } = this.#viewport
     return (this.snapPoints ?? []).map(snapPoint => {
-      const isPx = typeof snapPoint === 'string'
+      const isPx = isString(snapPoint)
       const value = isPx ? parseInt(snapPoint, 10) : 0
       if (isVertical(side)) {
         const size = isPx ? value : snapPoint * height
@@ -441,7 +442,7 @@ export class DrawerController extends DialogController {
     const activeIndex = this.activeSnapPointIndex
     const fadeFrom = this.fadeFromIndex
     const offsets = this.snapPointsOffset
-    if (!snapPoints || typeof activeIndex !== 'number' || fadeFrom === undefined) return null
+    if (!snapPoints || !isNumber(activeIndex) || fadeFrom === undefined) return null
     // Dragging to a snap point that is supposed to have an overlay.
     const isOverlaySnapPoint = activeIndex === fadeFrom - 1
     const isOverlaySnapPointOrHigher = activeIndex >= fadeFrom

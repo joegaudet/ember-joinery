@@ -1,3 +1,4 @@
+import { isFunction } from '@sindresorhus/is'
 import Component from '@glimmer/component'
 import { htmlSafe, type SafeString } from '@ember/template'
 import type { ComponentLike } from '@glint/template'
@@ -44,7 +45,7 @@ export default class ChartLegendContent extends Component<ChartLegendContentSign
     return (payload ?? [])
       .filter(item => item.type !== 'none')
       .map(item => {
-        const key = `${nameKey ?? (typeof item.dataKey === 'function' ? undefined : item.dataKey) ?? 'value'}`
+        const key = `${nameKey ?? (isFunction(item.dataKey) ? undefined : item.dataKey) ?? 'value'}`
         const itemConfig = payloadConfig(config, item, key)
         const icon = hideIcon ? undefined : itemConfig?.icon
         const color = cssValue(item.color)

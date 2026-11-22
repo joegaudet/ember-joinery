@@ -5,6 +5,7 @@
  * recharts is MIT licensed; its notice is in NOTICE, and the build keeps it in the module that
  * ships this (see rollup.config.mjs).
  */
+import { isNumber } from '@sindresorhus/is'
 import {
   area as d3Area,
   curveBasis,
@@ -188,7 +189,7 @@ export function rectanglePath(
       d += path`A ${r[3]},${r[3]},0,0,${clockWise},\n        ${x},${y + height - ySign * r[3]}`
     return `${d}Z`
   }
-  const uniform = typeof radius === 'number' ? radius : 0
+  const uniform = isNumber(radius) ? radius : 0
   if (maxRadius > 0 && uniform > 0) {
     const r = Math.min(maxRadius, uniform)
     return path`M ${x},${y + ySign * r}

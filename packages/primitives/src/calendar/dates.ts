@@ -1,3 +1,4 @@
+import { isBoolean, isFunction, isObject as isObjectLike } from '@sindresorhus/is'
 // Joinery's calendar works on plain `Date`s, with no date library: each day is a `Date` at local
 // midnight, as react-day-picker's are (Joinery's Calendar replaces it). Day arithmetic is native.
 // Month and year arithmetic goes through a calendar system: the Gregorian one is native too, and
@@ -476,7 +477,7 @@ export type Matcher =
   | ((date: Date) => boolean)
 
 function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
+  return isObjectLike(value) && !isFunction(value)
 }
 
 /** Whether `range` holds `date`; with `excludeEnds`, its first and last days don't count. */
@@ -497,8 +498,8 @@ export function isMatch(date: Date, matchers: Matcher | Matcher[] | undefined): 
   if (matchers === undefined) return false
   const list: Matcher[] = Array.isArray(matchers) ? matchers : [matchers]
   return list.some(matcher => {
-    if (typeof matcher === 'boolean') return matcher
-    if (typeof matcher === 'function') return matcher(date)
+    if (isBoolean(matcher)) return matcher
+    if (isFunction(matcher)) return matcher(date)
     if (matcher instanceof Date) return isSameDay(date, matcher)
     if (Array.isArray(matcher)) return matcher.some(day => isSameDay(date, day))
     if (!isObject(matcher)) return false

@@ -1,3 +1,4 @@
+import { isObject } from '@sindresorhus/is'
 import type { ChildOptions, Harness, HarnessClass } from './harness.ts'
 
 /**
@@ -41,8 +42,6 @@ export function child<T extends Harness>(
       return this.child(Type, options)
     }
     // A standard decorator gets a context object; a legacy one, the property key.
-    return typeof contextOrKey === 'object'
-      ? { get }
-      : { configurable: true, enumerable: true, get }
+    return isObject(contextOrKey) ? { get } : { configurable: true, enumerable: true, get }
   }) as HarnessDecorator<T>
 }

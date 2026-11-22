@@ -18,6 +18,7 @@ import { visuallyHidden } from './visually-hidden.gts'
 import { Delay, ElementRef, buttonType } from './-private/popper.gts'
 import { t } from './i18n.ts'
 import { messages } from './messages.ts'
+import { isUndefined } from '@sindresorhus/is'
 
 /**
  * What a styled layer adds to a modifier the menu yields (an item's `trigger`, the `link`), so it
@@ -364,7 +365,7 @@ export class NavigationMenu extends Component<NavigationMenuSignature> {
     if (this.#sizedContent === content) return
     this.#sizedContent = content
     this.#sizeObserver?.disconnect()
-    if (typeof ResizeObserver === 'undefined') return
+    if (isUndefined(globalThis.ResizeObserver)) return
     ignoreROError()
     this.#sizeObserver = new ResizeObserver(resize)
     this.#sizeObserver.observe(content)
@@ -1081,7 +1082,7 @@ class NavigationMenuIndicator extends Component<IndicatorSignature> {
         }
       }
       position()
-      if (typeof ResizeObserver === 'undefined') return
+      if (isUndefined(globalThis.ResizeObserver)) return
       ignoreROError()
       const observer = new ResizeObserver(position)
       if (trigger) observer.observe(trigger)

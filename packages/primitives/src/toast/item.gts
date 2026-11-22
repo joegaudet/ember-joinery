@@ -21,6 +21,7 @@ import type {
 } from './state.ts'
 import { t } from '../i18n.ts'
 import { messages } from '../messages.ts'
+import { isFunction, isObject, isString } from '@sindresorhus/is'
 
 // sonner 2.0.7's `Toast` (MIT, (c) 2023 Emil Kowalski; the notice is in state.ts): one toast in
 // a Toaster's list, with its timer, its place in the stack and its swipe to dismiss.
@@ -94,7 +95,7 @@ const optional = (value: boolean | undefined): 'true' | 'false' | undefined =>
   value === undefined ? undefined : bool(value)
 
 function isAction(action: ToastAction | ComponentLike | undefined): action is ToastAction {
-  return typeof action === 'object' && action !== null && 'label' in action
+  return isObject(action) && !isFunction(action) && 'label' in action
 }
 
 function defaultSwipeDirections(position: ToastPosition): SwipeDirection[] {
@@ -133,10 +134,10 @@ function naturalHeight(element: HTMLElement): number {
 const notLoading = (type: string | undefined): boolean => type !== 'loading'
 
 const text = (content: ToastContent | undefined): string | undefined =>
-  typeof content === 'string' ? content : undefined
+  isString(content) ? content : undefined
 
 const component = (content: ToastContent | undefined): ComponentLike | undefined =>
-  content === undefined || typeof content === 'string' ? undefined : content
+  content === undefined || isString(content) ? undefined : content
 
 export class ToastItem extends Component<ToastItemSignature> {
   @tracked mounted = false

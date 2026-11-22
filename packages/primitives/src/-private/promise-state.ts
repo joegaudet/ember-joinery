@@ -1,5 +1,6 @@
 import { tracked } from '@glimmer/tracking'
 import { waitForPromise } from '@ember/test-waiters'
+import { isFunction, isObject } from '@sindresorhus/is'
 
 /** Why a load failed, and what was thrown. reactiveweb's `getPromiseState` error, as is. */
 export interface LoadError {
@@ -25,11 +26,7 @@ export const REASON_PROMISE_REJECTION = 'Promise rejected while waiting to resol
 export type LoadInput<T> = T | Promise<T> | (() => T | Promise<T>)
 
 function isThenable(value: unknown): value is PromiseLike<unknown> {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof (value as { then?: unknown }).then === 'function'
-  )
+  return isObject(value) && !isFunction(value) && isFunction((value as { then?: unknown }).then)
 }
 
 /**
@@ -49,7 +46,7 @@ export class PromiseState<T> implements LoadState<T> {
   constructor(input: LoadInput<unknown>, transform: (value: unknown) => T = value => value as T) {
     let value: unknown
     try {
-      value = typeof input === 'function' ? (input as () => unknown)() : input
+      value = isFunction(input) ? (input as () => unknown)() : input
     } catch (original) {
       this.error = { reason: REASON_FUNCTION_EXCEPTION, original }
       return
@@ -88,8 +85,8 @@ export class PromiseState<T> implements LoadState<T> {
  */
 export function unwrapModule(value: unknown): unknown {
   if (
-    typeof value === 'object' &&
-    value !== null &&
+    isObject(value) &&
+    !isFunction(value) &&
     (value as { [Symbol.toStringTag]?: unknown })[Symbol.toStringTag] === 'Module' &&
     'default' in value
   ) {

@@ -19,6 +19,7 @@ import {
   type PanelSize,
   type ResizeTrigger,
 } from './layout.ts'
+import { isNumber } from '@sindresorhus/is'
 
 /** Which way the panels run: side by side (`horizontal`), or stacked (`vertical`). */
 export type ResizableOrientation = 'horizontal' | 'vertical'
@@ -424,7 +425,7 @@ export class ResizableGroup {
     }
     const map = layout as ResizableLayoutMap
     const sizes = panels.map(panel => map[this.#idOf(panel)])
-    return sizes.every(size => typeof size === 'number') ? (sizes as number[]) : undefined
+    return sizes.every(size => isNumber(size)) ? (sizes as number[]) : undefined
   }
 
   // ----- Layout ------------------------------------------------------------------------------
@@ -938,7 +939,7 @@ export class ResizableGroup {
     const size = panel.options.defaultSize
     if (size === undefined) return
     event.preventDefault()
-    this.resizePanel(panel, typeof size === 'number' ? size : `${constraints[index]!.defaultSize}%`)
+    this.resizePanel(panel, isNumber(size) ? size : `${constraints[index]!.defaultSize}%`)
   }
 
   /** @internal A member's arguments changed. */

@@ -1,3 +1,4 @@
+import { isNumber } from '@sindresorhus/is'
 import { getContext } from '@ember/test-helpers'
 import type { TestHooks } from './test-hooks.ts'
 
@@ -72,7 +73,7 @@ function format(message: TranslatorMessage, values?: Record<string, unknown>): s
   const count = values?.['count']
   const text =
     message.plural !== undefined &&
-    typeof count === 'number' &&
+    isNumber(count) &&
     new Intl.PluralRules('en').select(count) !== 'one'
       ? message.plural
       : message.message

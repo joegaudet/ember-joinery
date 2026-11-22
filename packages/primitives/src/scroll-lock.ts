@@ -1,5 +1,6 @@
 import Modifier from 'ember-modifier'
 import { registerDestructor } from '@ember/destroyable'
+import { isFunction } from '@sindresorhus/is'
 
 /** Elements, or a function that returns them when they're needed (they may render later). */
 export type ScrollLockShards =
@@ -45,7 +46,7 @@ const saved = new WeakMap<Document, Array<[property: string, value: string, prio
 
 function shardsOf(lock: Lock): Element[] {
   const inside = lock.options.inside
-  const list = typeof inside === 'function' ? inside() : (inside ?? [])
+  const list = isFunction(inside) ? inside() : (inside ?? [])
   return list.filter((element): element is Element => element instanceof Element)
 }
 
@@ -302,7 +303,7 @@ class ScrollLockModifier extends Modifier<ScrollLockSignature> {
     const { enabled = true, inside, allowPinchZoom } = named
     // The element is a shard too, as react-remove-scroll's own element is.
     const options: ScrollLockOptions = {
-      inside: () => [element, ...(typeof inside === 'function' ? inside() : (inside ?? []))],
+      inside: () => [element, ...(isFunction(inside) ? inside() : (inside ?? []))],
       allowPinchZoom,
     }
     if (!enabled) return this.#release()

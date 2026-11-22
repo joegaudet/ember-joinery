@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is'
 import Component from '@glimmer/component'
 import { htmlSafe, type SafeString } from '@ember/template'
 import { modifier } from 'ember-modifier'
@@ -55,11 +56,11 @@ export default class CodeBlockContent extends Component<CodeBlockContentSignatur
   }
 
   get splits(): boolean {
-    return Boolean(this.args.lineNumbers) && typeof this.args.code === 'string'
+    return Boolean(this.args.lineNumbers) && isString(this.args.code)
   }
 
   get isText(): boolean {
-    return typeof this.args.code === 'string'
+    return isString(this.args.code)
   }
 
   <template>

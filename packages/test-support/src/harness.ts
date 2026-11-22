@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is'
 import { getRootElement } from '@ember/test-helpers'
 import { attributes, selectors } from './selectors.ts'
 import {
@@ -32,11 +33,11 @@ export type HarnessClass<T extends Harness = Harness> = (new (
   Pick<typeof Harness, 'component' | 'named'>
 
 function normalize(options: string | HarnessOptions | undefined): HarnessOptions {
-  return typeof options === 'string' ? { name: options } : (options ?? {})
+  return isString(options) ? { name: options } : (options ?? {})
 }
 
 function kinds(component: string | readonly string[] | undefined): readonly string[] {
-  return typeof component === 'string' ? [component] : (component ?? [])
+  return isString(component) ? [component] : (component ?? [])
 }
 
 /**

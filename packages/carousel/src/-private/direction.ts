@@ -1,3 +1,4 @@
+import { isUndefined } from '@sindresorhus/is'
 /** Callbacks to call when any element's `dir` changes. */
 const listeners = new Set<() => void>()
 
@@ -9,7 +10,7 @@ let observer: MutationObserver | undefined
  * observer serves every carousel, and it watches only while one is listening.
  */
 export function watchDirection(callback: () => void): () => void {
-  if (typeof MutationObserver === 'undefined') return () => {}
+  if (isUndefined(globalThis.MutationObserver)) return () => {}
   if (!listeners.size) {
     observer ??= new MutationObserver(() => {
       for (const listener of [...listeners]) listener()

@@ -1,6 +1,7 @@
 /*
  * Reading a chart's config, as shadcn's chart.tsx reads it.
  */
+import { isObject, isString } from '@sindresorhus/is'
 import type { ChartConfig, ChartConfigItem } from '../types.ts'
 
 /**
@@ -13,16 +14,16 @@ export function payloadConfig(
   payload: unknown,
   key: string,
 ): ChartConfigItem | undefined {
-  if (!config || typeof payload !== 'object' || payload === null) return undefined
+  if (!config || !isObject(payload)) return undefined
   const item = payload as Record<string, unknown>
   const row =
-    'payload' in item && typeof item['payload'] === 'object' && item['payload'] !== null
+    'payload' in item && isObject(item['payload'])
       ? (item['payload'] as Record<string, unknown>)
       : undefined
   let configLabelKey = key
-  if (key in item && typeof item[key] === 'string') {
+  if (key in item && isString(item[key])) {
     configLabelKey = item[key]
-  } else if (row && key in row && typeof row[key] === 'string') {
+  } else if (row && key in row && isString(row[key])) {
     configLabelKey = row[key]
   }
   return configLabelKey in config ? config[configLabelKey] : config[key]

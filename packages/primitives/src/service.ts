@@ -4,6 +4,7 @@ import type { Registry } from '@ember/service'
 import { instanceFor } from './-private/instances.ts'
 import { PromiseState, type LoadState } from './-private/promise-state.ts'
 import { findOwner } from './store.ts'
+import { isFunction, isString } from '@sindresorhus/is'
 
 /**
  * What `service` makes one of per owner: a class, constructed with the owner, or a function
@@ -36,7 +37,7 @@ function instanceOrService<T extends object>(
   owner: Owner,
   definition: ServiceDefinition<T> | string,
 ): T {
-  if (typeof definition === 'string') return lookupService(owner, definition) as T
+  if (isString(definition)) return lookupService(owner, definition) as T
   return instanceFor(owner, owner, definition, 'service()')
 }
 
@@ -117,10 +118,7 @@ class ServiceHelperManager {
   getValue(bucket: ServiceHelperBucket): object {
     const { positional } = bucket.args
     const [definition] = positional
-    if (
-      positional.length !== 1 ||
-      (typeof definition !== 'function' && typeof definition !== 'string')
-    ) {
+    if (positional.length !== 1 || (!isFunction(definition) && !isString(definition))) {
       throw new Error(
         'Joinery: (service) takes one argument: the class or function to make an instance of, ' +
           "or a registered service's name",
@@ -155,9 +153,8 @@ export type AsyncServiceState<T extends object> = LoadState<T>
 const loading = new WeakMap<Owner, Map<AsyncServiceLoader<object>, PromiseState<object>>>()
 
 function definitionOf<T extends object>(loaded: unknown): ServiceDefinition<T> {
-  const definition =
-    typeof loaded === 'function' ? loaded : (loaded as { default?: unknown } | null)?.default
-  if (typeof definition === 'function') return definition as ServiceDefinition<T>
+  const definition = isFunction(loaded) ? loaded : (loaded as { default?: unknown } | null)?.default
+  if (isFunction(definition)) return definition as ServiceDefinition<T>
   throw new Error(
     'Joinery: an asyncService loader must resolve with a class, a function, or a module whose ' +
       'default export is one',

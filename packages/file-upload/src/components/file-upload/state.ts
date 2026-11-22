@@ -1,3 +1,4 @@
+import { isFunction, isNumber, isObject, isString } from '@sindresorhus/is'
 import { cached, tracked } from '@glimmer/tracking'
 import { registerDestructor } from '@ember/destroyable'
 import { Queue, type UploadFile } from 'ember-file-upload'
@@ -93,10 +94,10 @@ function isImage(value: unknown): value is Blob {
 /** A value's name when the caller gives no `@nameOf`: a file's, or a record's `name` or `label`. */
 function defaultName(value: unknown): string {
   if (value instanceof File) return value.name
-  if (value && typeof value === 'object') {
+  if (isObject(value) && !isFunction(value)) {
     const { name, label } = value as { name?: unknown; label?: unknown }
-    if (typeof name === 'string') return name
-    if (typeof label === 'string') return label
+    if (isString(name)) return name
+    if (isString(label)) return label
   }
   return String(value)
 }
@@ -104,7 +105,7 @@ function defaultName(value: unknown): string {
 /** A value's size in bytes when the caller gives no `@sizeOf`: its `size`, if it is a number. */
 function defaultSize(value: unknown): number | undefined {
   const size = (value as { size?: unknown } | null | undefined)?.size
-  return typeof size === 'number' ? size : undefined
+  return isNumber(size) ? size : undefined
 }
 
 /**
@@ -332,7 +333,7 @@ export class FileUploadState<T> {
       entry.error =
         error instanceof Error && error.message
           ? error.message
-          : typeof error === 'string' && error
+          : isString(error) && error
             ? error
             : this.#options.uploadFailedLabel()
     }

@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is'
 import type { TOC } from '@ember/component/template-only'
 import { on } from '@ember/modifier'
 import { modifier } from 'ember-modifier'
@@ -140,7 +141,7 @@ function baseDisabled(host: DaysLike, date: Date): boolean {
     disabledDates?.some(
       d =>
         (d instanceof Date && isSame(date, d, 'day')) ||
-        (typeof d === 'string' && WEEK_DAYS.includes(d) && formatDate(date, 'ddd') === d),
+        (isString(d) && WEEK_DAYS.includes(d) && formatDate(date, 'ddd') === d),
     ),
   )
 }

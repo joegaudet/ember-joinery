@@ -7,6 +7,7 @@
  * recharts is MIT licensed; its notice is in NOTICE, and the build keeps it in the module that
  * ships this (see rollup.config.mjs).
  */
+import { isFunction, isNumber, isObject, isString } from '@sindresorhus/is'
 import Component from '@glimmer/component'
 import type { TOC } from '@ember/component/template-only'
 import { cached, tracked } from '@glimmer/tracking'
@@ -229,7 +230,7 @@ function seriesId(part: object): string {
 let labelIds = 0
 
 function keyOf(dataKey: unknown): string {
-  return typeof dataKey === 'function' ? '' : String(dataKey ?? '')
+  return isFunction(dataKey) ? '' : String(dataKey ?? '')
 }
 
 function round(value: number): number {
@@ -819,7 +820,7 @@ export default class PolarChart extends Component<PolarChartSignature> implement
   // Size
 
   get fixedSize(): boolean {
-    return typeof this.args.width === 'number' && typeof this.args.height === 'number'
+    return isNumber(this.args.width) && isNumber(this.args.height)
   }
 
   get size(): { width: number; height: number } | null {
@@ -1319,7 +1320,7 @@ export default class PolarChart extends Component<PolarChartSignature> implement
   sectorFill(part: RadialBar, sector: RadialBarSector): string | undefined {
     // recharts spreads the row over the sector, so a row's `fill` wins over the bar's.
     const own = (sector.payload as Record<string, unknown> | null)?.['fill']
-    return typeof own === 'string' ? own : part.args.fill
+    return isString(own) ? own : part.args.fill
   }
 
   @cached
@@ -1446,7 +1447,7 @@ export default class PolarChart extends Component<PolarChartSignature> implement
       return index >= 0 ? index : null
     }
     if (this.keyboardActive && this.keyboardIndex !== null) return this.keyboardIndex
-    if (typeof tooltip.args.defaultIndex === 'number' && this.keyboardIndex === null)
+    if (isNumber(tooltip.args.defaultIndex) && this.keyboardIndex === null)
       return tooltip.args.defaultIndex
     if (tooltip.args.active === true) return this.keyboardIndex ?? 0
     return null
@@ -1622,7 +1623,7 @@ export default class PolarChart extends Component<PolarChartSignature> implement
     const tick = this.activeTick
     if (!tooltip || !geometry || !tick || !this.isTooltipActive || tooltip.args.cursor === false)
       return null
-    const option = typeof tooltip.args.cursor === 'object' ? tooltip.args.cursor : {}
+    const option = isObject(tooltip.args.cursor) ? tooltip.args.cursor : {}
     const { cx, cy, innerRadius, outerRadius, startAngle, endAngle } = geometry.viewBox
     const stroke = option.stroke ?? '#ccc'
     if (this.layout === 'centric') {
@@ -1685,7 +1686,7 @@ export default class PolarChart extends Component<PolarChartSignature> implement
           items.push({
             value: asText(row['name']),
             dataKey: args.dataKey,
-            color: typeof row['fill'] === 'string' ? row['fill'] : args.fill,
+            color: isString(row['fill']) ? row['fill'] : args.fill,
             type: args.legendType ?? 'rect',
             payload: row,
           } as LegendPayloadItem)

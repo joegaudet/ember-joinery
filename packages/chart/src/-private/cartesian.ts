@@ -10,6 +10,7 @@
  * recharts is MIT licensed; its notice is in NOTICE, and the build keeps it in the module that
  * ships this (see rollup.config.mjs).
  */
+import { isFunction, isString, isUndefined } from '@sindresorhus/is'
 import { scaleBand, scaleLinear, scalePoint } from 'd3-scale'
 import {
   stack as d3Stack,
@@ -32,7 +33,7 @@ export type DataKey = string | number | ((datum: Datum) => unknown)
 /** The value at `dataKey` in a row. */
 export function valueOf(datum: unknown, dataKey: DataKey | undefined, fallback?: unknown): unknown {
   if (dataKey === undefined || datum === null || datum === undefined) return fallback
-  if (typeof dataKey === 'function') return dataKey(datum as Datum)
+  if (isFunction(dataKey)) return dataKey(datum as Datum)
   return (datum as Datum)[dataKey] ?? fallback
 }
 
@@ -245,7 +246,7 @@ export function percentValue(
   fallback = 0,
 ): number {
   if (value === undefined || value === null) return fallback
-  if (typeof value === 'number') return value
+  if (!isString(value)) return value
   const trimmed = value.trim()
   if (trimmed.endsWith('%')) {
     const ratio = parseFloat(trimmed) / 100
@@ -256,7 +257,7 @@ export function percentValue(
 }
 
 function isNumber(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value)
+  return Number.isFinite(value)
 }
 
 /** recharts' plot area: the chart less its margins, its drawn axes and its legend. */
@@ -420,7 +421,7 @@ function resolveBound(
   which: 0 | 1,
 ): number | undefined {
   if (isNumber(bound)) return bound
-  if (typeof bound === 'function') return bound(data[which])
+  if (isFunction(bound)) return bound(data[which])
   if (bound === 'auto') return data[which]
   const match = /^data(Min|Max)\s*([+-])?\s*(\d+(?:\.\d+)?)?$/.exec(String(bound))
   if (match) {
@@ -728,9 +729,7 @@ export function cartesianGeometry(input: CartesianInput): CartesianGeometry {
           angle: axis.angle,
           style,
         })
-      : rawTicks.filter(
-          (_, i) => typeof axis.interval !== 'number' || i % (axis.interval + 1) === 0,
-        )
+      : rawTicks.filter((_, i) => isString(axis.interval) || i % (axis.interval + 1) === 0)
     const vertical = axis.orientation === 'left' || axis.orientation === 'right'
     return {
       settings: axis,
@@ -993,8 +992,8 @@ export function tooltipTransition(isAnimationActive: boolean | 'auto' = 'auto'):
 
 function prefersReducedMotion(): boolean {
   return (
-    typeof window !== 'undefined' &&
-    typeof window.matchMedia === 'function' &&
+    !isUndefined(globalThis.window) &&
+    isFunction(window.matchMedia) &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
   )
 }

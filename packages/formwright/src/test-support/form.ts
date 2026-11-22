@@ -1,3 +1,4 @@
+import { isObject } from '@sindresorhus/is'
 import type { FormHarness } from '@ember-formwright/test-support'
 import type { Harness } from '@ember-joinery/test-support'
 
@@ -115,12 +116,10 @@ export function form<T extends FormHarness>(
   name?: string,
 ): FormDecorator<T> {
   return ((_target: unknown, contextOrKey: string | symbol | ClassAccessorDecoratorContext) => {
-    const key = String(typeof contextOrKey === 'object' ? contextOrKey.name : contextOrKey)
+    const key = String(isObject(contextOrKey) ? contextOrKey.name : contextOrKey)
     function get(this: Harness): T {
       return formOf(this, key, Type, name)
     }
-    return typeof contextOrKey === 'object'
-      ? { get }
-      : { configurable: true, enumerable: true, get }
+    return isObject(contextOrKey) ? { get } : { configurable: true, enumerable: true, get }
   }) as FormDecorator<T>
 }

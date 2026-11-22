@@ -2,6 +2,7 @@ import { registerDestructor } from '@ember/destroyable'
 import type Owner from '@ember/owner'
 import Modifier, { type ArgsFor } from 'ember-modifier'
 import { resizeObserver, type ResizeObservers } from './resize-observer.ts'
+import { isFunction } from '@sindresorhus/is'
 
 export interface OnResizeSignature {
   Element: Element
@@ -44,7 +45,7 @@ class OnResize extends Modifier<OnResizeSignature> {
   }
 
   modify(element: Element, [callback]: [(entry: ResizeObserverEntry) => void]): void {
-    if (typeof callback !== 'function') {
+    if (!isFunction(callback)) {
       throw new Error(`Joinery: {{onResize}} takes a function, not ${String(callback)}`)
     }
     if (element === this.#element && callback === this.#callback) return

@@ -1,3 +1,4 @@
+import { isUndefined } from '@sindresorhus/is'
 import Component from '@glimmer/component'
 import { tracked } from '@glimmer/tracking'
 import { registerDestructor } from '@ember/destroyable'
@@ -89,7 +90,7 @@ export interface ToasterSignature {
 }
 
 const pageIsDark = () =>
-  typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+  !isUndefined(globalThis.document) && document.documentElement.classList.contains('dark')
 
 /**
  * shadcn's Toaster: sonner's, with toasts that look like a popover (its `--popover` tokens and
@@ -111,7 +112,7 @@ export default class Toaster extends Component<ToasterSignature> {
 
   constructor(owner: Owner, args: ToasterSignature['Args']) {
     super(owner, args)
-    if (typeof MutationObserver === 'undefined') return
+    if (isUndefined(globalThis.MutationObserver)) return
     const observer = new MutationObserver(() => (this.pageDark = pageIsDark()))
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
     registerDestructor(this, () => observer.disconnect())

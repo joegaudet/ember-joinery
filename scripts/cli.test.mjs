@@ -53,12 +53,20 @@ test('add installs the npm packages the copies need with the lockfile’s packag
   const cwd = app()
   const { installs } = await cli(cwd, ['add', 'dialog'])
   assert.deepEqual(installs, [
-    { pm: 'pnpm', specs: ['@ember-joinery/primitives@^1.2.0', 'lucide@^0.474.0'], dir: cwd },
+    {
+      pm: 'pnpm',
+      specs: ['@ember-joinery/primitives@^1.2.0', '@sindresorhus/is@^8.1.0', 'lucide@^0.474.0'],
+      dir: cwd,
+    },
   ])
 })
 
 test('add installs nothing the app already has, and leaves workspace and file specs alone', async () => {
-  const cwd = app({ '@ember-joinery/primitives': 'workspace:*', lucide: '^0.400.0' })
+  const cwd = app({
+    '@ember-joinery/primitives': 'workspace:*',
+    '@sindresorhus/is': '^8.1.0',
+    lucide: '^0.400.0',
+  })
   const { installs } = await cli(cwd, ['add', 'dialog'])
   assert.deepEqual(installs, [])
 })

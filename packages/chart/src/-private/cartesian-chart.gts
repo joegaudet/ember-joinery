@@ -7,6 +7,7 @@
  * recharts is MIT licensed; its notice is in NOTICE, and the build keeps it in the module that
  * ships this (see rollup.config.mjs).
  */
+import { isFunction, isNumber, isObject, isString, isUndefined } from '@sindresorhus/is'
 import Component from '@glimmer/component'
 import type { TOC } from '@ember/component/template-only'
 import { cached, tracked } from '@glimmer/tracking'
@@ -180,11 +181,11 @@ function seriesId(part: object): string {
 }
 
 function num(value: number | undefined, fallback: number): number {
-  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+  return isNumber(value) && Number.isFinite(value) ? value : fallback
 }
 
 function keyOf(dataKey: unknown): string {
-  return typeof dataKey === 'function' ? '' : String(dataKey ?? '')
+  return isFunction(dataKey) ? '' : String(dataKey ?? '')
 }
 
 function round(value: number): number {
@@ -194,7 +195,7 @@ function round(value: number): number {
 /** A row's own `fill` (or its Cell's), where it has one. */
 function entryFill(payload: unknown): string | undefined {
   const fill = (payload as Record<string, unknown> | undefined)?.['fill']
-  return typeof fill === 'string' ? fill : undefined
+  return isString(fill) ? fill : undefined
 }
 
 /** recharts' `getLegendItemColor`: the stroke, where there is one, else the fill. */
@@ -797,7 +798,7 @@ export default class CartesianChart
     super(owner, args)
     // Tick labels are measured to drop those that would overlap, and a web font that loads
     // after the first render changes their size: measure again once it has.
-    const fonts = typeof document !== 'undefined' ? document.fonts : undefined
+    const fonts = !isUndefined(globalThis.document) ? document.fonts : undefined
     if (fonts?.addEventListener) {
       const onFontsLoaded = () => {
         clearStringSizeCache()
@@ -820,7 +821,7 @@ export default class CartesianChart
   // Size
 
   get fixedSize(): boolean {
-    return typeof this.args.width === 'number' && typeof this.args.height === 'number'
+    return isNumber(this.args.width) && isNumber(this.args.height)
   }
 
   get size(): { width: number; height: number } | null {
@@ -999,7 +1000,7 @@ export default class CartesianChart
             }
           : undefined,
       tickStyle: this.tickStyles,
-      measure: typeof document !== 'undefined',
+      measure: !isUndefined(globalThis.document),
     })
   }
 
@@ -1310,7 +1311,7 @@ export default class CartesianChart
       )
     }
     if (this.keyboardActive && this.keyboardIndex !== null) return this.keyboardIndex
-    if (typeof tooltip.args.defaultIndex === 'number' && this.keyboardIndex === null)
+    if (isNumber(tooltip.args.defaultIndex) && this.keyboardIndex === null)
       return tooltip.args.defaultIndex
     if (tooltip.args.active === true) return this.keyboardIndex ?? 0
     return null
@@ -1465,7 +1466,7 @@ export default class CartesianChart
       tooltip.args.cursor === false
     )
       return null
-    const option = typeof tooltip.args.cursor === 'object' ? tooltip.args.cursor : {}
+    const option = isObject(tooltip.args.cursor) ? tooltip.args.cursor : {}
     const { offset } = geometry
     if (this.chartName === 'BarChart') {
       const half = geometry.bandSize / 2

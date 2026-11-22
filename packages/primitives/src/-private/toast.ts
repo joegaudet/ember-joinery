@@ -151,7 +151,11 @@ export class ToastTimer extends Machine<TimerState> {
     return this.host.isPaused
   }
 
-  @transition({ to: TimerState.None, guard: (m: ToastTimer) => m.hasNoTimer })
+  @transition({
+    from: [TimerState.None, TimerState.Running, TimerState.Paused],
+    to: TimerState.None,
+    guard: (m: ToastTimer) => m.hasNoTimer,
+  })
   @transition({
     from: [TimerState.None, TimerState.Running],
     to: TimerState.Paused,

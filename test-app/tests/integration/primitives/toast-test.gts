@@ -426,17 +426,18 @@ module('Integration | primitives | toast', function (hooks) {
   })
 
   test('a paused toast keeps only the time it had left', async function (assert) {
-    await render(<template><Toaster @duration={{400}} /></template>)
+    await render(<template><Toaster @duration={{1000}} /></template>)
     toast('Half gone')
     await settled()
     const toaster = new ToasterHarness()
-    await sleep(300)
+    await sleep(700)
     await toaster.hover()
     await toaster.unhover()
     assert.strictEqual(toaster.count, 1)
-    // About 100ms were left; a fresh 400ms would outlast the wait.
-    await waitUntil(() => toaster.count === 0, { timeout: 300 })
+    // About 300ms were left; a fresh 1000ms would outlast the wait.
+    await waitUntil(() => toaster.count === 0, { timeout: 600 })
     assert.strictEqual(toaster.count, 0)
+    await a11yAudit()
   })
 
   test('a loading toast has no timer', async function (assert) {

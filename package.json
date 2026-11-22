@@ -26,8 +26,7 @@
     "site:css": "node scripts/site-css.mjs",
     "site:screenshots": "node scripts/site-screenshots.mjs",
     "start": "pnpm --filter test-app start",
-    "release": "pnpm build && node scripts/publish.mjs",
-    "release:npm": "node scripts/npm-release.mjs"
+    "release": "pnpm build && node scripts/publish.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",

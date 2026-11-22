@@ -2,6 +2,8 @@ import Component from '@glimmer/component'
 import type Owner from '@ember/owner'
 import type { TOC } from '@ember/component/template-only'
 import { on } from '@ember/modifier'
+import { isDestroyed, isDestroying } from '@ember/destroyable'
+import { waitForPromise } from '@ember/test-waiters'
 import { modifier } from 'ember-modifier'
 import { buttonClasses, Icon, InputGroup, Popover, type IconNode } from '@ember-joinery/ember'
 import {
@@ -217,6 +219,7 @@ export abstract class PickerBase<S extends { Args: PickerOptions }>
   }
 
   followOpen = (open: boolean): void => {
+    if (isDestroying(this) || isDestroyed(this)) return
     if (open === this.chart.matches(Popup.Open)) return
     if (open) this.chart.opened()
     else this.chart.closed()
@@ -272,10 +275,13 @@ export abstract class PickerBase<S extends { Args: PickerOptions }>
   }
 }
 
-/** Brings the picker's chart to the popover's committed open, also when `@open` changes it. */
-const followOpen = modifier((_: Element, [follow, open]: [(open: boolean) => void, boolean]) =>
-  follow(open),
-)
+/**
+ * Brings the picker's chart to the popover's committed open, also when `@open` changes it. After
+ * the render: a render can't change state it has read, and the chart's is read in it.
+ */
+const followOpen = modifier((_: Element, [follow, open]: [(open: boolean) => void, boolean]) => {
+  void waitForPromise(Promise.resolve().then(() => follow(open)))
+})
 
 /** Elements this modifier named, so it leaves a caller's own `aria-labelledby` alone. */
 const named = new WeakSet<Element>()

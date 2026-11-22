@@ -2,6 +2,7 @@
 // shadcn/ui's Drawer is built on), as a DialogController with gestures. This file is bundled
 // into @ember-joinery/primitives/drawer; it isn't a subpath of its own.
 import { tracked } from '@glimmer/tracking'
+import { waitForPromise } from '@ember/test-waiters'
 import { ControllableState, type ControllableArgs } from '../controllable-state.ts'
 import { isRTL } from '../direction.gts'
 import type { FocusOutsideEvent, PointerDownOutsideEvent } from '../dismiss.ts'
@@ -881,7 +882,7 @@ export class DrawerController extends DialogController {
     const document = element.ownerDocument
     const wrapper = document.querySelector(WRAPPER)
     if (!(wrapper instanceof HTMLElement)) return undefined
-    this.#machine.backgroundScaled()
+    this.#afterRender(() => this.#machine.backgroundScaled())
     const body = document.body
     const initialBackground = body.style.backgroundColor
     const vertical = isVertical(this.side)
@@ -905,9 +906,23 @@ export class DrawerController extends DialogController {
       restoreWrapper()
       this.#body = { element: body, background: initialBackground }
       // Torn down with the drawer, there is no machine left to wait: restore it now.
-      if (this.#machine.status === 'active') this.#machine.backgroundReleased()
+      if (this.#machine.status === 'active')
+        this.#afterRender(() => this.#machine.backgroundReleased())
       else this.#restoreBackground()
     }
+  }
+
+  /**
+   * Sends to the machine once the render is over: the modifier that scales the background runs
+   * in a render that has read the machine, and a render can't change state it has read.
+   */
+  #afterRender(send: () => void): void {
+    void waitForPromise(
+      Promise.resolve().then(() => {
+        if (this.#machine.status === 'active') send()
+        else this.#restoreBackground()
+      }),
+    )
   }
 
   #restoreBackground(): void {

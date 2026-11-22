@@ -929,9 +929,10 @@ module('Integration | primitives | drawer', function (hooks) {
   })
 
   test('destroyed while open, a scaled background puts the body back', async function (assert) {
-    const show = new (class {
+    class Show {
       @tracked value = true
-    })()
+    }
+    const show = new Show()
     const body = document.body.style.background
     await render(
       <template>
@@ -995,9 +996,10 @@ module('Integration | primitives | drawer', function (hooks) {
   test('a tap on the handle does nothing once the drawer is gone', async function (assert) {
     const state = new State()
     state.open = true
-    const show = new (class {
+    class Show {
       @tracked value = true
-    })()
+    }
+    const show = new Show()
     const SNAP_POINTS = [0.5, 1]
     await render(
       <template>

@@ -149,6 +149,8 @@ export default class ApplicationTemplate extends Component {
           <a href="https://joegaudet.com/real-enums/">real-enums</a>
           ·
           <a href={{SITE}} aria-current="page">Joinery</a>
+          ·
+          <a href="https://joegaudet.com/switchyard/">switchyard</a>
         </p>
       </footer>
     {{/if}}

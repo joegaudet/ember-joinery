@@ -1,6 +1,6 @@
 {
   "name": "@ember-joinery/maskito",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Masked inputs for Ember in shadcn/ui's look, on Maskito: a masked Input with number, date and time presets, and a phone input with a country picker that stores E.164.",
   "keywords": [
     "ember-addon",

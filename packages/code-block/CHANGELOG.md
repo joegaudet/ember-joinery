@@ -1,5 +1,22 @@
 # @ember-joinery/code-block
 
+## 1.0.1
+
+### Patch Changes
+
+- 2b887bf: Avatar image loading and fallback delay, scroll area scrollbar visibility, and the code block's copy button now run on Switchyard statecharts. Nothing changes in how they behave.
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+  - @ember-joinery/primitives@1.0.1
+  - @ember-joinery/ember@1.0.1
+  - @ember-joinery/test-support@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

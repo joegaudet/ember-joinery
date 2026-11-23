@@ -1,6 +1,6 @@
 {
   "name": "ember-joinery",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Copy Joinery's components into your Ember app, and update them: shadcn's `add`, for Ember.",
   "keywords": [
     "ember",

@@ -1,5 +1,19 @@
 # @ember-joinery/ember
 
+## 1.0.1
+
+### Patch Changes
+
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+  - @ember-joinery/primitives@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

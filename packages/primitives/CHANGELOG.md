@@ -1,5 +1,18 @@
 # @ember-joinery/primitives
 
+## 1.0.1
+
+### Patch Changes
+
+- 2b887bf: Hover cards time their opening and closing with a Switchyard statechart. Nothing changes in how they behave.
+- 2b887bf: Tooltips, navigation menus and submenus time their delays with Switchyard statecharts; nothing changes in behavior, except that a controlled tooltip or navigation menu whose parent refuses an open no longer makes the next one skip its delay (a refused tooltip open no longer closes the other tooltips either).
+- 2b887bf: The Drawer's modes and timers run on a Switchyard statechart; nothing changes in behavior, apart from these fixes. A close that a controlled `@open` refuses no longer moves it to its first snap point (as vaul's, only a close the drawer itself made does), closing before it has finished opening no longer calls `onAnimationEnd(true)`, a handle tap no longer changes the snap point after the drawer is destroyed, and `settled()` now waits for its animation end, background and nested-drawer timers, and a drawer destroyed while open puts the body's background back. As vaul's, `onAnimationEnd` isn't called for a drawer that renders open.
+- 2b887bf: Combobox and the typeahead search (used by Select, menus and `{{typeahead}}`) now keep their modes in Switchyard statecharts; nothing changes in behavior. Fixed: a combobox whose controlled `@open` refuses a close no longer stops filtering, and a combobox reopened while its list animates out filters by what is typed instead of the query it closed with.
+- 2b887bf: The date pickers track their modes with a Switchyard chart; nothing changes in behavior, except that a close a controlled `@open` refuses no longer forgets the month paged to or the start of a range. A controlled Dialog no longer calls `@onClose`, nor clears its `returnValue`, for a close or open its `@open` refused, and InputOTP clears its pending selection sync when it goes.
+- 2b887bf: `Presence` tracks whether its content is present, exiting or exited with a Switchyard statechart. Nothing changes in how it behaves.
+- 2b887bf: Avatar image loading and fallback delay, scroll area scrollbar visibility, and the code block's copy button now run on Switchyard statecharts. Nothing changes in how they behave.
+- 2b887bf: Toasts run their life, swipe and auto-close timer on Switchyard statecharts; nothing changes in how they behave. A `toast.promise()` toast dismissed while it waits now stays dismissed, instead of coming back as the success or error toast.
+
 ## 1.0.0
 
 ### Major Changes

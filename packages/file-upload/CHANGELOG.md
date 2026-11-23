@@ -1,5 +1,22 @@
 # @ember-joinery/file-upload
 
+## 1.0.1
+
+### Patch Changes
+
+- 2b887bf: Each upload now runs as a small Switchyard statechart, with no change in how the component behaves. `@upload` gets a second argument, `{ signal }`, an `AbortSignal` that aborts when its file is replaced or the component goes, so a request can be cancelled; before, it ran on and its result was dropped.
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+- Updated dependencies [2b887bf]
+  - @ember-joinery/primitives@1.0.1
+  - @ember-joinery/ember@1.0.1
+  - @ember-joinery/test-support@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

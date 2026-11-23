@@ -1,6 +1,6 @@
 {
   "name": "@ember-joinery/chart",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "shadcn/ui's charts for Ember: declarative Glimmer SVG on d3-scale and d3-shape, with an API shaped like recharts.",
   "keywords": [
     "ember-addon",

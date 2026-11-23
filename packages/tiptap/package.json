@@ -1,6 +1,6 @@
 {
   "name": "@ember-joinery/tiptap",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A rich-text editor in shadcn/ui's look for Ember: a toolbar of toggles, a heading menu and tooltips over a Tiptap document, stored as HTML or JSON.",
   "keywords": [
     "ember-addon",

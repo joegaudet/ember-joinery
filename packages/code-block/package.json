@@ -1,6 +1,6 @@
 {
   "name": "@ember-joinery/code-block",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "shadcn/ui's Code Block for Ember: code, terminal output and diffs, with line numbers, a copy button and Shiki highlighting.",
   "keywords": [
     "ember-addon",

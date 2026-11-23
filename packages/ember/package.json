@@ -1,6 +1,6 @@
 {
   "name": "@ember-joinery/ember",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "shadcn/ui for Ember: accessible, themeable components, each with a test harness.",
   "keywords": [
     "ember-addon",

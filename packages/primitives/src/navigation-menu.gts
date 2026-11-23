@@ -15,7 +15,9 @@ import { part, type PartModifier, type PartSpec } from './part.ts'
 import { Presence } from './presence.gts'
 import { ignoreROError } from './resize-observer.ts'
 import { visuallyHidden } from './visually-hidden.gts'
-import { Delay, ElementRef, buttonType } from './-private/popper.gts'
+import { ElementRef, buttonType } from './-private/popper.gts'
+import { delayGroup } from './-private/delay-group.ts'
+import { hoverIntent, type HoverIntent } from './-private/hover-intent.ts'
 import { t } from './i18n.ts'
 import { messages } from './messages.ts'
 import { isUndefined } from '@sindresorhus/is'
@@ -233,20 +235,41 @@ export class NavigationMenu extends Component<NavigationMenuSignature> {
   readonly items = new Set<NavigationMenuItem>()
   /** Whether a Viewport is part of the menu, so its contents show there. */
   @tracked hasViewport = false
-  #isOpenDelayed = true
-  #openTimer = new Delay(this)
-  #closeTimer = new Delay(this)
-  #skipDelayTimer: ReturnType<typeof setTimeout> | undefined
+  #delay = delayGroup(this, this)
+  /** The value a delayed open opens. */
+  #pending = ''
+  // Two timers, as Radix's: a close can come due while a delayed open still waits.
+  /** `enter()` opens `#pending` after `@delayDuration`. */
+  #openTimer: HoverIntent
+  /** `leave()` closes it after 150ms. */
+  #closeTimer: HoverIntent
   #previous = new Remembered('')
   #sizedContent: HTMLElement | undefined
   #sizeObserver: ResizeObserver | undefined
 
   constructor(owner: Owner, args: NavigationMenuSignature['Args']) {
     super(owner, args)
-    registerDestructor(this, () => {
-      clearTimeout(this.#skipDelayTimer)
-      this.#sizeObserver?.disconnect()
+    const delay = (): number => this.args.delayDuration ?? 200
+    this.#openTimer = hoverIntent(this, {
+      get openDelay() {
+        return delay()
+      },
+      closeDelay: 0,
+      setOpen: () => {
+        this.#closeTimer.cancel()
+        this.setValue(this.#pending)
+      },
     })
+    this.#closeTimer = hoverIntent(this, {
+      openDelay: 0,
+      closeDelay: 150,
+      setOpen: () => this.setValue(''),
+    })
+    registerDestructor(this, () => this.#sizeObserver?.disconnect())
+  }
+
+  get skipDelayDuration(): number {
+    return this.args.skipDelayDuration ?? 300
   }
 
   get id(): string {
@@ -291,21 +314,17 @@ export class NavigationMenu extends Component<NavigationMenuSignature> {
     return this.triggerItems().some(item => item.triggerRef.current!.contains(target))
   }
 
+  /** Asks for `value`; when it changed (a controlled `@value` may refuse), the skip delay follows. */
   setValue = (value: string): void => {
-    if (value !== this.value) {
-      const skipDelayDuration = this.args.skipDelayDuration ?? 300
-      clearTimeout(this.#skipDelayTimer)
-      if (value !== '') {
-        if (skipDelayDuration > 0) this.#isOpenDelayed = false
-      } else {
-        this.#skipDelayTimer = setTimeout(() => (this.#isOpenDelayed = true), skipDelayDuration)
-      }
-    }
+    const was = this.value
     this.valueState.set(value)
+    if (this.value === was) return
+    if (this.value === '') this.#delay.closed()
+    else if (this.skipDelayDuration > 0) this.#delay.opened()
   }
 
   #startCloseTimer(): void {
-    this.#closeTimer.start(150, () => this.setValue(''))
+    this.#closeTimer.leave()
   }
 
   #open(value: string): void {
@@ -314,16 +333,14 @@ export class NavigationMenu extends Component<NavigationMenuSignature> {
   }
 
   #delayedOpen(value: string): void {
-    if (this.value === value) return this.#closeTimer.cancel()
-    this.#openTimer.start(this.args.delayDuration ?? 200, () => {
-      this.#closeTimer.cancel()
-      this.setValue(value)
-    })
+    if (this.value === value) return void this.#closeTimer.cancel()
+    this.#pending = value
+    this.#openTimer.enter()
   }
 
   onTriggerEnter(value: string): void {
     this.#openTimer.cancel()
-    if (this.#isOpenDelayed) this.#delayedOpen(value)
+    if (this.#delay.isOpenDelayed) this.#delayedOpen(value)
     else this.#open(value)
   }
 

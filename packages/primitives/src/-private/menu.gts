@@ -36,7 +36,6 @@ import { scrollLock } from '../scroll-lock.ts'
 import { getNextMatch, isTypeaheadKey, Typeahead } from '../typeahead.ts'
 import { anchor, type AnchorOptions, type Side, type VirtualElement } from '../anchor/index.ts'
 import {
-  Delay,
   ElementRef,
   PopperArrow,
   ensureId,
@@ -47,6 +46,9 @@ import {
   type PopperContentArgs,
 } from './popper.gts'
 import { isUndefined } from '@sindresorhus/is'
+import { after, Machine, State, transition } from '@switchyard-ts/core'
+import { windowClock } from './delay-group.ts'
+import { hoverIntent, IntentState, type HoverIntent } from './hover-intent.ts'
 
 // ----- Keys ----------------------------------------------------------------------------------
 
@@ -142,6 +144,44 @@ interface GraceIntent {
   side: Side | undefined
 }
 
+class GraceState extends State {
+  declare private readonly brand: never
+  static Idle = GraceState.of('idle')
+  /** A grace intent is set, until `clearAfter` runs out. */
+  static Held = GraceState.of('held')
+}
+
+/** How long a grace intent lasts: `hold(ms)` drops it after `ms`, as Radix's timer does. */
+class GraceTimer extends Machine<GraceState> {
+  // A window, not pending work: `settled()` doesn't wait for it to close.
+  static override clock = windowClock
+
+  #clearAfter = 0
+  readonly #expire: () => void
+
+  constructor(expire: () => void) {
+    super()
+    this.#expire = expire
+  }
+
+  get clearAfter(): number {
+    return this.#clearAfter
+  }
+
+  @transition({ to: GraceState.Held, reenter: true })
+  hold(ms: number) {
+    this.#clearAfter = ms
+  }
+
+  @transition({ to: GraceState.Idle })
+  cancel() {}
+
+  @after('clearAfter', { from: GraceState.Held, to: GraceState.Idle })
+  expired() {
+    this.#expire()
+  }
+}
+
 /** Whether an event came from a mouse: Radix's menus ignore pens and touch for hover. */
 function isMouse(event: PointerEvent): boolean {
   return event.pointerType === 'mouse'
@@ -186,7 +226,7 @@ export class MenuContentState {
   #pointerDir: 'left' | 'right' = 'right'
   #lastPointerX = 0
   #graceIntent: GraceIntent | null = null
-  #graceTimer: ReturnType<typeof setTimeout> | undefined
+  #graceTimer = new GraceTimer(() => (this.#graceIntent = null))
 
   constructor(
     element: HTMLElement,
@@ -204,6 +244,7 @@ export class MenuContentState {
   install(): () => void {
     const { element } = this
     contents.set(element, this)
+    this.#graceTimer.start()
     const onKeyDown = (event: KeyboardEvent) => this.#onKeyDown(event)
     const onPointerMove = (event: PointerEvent) => this.#onPointerMove(event)
     const onFocusIn = (event: FocusEvent) => this.#onFocusIn(event)
@@ -221,7 +262,7 @@ export class MenuContentState {
       element.removeEventListener('focusin', onFocusIn)
       element.removeEventListener('focusout', onFocusOut)
       this.#typeahead.dispose()
-      clearTimeout(this.#graceTimer)
+      this.#graceTimer.stop()
       if (contents.get(element) === this) contents.delete(element)
     }
   }
@@ -322,11 +363,8 @@ export class MenuContentState {
 
   setGraceIntent(intent: GraceIntent | null, clearAfter?: number): void {
     this.#graceIntent = intent
-    clearTimeout(this.#graceTimer)
-    this.#graceTimer =
-      clearAfter === undefined
-        ? undefined
-        : setTimeout(() => (this.#graceIntent = null), clearAfter)
+    if (clearAfter === undefined) this.#graceTimer.cancel()
+    else this.#graceTimer.hold(clearAfter)
   }
 
   // Radix's cancel the pointer event to say "on its way to a submenu", which React's events
@@ -1178,15 +1216,16 @@ export class MenuSub extends Component<MenuSubSignature> {
   openState = controllable(this, 'open', false)
   triggerRef = new ElementRef()
   contentRef = new ElementRef()
-  openTimer = new Delay(this)
+  /** The pointer resting on the trigger opens it after `openDelay`. */
+  readonly openDelay = 100
+  readonly closeDelay = 0
+  openTimer: HoverIntent = hoverIntent(this, this)
   /** The menu it is in, found from its trigger's place once it renders. */
   @tracked parent: MenuLevel | undefined
-  #graceTimer: ReturnType<typeof setTimeout> | undefined
 
   constructor(owner: Owner, args: MenuSubSignature['Args']) {
     super(owner, args)
     registerDestructor(this, () => {
-      clearTimeout(this.#graceTimer)
       // Radix's MenuSub calls `onOpenChange(false)` as it unmounts.
       this.setOpen(false)
     })
@@ -1261,9 +1300,9 @@ export class MenuSub extends Component<MenuSubSignature> {
             if (!isMouse(event)) return
             const content = contentOf(event.currentTarget as HTMLElement)
             if (content?.onItemEnter(event)) return
-            if (!disabled && !this.isOpen && !this.openTimer.isPending) {
+            if (!disabled && !this.isOpen && !this.openTimer.matches(IntentState.Opening)) {
               content?.setGraceIntent(null)
-              this.openTimer.start(100, () => this.setOpen(true))
+              this.openTimer.enter()
             }
             hover.pointermove?.(event)
           },

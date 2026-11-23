@@ -383,6 +383,8 @@ export class Toasts {
     ) => {
       const shown = await resolveResult(outcome as PromiseResult<unknown>, value)
       const description = await resolveResult(data.description, value)
+      // Joinery: dismissed while it waited, it stays dismissed. sonner's comes back.
+      if (id !== undefined && this.#dismissed.has(id)) return
       const settings = isExtendedResult(shown) ? shown : { message: shown }
       this.create({ id, type, description: description as ToastContent, ...settings })
     }

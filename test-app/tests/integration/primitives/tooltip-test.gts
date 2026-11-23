@@ -332,6 +332,33 @@ module('Integration | primitives | tooltip', function (hooks) {
     await a11yAudit()
   })
 
+  test('a controlled tooltip whose open is refused doesn’t skip the next one’s delay', async function (assert) {
+    const refuse = () => {}
+    await render(
+      <template>
+        <TooltipProvider @delayDuration={{60}} @skipDelayDuration={{200}}>
+          <Tooltip @name="refused" @open={{false}} @onOpenChange={{refuse}} as |t|>
+            <t.Trigger>Refused</t.Trigger>
+            <t.Content>Refused</t.Content>
+          </Tooltip>
+          <Tooltip @name="next" as |t|>
+            <t.Trigger>Next</t.Trigger>
+            <t.Content>Next</t.Content>
+          </Tooltip>
+        </TooltipProvider>
+      </template>,
+    )
+    const refused = new TooltipHarness('refused')
+    const next = new TooltipHarness('next')
+    await refused.focus()
+    assert.false(refused.isOpen, 'its parent kept it closed')
+    await refused.blur()
+    await next.hover()
+    assert.strictEqual(next.state, 'delayed-open', 'nothing opened, so the delay still applies')
+    await next.unhover()
+    await a11yAudit()
+  })
+
   test('its state can be controlled', async function (assert) {
     const state = new State()
     await render(

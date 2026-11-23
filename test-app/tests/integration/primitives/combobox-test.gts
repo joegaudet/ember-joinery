@@ -1,6 +1,6 @@
 import { module, test } from 'qunit'
 import { setupRenderingTest } from 'test-app/tests/helpers'
-import { focus, render, settled, triggerEvent } from '@ember/test-helpers'
+import { focus, render, rerender, settled, triggerEvent } from '@ember/test-helpers'
 import { array, get } from '@ember/helper'
 import { tracked } from '@glimmer/tracking'
 import { a11yAudit } from 'ember-a11y-testing/test-support'
@@ -416,6 +416,73 @@ module('Integration | primitives | combobox', function (hooks) {
     assert.true(combobox.isDisabled)
     assert.dom(combobox.input).isDisabled()
     assert.dom(combobox.trigger).isDisabled()
+    await a11yAudit()
+  })
+
+  test('controlled: a close the parent refuses leaves it open and still filtering', async function (assert) {
+    const asked: boolean[] = []
+    const refuse = (open: boolean) => void asked.push(open)
+    await render(
+      <template>
+        <Combobox @items={{frameworks}} @open={{true}} @onOpenChange={{refuse}} as |c|>
+          <c.Input placeholder="Select a framework" />
+          <c.Content>
+            <c.List as |item|><c.Item @value={{item}}>{{item}}</c.Item></c.List>
+          </c.Content>
+        </Combobox>
+      </template>,
+    )
+    const combobox = new ComboboxHarness()
+    await combobox.type('n')
+    assert.deepEqual(combobox.items, ['Next.js', 'Nuxt.js'])
+    await combobox.pressEscape()
+    assert.false(asked.at(-1), 'it asked to close')
+    assert.true(combobox.isOpen, 'the parent kept it open')
+    await combobox.type('u')
+    assert.deepEqual(combobox.items, ['Nuxt.js'], 'the query is not frozen')
+    await a11yAudit()
+  })
+
+  test('reopened while it animates out, it filters by what is typed', async function (assert) {
+    await render(
+      <template>
+        <style>
+          @keyframes test-combobox-exit {
+            from {
+              opacity: 1;
+            }
+            to {
+              opacity: 0;
+            }
+          }
+          [data-jn-combobox-popup][data-closed] {
+            animation: test-combobox-exit 200ms;
+          }
+        </style>
+        <Combobox @items={{frameworks}} as |c|>
+          <c.Input placeholder="Select a framework" />
+          <c.Content>
+            <c.List as |item|><c.Item @value={{item}}>{{item}}</c.Item></c.List>
+          </c.Content>
+        </Combobox>
+      </template>,
+    )
+    const combobox = new ComboboxHarness()
+    await combobox.type('n')
+    const input = combobox.input!
+    // Not through the harness, which waits for the exit animation to end.
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await rerender()
+    assert.false(combobox.isOpen)
+    assert.notStrictEqual(combobox.content, null, 'still animating out')
+    input.value += 'u'
+    input.dispatchEvent(
+      new InputEvent('input', { inputType: 'insertText', data: 'u', bubbles: true }),
+    )
+    await rerender()
+    assert.true(combobox.isOpen, 'typing opens it again')
+    assert.deepEqual(combobox.items, ['Nuxt.js'], 'by the new query, not the frozen one')
+    await settled()
     await a11yAudit()
   })
 

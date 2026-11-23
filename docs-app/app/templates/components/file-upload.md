@@ -85,12 +85,26 @@ settles, the file waits in the queue with a Progress bar, which follows `file.pr
 library's `file.upload(url)` keeps that up to date. If the promise rejects, the row turns
 destructive and shows the error's message, keeps nothing, and can be retried or removed.
 
+Its second argument, `{ signal }`, is an `AbortSignal` that aborts when the file leaves the queue
+before its upload settles: a new choice replaces it, or the component goes. Pass it to `fetch` to
+cancel the request; whatever the upload settles with after that is dropped anyway.
+
 ```ts
 import type { UploadFn } from '@ember-joinery/file-upload'
 
 const upload: UploadFn<Attachment> = async file => {
   const response = await file.upload('/api/attachments')
   return response.json() // e.g. { id: 7, name: 'notes.pdf', size: 1200, url: '…' }
+}
+
+// With fetch, which takes the signal:
+const send: UploadFn<Attachment> = async (file, options) => {
+  const response = await fetch('/api/attachments', {
+    method: 'POST',
+    body: file.file,
+    signal: options?.signal,
+  })
+  return response.json()
 }
 ```
 
